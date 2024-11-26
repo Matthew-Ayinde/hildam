@@ -5,7 +5,7 @@ import DashboardComponent from './DashboardComponent'
 
 const Homepage = () => {
   return (
-    <div className='w-full flex flex-row bg-orange-50'>
+    <div className='w-full flex flex-row bg-red-50'>
         <div className='w-1/4'>
             <Sidebar />
         </div>
