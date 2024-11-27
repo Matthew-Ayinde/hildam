@@ -79,14 +79,14 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 h-full w-[250px] bg-[#262d34] text-[#A5A8AB] shadow-lg">
+    <div className="fixed top-0 left-0 h-full w-[250px] bg-[#262d34] text-[#A5A8AB] shadow-lg font-play">
       <div className="mt-10">
         <div className="mx-9">
           <div className="flex flex-row justify-between items-center">
             <div className="flex flex-row items-center">
               <div className="w-10 h-10">
                 <Image
-                  src="/logo.jpg"
+                  src="/logo.png"
                   alt="Logo"
                   width={300}
                   height={300}

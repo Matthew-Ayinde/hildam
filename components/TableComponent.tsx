@@ -1,7 +1,7 @@
 "use client";
 
 import { SetStateAction, useState } from "react";
-import { mockData } from "../data/mockData";
+import { mockData } from "../data/mockDataForDashboard";
 import { FaArrowRight } from "react-icons/fa";
 import { FaArrowLeft } from "react-icons/fa";
 
@@ -26,9 +26,9 @@ export default function Table() {
   return (
     <div className="w-full">
       <div className="overflow-x-auto max-h-[500px]">
-        <table className="min-w-full border-collapse border border-gray-200  whitespace-nowrap">
-          <thead className="bg-gray-100 sticky top-0 z-10">
-            <tr className="">
+        <table className="min-w-full border-collapse border border-gray-200">
+          <thead className="bg-[#f6f8fb] sticky top-0 z-10">
+            <tr className="text-[#5d7186]">
               {[
                 "Order ID",
                 "Date",
@@ -51,7 +51,7 @@ export default function Table() {
           </thead>
           <tbody>
             {paginatedData.map((row, index) => (
-              <tr key={index} className="hover:cursor-pointer">
+              <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
                 <td className="px-4 py-2 text-sm border-b">{row.orderId}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.date}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.clothing}</td>
@@ -83,10 +83,10 @@ export default function Table() {
         </table>
       </div>
       {/* Pagination Bar */}
-      <div className="bottom-0 flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200">
+      <div className="bottom-0 flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200 text-[#A5A8AB]">
         <div>
           Showing <span className="font-bold">{currentPage * rowsPerPage - rowsPerPage + 1} </span>-
-          <span className="font-bold">{Math.min(currentPage * rowsPerPage, data.length)}</span> of <span className="font-bold">{data.length}</span>
+          <span className="font-bold">{Math.min(currentPage * rowsPerPage, data.length)}</span> of <span className="font-bold">{data.length}</span> Orders
         </div>
         <div className="flex items-center space-x-2">
           <button
