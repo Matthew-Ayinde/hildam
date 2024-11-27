@@ -2,6 +2,8 @@
 
 import { SetStateAction, useState } from "react";
 import { mockData } from "../data/mockData";
+import { FaArrowRight } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 
 export default function Table() {
   const [data, setData] = useState(mockData);
@@ -24,7 +26,7 @@ export default function Table() {
   return (
     <div className="w-full">
       <div className="overflow-x-auto max-h-[500px]">
-        <table className="min-w-full border-collapse border border-gray-200 whitespace-nowrap">
+        <table className="min-w-full border-collapse border border-gray-200  whitespace-nowrap">
           <thead className="bg-gray-100 sticky top-0 z-10">
             <tr className="">
               {[
@@ -83,16 +85,16 @@ export default function Table() {
       {/* Pagination Bar */}
       <div className="bottom-0 flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200">
         <div>
-          Showing {currentPage * rowsPerPage - rowsPerPage + 1}-
-          {Math.min(currentPage * rowsPerPage, data.length)} of {data.length}
+          Showing <span className="font-bold">{currentPage * rowsPerPage - rowsPerPage + 1} </span>-
+          <span className="font-bold">{Math.min(currentPage * rowsPerPage, data.length)}</span> of <span className="font-bold">{data.length}</span>
         </div>
         <div className="flex items-center space-x-2">
           <button
-            className="px-2 py-1 text-sm text-gray-600 bg-gray-200 rounded disabled:opacity-50"
+            className="p-3 text-sm text-gray-600 bg-gray-200 rounded disabled:opacity-50"
             disabled={currentPage === 1}
             onClick={() => handlePageChange(currentPage - 1)}
           >
-            ←
+            <FaArrowLeft/>
           </button>
           {Array.from(
             { length: Math.min(3, totalPages) },
@@ -102,9 +104,9 @@ export default function Table() {
             .map((page) => (
               <button
                 key={page}
-                className={`px-3 py-1 text-sm ${
+                className={`px-4 py-2 text-sm ${
                   page === currentPage
-                    ? "bg-blue-500 text-white rounded"
+                    ? "bg-[#ff6c2f] text-white rounded"
                     : "text-gray-600"
                 }`}
                 onClick={() => handlePageChange(page)}
@@ -113,11 +115,11 @@ export default function Table() {
               </button>
             ))}
           <button
-            className="px-2 py-1 text-sm text-gray-600 bg-gray-200 rounded disabled:opacity-50"
+            className="p-3 text-sm text-gray-600 bg-gray-200 rounded disabled:opacity-50"
             disabled={currentPage === totalPages}
             onClick={() => handlePageChange(currentPage + 1)}
           >
-            →
+            <FaArrowRight />
           </button>
         </div>
       </div>
