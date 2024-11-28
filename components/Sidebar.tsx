@@ -169,7 +169,7 @@ const Sidebar = () => {
                       className={`block w-full text-left text-base transition-all duration-300 ${
                         activeSubItem === `${item.text}-${subItem.name}`
                           ? "text-[#ff6c2f]"
-                          : "text-gray-600"
+                          : "text-[#A5A8AB]"
                       }`}
                     >
                       {subItem.name}
