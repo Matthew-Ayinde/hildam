@@ -20,5 +20,6 @@ const generateMockData = () => {
     return mockData;
   };
   
+  
   export const mockData = generateMockData();
   

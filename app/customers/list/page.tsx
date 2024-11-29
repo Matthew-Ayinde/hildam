@@ -1,7 +1,7 @@
-"use client";
+"use client"; 
 
 import { SetStateAction, useState } from "react";
-import { mockData } from "../../../data/mockDataForInventoryList";
+import { mockData } from "@/data/mockDataForCustomer";
 import { FaArrowRight } from "react-icons/fa";
 import { FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
@@ -26,18 +26,19 @@ export default function Table() {
     currentPage * rowsPerPage
   );
 
-  return ( 
-    <div className="w-full bg-white py-3 rounded-2xl">
-      <div className=" mx-2 font-bold text-gray-500 text-xl my-3">Inventory List</div>
-      <div className="overflow-x-auto">
+  return (
+    <div className="w-full">
+      <div className="overflow-x-auto bg-white rounded-2xl py-3">
+      <div className=" mx-2 font-bold text-gray-500 text-xl my-3">Customers List</div>
         <table className="min-w-full border-collapse border border-gray-200">
           <thead className="bg-[#f6f8fb] sticky top-0 z-10">
             <tr className="text-[#5d7186]">
               {[
-                "ID",
-                "Item",
-                "Item Quantity",
-                "Created On",
+                "Full Name",
+                "Age",
+                "Gender",
+                "Phone No",
+                "Create Date",
                 "Action",
               ].map((header) => (
                 <th
@@ -52,10 +53,12 @@ export default function Table() {
           <tbody>
             {paginatedData.map((row, index) => (
               <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
-                <td className="px-4 py-2 text-sm border-b">{row.orderId}</td>
-                <td className="px-4 py-2 text-sm border-b">{row.itemData}</td>
-                <td className="px-4 py-2 text-sm border-b">{row.itemQuantity}</td>
+                <td className="px-4 py-2 text-sm border-b">{row.fullName}</td>
+                <td className="px-4 py-2 text-sm border-b">{row.age}</td>
+                <td className="px-4 py-2 text-sm border-b">{row.gender}</td>
+                <td className="px-4 py-2 text-sm border-b">{row.phone}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.date}</td>
+              
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
                     <div className="mx-2 px-3 bg-gray-200 p-2 rounded-lg">
@@ -85,7 +88,7 @@ export default function Table() {
           <span className="font-bold">
             {Math.min(currentPage * rowsPerPage, data.length)}
           </span>{" "}
-          of <span className="font-bold">{data.length}</span> Inventory Items
+          of <span className="font-bold">{data.length}</span> Orders
         </div>
         <div className="flex items-center space-x-2">
           <button

@@ -1,6 +1,6 @@
 const generateMockData = () => {
     const gender = ['Unspecified', 'Female', 'Male'];
-  
+   
     const mockData = Array.from({ length: 100 }, (_, i) => ({
       date: new Date().toLocaleDateString('en-GB', {
         day: 'numeric',
