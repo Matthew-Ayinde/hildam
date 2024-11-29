@@ -85,7 +85,8 @@ const Form = () => {
         className="w-full bg-white rounded-lg shadow-md p-6"
       >
         {/* Name and Gender */}
-        <div className="block text-xl font-medium text-gray-700 mt-5 mb-5">Customer Information</div>
+      <div className="font-bold text-gray-500 text-xl my-3">Customer Information</div>
+        
         <div className="flex space-x-4 mb-4">
           <div className="w-1/2">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -114,7 +115,7 @@ const Form = () => {
               className="mt-1 block w-full text-gray-700 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             >
-              <option value="">Select Your Gender</option>
+              <option value="">Select Gender</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
               <option value="other">Other</option>

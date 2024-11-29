@@ -32,7 +32,7 @@ export default function Table() {
   return (
     <div className="w-full bg-white rounded-2xl py-3">
 
-      <div className="my-5 mx-5 font-bold text-gray-700">All Payments</div>
+      <div className="my-5 mx-5 font-bold text-gray-500 text-xl">All Payments</div>
 
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-200">

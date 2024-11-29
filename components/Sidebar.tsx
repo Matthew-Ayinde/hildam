@@ -9,14 +9,13 @@ import {
   FaBoxes,
   FaUser,
 } from "react-icons/fa";
-import {
-  IoIosArrowDown,
-  IoIosArrowDroprightCircle,
-  IoIosArrowUp,
-} from "react-icons/io";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import Image from "next/image";
 import { MdDashboard } from "react-icons/md";
+import { usePathname } from "next/navigation";
+import "nprogress/nprogress.css"; // Import default styles for NProgress
 
+// Sidebar items definition
 const sidebarItems = [
   {
     id: 1,
@@ -40,9 +39,7 @@ const sidebarItems = [
     id: 3,
     text: "Payments",
     icon: <FaCreditCard />,
-    links: [
-      { name: "List", href: "/payments/list" },
-    ],
+    links: [{ name: "List", href: "/payments/list" }],
   },
   {
     id: 4,
@@ -66,24 +63,34 @@ const sidebarItems = [
 
 const Sidebar = () => {
   const [openItemId, setOpenItemId] = useState<number | null>(null);
-  const [activeSubItem, setActiveSubItem] = useState<string | null>(null);
+  const pathname = usePathname(); // Get the current route
 
+  // Toggle dropdown menus
   const handleToggle = (id: number) => {
-    setOpenItemId(openItemId === id ? null : id); // Toggle dropdown
-    setActiveSubItem(null); // Reset sub-item when toggling
+    setOpenItemId(openItemId === id ? null : id);
   };
 
-  const handleSubItemClick = (itemId: number, subItem: string) => {
-    setActiveSubItem(subItem);
-    setOpenItemId(itemId); // Ensure parent remains open
-  };
+  // Determine if a link or submenu is active
+  const isActive = (href: string) => pathname === href;
+  const isParentActive = (links: { href: string }[]) =>
+    links.some((link) => pathname.startsWith(link.href));
 
   return (
-    <div className="fixed top-0 left-0 h-full w-[250px] bg-[#262d34] text-[#A5A8AB] shadow-lg font-play">
-      <div className="mt-10">
-        <div className="mx-9">
-          <div className="flex flex-row justify-between items-center">
-            <div className="flex flex-row items-center">
+    <>
+      {/* Add NProgress styles */}
+      <style jsx global>{`
+        #nprogress .bar {
+          background: #ff6c2f;
+          height: 4px;
+        }
+      `}</style>
+
+      {/* Sidebar container */}
+      <div className="fixed top-0 left-0 h-full w-[250px] bg-[#262d34] text-[#A5A8AB] shadow-lg overflow-y-auto">
+        {/* Sidebar header */}
+        <div className="mx-9 mt-10">
+          <div className="flex flex-row items-center justify-between">
+            <div className="flex items-center">
               <div className="w-10 h-10">
                 <Image
                   src="/logo.png"
@@ -93,47 +100,49 @@ const Sidebar = () => {
                   className="w-full h-full"
                 />
               </div>
-              <div>HildaM Couture</div>
+              <div className="ml-2 text-white font-bold text-lg">
+                HildaM Couture
+              </div>
             </div>
-            <div></div>
           </div>
         </div>
 
-        <div className="mt-10 mb-0 text-sm mx-9">GENERAL</div>
+        {/* General label */}
+        <div className="mt-10 mb-0 text-sm mx-9 text-gray-400">GENERAL</div>
 
-        <div className="relative mt-5">
+        {/* Dashboard link */}
+        <div className="relative mt-5 mx-4">
           <div
-            className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-all duration-300`}
+            className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
+              pathname === "/" ? "opacity-100" : "opacity-0"
+            }`}
           ></div>
-          <div
-            className={`flex w-full items-center justify-between py-1 px-4 text-left text-base transition-all duration-300 mx-4`}
+          <Link
+            href="/"
+            className={`flex items-center space-x-3 px-4 py-2 text-base font-medium transition-all duration-300 ${
+              pathname === "/" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
+            }`}
           >
-            <Link href={'/'}>
-            <div className="flex items-center space-x-3">
             <MdDashboard />
-              <span>Dashboard</span>
-            </div>
-            </Link>
-          </div>
+            <span>Dashboard</span>
+          </Link>
         </div>
-        <ul className="space-y-1 p-4">
+
+        {/* Sidebar navigation */}
+        <ul className="space-y-1 mt-3 px-4">
           {sidebarItems.map((item) => (
             <li key={item.id} className="relative">
               {/* Main Button */}
               <div className="relative">
                 <div
-                  className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-all duration-300 ${
-                    openItemId === item.id ||
-                    activeSubItem?.startsWith(item.text)
-                      ? "opacity-100"
-                      : "opacity-0"
+                  className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
+                    isParentActive(item.links) ? "opacity-100" : "opacity-0"
                   }`}
                 ></div>
                 <button
                   onClick={() => handleToggle(item.id)}
-                  className={`flex w-full items-center justify-between py-1 px-4 text-left text-base transition-all duration-300 ${
-                    openItemId === item.id ||
-                    activeSubItem?.startsWith(item.text)
+                  className={`flex w-full items-center justify-between py-2 px-4 text-left text-base font-medium transition-all duration-300 ${
+                    isParentActive(item.links)
                       ? "text-[#ff6c2f]"
                       : "text-[#A5A8AB]"
                   }`}
@@ -152,7 +161,7 @@ const Sidebar = () => {
 
               {/* Dropdown Menu */}
               <ul
-                className={`ml-8 mt-2 space-y-2 overflow-hidden transition-all duration-300 ${
+                className={`ml-8 mt-2 space-y-2 overflow-hidden transition-all duration-500 ${
                   openItemId === item.id ? "max-h-40" : "max-h-0"
                 }`}
               >
@@ -160,16 +169,10 @@ const Sidebar = () => {
                   <li key={subItem.name}>
                     <Link
                       href={subItem.href}
-                      onClick={() =>
-                        handleSubItemClick(
-                          item.id,
-                          `${item.text}-${subItem.name}`
-                        )
-                      }
-                      className={`block w-full text-left text-base transition-all duration-300 ${
-                        activeSubItem === `${item.text}-${subItem.name}`
-                          ? "text-[#ff6c2f]"
-                          : "text-[#A5A8AB]"
+                      className={`block px-4 py-2 text-base transition-all duration-300 ${
+                        isActive(subItem.href)
+                          ? "text-[#ff6c2f] bg-transparent"
+                          : "text-[#A5A8AB] hover:text-[#ff6c2f]"
                       }`}
                     >
                       {subItem.name}
@@ -181,7 +184,7 @@ const Sidebar = () => {
           ))}
         </ul>
       </div>
-    </div>
+    </>
   );
 };
 

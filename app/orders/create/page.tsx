@@ -85,7 +85,7 @@ const Form = () => {
         className="w-full bg-white rounded-lg shadow-md p-6"
       >
         {/* Name and Gender */}
-        <div className="block text-xl font-medium text-gray-700 mt-5 mb-5">Order Information</div>
+      <div className="font-bold text-gray-500 text-xl my-3">Order Information</div>
         <div className="flex space-x-4 mb-4">
           <div className="w-1/2">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">

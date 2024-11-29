@@ -70,7 +70,8 @@ export default function Table() {
         </div>
       </div>
 
-      <div className="overflow-x-auto max-h-[500px]">
+      <div className="overflow-x-auto bg-white py-3 rounded-2xl">
+      <div className=" mx-2 font-bold text-gray-500 text-xl my-3">Order List</div>
         <table className="min-w-full border-collapse border border-gray-200">
           <thead className="bg-[#f6f8fb] sticky top-0 z-10">
             <tr className="text-[#5d7186]">
