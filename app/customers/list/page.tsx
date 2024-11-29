@@ -61,18 +61,7 @@ export default function Table() {
                 <td className="px-4 py-2 text-sm border-b">{row.gender}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.phone}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.date}</td>
-                {/* <td className="px-4 py-2 text-sm border-b">
-                  <span
-                    className={`px-4 py-2 text-xs font-medium rounded ${
-                      row.paymentStatus === "Paid"
-                        ? "bg-green-600 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    {row.paymentStatus}
-                  </span>
-                </td> */}
-                {/* <td className="px-4 py-2 text-sm border-b">{row.paymentStatus}</td> */}
+              
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
                     <div className="mx-2 px-3 bg-gray-200 p-2 rounded-lg">
