@@ -4,6 +4,7 @@ const generateMockData = () => {
     const paymentTypes = ['Cash', 'Transfer', 'POS'];
     const priority = ['High', 'Medium', 'Low'];
     const paymentStatus = ['Paid', 'Refund'];
+    const item = ['Shirt', 'Pants', 'Jacket', 'Dress', 'Blouse'];
   
     const mockData = Array.from({ length: 100 }, (_, i) => ({
       orderId: `#1111ORD${i + 1}`,
@@ -21,6 +22,7 @@ const generateMockData = () => {
       status: orderStatuses[i % orderStatuses.length],
       priority: priority[i % priority.length],
       paymentStatus: paymentStatus[i % paymentStatus.length],
+      item: item[i % item.length],
     }));
   
     return mockData;
