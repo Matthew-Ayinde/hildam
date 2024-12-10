@@ -81,13 +81,13 @@ const Sidebar = () => {
         <div className="relative mt-5 mx-4">
           <div
             className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
-              pathname === "/" ? "opacity-100" : "opacity-0"
+              pathname === "/client" ? "opacity-100" : "opacity-0"
             }`}
           ></div>
           <Link
             href="/"
             className={`flex items-center space-x-3 px-4 py-2 text-base font-medium transition-all duration-300 ${
-              pathname === "/" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
+              pathname === "/client" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
             }`}
           >
             <MdDashboard />

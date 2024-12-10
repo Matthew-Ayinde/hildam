@@ -35,20 +35,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-black`}
       >
         <div className={`w-full flex flex-row bg-[#f9f7f7] ${play.className}`}>
-          <>
-            <div className="max-w-[250px] w-1/4 bg-green-500">
-              <div className=""> <Sidebar /> </div>
-            </div>
-            <div className="mx-10 h-full w-3/4">
-              <div className="mb-10">
-                <Topbar />
-              </div>
-              <div className="mb-40">{children}</div>
-              <div>
-                <Footer />
-              </div>
-            </div>
-          </>
+         {children}
         </div>
       </body>
     </html>

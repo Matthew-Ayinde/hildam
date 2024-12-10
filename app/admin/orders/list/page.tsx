@@ -1,10 +1,9 @@
 "use client";
 
 import { SetStateAction, useState } from "react";
-import { mockData } from "../../../data/mockDataForOrderList";
+import { mockData } from "@/data/mockDataForOrderList";
 import { FaArrowRight } from "react-icons/fa";
 import { FaArrowLeft } from "react-icons/fa";
-import Image from "next/image";
 import { IoEyeOutline } from "react-icons/io5";
 import { CiEdit } from "react-icons/ci";
 import { MdOutlineDeleteForever } from "react-icons/md";
