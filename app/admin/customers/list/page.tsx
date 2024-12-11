@@ -6,9 +6,19 @@ import { FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { CiEdit } from "react-icons/ci";
 import { MdOutlineDeleteForever } from "react-icons/md";
+import router from "next/router";
 
 export default function Table() {
-  const [data, setData] = useState([]);
+  interface Customer {
+    fullName: string;
+    age: number;
+    gender: string;
+    phone: string;
+    id: string;
+    date: string;
+  }
+
+  const [data, setData] = useState<Customer[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
 
@@ -38,13 +48,25 @@ export default function Table() {
       .then((result) => {
         if (result.data && Array.isArray(result.data)) {
           // Take only the first 8 entries
-          const filteredData = result.data.slice(0, 8).map((item: { name: any; age: any; role: string; phone_number: any; }) => ({
-            fullName: item.name,
-            age: item.age,
-            gender: item.role,
-            phone: item.phone_number || "N/A",
-            date: new Date().toLocaleDateString(), // Placeholder date
-          }));
+          const filteredData = result.data
+            .slice(0, 8)
+            .map(
+              (item: {
+                id: any;
+                gender: any;
+                name: any;
+                age: any;
+                role: string;
+                phone_number: any;
+              }) => ({
+                fullName: item.name,
+                age: item.age,
+                gender: item.gender,
+                phone: item.phone_number || "N/A",
+                id: item.id,
+                date: new Date().toLocaleDateString(), // Placeholder date
+              })
+            );
           setData(filteredData);
         } else {
           console.error("Invalid data format received");
@@ -94,7 +116,7 @@ export default function Table() {
           </thead>
           <tbody>
             {paginatedData.map((row, index) => (
-              <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
+              <tr key={index} className="text-[#5d7186]">
                 <td className="px-4 py-2 text-sm border-b">{row.fullName}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.age}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.gender}</td>
@@ -103,11 +125,11 @@ export default function Table() {
 
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
-                    <div className="mx-2 px-3 bg-gray-200 p-2 rounded-lg">
+                    <div
+                      className="ml-0 me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:cursor-pointer"
+                      onClick={() => router.push(`/admin/customers/${row.id}`)}
+                    >
                       <IoEyeOutline size={20} />
-                    </div>
-                    <div className="mx-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg">
-                      <CiEdit size={20} />
                     </div>
                     <div className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg">
                       <MdOutlineDeleteForever size={20} />

@@ -7,12 +7,13 @@ export default function ShowCustomer() {
   const router = useRouter();
   const { id } = useParams();
   interface Customer {
-    id: string;
-    item_name: string;
-    item_quantity: number;
-    created_at: string;
+    fullName: string;
+    age: number;
+    gender: string;
+    phone: string;
+    date: string;
   }
-
+  
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +24,7 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/inventory/${id}`, {
+      const response = await fetch(`/api/customerslist/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -34,7 +35,20 @@ export default function ShowCustomer() {
       }
 
       const result = await response.json();
-      setCustomer(result.data);
+
+      // Map response to fields used in the Table component
+      if (result.data) {
+        const mappedCustomer = {
+          fullName: result.data.name,
+          age: result.data.age,
+          gender: result.data.gender,
+          phone: result.data.phone_number || "N/A",
+          date: new Date().toLocaleDateString(), // Placeholder date if not provided
+        };
+        setCustomer(mappedCustomer);
+      } else {
+        setCustomer(null);
+      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -81,53 +95,58 @@ export default function ShowCustomer() {
       </div>
       <form className="grid grid-cols-2 gap-6">
         <div>
-          <label className="block text-gray-700 font-bold">ID</label>
+          <label className="block text-gray-700 font-bold">Full Name</label>
           <input
             type="text"
-            value={customer.id}
+            value={customer.fullName}
             readOnly
             className="w-full border border-gray-300 rounded p-2 bg-gray-100"
           />
         </div>
         <div>
-          <label className="block text-gray-700 font-bold">Item Name</label>
+          <label className="block text-gray-700 font-bold">Age</label>
           <input
             type="text"
-            value={customer.item_name}
+            value={customer.age}
             readOnly
             className="w-full border border-gray-300 rounded p-2 bg-gray-100"
           />
         </div>
         <div>
-          <label className="block text-gray-700 font-bold">Quantity</label>
+          <label className="block text-gray-700 font-bold">Gender</label>
           <input
             type="text"
-            value={customer.item_quantity}
+            value={customer.gender}
             readOnly
             className="w-full border border-gray-300 rounded p-2 bg-gray-100"
           />
         </div>
         <div>
-          <label className="block text-gray-700 font-bold">Created On</label>
+          <label className="block text-gray-700 font-bold">Phone</label>
           <input
             type="text"
-            value={new Date(customer.created_at).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })}
+            value={customer.phone}
             readOnly
             className="w-full border border-gray-300 rounded p-2 bg-gray-100"
           />
-        </div> 
-        {/* Additional fields */}
+        </div>
+        <div>
+          <label className="block text-gray-700 font-bold">Create Date</label>
+          <input
+            type="text"
+            value={customer.date}
+            readOnly
+            className="w-full border border-gray-300 rounded p-2 bg-gray-100"
+          />
+        </div>
       </form>
       <div className="mt-6 flex justify-end space-x-4">
-        <button className="px-4 py-2 bg-blue-500 text-white rounded" 
-        onClick={() => router.push(`/admin/inventory/${id}/edit`)}
+        <div
+          className="px-4 py-2 bg-blue-500 text-white rounded"
+          onClick={() => router.push(`/admin/inventory/${id}/edit`)}
         >
           Edit
-        </button>
+        </div>
         <button className="px-4 py-2 bg-red-500 text-white rounded">
           Delete
         </button>

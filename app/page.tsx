@@ -14,7 +14,7 @@ export default function Home() {
       const decodedToken = jwtDecode<{ role: string }>(token);
       switch (decodedToken.role) {
         case "admin":
-          router.push("/admin/customers");
+          router.push("/admin");
           break;
         case "customer":
           router.push("/client/customers");

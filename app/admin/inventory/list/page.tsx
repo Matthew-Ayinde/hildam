@@ -4,12 +4,20 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { CiEdit } from "react-icons/ci";
+import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
 
 export default function Table() {
-  const [data, setData] = useState([]);
+  interface InventoryItem {
+    id: number;
+    itemData: string;
+    itemQuantity: number;
+    date: string;
+  }
+
+  const [data, setData] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
   const router = useRouter();
@@ -56,7 +64,11 @@ export default function Table() {
       }));
       setData(formattedData);
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -105,10 +117,10 @@ export default function Table() {
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
                     <div
-                      className="ml-0 me-4 px-3 bg-gray-100 text-orange-600 p-2 rounded-lg hover:cursor-pointer"
+                      className="ml-0 me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:cursor-pointer"
                       onClick={() => router.push(`/admin/inventory/${row.id}`)}
                     >
-                      <CiEdit size={20} />
+                      <IoEyeOutline size={20} />
                     </div>
                     <div className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg">
                       <MdOutlineDeleteForever size={20} />

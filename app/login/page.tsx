@@ -23,7 +23,7 @@ export default function LoginForm() {
   const redirectToRole = (role: string) => {
     switch (role) {
       case "admin":
-        router.push("/admin/customers/list");
+        router.push("/admin");
         break;
       case "customer":
         router.push("/client/orders/list");
