@@ -4,9 +4,8 @@ import { SetStateAction, useEffect, useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
 import { FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
-import { CiEdit } from "react-icons/ci";
 import { MdOutlineDeleteForever } from "react-icons/md";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function Table() {
   interface Customer {
@@ -21,6 +20,7 @@ export default function Table() {
   const [data, setData] = useState<Customer[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
+  const router = useRouter();
 
   useEffect(() => {
     // Fetch the token from sessionStorage

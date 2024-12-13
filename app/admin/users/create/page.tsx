@@ -1,95 +1,115 @@
 "use client";
 
 import React, { useState } from "react";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
+import { MdOutlineHideSource } from "react-icons/md";
 
 const Form = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<{
     name: string;
-    gender: string;
-    age: string;
-    phone: string;
+    role: string;
     email: string;
-    address: string;
-    description: string;
-    photo: File | null;
-    bust: string;
-    waist: string;
-    hips: string;
-    shoulderWidth: string;
-    neck: string;
-    armLength: string;
-    backLength: string;
-    frontLength: string;
-    highBust: string;
+    password: string;
   }>({
     name: "",
-    gender: "",
-    age: "",
-    phone: "",
+    role: "",
     email: "",
-    address: "",
-    description: "",
-    photo: null,
-    bust: "",
-    waist: "",
-    hips: "",
-    shoulderWidth: "",
-    neck: "",
-    armLength: "",
-    backLength: "",
-    frontLength: "",
-    highBust: "",
+    password: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
 
-  const [dragging, setDragging] = useState(false);
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData({ ...formData, photo: file });
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      setFormData({ ...formData, photo: file });
+    setIsSubmitting(true);
+
+    const accessToken = sessionStorage.getItem("access_token");
+
+    if (!accessToken) {
+      alert("No access token found! Please login first.");
+      setIsSubmitting(false);
+      return;
     }
-    setDragging(false);
-  };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragging(true);
-  };
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      role: parseInt(formData.role, 10),
+    };
 
-  const handleDragLeave = () => {
-    setDragging(false);
-  };
+    try {
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form data submitted:", formData);
+      if (response.ok) {
+        setPopupMessage("User created successfully");
+        setFormData({
+          name: "",
+          role: "",
+          email: "",
+          password: "",
+        });
+
+        // Automatically hide popup message after 5 seconds
+        setTimeout(() => {
+          setPopupMessage("");
+        }, 5000);
+      } else {
+        const error = await response.json();
+        alert(`Failed to create user: ${error.message || "Unknown error"}`);
+      }
+    } catch (err) {
+      alert("Network error. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
+    <div className="min-h-[400px] bg-gray-100 flex justify-center">
       <form
         onSubmit={handleSubmit}
         className="w-full bg-white rounded-lg shadow-md p-6"
       >
-        {/* Name and Gender */}
-      <div className="font-bold text-gray-500 text-xl my-3">User Information</div>
-        
+        {/* Popup Message */}
+        {popupMessage && (
+          <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded-md shadow-lg">
+            {popupMessage}
+          </div>
+        )}
+
+        {/* Name and role */}
+        <div className="font-bold text-gray-500 text-xl my-3">
+          User Information
+        </div>
+
         <div className="flex space-x-4 mb-4">
           <div className="w-1/2">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
               Name
             </label>
             <input
@@ -104,64 +124,37 @@ const Form = () => {
             />
           </div>
           <div className="w-1/2">
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700"
+            >
               Role
             </label>
             <select
               id="role"
               name="role"
-              value={formData.gender}
+              value={formData.role}
               onChange={handleChange}
               className="mt-1 block w-full text-gray-700 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             >
               <option value="">Select Role</option>
-              <option value="male">Account Manager</option>
-              <option value="female">Project Manager</option>
-              <option value="designer">Designer</option>
-              <option value="other">Operations</option>
+              <option value="1">Admin</option>
+              <option value="2">Client Manager</option>
+              <option value="3">Project Manager</option>
+              <option value="4">Store Manager</option>
+              <option value="5">Head of Tailoring</option>
             </select>
           </div>
         </div>
 
-        {/* Age and Phone Number */}
+        {/* Email */}
         <div className="flex space-x-4 mb-4">
           <div className="w-1/2">
-            <label htmlFor="age" className="block text-sm font-medium text-gray-700">
-              Age
-            </label>
-            <input
-              type="number"
-              id="age"
-              name="age"
-              value={formData.age}
-              onChange={handleChange}
-              placeholder="Enter your age"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            />
-          </div>
-          <div className="w-1/2">
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="Enter your phone number"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Email and Address */}
-        <div className="flex space-x-4 mb-4">
-          <div className="w-1/2">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <input
@@ -170,221 +163,82 @@ const Form = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your email"
+              placeholder="Enter your e-mail"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
           </div>
-          <div className="w-1/2">
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-              Address
+
+          <div className="w-1/2 relative">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Password
             </label>
             <input
-              type="text"
-              id="address"
-              name="address"
-              value={formData.address}
+              type={showPassword ? "text" : "password"}
+              id="password"
+              name="password"
+              value={formData.password}
               onChange={handleChange}
-              placeholder="Enter your address"
+              placeholder="Enter your password"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="absolute right-3 top-9 text-gray-500 hover:text-[#ff6c2f]"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <MdOutlineHideSource size={30} className="h-5 w-5" />
+              ) : (
+                <MdOutlineRemoveRedEye size={30} className="h-5 w-5" />
+              )}
+            </button>
           </div>
-        </div>
-
-        {/* Description */}
-        <div className="mb-4">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Short description about the customer"
-            className="mt-1 block w-full h-24 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-          />
-        </div>
-
-        {/* Measurement Fields */}
-        <div className="mb-4">
-          <div className="flex space-x-4 mb-4">
-            <div className="w-1/3">
-              <label htmlFor="bust" className="block text-sm font-medium text-gray-700">
-                Bust
-              </label>
-              <input
-                type="number"
-                id="bust"
-                name="bust"
-                value={formData.bust}
-                onChange={handleChange}
-                placeholder="Bust"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="waist" className="block text-sm font-medium text-gray-700">
-                Waist
-              </label>
-              <input
-                type="number"
-                id="waist"
-                name="waist"
-                value={formData.waist}
-                onChange={handleChange}
-                placeholder="Waist"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="hips" className="block text-sm font-medium text-gray-700">
-                Hips
-              </label>
-              <input
-                type="number"
-                id="hips"
-                name="hips"
-                value={formData.hips}
-                onChange={handleChange}
-                placeholder="Hips"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-          </div>
-          <div className="flex space-x-4 mb-4">
-            <div className="w-1/3">
-              <label
-                htmlFor="shoulderWidth"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Shoulder Width
-              </label>
-              <input
-                type="number"
-                id="shoulderWidth"
-                name="shoulderWidth"
-                value={formData.shoulderWidth}
-                onChange={handleChange}
-                placeholder="Shoulder Width"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="neck" className="block text-sm font-medium text-gray-700">
-                Neck
-              </label>
-              <input
-                type="number"
-                id="neck"
-                name="neck"
-                value={formData.neck}
-                onChange={handleChange}
-                placeholder="Neck"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="armLength" className="block text-sm font-medium text-gray-700">
-                Arm Length
-              </label>
-              <input
-                type="number"
-                id="armLength"
-                name="armLength"
-                value={formData.armLength}
-                onChange={handleChange}
-                placeholder="Arm Length"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-          </div>
-          <div className="flex space-x-4 mb-4">
-            <div className="w-1/3">
-              <label
-                htmlFor="backLength"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Back Length
-              </label>
-              <input
-                type="number"
-                id="backLength"
-                name="backLength"
-                value={formData.backLength}
-                onChange={handleChange}
-                placeholder="Back Length"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label
-                htmlFor="frontLength"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Front Length
-              </label>
-              <input
-                type="number"
-                id="frontLength"
-                name="frontLength"
-                value={formData.frontLength}
-                onChange={handleChange}
-                placeholder="Front Length"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="highBust" className="block text-sm font-medium text-gray-700">
-                High Bust
-              </label>
-              <input
-                type="number"
-                id="highBust"
-                name="highBust"
-                value={formData.highBust}
-                onChange={handleChange}
-                placeholder="High Bust"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Photo Upload */}
-        <div className="block text-xl font-medium text-gray-700 mt-14">Measurements</div>
-        <div
-          className={`flex justify-center items-center border-2 border-dashed p-4 rounded-md ${
-            dragging ? "border-[#ff6c2f] bg-green-100" : "border-gray-300"
-          }`}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragLeave={handleDragLeave}
-        >
-          <input
-            type="file"
-            id="photo"
-            name="photo"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-          <label
-            htmlFor="photo"
-            className="text-sm text-gray-600 hover:text-[#ff6c2f] p-20 cursor-pointer"
-          >
-            {formData.photo ? formData.photo.name : "Drag and drop a photo, or click to upload"}
-          </label>
         </div>
 
         {/* Submit Button */}
         <div className="mt-6">
           <button
             type="submit"
-            className="w-fit px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+            disabled={isSubmitting}
+            className={`w-fit px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 ${
+              isSubmitting
+                ? "bg-[#ff6c2f] cursor-not-allowed"
+                : "bg-[#ff6c2f] text-white hover:bg-orange-600"
+            }`}
           >
-            Create Customer
+            {isSubmitting ? (
+              <span className="inline-flex items-center">
+                <svg
+                  className="animate-spin h-3 w-3 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
+                </svg>
+                <div className="text-white">Submitting...</div>
+              </span>
+            ) : (
+              "Create Customer"
+            )}
           </button>
         </div>
       </form>

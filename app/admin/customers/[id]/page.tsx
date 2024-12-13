@@ -100,7 +100,7 @@ export default function ShowCustomer() {
             type="text"
             value={customer.fullName}
             readOnly
-            className="w-full border border-gray-300 rounded p-2 bg-gray-100"
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>
         <div>
@@ -109,7 +109,7 @@ export default function ShowCustomer() {
             type="text"
             value={customer.age}
             readOnly
-            className="w-full border border-gray-300 rounded p-2 bg-gray-100"
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>
         <div>
@@ -118,7 +118,7 @@ export default function ShowCustomer() {
             type="text"
             value={customer.gender}
             readOnly
-            className="w-full border border-gray-300 rounded p-2 bg-gray-100"
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>
         <div>
@@ -127,7 +127,7 @@ export default function ShowCustomer() {
             type="text"
             value={customer.phone}
             readOnly
-            className="w-full border border-gray-300 rounded p-2 bg-gray-100"
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>
         <div>
@@ -136,14 +136,14 @@ export default function ShowCustomer() {
             type="text"
             value={customer.date}
             readOnly
-            className="w-full border border-gray-300 rounded p-2 bg-gray-100"
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>
       </form>
       <div className="mt-6 flex justify-end space-x-4">
         <div
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-          onClick={() => router.push(`/admin/inventory/${id}/edit`)}
+          className="px-4 py-2 bg-orange-500 text-white rounded"
+          onClick={() => router.push(`/admin/customers/${id}/edit`)}
         >
           Edit
         </div>
