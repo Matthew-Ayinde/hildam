@@ -237,7 +237,7 @@ const Form = () => {
                 <div className="text-white">Submitting...</div>
               </span>
             ) : (
-              "Create Customer"
+              "Create User"
             )}
           </button>
         </div>

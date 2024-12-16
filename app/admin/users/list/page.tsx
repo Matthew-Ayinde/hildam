@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
-import { CiEdit } from "react-icons/ci";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
 
@@ -11,8 +10,12 @@ export default function Table() {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const rowsPerPage = 10;
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
 
+  const rowsPerPage = 10;
   const totalPages = Math.ceil(data.length / rowsPerPage);
   const router = useRouter();
 
@@ -50,6 +53,42 @@ export default function Table() {
     fetchData();
   }, []);
 
+  const handleDelete = async () => {
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      if (!accessToken) {
+        console.error("No access token found in sessionStorage.");
+        return;
+      }
+
+      const response = await fetch(`/api/users/${selectedUserId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.error("Failed to delete user:", response.statusText);
+        setToastMessage("Failed to delete user.");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+        return;
+      }
+
+      setData((prevData) => prevData.filter((user) => user.id !== selectedUserId));
+      setIsPopupOpen(false);
+      setToastMessage("User deleted successfully.");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      setToastMessage("An error occurred. Please try again.");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  };
+
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -64,6 +103,14 @@ export default function Table() {
   return (
     <div className="w-full bg-white rounded-2xl py-2">
       <div className="mx-2 font-bold text-gray-500 text-xl my-3">Users</div>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-sm px-6 py-3 rounded-lg shadow-lg z-50">
+          {toastMessage}
+        </div>
+      )}
+
       {loading ? (
         <div className="text-center py-10">Loading...</div>
       ) : (
@@ -89,12 +136,19 @@ export default function Table() {
                   <td className="px-4 py-2 text-sm border-b">{row.role}</td>
                   <td className="px-4 py-2 text-sm border-b">
                     <div className="flex flex-row">
-                      <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
-                      onClick={() => router.push(`/admin/users/${row.id}`)}
+                      <div
+                        className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
+                        onClick={() => router.push(`/admin/users/${row.id}`)}
                       >
                         <IoEyeOutline size={20} />
                       </div>
-                      <div className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg">
+                      <div
+                        className="mx-2 px-3 bg-red-100 text-red-600 p-2 rounded-lg cursor-pointer"
+                        onClick={() => {
+                          setSelectedUserId(row.id);
+                          setIsPopupOpen(true);
+                        }}
+                      >
                         <MdOutlineDeleteForever size={20} />
                       </div>
                     </div>
@@ -154,6 +208,43 @@ export default function Table() {
           </button>
         </div>
       </div>
+
+      {/* Popup */}
+      {isPopupOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={() => setIsPopupOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg w-96 p-6 text-center"
+            onClick={(e) => e.stopPropagation()}
+            aria-modal="true"
+            role="dialog"
+          >
+            <h3 className="text-lg font-bold text-gray-700 mb-4">
+              Confirm Deletion
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to delete this user? This action cannot be
+              undone.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg"
+                onClick={handleDelete}
+              >
+                Confirm
+              </button>
+              <button
+                className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg"
+                onClick={() => setIsPopupOpen(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

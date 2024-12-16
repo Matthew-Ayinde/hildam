@@ -122,6 +122,22 @@ const Form = () => {
           </div>
         </div>
 
+        <div className="w-1/2 my-5">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
+            <input
+              type="text"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your name"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+          </div>
+
         {/* Description */}
         <div className="mb-4">
           <label htmlFor="description" className="block text-sm font-medium text-gray-700">

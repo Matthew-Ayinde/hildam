@@ -1,6 +1,6 @@
 "use client";
 
-import { SetStateAction, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { mockData } from "@/data/mockDataForPaymentList";
 import { FaArrowRight } from "react-icons/fa";
 import { FaArrowLeft } from "react-icons/fa";
@@ -10,16 +10,37 @@ import { CiEdit } from "react-icons/ci";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { GoClock } from "react-icons/go";
+import { useRouter } from "next/navigation";
+
 
 export default function Table() {
-  const [data, setData] = useState(mockData);
+  interface ProjectItem {
+    items: string;
+    status: string;
+    id: number;
+    order_id: string;
+    amount: string;
+    assigned_at: string;
+    clothing_name: string;
+    itemData: string;
+    itemQuantity: number;
+    date: string;
+    customer_name: string;
+    order_created_at: string;
+    order_status: string;
+  }
+
+  const [data, setData] = useState<ProjectItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
+  const router = useRouter();
 
   const totalPages = Math.ceil(data.length / rowsPerPage);
 
-  const handlePageChange = (newPage: SetStateAction<number>) => {
-    if (typeof newPage === "number" && newPage > 0 && newPage <= totalPages) {
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
@@ -29,24 +50,82 @@ export default function Table() {
     currentPage * rowsPerPage
   );
 
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      const response = await fetch("/api/projectlists", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const result = await response.json();
+      const formattedData = result.data.map((item: any) => ({
+        id: item.id,
+        order_id: item.order_id,
+        itemData: item.item_name,
+        clothing_name: item.clothing_name,
+        itemQuantity: item.item_quantity,
+        customer_name: item.customer_name,
+        order_status: item.order_status,
+        date: new Date(item.order_created_at).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        }),
+      }));
+      setData(formattedData);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+ useEffect(() => {
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center text-gray-500 py-10">Loading...</div>;
+  }
+
+  
+  if (error) {
+    return (
+      <div className="text-center text-red-500 py-10">
+        Error: {error} <button onClick={fetchData}>Retry</button>
+      </div>
+    );
+  }
+
+
   return (
     <div className="w-full bg-white rounded-2xl py-3">
 
-      <div className="my-5 mx-5 font-bold text-gray-500 text-xl">All Payments</div>
+      <div className="my-5 mx-5 font-bold text-gray-500 text-xl">Project Lists</div>
 
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-200">
           <thead className="bg-[#f6f8fb] sticky top-0 z-10">
             <tr className="text-[#5d7186]">
               {[
-                "ID",
+                "Order ID",
                 "Order By",
-                "Items",
-                "Purchase Status",
-                "Date",
-                "Total",
-                "Payment Method",
-                "Payment Status",
+                "Item",
+                "Date Assigned",
+                "Order Status",
                 "Action",
               ].map((header) => (
                 <th
@@ -61,12 +140,11 @@ export default function Table() {
           <tbody>
             {paginatedData.map((row, index) => (
               <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
-                <td className="px-4 py-2 text-sm border-b">{row.orderId}</td>
-                <td className="px-4 py-2 text-sm border-b text-[#da6d35]">
-                  {row.customerName}
-                </td>
-                <td className="px-4 py-2 text-sm border-b">{row.items}</td>
-                <td className="px-4 py-2 text-sm border-b">
+                <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
+                <td className="px-4 py-2 text-sm border-b">{row.customer_name}</td>
+                <td className="px-4 py-2 text-sm border-b">{row.clothing_name}</td>
+                <td className="px-4 py-2 text-sm border-b">{row.date}</td>
+                {/* <td className="px-4 py-2 text-sm border-b">
                   <span
                     className={`px-4 py-2 text-xs font-medium rounded whitespace-nowrap ${
                       row.paymentStatus === "Items Recieved"
@@ -76,34 +154,31 @@ export default function Table() {
                   >
                     {row.paymentStatus}
                   </span>
-                </td>
-                <td className="px-4 py-2 text-sm border-b">{row.date}</td>
+                </td> */}
 
                 {/* <td className="px-4 py-2 text-sm border-b">{row.paymentStatus}</td> */}
-                <td className="px-4 py-2 text-sm border-b">{`₦${row.total}`}</td>
-                <td className="px-4 py-2 text-sm border-b">
+                {/* <td className="px-4 py-2 text-sm border-b">
                   {row.paymentType}
-                </td>
+                </td> */}
                 <td className="px-4 py-2 text-sm border-b">
                   <span
                     className={`px-3 py-1 text-sm font-medium rounded ${
-                      row.status === "Completed"
+                      row.order_status === "Completed"
                         ? "bg-white text-green-800 border border-green-800"
-                        : row.status === "Pending"
+                        : row.status === "Processing"
                         ? "text-yellow-600 bg-white border border-yellow-600"
                         : "text-red-600 bg-white border border-red-600"
                     }`}
                   >
-                    {row.status}
+                    {row.order_status}
                   </span>
                 </td>
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
-                    <div className="mx-2 px-3 bg-gray-200 p-2 rounded-lg">
+                    <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
+                    onClick={() => router.push(`/admin/joblists/projects/${row.id}`)}
+                    >
                       <IoEyeOutline size={20} />
-                    </div>
-                    <div className="mx-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg">
-                      <CiEdit size={20} />
                     </div>
                     <div className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg">
                       <MdOutlineDeleteForever size={20} />

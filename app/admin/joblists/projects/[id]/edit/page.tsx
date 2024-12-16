@@ -170,9 +170,7 @@ export default function EditCustomer() {
           <label className="block text-gray-700 font-bold">Gender</label>
           <input
             type="text"
-            name="gender"
-            onChange={handleInputChange}
-            value={formData.gender}
+            value={customer.gender}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>
@@ -180,9 +178,16 @@ export default function EditCustomer() {
           <label className="block text-gray-700 font-bold">Phone</label>
           <input
             type="text"
-            name="phone"
-            value={formData?.phone || ""}
+            value={customer?.phone_number || ""}
             onChange={handleInputChange}
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-bold">Create Date</label>
+          <input
+            type="text"
+            value={customer.date}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>
@@ -190,9 +195,7 @@ export default function EditCustomer() {
           <label className="block text-gray-700 font-bold">Email</label>
           <input
             type="text"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
+            value={customer.email}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>
@@ -211,8 +214,7 @@ export default function EditCustomer() {
                 type="number"
                 id="bust"
                 name="bust"
-                onChange={handleInputChange}
-                value={formData?.bust || ""}
+                value={customer?.bust || ""}
                 placeholder="Bust"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />
@@ -225,8 +227,7 @@ export default function EditCustomer() {
                 type="number"
                 id="waist"
                 name="waist"
-                onChange={handleInputChange}
-                value={formData?.waist || ""}
+                value={customer?.waist || ""}
                 placeholder="Waist"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />
@@ -257,8 +258,7 @@ export default function EditCustomer() {
                 type="number"
                 id="shoulderWidth"
                 name="shoulderWidth"
-                value={formData?.shoulderWidth || ""}
-                onChange={handleInputChange}
+                value={customer?.shoulder_width || ""}
                 placeholder="Shoulder Width"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />

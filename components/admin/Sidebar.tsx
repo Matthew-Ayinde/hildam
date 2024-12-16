@@ -36,6 +36,15 @@ const sidebarItems = [
     ],
   },
   {
+    id: 3,
+    text: "Job Lists",
+    icon: <FaBoxes />,
+    links: [
+      { name: "Projects", href: "/admin/joblists/projects" },
+      { name: "Tailor Jobs", href: "/admin/joblists/tailorjoblists" },
+    ],
+  },
+  {
     id: 4,
     text: "Inventory",
     icon: <FaBoxes />,

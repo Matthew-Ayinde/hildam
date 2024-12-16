@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 
 export default function Table() {
   interface Order {
+    id: any;
     order_id: string;
     created_at: string;
     customer_name: string;
@@ -166,7 +167,7 @@ export default function Table() {
                   <td className="px-4 py-2 text-sm border-b">
                     <div className="flex flex-row">
                       <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
-                        onClick={() => router.push(`/admin/orders/${row.order_id}`)}
+                        onClick={() => router.push(`/admin/orders/${row.id}`)}
                       >
                         <IoEyeOutline size={20} />
                       </div>

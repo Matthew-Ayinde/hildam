@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-
+ 
 const Form = () => {
   const [formData, setFormData] = useState<{
     name: string;
@@ -41,7 +41,6 @@ const Form = () => {
     highBust: "",
   });
 
-  const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
 
@@ -50,29 +49,6 @@ const Form = () => {
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData({ ...formData, photo: file });
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      setFormData({ ...formData, photo: file });
-    }
-    setDragging(false);
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setDragging(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,11 +75,11 @@ const Form = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create customer.");
+        throw new Error("Failed to create Inventory.");
       }
 
       const result = await response.json();
-      setResponseMessage("Customer created successfully!");
+      setResponseMessage("Inventory created successfully!");
 
       // Automatically clear the response message after 5 seconds
       setTimeout(() => {
@@ -175,7 +151,7 @@ const Form = () => {
             } focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2`}
             disabled={loading}
           >
-            {loading ? "Loading..." : "Create Customer"}
+            {loading ? "Loading..." : "Create Inventory"}
           </button>
         </div>
 

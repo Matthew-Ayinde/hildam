@@ -10,8 +10,9 @@ export default function EditCustomer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
-    item_name: "",
-    item_quantity: "",
+    name: "",
+    email: "",
+    role: ""
   });
 
   const fetchCustomer = async () => {
@@ -20,7 +21,7 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/inventory/${id}`, {
+      const response = await fetch(`/api/users/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -33,8 +34,8 @@ export default function EditCustomer() {
       const result = await response.json();
       setCustomer(result.data);
       setFormData({
-        item_name: result.data.item_name,
-        item_quantity: result.data.item_quantity,
+        name: result.data.name,
+        email: result.data.email,
       });
     } catch (err) {
       setError(err.message);
@@ -56,7 +57,7 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/inventory/${id}`, {
+      const response = await fetch(`/api/users/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -69,7 +70,7 @@ export default function EditCustomer() {
         throw new Error("Failed to update customer data");
       }
 
-      router.push(`/admin/inventory/${id}`);
+      router.push(`/admin/users/${id}`);
     } catch (err) {
       setError(err.message);
     }
@@ -98,25 +99,48 @@ export default function EditCustomer() {
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
         <div>
-          <label className="block text-gray-700 font-bold">Item Name</label>
+          <label className="block text-gray-700 font-bold">Name</label>
           <input
             type="text"
-            name="item_name"
-            value={formData.item_name}
+            name="name"
+            value={formData.name}
             onChange={handleInputChange}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
           />
         </div>
         <div>
-          <label className="block text-gray-700 font-bold">Quantity</label>
+          <label className="block text-gray-700 font-bold">Email</label>
           <input
             type="text"
-            name="item_quantity"
-            value={formData.item_quantity}
+            name="email"
+            value={formData.email}
             onChange={handleInputChange}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
           />
         </div>
+        <div className="">
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Role
+            </label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              // onChange={handleChange}
+              className="mt-1 block w-full text-gray-700 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            >
+              <option value="">Select Role</option>
+              <option value="1">Admin</option>
+              <option value="2">Client Manager</option>
+              <option value="3">Project Manager</option>
+              <option value="4">Store Manager</option>
+              <option value="5">Head of Tailoring</option>
+            </select>
+          </div>
         <div className="col-span-2">
           <button
             type="submit"

@@ -1,8 +1,7 @@
 "use client";
 
 import { SetStateAction, useEffect, useState } from "react";
-import { FaArrowRight } from "react-icons/fa";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
@@ -19,11 +18,45 @@ export default function Table() {
 
   const [data, setData] = useState<Customer[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
   const rowsPerPage = 10;
   const router = useRouter();
 
+  const handleDelete = async (id: string) => {
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      if (!accessToken) {
+        throw new Error("Authentication token not found");
+      }
+
+      const response = await fetch(`/api/deletecustomer/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete customer");
+      }
+
+      // Remove the deleted customer from the local state
+      setData((prevData) => prevData.filter((customer) => customer.id !== id));
+
+      // Show success popup
+      setPopupMessage("Customer successfully deleted");
+
+      // Hide popup after 5 seconds
+      setTimeout(() => setPopupMessage(null), 5000);
+    } catch (error) {
+      console.error("Error deleting customer:", error.message);
+      setPopupMessage("Error deleting customer");
+      setTimeout(() => setPopupMessage(null), 5000);
+    }
+  };
+
   useEffect(() => {
-    // Fetch the token from sessionStorage
     const token = sessionStorage.getItem("access_token");
 
     if (!token) {
@@ -31,7 +64,6 @@ export default function Table() {
       return;
     }
 
-    // Fetch the data from the API
     fetch("/api/customerslist", {
       method: "GET",
       headers: {
@@ -47,26 +79,22 @@ export default function Table() {
       })
       .then((result) => {
         if (result.data && Array.isArray(result.data)) {
-          // Take only the first 8 entries
-          const filteredData = result.data
-            .slice(0, 8)
-            .map(
-              (item: {
-                id: any;
-                gender: any;
-                name: any;
-                age: any;
-                role: string;
-                phone_number: any;
-              }) => ({
-                fullName: item.name,
-                age: item.age,
-                gender: item.gender,
-                phone: item.phone_number || "N/A",
-                id: item.id,
-                date: new Date().toLocaleDateString(), // Placeholder date
-              })
-            );
+          const filteredData = result.data.map(
+            (item: {
+              id: any;
+              gender: any;
+              name: any;
+              age: any;
+              phone_number: any;
+            }) => ({
+              fullName: item.name,
+              age: item.age,
+              gender: item.gender,
+              phone: item.phone_number || "N/A",
+              id: item.id,
+              date: new Date().toLocaleDateString(),
+            })
+          );
           setData(filteredData);
         } else {
           console.error("Invalid data format received");
@@ -90,6 +118,11 @@ export default function Table() {
 
   return (
     <div className="w-full">
+      {popupMessage && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50">
+          {popupMessage}
+        </div>
+      )}
       <div className="overflow-x-auto bg-white rounded-2xl py-3">
         <div className="mx-2 font-bold text-gray-500 text-xl my-3">
           Customers List
@@ -121,7 +154,7 @@ export default function Table() {
                 <td className="px-4 py-2 text-sm border-b">{row.age}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.gender}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.phone}</td>
-                <td className="px-4 py-2 text-sm border-b">{row.age}</td>
+                <td className="px-4 py-2 text-sm border-b">{row.date}</td>
 
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
@@ -131,7 +164,10 @@ export default function Table() {
                     >
                       <IoEyeOutline size={20} />
                     </div>
-                    <div className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg">
+                    <div
+                      className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg hover:cursor-pointer"
+                      onClick={() => handleDelete(row.id)}
+                    >
                       <MdOutlineDeleteForever size={20} />
                     </div>
                   </div>
@@ -141,7 +177,6 @@ export default function Table() {
           </tbody>
         </table>
       </div>
-      {/* Pagination Bar */}
       <div className="bottom-0 flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200 text-[#A5A8AB]">
         <div>
           Showing{" "}
