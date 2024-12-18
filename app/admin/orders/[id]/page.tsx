@@ -130,6 +130,7 @@ export default function ShowCustomer() {
         </button>
       </div>
       <form>
+      <div className="text-end font-bond text-xl">Project Manager: </div>
         <div className="grid grid-cols-2 gap-6 mb-5">
           <div>
             <label className="block text-gray-700 font-bold">Order ID</label>

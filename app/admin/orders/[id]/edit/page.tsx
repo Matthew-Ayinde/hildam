@@ -38,7 +38,20 @@ export default function EditCustomer() {
     waist: "",
     hip: "",
     neck: "",
-    gender: ""
+    gender: "",
+    order_status: "",
+    date: "",
+    shoulderWidth: "",
+    armLength: "",
+    backLength: "",
+    frontLength: "",
+    highBust: "",
+    order_id: "",
+    priority: "",
+    clothing_name: "",
+    clothing_description: "",
+    customer_description: "",
+    project_manager_order_status: "",
   });
 
   
@@ -55,7 +68,7 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/customerslist/${id}`, {
+      const response = await fetch(`/api/orderslist/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -68,10 +81,10 @@ export default function EditCustomer() {
       const result = await response.json();
       setCustomer(result.data);
       setFormData({
-        name: result.data.name,
+        name: result.data.customer_name,
         age: result.data.age,
         phone: result.data.phone_number,
-        email: result.data.email,
+        email: result.data.customer_email,
         bust: result.data.bust,
         address: result.data.address,
         waist: result.data.waist,
@@ -82,7 +95,16 @@ export default function EditCustomer() {
         armLength: result.data.arm_length,
         backLength: result.data.back_length,
         frontLength: result.data.front_length,
-        highBust: result.data.high_bust
+        highBust: result.data.high_bust,
+        order_id: result.data.order_id,
+        priority: result.data.priority,
+        order_status: result.data.order_status,
+        clothing_name: result.data.clothing_name,
+        clothing_description: result.data.clothing_description,
+        customer_description: result.data.customer_description,
+        project_manager_order_status: result.data.project_manager_order_status,
+        project_manager_amount: result.data.project_manager_amount,
+        
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -155,7 +177,47 @@ export default function EditCustomer() {
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-6">
         <div>
-          <label className="block text-gray-700 font-bold">Full Name</label>
+          <label className="block text-gray-700 font-bold">Order ID</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.order_id}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-bold">Cloth Name</label>
+          <input
+            type="text"
+            name="clothing_name"
+            value={formData.clothing_name}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-bold">Priority</label>
+          <input
+            type="text"
+            name="priority"
+            value={formData.priority}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-bold">Order Status</label>
+          <input
+            type="text"
+            name="order_status"
+            value={formData.order_status}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-bold">Customer Name</label>
           <input
             type="text"
             name="name"
@@ -178,7 +240,9 @@ export default function EditCustomer() {
           <label className="block text-gray-700 font-bold">Gender</label>
           <input
             type="text"
-            value={customer.gender}
+            name="gender"
+            onChange={handleInputChange}
+            value={formData.gender}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>
@@ -186,7 +250,8 @@ export default function EditCustomer() {
           <label className="block text-gray-700 font-bold">Phone</label>
           <input
             type="text"
-            value={customer?.phone_number || ""}
+            name="phone"
+            value={formData.phone || ""}
             onChange={handleInputChange}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
@@ -195,7 +260,7 @@ export default function EditCustomer() {
           <label className="block text-gray-700 font-bold">Create Date</label>
           <input
             type="text"
-            value={customer.date}
+            value={formData.date}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>
@@ -203,7 +268,9 @@ export default function EditCustomer() {
           <label className="block text-gray-700 font-bold">Email</label>
           <input
             type="text"
-            value={customer.email}
+            onChange={handleInputChange}
+            value={formData.email}
+            name="email"
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>

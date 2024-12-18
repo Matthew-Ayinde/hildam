@@ -49,6 +49,7 @@ const Form = () => {
       name: formData.name,
       email: formData.email,
       password: formData.password,
+
       role: parseInt(formData.role, 10),
     };
 
