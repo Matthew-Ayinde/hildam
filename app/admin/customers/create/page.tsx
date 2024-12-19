@@ -71,14 +71,6 @@ const Form = () => {
         throw new Error("Access token not found in session storage.");
       }
 
-      console.log(token);
-
-      console.log({
-        name: formData.name,
-        email: formData.email,
-        phone_number: formData.phone,
-      });
-
       const response = await fetch("/api/addcustomer", {
         method: "POST",
         headers: {
@@ -89,7 +81,9 @@ const Form = () => {
           name: formData.name,
           email: formData.email,
           phone_number: formData.phone,
-          password: formData.password
+          password: formData.password,
+          age: formData.age,
+          gender: formData.gender
         }),
       });
 
@@ -189,23 +183,44 @@ const Form = () => {
           </div>
           <div className="w-1/2">
             <label
-              htmlFor="gender"
+              htmlFor="phone"
               className="block text-sm font-medium text-gray-700"
             >
               Gender
             </label>
-            <select
+            <input
+              type="text"
               id="gender"
               name="gender"
               value={formData.gender}
               onChange={handleChange}
-              className="mt-1 block w-full text-gray-700 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              placeholder="Enter your Gender"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+          </div>
+          
+        </div>
+
+        
+        <div className="flex space-x-4 mb-4">
+          <div className="w-1/2">
+            <label
+              htmlFor="phone"
+              className="block text-sm font-medium text-gray-700"
             >
-              <option value="">Select Gender</option>
-              <option value="1">Male</option>
-              <option value="2">Female</option>
-              <option value="3">Other</option>
-            </select>
+              Age
+            </label>
+            <input
+              type="string"
+              id="age"
+              name="age"
+              value={formData.age}
+              onChange={handleChange}
+              placeholder="Enter your age"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
           </div>
         </div>
 

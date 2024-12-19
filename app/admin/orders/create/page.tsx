@@ -4,6 +4,8 @@ import React, { useState } from "react";
 
 const Form = () => {
   const [formData, setFormData] = useState<{
+    order_status: string | number | readonly string[] | undefined;
+    priority: string | number | readonly string[] | undefined;
     clothing_description: string | number | readonly string[] | undefined;
     clothing_name: string | number | readonly string[] | undefined;
     customer_name: string;
@@ -47,6 +49,7 @@ const Form = () => {
 
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [popupMessage, setPopupMessage] = useState("");
   const [dragging, setDragging] = useState(false);
 
@@ -85,25 +88,28 @@ const Form = () => {
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       setIsSubmitting(true);
-  
+      setResponseMessage(null);
+    
       const accessToken = sessionStorage.getItem("access_token");
-  
+    
       if (!accessToken) {
         alert("No access token found! Please login first.");
         setIsSubmitting(false);
         return;
       }
-  
+    
       const payload = {
         customer_name: formData.customer_name,
         customer_email: formData.customer_email,
         clothing_name: formData.clothing_name,
         clothing_description: formData.clothing_description,
-        
+        order_status: formData.order_status,
+        priority: formData.priority,
+
       };
-  
+    
       try {
-        const response = await fetch("/api/users", {
+        const response = await fetch("/api/createorder", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -111,9 +117,9 @@ const Form = () => {
           },
           body: JSON.stringify(payload),
         });
-  
+    
         if (response.ok) {
-          setPopupMessage("Order created successfully");
+          setResponseMessage("Order created successfully");
           setFormData({
             clothing_description: "",
             clothing_name: "",
@@ -135,10 +141,10 @@ const Form = () => {
             frontLength: "",
             highBust: "",
           });
-  
-          // Automatically hide popup message after 5 seconds
+    
+          // Automatically hide response message after 5 seconds
           setTimeout(() => {
-            setPopupMessage("");
+            setResponseMessage(null);
           }, 5000);
         } else {
           const error = await response.json();
@@ -153,6 +159,7 @@ const Form = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
+      {popupMessage && (<div>{popupMessage}</div>)}
       <form
         onSubmit={handleSubmit}
         className="w-full bg-white rounded-lg shadow-md p-6"
@@ -164,15 +171,15 @@ const Form = () => {
         <div className="flex space-x-4 mb-4">
           <div className="w-1/2">
             <label
-              htmlFor="name"
+              htmlFor="customer_name"
               className="block text-sm font-medium text-gray-700"
             >
               Name
             </label>
             <input
               type="text"
-              id="name"
-              name="name"
+              id="customer_name"
+              name="customer_name"
               value={formData.customer_name}
               onChange={handleChange}
               placeholder="Enter your name"
@@ -210,8 +217,8 @@ const Form = () => {
             </label>
             <input
               type="text"
-              id="priority"
-              name="customer_priority"
+              id="phone"
+              name="phone"
               value={formData.phone}
               onChange={handleChange}
               placeholder="Enter your phone number"
@@ -225,19 +232,19 @@ const Form = () => {
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
             >
-              Phone
+              Priority
             </label>
             <input
               type="text"
-              id="phone"
-              name="phone"
-              value={formData.phone}
+              id="priority"
+              name="priority"
+              value={formData.priority}
               onChange={handleChange}
-              placeholder="Enter your name"
+              placeholder="Set Priority"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
             />
           </div>
+
         </div>
 
         <div className="flex flex-row space-x-4 mb-5">
@@ -246,38 +253,20 @@ const Form = () => {
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
             >
-              Priority
+              Order Status
             </label>
             <input
               type="text"
-              id="phone"
-              name="phone"
-              value={formData.phone}
+              id="order_status"
+              name="order_status"
+              value={formData.order_status}
               onChange={handleChange}
-              placeholder=""
+              placeholder="Order Status"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
           </div>
 
-          <div className="w-1/2">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Phone
-            </label>
-            <input
-              type="text"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="Enter your name"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            />
-          </div>
         </div>
 
         <div className="w-full flex flex-row space-x-4">
@@ -314,6 +303,8 @@ const Form = () => {
             />
           </div>
         </div>
+
+
 
         {/* Measurement Fields */}
         <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
@@ -512,22 +503,22 @@ const Form = () => {
         <div className="mt-6">
           <button
             type="submit"
-            className="w-fit px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+            className="w-fit px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2"
           >
             Create Customer
           </button>
         </div>
+        {responseMessage && (
+        <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
+          {responseMessage}
+        </div>
+      )}
       </form>
+
+      
     </div>
   );
 };
 
 export default Form;
-function setIsSubmitting(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}
-
-function setPopupMessage(arg0: string) {
-  throw new Error("Function not implemented.");
-}
 

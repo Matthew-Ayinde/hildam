@@ -67,7 +67,8 @@ export default function ProjectManagerDropdown() {
           </button>
         </div>
       ) : (
-        <select
+        <div>
+          <select
           id="project-manager"
           className="mt-2 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-green-300 focus:outline-none"
         >
@@ -78,6 +79,23 @@ export default function ProjectManagerDropdown() {
             </option>
           ))}
         </select>
+
+
+        <div
+          className="mt-2 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-green-300 focus:outline-none"
+        >
+          {managers.map((manager) => (
+            <h1 key={manager.id} className="flex flex-col">
+              {manager.name}
+              {manager.id}
+              {manager.user_id}
+            </h1>
+          ))}
+        </div>
+        </div>
+
+
+
       )}
     </div>
   );

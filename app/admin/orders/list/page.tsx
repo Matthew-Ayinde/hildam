@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
-import { CiEdit } from "react-icons/ci";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
 
 export default function Table() {
   interface Order {
+    manager_name: ReactNode;
     id: any;
     order_id: string;
     created_at: string;
@@ -20,7 +20,9 @@ export default function Table() {
   const [data, setData] = useState<Order[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<"success" | "error" | null>(null);
   const rowsPerPage = 10;
   const router = useRouter();
 
@@ -34,15 +36,12 @@ export default function Table() {
         const token = sessionStorage.getItem("access_token");
         if (!token) throw new Error("No access token found");
 
-        const response = await fetch(
-          "/api/orderslist",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch("/api/orderslist", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -64,13 +63,46 @@ export default function Table() {
     fetchOrders();
   }, []);
 
-  const handlePageChange = (newPage) => {
+  const handleDelete = async (id: any) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) throw new Error("No access token found");
+
+      const response = await fetch(`/api/deleteorder/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to delete order");
+      }
+
+      // Update state
+      setData((prevData) => prevData.filter((order) => order.id !== id));
+      setToastMessage("Order deleted successfully");
+      setToastType("success");
+    } catch (error) {
+      setToastMessage(error.message || "An unexpected error occurred");
+      setToastType("error");
+    } finally {
+      // Hide toast after 3 seconds
+      setTimeout(() => {
+        setToastMessage(null);
+        setToastType(null);
+      }, 3000);
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-GB", {
       day: "numeric",
@@ -85,15 +117,20 @@ export default function Table() {
   );
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
+      {/* Toast */}
+      {toastMessage && (
+        <div
+          className={`fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg text-white ${
+            toastType === "success" ? "bg-green-500" : "bg-red-500"
+          }`}
+        >
+          {toastMessage}
+        </div>
+      )}
+
       <div className="flex flex-row gap-5">
-        {/* Example stats */}
-        {[
-          { label: "Pending Review", value: 210 },
-          { label: "Pending Payment", value: 608 },
-          { label: "Delivered", value: 200 },
-          { label: "In Progress", value: 210 },
-        ].map((stat, index) => (
+        {[ /* Example stats */ ].map((stat, index) => (
           <div key={index} className="bg-white rounded-xl flex items-center p-5 mb-5">
             <div className="text-[#81899d]">
               <div className="font-bold text-gray-700">{stat.label}</div>
@@ -113,7 +150,7 @@ export default function Table() {
           <div className="text-center py-10">Loading...</div>
         ) : error ? (
           <div className="text-center py-10 text-red-500">
-            {error} {" "}
+            {error}{" "}
             <button
               className="text-blue-500 underline"
               onClick={() => window.location.reload()}
@@ -147,7 +184,9 @@ export default function Table() {
               {paginatedData.map((row, index) => (
                 <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
                   <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
-                  <td className="px-4 py-2 text-sm border-b">{formatDate(row.created_at)}</td>
+                  <td className="px-4 py-2 text-sm border-b">
+                    {formatDate(row.created_at)}
+                  </td>
                   <td className="px-4 py-2 text-sm border-b text-[#da6d35]">
                     {row.customer_name}
                   </td>
@@ -165,15 +204,25 @@ export default function Table() {
                       {row.order_status}
                     </span>
                   </td>
-                  <td className="px-4 py-2 text-sm border-b">{row.priority}</td>
+                  <td className="px-4 py-2 text-sm border-b">{row.manager_name}</td>
                   <td className="px-4 py-2 text-sm border-b">
                     <div className="flex flex-row">
-                      <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
+                      <div
+                        className="px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
                         onClick={() => router.push(`/admin/orders/${row.id}`)}
                       >
                         <IoEyeOutline size={20} />
                       </div>
-                      <div className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg">
+                      <div
+                        className="mx-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
+                        onClick={() => router.push(`/admin/assign-manager/${row.id}`)}
+                      >
+                        <IoEyeOutline size={20} />
+                      </div>
+                      <div
+                        className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg"
+                        onClick={() => handleDelete(row.id)}
+                      >
                         <MdOutlineDeleteForever size={20} />
                       </div>
                     </div>
@@ -189,7 +238,7 @@ export default function Table() {
       {!loading && !error && (
         <div className="bottom-0 flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200 text-[#A5A8AB]">
           <div>
-            Showing {" "}
+            Showing{" "}
             <span className="font-bold">
               {currentPage * rowsPerPage - rowsPerPage + 1}
             </span>
