@@ -135,6 +135,15 @@ export default function ShowCustomer() {
       <form>
         <div className="grid grid-cols-2 gap-6 mb-5">
           <div>
+            <label className="block text-gray-700 font-bold">ID</label>
+            <input
+              type="text"
+              value={id}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
             <label className="block text-gray-700 font-bold">Order ID</label>
             <input
               type="text"

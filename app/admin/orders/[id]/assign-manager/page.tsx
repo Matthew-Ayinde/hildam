@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
 export default function ProjectManagerDropdown() {
+  const { id } = useParams();
+  console.log(id)
   const [managers, setManagers] = useState<
     {
       user_id: string | number | readonly string[] | undefined;
-      id: string;
+      project_id: string;
       name: string;
     }[]
   >([]);
