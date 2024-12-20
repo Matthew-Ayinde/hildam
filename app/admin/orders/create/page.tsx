@@ -26,6 +26,8 @@ const Form = () => {
     frontLength: string;
     highBust: string;
   }>({
+    order_status: "",
+    priority: "",
     clothing_description: "",
     clothing_name: "",
     customer_name: "",
@@ -102,10 +104,18 @@ const Form = () => {
         customer_name: formData.customer_name,
         customer_email: formData.customer_email,
         clothing_name: formData.clothing_name,
+        hips: formData.hips,
+        bust: formData.bust,
+        waist: formData.waist,
         clothing_description: formData.clothing_description,
         order_status: formData.order_status,
         priority: formData.priority,
-
+        shoulder_width: formData.shoulderWidth,
+        neck: formData.neck,
+        arm_length: formData.armLength,
+        back_length: formData.backLength,
+        front_length: formData.frontLength,
+        high_bust: formData.highBust
       };
     
       try {
@@ -121,26 +131,28 @@ const Form = () => {
         if (response.ok) {
           setResponseMessage("Order created successfully");
           setFormData({
-            clothing_description: "",
-            clothing_name: "",
-            customer_name: "",
-            gender: "",
-            age: "",
-            phone: "",
-            customer_email: "",
-            address: "",
-            description: "",
-            photo: null,
-            bust: "",
-            waist: "",
-            hips: "",
-            shoulderWidth: "",
-            neck: "",
-            armLength: "",
-            backLength: "",
-            frontLength: "",
-            highBust: "",
-          });
+                      order_status: "",
+                      priority: "",
+                      clothing_description: "",
+                      clothing_name: "",
+                      customer_name: "",
+                      gender: "",
+                      age: "",
+                      phone: "",
+                      customer_email: "",
+                      address: "",
+                      description: "",
+                      photo: null,
+                      bust: "",
+                      waist: "",
+                      hips: "",
+                      shoulderWidth: "",
+                      neck: "",
+                      armLength: "",
+                      backLength: "",
+                      frontLength: "",
+                      highBust: "",
+                    });
     
           // Automatically hide response message after 5 seconds
           setTimeout(() => {
@@ -505,7 +517,7 @@ const Form = () => {
             type="submit"
             className="w-fit px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2"
           >
-            Create Customer
+            Create Order
           </button>
         </div>
         {responseMessage && (

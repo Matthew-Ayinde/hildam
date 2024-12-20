@@ -33,9 +33,6 @@ export default function Home() {
 
   return (
     <div className="h-screen flex items-center justify-center bg-gray-100 w-full">
-      <div className="w-[800px] shadow-2xl bg-white p-20 rounded-2xl text-center">
-        <div className="text-3xl font-bold">This is the Homepage</div>
-      </div>
     </div>
   );
 }

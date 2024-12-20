@@ -30,7 +30,7 @@ export default function ProjectManagerDropdown() {
         const token = sessionStorage.getItem("access_token");
         if (!token) throw new Error("No access token found");
 
-        const response = await fetch("/api/projectmanagerlist", {
+        const response = await fetch("/api/headoftailoringlist", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -78,7 +78,7 @@ export default function ProjectManagerDropdown() {
     };
 
     try {
-      const response = await fetch(`/api/assignprojectmanager/${id}`, {
+      const response = await fetch(`/api/assignheadoftailoring/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -111,7 +111,7 @@ export default function ProjectManagerDropdown() {
   return (
     <>
       {popupMessage && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-center py-2 px-4 rounded-lg shadow-lg z-50">
+        <div className="fixed top-5 left-1/2 transform -transla-500 bg-green-500 text-white text-center py-2 px-4 rounded-lg shadow-lg z-50">
           {popupMessage}
         </div>
       )}
@@ -122,7 +122,7 @@ export default function ProjectManagerDropdown() {
             htmlFor="project-manager"
             className="block text-2xl font-medium text-gray-700"
           >
-            Select Project Manager
+            Select Head of Tailoring
           </label>
           {loading ? (
             <div className="text-center text-gray-500 mt-2">Loading...</div>
@@ -140,11 +140,11 @@ export default function ProjectManagerDropdown() {
             <div>
               <select
                 id="user_id"
-                className="mt-2 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-green-300 focus:outline-none"
+                className="mt-2 block w-full p-2 border border-gray-300 rounded-lg shadow-sm  focus:outline-none"
                 value={formData.user_id}
                 onChange={(e) => setFormData({ user_id: e.target.value })}
               >
-                <option value="">Select project manager</option>
+                <option value="">Select Head of Tailoring</option>
                 {managers.map((manager) => (
                   <option key={manager.id} value={manager.user_id}>
                     {manager.name}

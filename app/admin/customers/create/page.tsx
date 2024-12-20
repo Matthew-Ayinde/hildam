@@ -71,6 +71,15 @@ const Form = () => {
         throw new Error("Access token not found in session storage.");
       }
 
+      console.log(JSON.stringify({
+        name: formData.name,
+        gender: formData.gender,
+        email: formData.email,
+        phone_number: formData.phone,
+        password: formData.password,
+        age: formData.age,
+      }));
+
       const response = await fetch("/api/addcustomer", {
         method: "POST",
         headers: {
@@ -79,11 +88,11 @@ const Form = () => {
         },
         body: JSON.stringify({
           name: formData.name,
+          gender: formData.gender,
           email: formData.email,
           phone_number: formData.phone,
           password: formData.password,
           age: formData.age,
-          gender: formData.gender
         }),
       });
 
@@ -183,7 +192,7 @@ const Form = () => {
           </div>
           <div className="w-1/2">
             <label
-              htmlFor="phone"
+              htmlFor="gender"
               className="block text-sm font-medium text-gray-700"
             >
               Gender

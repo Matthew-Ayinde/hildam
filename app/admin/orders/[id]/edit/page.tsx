@@ -103,6 +103,7 @@ export default function EditCustomer() {
         clothing_description: result.data.clothing_description,
         customer_description: result.data.customer_description,
         project_manager_order_status: result.data.project_manager_order_status,
+        hips: result.data.hips,
         project_manager_amount: result.data.project_manager_amount,
         
       });
@@ -275,24 +276,6 @@ export default function EditCustomer() {
           />
         </div>
 
-        <div className="w-1/2">
-            <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
-              Assign
-            </label>
-            <select
-              id="gender"
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              className="mt-1 block w-full text-gray-700 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            >
-              <option value="">Select Project Manager</option>
-              <option value="male">Gabriel Babatunde</option>
-              <option value="female">Kingsley Okpara</option>
-              <option value="other">Tomisin Ojo</option>
-            </select>
-          </div>
         
         </div>
         <div className="w-full">
@@ -334,7 +317,7 @@ export default function EditCustomer() {
                 type="number"
                 id="hips"
                 name="hips"
-                value={customer?.hip || ""}
+                value={customer?.hips || ""}
                 placeholder="Hips"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />

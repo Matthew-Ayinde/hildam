@@ -70,7 +70,8 @@ export default function ShowCustomer() {
           clothing_description: result.data.clothing_description || "",
           customer_description: result.data.customer_description || "",
           age: 0,
-          address: ""
+          manager_name: result.data.manager_name || "N/A",
+          address: "",
         };
         setCustomer(mappedCustomer);
       } else {
@@ -116,9 +117,11 @@ export default function ShowCustomer() {
         <button
           onClick={() => router.push("/admin/joblists/projects")}
           className="text-blue-500 underline"
-        >
+        > 
           Back to List
         </button>
+      <div className="text-end font-bond text-lg text-gray-700 flex flex-row"><div className="font-bold me-3">Head of Tailoring:</div> {customer.manager_name}</div>
+
       </div>
       <form>
         <div className="grid grid-cols-2 gap-6 mb-5">
@@ -162,23 +165,12 @@ export default function ShowCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
-          <div>
-            <label className="block text-gray-700 font-bold">
-              Head of Tailoring
-            </label>
-            <input
-              type="text"
-              value={customer.email}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
           <div className="w-full">
         <label className="block text-gray-700 font-bold">Clothing description</label>
           <textarea
             value={customer.clothing_description}
             readOnly
-            rows={1}
+            rows={3}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           ></textarea>
         </div>
@@ -361,10 +353,15 @@ export default function ShowCustomer() {
         </div>
       </form>
       <div className="mt-6 flex justify-end space-x-4">
-        
+      <div
+          className="px-4 py-2 bg-gray-500 text-white rounded"
+          onClick={() => router.push(`/admin/joblists/projects/${id}/assign-head-of-tailoring`)}
+        >
+          Assign Head of Tailoring
+        </div>
         <div
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/admin/customers/${id}/edit`)}
+          onClick={() => router.push(`/admin/joblists/projects/${id}/edit`)}
         >
           Edit
         </div>

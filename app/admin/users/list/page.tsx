@@ -143,7 +143,7 @@ export default function Table() {
                         <IoEyeOutline size={20} />
                       </div>
                       <div
-                        className="mx-2 px-3 bg-red-100 text-red-600 p-2 rounded-lg cursor-pointer"
+                        className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg cursor-pointer"
                         onClick={() => {
                           setSelectedUserId(row.id);
                           setIsPopupOpen(true);

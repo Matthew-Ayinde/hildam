@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {jwtDecode} from "jwt-decode";
+import Image from "next/image";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -79,7 +80,14 @@ export default function LoginForm() {
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded shadow-md w-full"
       >
-        <h2 className="text-xl font-bold mb-4 text-center">Login</h2>
+        <div className="flex flex-row space-x-2 items-center mb-5">
+          <div className="w-7 h-7">
+            <Image src={'/logo.png'} width={300} height={300} alt="Logo" className="w-full h-full"/>
+          </div>
+          <div className="font-bold">Hildam Couture</div>
+        </div>
+        <div className="text-3xl font-bold">Sign In</div>
+        <div className="text-gray-700 my-8">Please enter your email and password</div>
         <div className="flex items-center justify-center">
           {error && (
             <p className="text-white py-1 px-3 text-sm rounded-lg max-w-96 items-center flex justify-center bg-red-500 mb-4">
@@ -97,6 +105,7 @@ export default function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            placeholder="Please enter your email"
             className="w-full border border-gray-300 p-2 rounded"
           />
         </div>
@@ -108,6 +117,7 @@ export default function LoginForm() {
             type="password"
             id="password"
             value={password}
+            placeholder="Please enter your password"
             onChange={(e) => setPassword(e.target.value)}
             minLength={5}
             required
@@ -117,8 +127,8 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full bg-blue-500 text-black py-2 rounded ${
-            loading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"
+          className={`w-full bg-orange-500 text-black py-2 rounded ${
+            loading ? "opacity-50 cursor-not-allowed" : "hover:bg-orange-600"
           }`}
         >
           {loading ? "Logging in..." : "Login"}

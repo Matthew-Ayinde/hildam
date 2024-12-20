@@ -67,9 +67,10 @@ export default function ShowCustomer() {
           bust: result.data.bust || 0,
           waist: result.data.waist || 0,
           hip: result.data.hips || 0,
+          highBust: result.data.high_bust,
           shoulderWidth: result.data.shoulder_width || 0,
           neck: result.data.neck || 0,
-          armLength: result.data.armLength || 0,
+          armLength: result.data.arm_length || 0,
           backLength: result.data.back_length || 0,
           frontLength: result.data.front_length || 0,
           clothing_description: result.data.clothing_description || "N/A",
@@ -326,7 +327,7 @@ export default function ShowCustomer() {
                   readOnly
                   id="hips"
                   name="hips"
-                  value={customer.hips}
+                  value={customer.hip}
                   placeholder="Hips"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />

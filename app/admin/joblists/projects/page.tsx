@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 
 export default function Table() {
   interface ProjectItem {
+    manager_name: string;
     items: string;
     status: string;
     id: number;
@@ -68,6 +69,7 @@ export default function Table() {
 
       const result = await response.json();
       const formattedData = result.data.map((item: any) => ({
+        manager_name: item.manager_name,
         id: item.id,
         order_id: item.order_id,
         itemData: item.item_name,
@@ -126,6 +128,7 @@ export default function Table() {
                 "Item",
                 "Date Assigned",
                 "Order Status",
+                "Head of Tailoring",
                 "Action",
               ].map((header) => (
                 <th
@@ -173,6 +176,7 @@ export default function Table() {
                     {row.order_status}
                   </span>
                 </td>
+                <td className="px-4 py-2 text-sm border-b">{row.manager_name}</td>
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
                     <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
