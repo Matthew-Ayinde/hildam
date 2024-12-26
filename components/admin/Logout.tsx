@@ -1,4 +1,5 @@
 import React from "react";
+import { MdLogout } from "react-icons/md";
 
 const LogoutButton = () => {
   const handleLogout = () => {
@@ -9,9 +10,10 @@ const LogoutButton = () => {
   return (
     <button
       onClick={handleLogout}
-      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+      className="px-4 py-1 flex flex-row items-center text-red-500 border border-red-500 text-sm space-x-2  rounded hover:bg-red-500 hover:text-white"
     >
-      Log Out
+      <div>Log Out</div>
+      <MdLogout />
     </button>
   );
 };

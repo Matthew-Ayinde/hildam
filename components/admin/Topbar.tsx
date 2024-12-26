@@ -31,7 +31,7 @@ const Topbar = () => {
 
   return (
     <div>
-      <div className="flex justify-between my-10 items-center sticky text-gray-500">
+      <div className="lg:flex justify-between my-10 items-center sticky text-gray-500 hidden">
         <div className="text-xl font-bold">
           <div>WELCOME, {userName.toUpperCase()}</div>
           <div className="text-sm mt-1">Role: Admin</div>
