@@ -8,6 +8,7 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { GoClock } from "react-icons/go";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Spinner from "@/components/Spinner";
 
 export default function Table() {
   interface Order {
@@ -98,7 +99,9 @@ export default function Table() {
         </div>
 
         {loading ? (
-          <div className="text-center py-10">Loading...</div>
+          <div className="text-center py-10">
+            <Spinner />
+          </div>
         ) : error ? (
           <div className="text-center py-10 text-red-500">
             {error} {" "}

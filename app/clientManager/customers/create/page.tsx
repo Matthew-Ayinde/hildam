@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { MdOutlineHideSource, MdOutlineRemoveRedEye } from "react-icons/md";
 
 const Form = () => {
   const [formData, setFormData] = useState<{
@@ -8,10 +9,10 @@ const Form = () => {
     gender: string;
     age: string;
     phone: string;
+    password: string;
     email: string;
     address: string;
     description: string;
-    photo: File | null;
     bust: string;
     waist: string;
     hips: string;
@@ -29,7 +30,6 @@ const Form = () => {
     email: "",
     address: "",
     description: "",
-    photo: null,
     bust: "",
     waist: "",
     hips: "",
@@ -39,44 +39,88 @@ const Form = () => {
     backLength: "",
     frontLength: "",
     highBust: "",
+    password: ""
   });
 
-  const [dragging, setDragging] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [responseMessage, setResponseMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData({ ...formData, photo: file });
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      setFormData({ ...formData, photo: file });
+    setLoading(true);
+    setResponseMessage(null);
+
+    try {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) {
+        throw new Error("Access token not found in session storage.");
+      }
+
+      console.log(JSON.stringify({
+        name: formData.name,
+        gender: formData.gender,
+        email: formData.email,
+        phone_number: formData.phone,
+        password: formData.password,
+        age: formData.age,
+      }));
+
+      const response = await fetch("/api/addcustomer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          gender: formData.gender,
+          email: formData.email,
+          phone_number: formData.phone,
+          password: formData.password,
+          age: formData.age,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create customer.");
+      }
+
+      const result = await response.json();
+      setResponseMessage("Customer created successfully!");
+
+      // Automatically clear the response message after 5 seconds
+      setTimeout(() => {
+        setResponseMessage(null);
+      }, 5000);
+    } catch (error: any) {
+      setResponseMessage(`Error: ${error.message}`);
+
+      // Automatically clear the error message after 5 seconds
+      setTimeout(() => {
+        setResponseMessage(null);
+      }, 5000);
+    } finally {
+      setLoading(false);
     }
-    setDragging(false);
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragging(true);
-  };
+  {console.log(responseMessage)}
 
-  const handleDragLeave = () => {
-    setDragging(false);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form data submitted:", formData);
-  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
@@ -84,12 +128,16 @@ const Form = () => {
         onSubmit={handleSubmit}
         className="w-full bg-white rounded-lg shadow-md p-6"
       >
-        {/* Name and Gender */}
-      <div className="font-bold text-gray-500 text-xl my-3">Customer Information</div>
-        
+        <div className="font-bold text-gray-500 text-xl my-3">
+          Customer Information
+        </div>
+
         <div className="flex space-x-4 mb-4">
           <div className="w-1/2">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
               Name
             </label>
             <input
@@ -104,44 +152,31 @@ const Form = () => {
             />
           </div>
           <div className="w-1/2">
-            <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
-              Gender
-            </label>
-            <select
-              id="gender"
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              className="mt-1 block w-full text-gray-700 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
             >
-              <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Age and Phone Number */}
-        <div className="flex space-x-4 mb-4">
-          <div className="w-1/2">
-            <label htmlFor="age" className="block text-sm font-medium text-gray-700">
-              Age
+              Email
             </label>
             <input
-              type="number"
-              id="age"
-              name="age"
-              value={formData.age}
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your age"
+              placeholder="Enter your email"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
           </div>
+        </div>
+
+        <div className="flex space-x-4 mb-4">
           <div className="w-1/2">
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="phone"
+              className="block text-sm font-medium text-gray-700"
+            >
               Phone Number
             </label>
             <input
@@ -155,21 +190,92 @@ const Form = () => {
               required
             />
           </div>
-        </div>
-
-        {/* Email and Address */}
-        <div className="flex space-x-4 mb-4">
           <div className="w-1/2">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
+            <label
+              htmlFor="gender"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Gender
             </label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
+              type="text"
+              id="gender"
+              name="gender"
+              value={formData.gender}
               onChange={handleChange}
-              placeholder="Enter your email"
+              placeholder="Enter your Gender"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+          </div>
+          
+        </div>
+
+        
+        <div className="flex space-x-4 mb-4">
+          <div className="w-1/2">
+            <label
+              htmlFor="phone"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Age
+            </label>
+            <input
+              type="string"
+              id="age"
+              name="age"
+              value={formData.age}
+              onChange={handleChange}
+              placeholder="Enter your age"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="w-1/2 relative">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Password
+                    </label>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Enter your password"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute right-3 top-9 text-gray-500 hover:text-[#ff6c2f]"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <MdOutlineHideSource size={30} className="h-5 w-5" />
+                      ) : (
+                        <MdOutlineRemoveRedEye size={30} className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+
+        {/* <div className="flex space-x-4 mb-4">
+        <div className="w-1/2">
+            <label htmlFor="age" className="block text-sm font-medium text-gray-700">
+              Age
+            </label>
+            <input
+              type="number"
+              id="age"
+              name="age"
+              value={formData.age}
+              onChange={handleChange}
+              placeholder="Enter your age"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
@@ -189,203 +295,26 @@ const Form = () => {
               required
             />
           </div>
-        </div>
+        </div> */}
 
-        {/* Description */}
-        <div className="mb-4">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Short description about the customer"
-            className="mt-1 block w-full h-24 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-          />
-        </div>
-
-        {/* Measurement Fields */}
-        <div className="mb-4">
-          <div className="flex space-x-4 mb-4">
-            <div className="w-1/3">
-              <label htmlFor="bust" className="block text-sm font-medium text-gray-700">
-                Bust
-              </label>
-              <input
-                type="number"
-                id="bust"
-                name="bust"
-                value={formData.bust}
-                onChange={handleChange}
-                placeholder="Bust"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="waist" className="block text-sm font-medium text-gray-700">
-                Waist
-              </label>
-              <input
-                type="number"
-                id="waist"
-                name="waist"
-                value={formData.waist}
-                onChange={handleChange}
-                placeholder="Waist"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="hips" className="block text-sm font-medium text-gray-700">
-                Hips
-              </label>
-              <input
-                type="number"
-                id="hips"
-                name="hips"
-                value={formData.hips}
-                onChange={handleChange}
-                placeholder="Hips"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-          </div>
-          <div className="flex space-x-4 mb-4">
-            <div className="w-1/3">
-              <label
-                htmlFor="shoulderWidth"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Shoulder Width
-              </label>
-              <input
-                type="number"
-                id="shoulderWidth"
-                name="shoulderWidth"
-                value={formData.shoulderWidth}
-                onChange={handleChange}
-                placeholder="Shoulder Width"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="neck" className="block text-sm font-medium text-gray-700">
-                Neck
-              </label>
-              <input
-                type="number"
-                id="neck"
-                name="neck"
-                value={formData.neck}
-                onChange={handleChange}
-                placeholder="Neck"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="armLength" className="block text-sm font-medium text-gray-700">
-                Arm Length
-              </label>
-              <input
-                type="number"
-                id="armLength"
-                name="armLength"
-                value={formData.armLength}
-                onChange={handleChange}
-                placeholder="Arm Length"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-          </div>
-          <div className="flex space-x-4 mb-4">
-            <div className="w-1/3">
-              <label
-                htmlFor="backLength"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Back Length
-              </label>
-              <input
-                type="number"
-                id="backLength"
-                name="backLength"
-                value={formData.backLength}
-                onChange={handleChange}
-                placeholder="Back Length"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label
-                htmlFor="frontLength"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Front Length
-              </label>
-              <input
-                type="number"
-                id="frontLength"
-                name="frontLength"
-                value={formData.frontLength}
-                onChange={handleChange}
-                placeholder="Front Length"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="highBust" className="block text-sm font-medium text-gray-700">
-                High Bust
-              </label>
-              <input
-                type="number"
-                id="highBust"
-                name="highBust"
-                value={formData.highBust}
-                onChange={handleChange}
-                placeholder="High Bust"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Photo Upload */}
-        <div className="block text-xl font-medium text-gray-700 mt-14">Measurements</div>
-        <div
-          className={`flex justify-center items-center border-2 border-dashed p-4 rounded-md ${
-            dragging ? "border-[#ff6c2f] bg-green-100" : "border-gray-300"
-          }`}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragLeave={handleDragLeave}
-        >
-          <input
-            type="file"
-            id="photo"
-            name="photo"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-          <label
-            htmlFor="photo"
-            className="text-sm text-gray-600 hover:text-[#ff6c2f] p-20 cursor-pointer"
-          >
-            {formData.photo ? formData.photo.name : "Drag and drop a photo, or click to upload"}
-          </label>
-        </div>
-
-        {/* Submit Button */}
         <div className="mt-6">
           <button
             type="submit"
-            className="w-fit px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+            className={`w-fit px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium ${
+              loading ? "cursor-not-allowed opacity-50" : "hover:bg-orange-600"
+            } focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2`}
+            disabled={loading}
           >
-            Create Customer
+            {loading ? "Loading..." : "Create Customer"}
           </button>
         </div>
+
+
+        {responseMessage && (
+          <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
+            {responseMessage}
+          </div>
+        )}
       </form>
     </div>
   );

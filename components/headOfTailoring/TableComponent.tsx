@@ -1,7 +1,7 @@
 "use client";
 
 import { SetStateAction, useState } from "react";
-import { mockData } from "../data/mockDataForDashboard";
+import { mockData } from "@/data/mockDataForDashboard";
 import { FaArrowRight } from "react-icons/fa";
 import { FaArrowLeft } from "react-icons/fa";
 

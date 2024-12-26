@@ -18,7 +18,9 @@ export default function Table() {
   }
 
   const [data, setData] = useState<Order[]>([]);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -68,7 +70,7 @@ export default function Table() {
       const token = sessionStorage.getItem("access_token");
       if (!token) throw new Error("No access token found");
 
-      const response = await fetch(`/api/deleteorder/${id}`, {
+      const response = await fetch(`/api/deleteorder/${selectedUserId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -81,7 +83,8 @@ export default function Table() {
       }
 
       // Update state
-      setData((prevData) => prevData.filter((order) => order.id !== id));
+      setData((prevData) => prevData.filter((order) => order.id !== selectedUserId));
+      setIsPopupOpen(false);
       setToastMessage("Order deleted successfully");
       setToastType("success");
     } catch (error) {
@@ -215,7 +218,11 @@ export default function Table() {
                       </div>
                       <div
                         className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg"
-                        onClick={() => handleDelete(row.id)}
+                        onClick={() => {
+                          setSelectedUserId(row.id);
+                          setIsPopupOpen(true);
+                        }
+                        }
                       >
                         <MdOutlineDeleteForever size={20} />
                       </div>
@@ -275,6 +282,43 @@ export default function Table() {
             >
               <FaArrowRight />
             </button>
+          </div>
+        </div>
+      )}
+
+       {/* Popup */}
+       {isPopupOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={() => setIsPopupOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg w-96 p-6 text-center"
+            onClick={(e) => e.stopPropagation()}
+            aria-modal="true"
+            role="dialog"
+          >
+            <h3 className="text-lg font-bold text-gray-700 mb-4">
+              Confirm Deletion
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to delete this user? This action cannot be
+              undone.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg"
+                onClick={handleDelete}
+              >
+                Confirm
+              </button>
+              <button
+                className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg"
+                onClick={() => setIsPopupOpen(false)}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

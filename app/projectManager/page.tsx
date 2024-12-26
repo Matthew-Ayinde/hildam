@@ -1,12 +1,10 @@
-import Homepage from "@/components/Homepage";
-import Image from "next/image";
-import Link from "next/link";
+import DashboardComponent from "@/components/admin/DashboardComponent";
 
 export default function Home() {
   return (
     <div className="bg-white overflow-hidden rounded-2xl text-black ">
-      <Link href="/client">Go to client layout</Link>
-      <Homepage />
+      {/* <DashboardComponent /> */}
+      <div>hii</div>
     </div>
   );
 }

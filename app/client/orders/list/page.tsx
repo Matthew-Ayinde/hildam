@@ -33,7 +33,7 @@ export default function Table() {
     <div className="w-full">
 
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
-      <div className=" mx-2 font-bold text-gray-500 text-xl my-3">All Order List</div>
+      <div className=" mx-2 font-bold text-gray-500 text-xl my-3">My Orders</div>
         <table className="min-w-full border-collapse border border-gray-200">
           <thead className="bg-[#f6f8fb] sticky top-0 z-10">
             <tr className="text-[#5d7186]">

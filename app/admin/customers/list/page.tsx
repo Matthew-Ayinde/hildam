@@ -19,17 +19,21 @@ export default function Table() {
   const [data, setData] = useState<Customer[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [popupMessage, setPopupMessage] = useState<string | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const rowsPerPage = 10;
   const router = useRouter();
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async () => {
+    if (!selectedCustomerId) return;
+
     try {
       const accessToken = sessionStorage.getItem("access_token");
       if (!accessToken) {
         throw new Error("Authentication token not found");
       }
 
-      const response = await fetch(`/api/deletecustomer/${id}`, {
+      const response = await fetch(`/api/deletecustomer/${selectedCustomerId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -42,7 +46,7 @@ export default function Table() {
       }
 
       // Remove the deleted customer from the local state
-      setData((prevData) => prevData.filter((customer) => customer.id !== id));
+      setData((prevData) => prevData.filter((customer) => customer.id !== selectedCustomerId));
 
       // Show success popup
       setPopupMessage("Customer successfully deleted");
@@ -50,9 +54,15 @@ export default function Table() {
       // Hide popup after 5 seconds
       setTimeout(() => setPopupMessage(null), 5000);
     } catch (error) {
-      console.error("Error deleting customer:", error.message);
+      if (error instanceof Error) {
+        console.error("Error deleting customer:", error.message);
+      } else {
+        console.error("Error deleting customer:", error);
+      }
       setPopupMessage("Error deleting customer");
       setTimeout(() => setPopupMessage(null), 5000);
+    } finally {
+      setIsPopupOpen(false);
     }
   };
 
@@ -124,7 +134,7 @@ export default function Table() {
         </div>
       )}
       <div className="overflow-x-auto bg-white rounded-2xl py-3">
-        <div className="mx-2 font-bold text-gray-500 text-xl my-3">
+        <div className ="mx-2 font-bold text-gray-500 text-xl my-3">
           Customers List
         </div>
         <table className="min-w-full border-collapse border border-gray-200">
@@ -166,7 +176,10 @@ export default function Table() {
                     </div>
                     <div
                       className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg hover:cursor-pointer"
-                      onClick={() => handleDelete(row.id)}
+                      onClick={() => {
+                        setSelectedCustomerId(row.id);
+                        setIsPopupOpen(true);
+                      }}
                     >
                       <MdOutlineDeleteForever size={20} />
                     </div>
@@ -224,6 +237,42 @@ export default function Table() {
           </button>
         </div>
       </div>
+
+      {/* Confirmation Popup */}
+      {isPopupOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={() => setIsPopupOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg w-96 p-6 text-center"
+            onClick ={(e) => e.stopPropagation()}
+            aria-modal="true"
+            role="dialog"
+          >
+            <h3 className="text-lg font-bold text-gray-700 mb-4">
+              Confirm Deletion
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to delete this customer? This action cannot be undone.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg"
+                onClick={handleDelete}
+              >
+                Confirm
+              </button>
+              <button
+                className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg"
+                onClick={() => setIsPopupOpen(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

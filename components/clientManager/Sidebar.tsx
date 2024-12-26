@@ -22,8 +22,8 @@ const sidebarItems = [
     text: "Customers",
     icon: <FaUsers />,
     links: [
-      { name: "List", href: "/customers/list" },
-      { name: "Create", href: "/customers/create" },
+      { name: "List", href: "/clientmanager/customers/list" },
+      { name: "Create", href: "/clientmanager/customers/create" },
     ],
   },
   {
@@ -31,38 +31,33 @@ const sidebarItems = [
     text: "Orders",
     icon: <FaShoppingCart />,
     links: [
-      { name: "List", href: "/orders/list" },
-      { name: "Create Order", href: "/orders/create" },
+      { name: "List", href: "/clientmanager/orders/list" },
+      { name: "Create Order", href: "/clientmanager/orders/create" },
     ],
   },
   {
     id: 3,
-    text: "Payments",
-    icon: <FaCreditCard />,
-    links: [{ name: "List", href: "/payments/list" }],
+    text: "Job Lists",
+    icon: <FaBoxes />,
+    links: [
+      { name: "Projects", href: "/clientmanager/joblists/projects" },
+      { name: "Tailor Jobs", href: "/clientmanager/joblists/tailorjoblists" },
+    ],
   },
   {
     id: 4,
     text: "Inventory",
     icon: <FaBoxes />,
     links: [
-      { name: "List", href: "/inventory/list" },
-      { name: "Create", href: "/inventory/create" },
-    ],
-  },
-  {
-    id: 5,
-    text: "Users",
-    icon: <FaUser />,
-    links: [
-      { name: "List", href: "/users/list" },
-      { name: "Create", href: "/users/create" },
+      { name: "List", href: "/clientmanager/inventory/list" },
+      { name: "Create", href: "/clientmanager/inventory/create" },
     ],
   },
 ];
 
 const Sidebar = () => {
   const [openItemId, setOpenItemId] = useState<number | null>(null);
+  const [isSidebarOpen, setSidebarOpen] = useState(false); // For toggling sidebar on mobile
   const pathname = usePathname(); // Get the current route
 
   // Toggle dropdown menus
@@ -75,6 +70,9 @@ const Sidebar = () => {
   const isParentActive = (links: { href: string }[]) =>
     links.some((link) => pathname.startsWith(link.href));
 
+  // Toggle sidebar visibility on mobile
+  const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+
   return (
     <>
       {/* Add NProgress styles */}
@@ -86,7 +84,11 @@ const Sidebar = () => {
       `}</style>
 
       {/* Sidebar container */}
-      <div className="fixed top-0 left-0 h-full w-[250px] bg-[#262d34] text-[#A5A8AB] shadow-lg overflow-y-auto">
+      <div
+        className={`fixed top-0 left-0 h-full w-[250px] bg-[#262d34] text-[#A5A8AB] shadow-lg overflow-y-auto transition-transform duration-300 transform ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0 md:w-[250px] absolute z-50`}
+      >
         {/* Sidebar header */}
         <div className="mx-9 mt-10">
           <div className="flex flex-row items-center justify-between">
@@ -114,13 +116,13 @@ const Sidebar = () => {
         <div className="relative mt-5 mx-4">
           <div
             className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
-              pathname === "/" ? "opacity-100" : "opacity-0"
+              pathname === "/clientmanager" ? "opacity-100" : "opacity-0"
             }`}
           ></div>
           <Link
-            href="/"
+            href="/clientmanager"
             className={`flex items-center space-x-3 px-4 py-2 text-base font-medium transition-all duration-300 ${
-              pathname === "/" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
+              pathname === "/clientmanager" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
             }`}
           >
             <MdDashboard />
@@ -183,6 +185,22 @@ const Sidebar = () => {
             </li>
           ))}
         </ul>
+      </div>
+
+      {/* Hamburger menu for mobile */}
+      
+      <div className="bg-[#414d58] flex lg:hidden p-3 h-20 absolute w-full">
+      <div
+        className="fixed top-4 left-4 z-10 md:hidden p-3 bg-[#262d34] text-white rounded-full"
+      >
+        LOGO
+      </div>
+      <button
+        className="fixed top-4 right-4 z-50 md:hidden p-3 bg-[#262d34] text-white rounded-full"
+        onClick={toggleSidebar}
+      >
+        ☰
+      </button>
       </div>
     </>
   );
