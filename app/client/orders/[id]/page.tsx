@@ -10,12 +10,10 @@ export default function ShowCustomer() {
   interface Customer {
     [x: string]: string | number | readonly string[] | undefined;
     fullName: string;
-    clothing_name: string;
-    order_status: string;
+    gender: string;
+    phone: string;
     date: string;
     email: string;
-    clothing_description: string;
-    customer_description: string;
     address: string;
     bust: number;
     waist: number;
@@ -25,7 +23,15 @@ export default function ShowCustomer() {
     armLength: number;
     backLength: number;
     frontLength: number;
+    project_manager_order_status: string;
+    project_manager_amount: string;
+    clothing_description: string;
+    clothing_name: string;
     order_id: string;
+    priority: string;
+    order_status: string;
+    customer_description: string;
+
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -38,7 +44,7 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/projectlists/${id}`, {
+      const response = await fetch(`/api/myorders/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -53,26 +59,30 @@ export default function ShowCustomer() {
       // Map response to fields used in the Table component
       if (result.data) {
         const mappedCustomer: Customer = {
-          fullName: result.data.name,
-          clothing_name: result.data.clothing_name,
+          fullName: result.data.customer_name || "N/A",
+          gender: result.data.gender || "N/A",
+          phone: result.data.phone_number || "N/A",
           date: new Date().toLocaleDateString(), // Placeholder date if not provided
+          email: result.data.customer_email || "N/A",
+          address: result.data.address || "N/A",
           bust: result.data.bust || 0,
           waist: result.data.waist || 0,
-          hip: result.data.hip || 0,
-          shoulderWidth: result.data.shoulderWidth || 0,
+          hip: result.data.hips || 0,
+          highBust: result.data.high_bust,
+          shoulderWidth: result.data.shoulder_width || 0,
           neck: result.data.neck || 0,
-          armLength: result.data.armLength || 0,
-          backLength: result.data.backLength || 0,
-          frontLength: result.data.frontLength || 0,
-          order_id: result.data.order_id,
-          priority: result.data.priority,
-          order_status: result.data.order_status,
-          email: "",
-          clothing_description: result.data.clothing_description || "",
-          customer_description: result.data.customer_description || "",
-          age: 0,
+          armLength: result.data.arm_length || 0,
+          backLength: result.data.back_length || 0,
+          frontLength: result.data.front_length || 0,
+          clothing_description: result.data.clothing_description || "N/A",
+          clothing_name: result.data.clothing_name || "N/A",
+          order_id: result.data.order_id || "N/A",
+          priority: result.data.priority || "N/A",
+          order_status: result.data.order_status || "N/A",
+          customer_description: result.data.customer_description || "N/A",
+          project_manager_order_status: result.data.project_manager_order_status || "N/A",
+          project_manager_amount: result.data.project_manager_amount || "N/A",
           manager_name: result.data.manager_name || "N/A",
-          address: "",
         };
         setCustomer(mappedCustomer);
       } else {
@@ -118,12 +128,12 @@ export default function ShowCustomer() {
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => router.push("/admin/joblists/projects")}
+          onClick={() => router.push("/admin/customers/list")}
           className="text-blue-500 underline"
-        > 
+        >
           Back to List
         </button>
-      <div className="text-end font-bond text-lg text-gray-700 flex flex-row"><div className="font-bold me-3">Head of Tailoring:</div> {customer.manager_name}</div>
+      <div className="text-end font-bond text-lg text-gray-700 flex flex-row"><div className="font-bold me-3">Client Manager:</div> {customer.manager_name}</div>
 
       </div>
       <form>
@@ -137,21 +147,10 @@ export default function ShowCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
+          
+         
           <div>
-            <label className="block text-gray-700 font-bold">
-              Clothing Item
-            </label>
-            <input
-              type="text"
-              value={customer.clothing_name}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">
-              Order Status
-            </label>
+            <label className="block text-gray-700 font-bold">Order Status</label>
             <input
               type="text"
               value={customer.order_status}
@@ -159,6 +158,8 @@ export default function ShowCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
+          
+          
           <div>
             <label className="block text-gray-700 font-bold">Create Date</label>
             <input
@@ -168,24 +169,39 @@ export default function ShowCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
-          <div className="w-full">
-        <label className="block text-gray-700 font-bold">Clothing description</label>
-          <textarea
-            value={customer.clothing_description}
-            readOnly
-            rows={3}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          ></textarea>
+          
+          <div className="">
+            <div className="block text-gray-700 font-bold">
+              Clothing Name
+            </div>
+            <textarea
+              rows={1}
+              value={customer.clothing_name}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          
+          <div className="">
+            <div className="block text-gray-700 font-bold">
+              Clothing Description
+            </div>
+            <textarea
+              rows={1}
+              value={customer.clothing_description}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+
         </div>
         <div className="w-full">
-        <label className="block text-gray-700 font-bold">Customer description</label>
+          <label className="block text-gray-700 font-bold">Address</label>
           <textarea
-            value={customer.customer_description}
+            value={customer.address}
             readOnly
-            rows={3}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          ></textarea>
-        </div>
+          />
         </div>
         <div className="w-full">
           {/* Measurement Fields */}
@@ -240,7 +256,7 @@ export default function ShowCustomer() {
                   readOnly
                   id="hips"
                   name="hips"
-                  value={customer.hips}
+                  value={customer.hip}
                   placeholder="Hips"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -356,15 +372,9 @@ export default function ShowCustomer() {
         </div>
       </form>
       <div className="mt-6 flex justify-end space-x-4">
-      <div
-          className="px-4 py-2 bg-gray-500 text-white rounded"
-          onClick={() => router.push(`/admin/joblists/projects/${id}/assign-head-of-tailoring`)}
-        >
-          Assign Head of Tailoring
-        </div>
         <div
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/admin/joblists/projects/${id}/edit`)}
+          onClick={() => router.push(`/client/orders/${id}/edit`)}
         >
           Edit
         </div>

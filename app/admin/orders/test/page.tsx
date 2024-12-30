@@ -1,5 +1,6 @@
 "use client";
 
+import Spinner from "@/components/Spinner";
 import { useEffect, useState } from "react";
 
 export default function ProjectManagerDropdown() {
@@ -55,7 +56,9 @@ export default function ProjectManagerDropdown() {
         Select Project Manager
       </label>
       {loading ? (
-        <div className="text-center text-gray-500 mt-2">Loading...</div>
+        <div className="text-center text-gray-500 mt-2">
+          <Spinner />
+        </div>
       ) : error ? (
         <div className="text-red-500 mt-2">
           {error}{" "}

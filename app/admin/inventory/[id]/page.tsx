@@ -1,5 +1,6 @@
 "use client";
 
+import Spinner from "@/components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -51,7 +52,9 @@ export default function ShowCustomer() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">Loading...</div>;
+    return <div className="text-center text-gray-500 py-10">
+      <Spinner />
+    </div>;
   }
 
   if (error) {
@@ -81,15 +84,6 @@ export default function ShowCustomer() {
       </div>
       <form className="grid grid-cols-2 gap-6">
         <div>
-          <label className="block text-gray-700 font-bold">ID</label>
-          <input
-            type="text"
-            value={customer.id}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
-          />
-        </div>
-        <div>
           <label className="block text-gray-700 font-bold">Item Name</label>
           <input
             type="text"
@@ -107,19 +101,6 @@ export default function ShowCustomer() {
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
           />
         </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Created On</label>
-          <input
-            type="text"
-            value={new Date(customer.created_at).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
-          />
-        </div> 
         {/* Additional fields */}
       </form>
       <div className="mt-6 flex justify-end space-x-4">

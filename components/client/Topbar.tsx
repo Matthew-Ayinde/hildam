@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import SearchBar from './Searchbar';
 import { IoNotifications } from 'react-icons/io5';
 import { FaMoon } from 'react-icons/fa';
+import LogoutButton from '../admin/Logout';
 
 const Topbar = () => {
   const [userName, setUserName] = useState('Customer');
@@ -37,9 +38,7 @@ const Topbar = () => {
 
         </div>
         <div className="flex flex-row items-center">
-          <div className="w-12 h-12 flex items-center justify-center">
-            <FaMoon size={20} />
-          </div>
+          <LogoutButton />
           <div className="w-12 h-12 flex items-center justify-center">
             <IoNotifications size={20} />
           </div>

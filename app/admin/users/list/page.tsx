@@ -5,6 +5,7 @@ import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
+import Spinner from "@/components/Spinner";
 
 export default function Table() {
   const [data, setData] = useState([]);
@@ -112,7 +113,9 @@ export default function Table() {
       )}
 
       {loading ? (
-        <div className="text-center py-10">Loading...</div>
+        <div className="text-center py-10">
+          <Spinner />
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse border border-gray-200">

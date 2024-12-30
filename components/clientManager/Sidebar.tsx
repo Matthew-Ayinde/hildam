@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   FaUsers,
   FaShoppingCart,
-  FaCreditCard,
   FaBoxes,
   FaUser,
 } from "react-icons/fa";
@@ -13,14 +12,15 @@ import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import Image from "next/image";
 import { MdDashboard } from "react-icons/md";
 import { usePathname } from "next/navigation";
+import { HiMenuAlt3, HiX } from "react-icons/hi";
 import "nprogress/nprogress.css"; // Import default styles for NProgress
 
-// Sidebar items definition
 const sidebarItems = [
   {
     id: 1,
     text: "Customers",
     icon: <FaUsers />,
+    prefix: "/clientmanager/customers/",
     links: [
       { name: "List", href: "/clientmanager/customers/list" },
       { name: "Create", href: "/clientmanager/customers/create" },
@@ -30,6 +30,7 @@ const sidebarItems = [
     id: 2,
     text: "Orders",
     icon: <FaShoppingCart />,
+    prefix: "/clientmanager/orders/",
     links: [
       { name: "List", href: "/clientmanager/orders/list" },
       { name: "Create Order", href: "/clientmanager/orders/create" },
@@ -39,6 +40,7 @@ const sidebarItems = [
     id: 3,
     text: "Job Lists",
     icon: <FaBoxes />,
+    prefix: "/clientmanager/joblists/",
     links: [
       { name: "Projects", href: "/clientmanager/joblists/projects" },
       { name: "Tailor Jobs", href: "/clientmanager/joblists/tailorjoblists" },
@@ -48,6 +50,7 @@ const sidebarItems = [
     id: 4,
     text: "Inventory",
     icon: <FaBoxes />,
+    prefix: "/clientmanager/inventory/",
     links: [
       { name: "List", href: "/clientmanager/inventory/list" },
       { name: "Create", href: "/clientmanager/inventory/create" },
@@ -56,26 +59,29 @@ const sidebarItems = [
 ];
 
 const Sidebar = () => {
-  const [openItemId, setOpenItemId] = useState<number | null>(null);
-  const [isSidebarOpen, setSidebarOpen] = useState(false); // For toggling sidebar on mobile
-  const pathname = usePathname(); // Get the current route
+  const pathname = usePathname();
+  const [openMenus, setOpenMenus] = useState<{ [key: number]: boolean }>({});
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
-  // Toggle dropdown menus
-  const handleToggle = (id: number) => {
-    setOpenItemId(openItemId === id ? null : id);
+  const isActive = (prefix: string) => pathname.startsWith(prefix);
+
+  const toggleMenu = (id: number) => {
+    setOpenMenus((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
-  // Determine if a link or submenu is active
-  const isActive = (href: string) => pathname === href;
-  const isParentActive = (links: { href: string }[]) =>
-    links.some((link) => pathname.startsWith(link.href));
+  const toggleSidebar = () => {
+    setSidebarOpen((prev) => !prev);
+  };
 
-  // Toggle sidebar visibility on mobile
-  const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
 
   return (
     <>
-      {/* Add NProgress styles */}
       <style jsx global>{`
         #nprogress .bar {
           background: #ff6c2f;
@@ -83,36 +89,56 @@ const Sidebar = () => {
         }
       `}</style>
 
-      {/* Sidebar container */}
+      <div className="lg:hidden fixed top-0 w-full bg-[#262d34] text-white flex justify-between items-center px-4 py-3 z-50 shadow-md">
+        <div className="flex items-center">
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={40}
+            height={40}
+            className="w-10 h-10"
+          />
+          <div className="ml-2 text-white font-bold text-lg">HildaM Couture</div>
+        </div>
+        <button
+          onClick={toggleSidebar}
+          className="text-3xl text-white focus:outline-none"
+        >
+          {isSidebarOpen ? <HiX /> : <HiMenuAlt3 />}
+        </button>
+      </div>
+
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity duration-300"
+          onClick={closeSidebar}
+        />
+      )}
+
       <div
-        className={`fixed top-0 left-0 h-full w-[250px] bg-[#262d34] text-[#A5A8AB] shadow-lg overflow-y-auto transition-transform duration-300 transform ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 md:w-[250px] absolute z-50`}
+        className={`fixed top-0 left-0 h-full bg-[#262d34] text-[#A5A8AB] shadow-lg overflow-y-auto z-50 transition-transform duration-300 lg:w-[250px] ${
+          isSidebarOpen
+            ? "translate-x-0 w-3/4"
+            : "-translate-x-full lg:translate-x-0"
+        }`}
       >
-        {/* Sidebar header */}
         <div className="mx-9 mt-10">
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-10 h-10">
-                <Image
-                  src="/logo.png"
-                  alt="Logo"
-                  width={300}
-                  height={300}
-                  className="w-full h-full"
-                />
-              </div>
-              <div className="ml-2 text-white font-bold text-lg">
-                HildaM Couture
-              </div>
+          <div className="flex items-center">
+            <div className="w-10 h-10">
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={300}
+                height={300}
+                className="w-full h-full"
+              />
             </div>
+            <div className="ml-2 text-white font-bold text-lg">HildaM Couture</div>
           </div>
         </div>
 
-        {/* General label */}
         <div className="mt-10 mb-0 text-sm mx-9 text-gray-400">GENERAL</div>
 
-        {/* Dashboard link */}
         <div className="relative mt-5 mx-4">
           <div
             className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
@@ -124,83 +150,66 @@ const Sidebar = () => {
             className={`flex items-center space-x-3 px-4 py-2 text-base font-medium transition-all duration-300 ${
               pathname === "/clientmanager" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
             }`}
+            onClick={closeSidebar}
           >
             <MdDashboard />
             <span>Dashboard</span>
           </Link>
         </div>
 
-        {/* Sidebar navigation */}
         <ul className="space-y-1 mt-3 px-4">
-          {sidebarItems.map((item) => (
-            <li key={item.id} className="relative">
-              {/* Main Button */}
-              <div className="relative">
-                <div
-                  className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
-                    isParentActive(item.links) ? "opacity-100" : "opacity-0"
-                  }`}
-                ></div>
-                <button
-                  onClick={() => handleToggle(item.id)}
-                  className={`flex w-full items-center justify-between py-2 px-4 text-left text-base font-medium transition-all duration-300 ${
-                    isParentActive(item.links)
-                      ? "text-[#ff6c2f]"
-                      : "text-[#A5A8AB]"
+          {sidebarItems.map((item) => {
+            const isMenuOpen = openMenus[item.id] || isActive(item.prefix);
+
+            return (
+              <li key={item.id} className="relative">
+                <div className="relative">
+                  <div
+                    className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
+                      isActive(item.prefix) ? "opacity-100" : "opacity-0"
+                    }`}
+                  ></div>
+                  <button
+                    onClick={() => toggleMenu(item.id)}
+                    className={`flex w-full items-center justify-between py-2 px-4 text-left text-base font-medium transition-all duration-300 ${
+                      isActive(item.prefix)
+                        ? "text-[#ff6c2f]"
+                        : "text-[#A5A8AB]"
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      {item.icon}
+                      <span>{item.text}</span>
+                    </div>
+                    {isMenuOpen ? <IoIosArrowUp /> : <IoIosArrowDown />}
+                  </button>
+                </div>
+
+                <ul
+                  className={`ml-8 mt-2 space-y-2 overflow-hidden transition-all duration-500 ${
+                    isMenuOpen ? "max-h-40" : "max-h-0"
                   }`}
                 >
-                  <div className="flex items-center space-x-3">
-                    {item.icon}
-                    <span>{item.text}</span>
-                  </div>
-                  {openItemId === item.id ? (
-                    <IoIosArrowUp />
-                  ) : (
-                    <IoIosArrowDown />
-                  )}
-                </button>
-              </div>
-
-              {/* Dropdown Menu */}
-              <ul
-                className={`ml-8 mt-2 space-y-2 overflow-hidden transition-all duration-500 ${
-                  openItemId === item.id ? "max-h-40" : "max-h-0"
-                }`}
-              >
-                {item.links.map((subItem) => (
-                  <li key={subItem.name}>
-                    <Link
-                      href={subItem.href}
-                      className={`block px-4 py-2 text-base transition-all duration-300 ${
-                        isActive(subItem.href)
-                          ? "text-[#ff6c2f] bg-transparent"
-                          : "text-[#A5A8AB] hover:text-[#ff6c2f]"
-                      }`}
-                    >
-                      {subItem.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
+                  {item.links.map((subItem) => (
+                    <li key={subItem.name}>
+                      <Link
+                        href={subItem.href}
+                        className={`block px-4 py-2 text-base transition-all duration-300 ${
+                          pathname === subItem.href
+                            ? "text-[#ff6c2f] bg-transparent"
+                            : "text-[#A5A8AB] hover:text-[#ff6c2f]"
+                        }`}
+                        onClick={closeSidebar}
+                      >
+                        {subItem.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            );
+          })}
         </ul>
-      </div>
-
-      {/* Hamburger menu for mobile */}
-      
-      <div className="bg-[#414d58] flex lg:hidden p-3 h-20 absolute w-full">
-      <div
-        className="fixed top-4 left-4 z-10 md:hidden p-3 bg-[#262d34] text-white rounded-full"
-      >
-        LOGO
-      </div>
-      <button
-        className="fixed top-4 right-4 z-50 md:hidden p-3 bg-[#262d34] text-white rounded-full"
-        onClick={toggleSidebar}
-      >
-        ☰
-      </button>
       </div>
     </>
   );

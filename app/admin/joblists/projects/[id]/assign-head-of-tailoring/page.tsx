@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Spinner from "@/components/Spinner";
 
 export default function ProjectManagerDropdown() {
   const { id } = useParams();
@@ -125,7 +126,9 @@ export default function ProjectManagerDropdown() {
             Select Head of Tailoring
           </label>
           {loading ? (
-            <div className="text-center text-gray-500 mt-2">Loading...</div>
+            <div className="text-center text-gray-500 mt-2">
+              <Spinner />
+            </div>
           ) : error ? (
             <div className="text-red-500 mt-2">
               {error}{" "}

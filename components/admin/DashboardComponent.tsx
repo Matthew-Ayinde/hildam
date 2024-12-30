@@ -19,6 +19,7 @@ export default function Table() {
     order_status: string;
   }
 
+  const [userName, setUserName] = useState('CEO');
   const [data, setData] = useState<Order[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -72,6 +73,25 @@ export default function Table() {
     }
   };
 
+    useEffect(() => {
+      const token = sessionStorage.getItem('access_token');
+      if (token) {
+        try {
+          // Decode the token payload
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const payload = JSON.parse(atob(base64));
+  
+          // Extract the name from the payload and update the state
+          if (payload?.name) {
+            setUserName(payload.name);
+          }
+        } catch (error) {
+          console.error('Error decoding token:', error);
+        }
+      }
+    }, []);
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-GB", {
@@ -89,6 +109,9 @@ export default function Table() {
   return (
     <div className="w-full">
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
+      <div className="lg:hidden flex">
+        <div className="text-xl font-bold mx-2">WELCOME, {userName.toUpperCase()}</div>
+      </div>
         <div className="mx-2 font-bold text-gray-500 text-xl my-3 flex flex-row justify-between items-center">
           <div>Recent Orders</div>
           <Link href="/admin/orders/create">

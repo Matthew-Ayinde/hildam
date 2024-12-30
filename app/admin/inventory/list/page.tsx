@@ -6,6 +6,7 @@ import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { CiEdit } from "react-icons/ci";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
+import Spinner from "@/components/Spinner";
 
 export default function Table() {
   interface InventoryItem {
@@ -79,7 +80,9 @@ export default function Table() {
   }, []);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">Loading...</div>;
+    return <div className="text-center text-gray-500 py-10">
+      <Spinner />
+    </div>;
   }
 
   if (error) {

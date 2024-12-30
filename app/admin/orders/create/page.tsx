@@ -49,7 +49,6 @@ const Form = () => {
     highBust: "",
   });
 
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [popupMessage, setPopupMessage] = useState("");
@@ -78,100 +77,100 @@ const Form = () => {
     setDragging(false);
   };
 
-    const handleChange = (
-      e: React.ChangeEvent<
-        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-      >
-    ) => {
-      const { name, value } = e.target;
-      setFormData({ ...formData, [name]: value });
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setResponseMessage(null);
+
+    const accessToken = sessionStorage.getItem("access_token");
+
+    if (!accessToken) {
+      alert("No access token found! Please login first.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const payload = {
+      customer_name: formData.customer_name,
+      customer_email: formData.customer_email,
+      clothing_name: formData.clothing_name,
+      hips: formData.hips,
+      bust: formData.bust,
+      waist: formData.waist,
+      clothing_description: formData.clothing_description,
+      order_status: formData.order_status,
+      priority: formData.priority,
+      shoulder_width: formData.shoulderWidth,
+      neck: formData.neck,
+      arm_length: formData.armLength,
+      back_length: formData.backLength,
+      front_length: formData.frontLength,
+      high_bust: formData.highBust,
     };
-  
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setIsSubmitting(true);
-      setResponseMessage(null);
-    
-      const accessToken = sessionStorage.getItem("access_token");
-    
-      if (!accessToken) {
-        alert("No access token found! Please login first.");
-        setIsSubmitting(false);
-        return;
-      }
-    
-      const payload = {
-        customer_name: formData.customer_name,
-        customer_email: formData.customer_email,
-        clothing_name: formData.clothing_name,
-        hips: formData.hips,
-        bust: formData.bust,
-        waist: formData.waist,
-        clothing_description: formData.clothing_description,
-        order_status: formData.order_status,
-        priority: formData.priority,
-        shoulder_width: formData.shoulderWidth,
-        neck: formData.neck,
-        arm_length: formData.armLength,
-        back_length: formData.backLength,
-        front_length: formData.frontLength,
-        high_bust: formData.highBust
-      };
-    
-      try {
-        const response = await fetch("/api/createorder", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(payload),
+
+    try {
+      const response = await fetch("/api/createorder", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        setResponseMessage("Order created successfully");
+        setFormData({
+          order_status: "",
+          priority: "",
+          clothing_description: "",
+          clothing_name: "",
+          customer_name: "",
+          gender: "",
+          age: "",
+          phone: "",
+          customer_email: "",
+          address: "",
+          description: "",
+          photo: null,
+          bust: "",
+          waist: "",
+          hips: "",
+          shoulderWidth: "",
+          neck: "",
+          armLength: "",
+          backLength: "",
+          frontLength: "",
+          highBust: "",
         });
-    
-        if (response.ok) {
-          setResponseMessage("Order created successfully");
-          setFormData({
-                      order_status: "",
-                      priority: "",
-                      clothing_description: "",
-                      clothing_name: "",
-                      customer_name: "",
-                      gender: "",
-                      age: "",
-                      phone: "",
-                      customer_email: "",
-                      address: "",
-                      description: "",
-                      photo: null,
-                      bust: "",
-                      waist: "",
-                      hips: "",
-                      shoulderWidth: "",
-                      neck: "",
-                      armLength: "",
-                      backLength: "",
-                      frontLength: "",
-                      highBust: "",
-                    });
-    
-          // Automatically hide response message after 5 seconds
-          setTimeout(() => {
-            setResponseMessage(null);
-          }, 5000);
-        } else {
-          const error = await response.json();
-          alert(`Failed to create order: ${error.message || "Unknown error"}`);
-        }
-      } catch (err) {
-        alert("Network error. Please try again later.");
-      } finally {
-        setIsSubmitting(false);
+
+        // Automatically hide response message after 5 seconds
+        setTimeout(() => {
+          setResponseMessage(null);
+        }, 5000);
+      } else {
+        const error = await response.json();
+        alert(`Failed to create order: ${error.message || "Unknown error"}`);
       }
-    };
+    } catch (err) {
+      alert("Network error. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
-      {popupMessage && (<div>{popupMessage}</div>)}
+      {popupMessage && <div>{popupMessage}</div>}
       <form
         onSubmit={handleSubmit}
         className="w-full bg-white rounded-lg shadow-md p-6"
@@ -180,8 +179,8 @@ const Form = () => {
         <div className="font-bold text-gray-500 text-xl my-3">
           Order Information
         </div>
-        <div className="flex space-x-4 mb-4">
-          <div className="w-1/2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-6 gap-5 mb-5">
+          <div className="">
             <label
               htmlFor="customer_name"
               className="block text-sm font-medium text-gray-700"
@@ -199,7 +198,7 @@ const Form = () => {
               required
             />
           </div>
-          <div className="w-1/2">
+          <div className="">
             <label
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
@@ -212,15 +211,12 @@ const Form = () => {
               name="customer_email"
               value={formData.customer_email}
               onChange={handleChange}
-              placeholder="Enter your name"
+              placeholder="Enter your email"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
           </div>
-        </div>
-
-        <div className="flex flex-row space-x-4 mb-5">
-          <div className="w-1/2">
+          <div className="">
             <label
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
@@ -238,51 +234,55 @@ const Form = () => {
               required
             />
           </div>
-
-          <div className="w-1/2">
+          <div className="">
             <label
-              htmlFor="name"
+              htmlFor="priority"
               className="block text-sm font-medium text-gray-700"
             >
               Priority
             </label>
-            <input
-              type="text"
+            <select
               id="priority"
               name="priority"
               value={formData.priority}
               onChange={handleChange}
-              placeholder="Set Priority"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-            />
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
+            >
+              <option value="" disabled>
+                Select Priority
+              </option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
           </div>
-
-        </div>
-
-        <div className="flex flex-row space-x-4 mb-5">
-          <div className="w-1/2">
+          <div className="">
             <label
-              htmlFor="name"
+              htmlFor="order_status"
               className="block text-sm font-medium text-gray-700"
             >
               Order Status
             </label>
-            <input
-              type="text"
+            <select
               id="order_status"
               name="order_status"
               value={formData.order_status}
               onChange={handleChange}
-              placeholder="Order Status"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
               required
-            />
+            >
+              <option value="" disabled>
+                Select Order Status
+              </option>
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="completed">Completed</option>
+            </select>
           </div>
-
         </div>
 
-        <div className="w-full flex flex-row space-x-4">
-          <div className="mb-4 w-1/2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
+          <div className="">
             <label
               htmlFor="clothing_name"
               className="block text-sm font-medium text-gray-700"
@@ -298,7 +298,7 @@ const Form = () => {
               className="mt-1 block w-full h-24 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
             />
           </div>
-          <div className="mb-4 w-1/2">
+          <div className="">
             <label
               htmlFor="description"
               className="block text-sm font-medium text-gray-700"
@@ -315,8 +315,6 @@ const Form = () => {
             />
           </div>
         </div>
-
-
 
         {/* Measurement Fields */}
         <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
@@ -521,16 +519,13 @@ const Form = () => {
           </button>
         </div>
         {responseMessage && (
-        <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
-          {responseMessage}
-        </div>
-      )}
+          <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
+            {responseMessage}
+          </div>
+        )}
       </form>
-
-      
     </div>
   );
 };
 
 export default Form;
-

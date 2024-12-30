@@ -2,17 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  FaUsers,
-  FaShoppingCart,
-  FaBoxes,
-  FaUser,
-} from "react-icons/fa";
+import { FaUsers, FaShoppingCart, FaBoxes, FaUser } from "react-icons/fa";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import Image from "next/image";
 import { MdDashboard } from "react-icons/md";
 import { usePathname } from "next/navigation";
+import { HiMenuAlt3, HiX } from "react-icons/hi";
 import "nprogress/nprogress.css"; // Import default styles for NProgress
+import { IoNotifications } from "react-icons/io5";
 
 const sidebarItems = [
   {
@@ -70,6 +67,7 @@ const sidebarItems = [
 const Sidebar = () => {
   const pathname = usePathname();
   const [openMenus, setOpenMenus] = useState<{ [key: number]: boolean }>({});
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const isActive = (prefix: string) => pathname.startsWith(prefix);
 
@@ -78,6 +76,14 @@ const Sidebar = () => {
       ...prev,
       [id]: !prev[id],
     }));
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen((prev) => !prev);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
   };
 
   return (
@@ -89,24 +95,69 @@ const Sidebar = () => {
         }
       `}</style>
 
+      <div className="lg:hidden fixed top-0 w-full bg-[#262d34] text-white flex justify-between items-center px-4 py-3 z-50 shadow-md">
+        <div className="flex items-center">
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={40}
+            height={40}
+            className="w-10 h-10"
+          />
+          <div className="ml-2 text-white font-bold text-lg">
+            HildaM Couture
+          </div>
+        </div>
+        <div className="flex flex-row space-x-1 items-center">
+          <div className="w-7 h-7 flex items-center justify-center">
+            <Image
+              src={"/profile.jpeg"}
+              alt="Profile picture"
+              width={100}
+              height={100}
+              className="w-full h-full rounded-full"
+            />
+          </div>
+
+          <div className="w-12 h-12 flex items-center justify-center">
+            <IoNotifications size={20} />
+          </div>
+          <button
+            onClick={toggleSidebar}
+            className="text-3xl text-white focus:outline-none"
+          >
+            {isSidebarOpen ? <HiX /> : <HiMenuAlt3 />}
+          </button>
+        </div>
+      </div>
+
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity duration-300"
+          onClick={closeSidebar}
+        />
+      )}
+
       <div
-        className={`fixed top-0 left-0 h-full w-[250px] bg-[#262d34] text-[#A5A8AB] shadow-lg overflow-y-auto`}
+        className={`fixed top-0 left-0 h-full bg-[#262d34] text-[#A5A8AB] shadow-lg overflow-y-auto z-50 transition-transform duration-300 lg:w-[250px] ${
+          isSidebarOpen
+            ? "translate-x-0 w-3/4"
+            : "-translate-x-full lg:translate-x-0"
+        }`}
       >
         <div className="mx-9 mt-10">
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-10 h-10">
-                <Image
-                  src="/logo.png"
-                  alt="Logo"
-                  width={300}
-                  height={300}
-                  className="w-full h-full"
-                />
-              </div>
-              <div className="ml-2 text-white font-bold text-lg">
-                HildaM Couture
-              </div>
+          <div className="flex items-center">
+            <div className="w-10 h-10">
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={300}
+                height={300}
+                className="w-full h-full"
+              />
+            </div>
+            <div className="ml-2 text-white font-bold text-lg">
+              HildaM Couture
             </div>
           </div>
         </div>
@@ -124,6 +175,7 @@ const Sidebar = () => {
             className={`flex items-center space-x-3 px-4 py-2 text-base font-medium transition-all duration-300 ${
               pathname === "/admin" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
             }`}
+            onClick={closeSidebar}
           >
             <MdDashboard />
             <span>Dashboard</span>
@@ -145,7 +197,9 @@ const Sidebar = () => {
                   <button
                     onClick={() => toggleMenu(item.id)}
                     className={`flex w-full items-center justify-between py-2 px-4 text-left text-base font-medium transition-all duration-300 ${
-                      isActive(item.prefix) ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
+                      isActive(item.prefix)
+                        ? "text-[#ff6c2f]"
+                        : "text-[#A5A8AB]"
                     }`}
                   >
                     <div className="flex items-center space-x-3">
@@ -170,6 +224,7 @@ const Sidebar = () => {
                             ? "text-[#ff6c2f] bg-transparent"
                             : "text-[#A5A8AB] hover:text-[#ff6c2f]"
                         }`}
+                        onClick={closeSidebar}
                       >
                         {subItem.name}
                       </Link>

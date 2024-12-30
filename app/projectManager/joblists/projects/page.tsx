@@ -176,7 +176,7 @@ export default function Table() {
                     {row.order_status}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-sm border-b">{row.manager_name}</td>
+                <td className="px-4 py-2 text-sm border-b">{row.manager_name || "Not Assigned"}</td>
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
                     <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"

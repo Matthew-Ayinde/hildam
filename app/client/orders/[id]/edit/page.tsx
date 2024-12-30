@@ -69,7 +69,7 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/orderslist/${id}`, {
+      const response = await fetch(`/api/myorders/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -186,7 +186,6 @@ export default function EditCustomer() {
               type="text"
               name="order_id"
               value={formData.order_id}
-              onChange={handleInputChange}
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
             />
           </div>
@@ -199,38 +198,6 @@ export default function EditCustomer() {
               onChange={handleInputChange}
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
             />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Order Priority</label>
-            <select
-              name="priority"
-              value={formData.priority}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-white"
-            >
-              <option value="" disabled>
-                Select Priority
-              </option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Order Status</label>
-            <select
-              name="order_status"
-              value={formData.order_status}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-white"
-            >
-              <option value="" disabled>
-                Select Order Status
-              </option>
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="completed">Completed</option>
-            </select>
           </div>
           <div>
             <label className="block text-gray-700 font-bold">Customer Name</label>
@@ -305,6 +272,7 @@ export default function EditCustomer() {
                   id="bust"
                   name="bust"
                   value={formData.bust || ""}
+                  onChange={handleInputChange}
                   placeholder="Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -317,6 +285,7 @@ export default function EditCustomer() {
                   type="number"
                   id="waist"
                   name="waist"
+                  onChange={handleInputChange}
                   value={formData.waist || ""}
                   placeholder="Waist"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -330,6 +299,7 @@ export default function EditCustomer() {
                   type="number"
                   id="hips"
                   name="hips"
+                  onChange={handleInputChange}
                   value={formData.hips || ""}
                   placeholder="Hips"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -346,6 +316,7 @@ export default function EditCustomer() {
                   id="shoulderWidth"
                   name="shoulderWidth"
                   value={formData.shoulderWidth || ""}
+                  onChange={handleInputChange}
                   placeholder="Shoulder Width"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -359,6 +330,7 @@ export default function EditCustomer() {
                   id="neck"
                   name="neck"
                   value={formData.neck || ""}
+                  onChange={handleInputChange}
                   placeholder="Neck"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -371,6 +343,7 @@ export default function EditCustomer() {
                   type="number"
                   id="armLength"
                   name="armLength"
+                  onChange={handleInputChange}
                   value={formData.armLength || ""}
                   placeholder="Arm Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -385,6 +358,7 @@ export default function EditCustomer() {
                 <input
                   type="number"
                   id="backLength"
+                  onChange={handleInputChange}
                   name="backLength"
                   value={formData.backLength || ""}
                   placeholder="Back Length"
@@ -400,6 +374,7 @@ export default function EditCustomer() {
                   id="frontLength"
                   name="frontLength"
                   value={formData.frontLength || ""}
+                  onChange={handleInputChange}
                   placeholder="Front Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -413,6 +388,7 @@ export default function EditCustomer() {
                   id="highBust"
                   name="highBust"
                   value={formData.highBust || ""}
+                  onChange={handleInputChange}
                   placeholder="High Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
