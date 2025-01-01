@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const Form = () => {
   const [formData, setFormData] = useState<{
@@ -25,6 +25,7 @@ const Form = () => {
     backLength: string;
     frontLength: string;
     highBust: string;
+    manager_id: string; // New field for selected project manager
   }>({
     order_status: "",
     priority: "",
@@ -47,35 +48,54 @@ const Form = () => {
     backLength: "",
     frontLength: "",
     highBust: "",
+    manager_id: "", // Initialize with empty string
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [managers, setManagers] = useState<
+    {
+      id: string;
+      user_id: string;
+      name: string;
+    }[]
+  >([]);
+  const [loadingManagers, setLoadingManagers] = useState(true);
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [popupMessage, setPopupMessage] = useState("");
-  const [dragging, setDragging] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData({ ...formData, photo: file });
-  };
+  useEffect(() => {
+    const fetchProjectManagers = async () => {
+      try {
+        setLoadingManagers(true);
+        const token = sessionStorage.getItem("access_token");
+        if (!token) throw new Error("No access token found");
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      setFormData({ ...formData, photo: file });
-    }
-    setDragging(false);
-  };
+        const response = await fetch("/api/projectmanagerlist", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragging(true);
-  };
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-  const handleDragLeave = () => {
-    setDragging(false);
-  };
+        const result = await response.json();
+        if (!result.data) {
+          throw new Error("Failed to fetch project managers");
+        }
+
+        setManagers(result.data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingManagers(false);
+      }
+    };
+
+    fetchProjectManagers();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -115,6 +135,7 @@ const Form = () => {
       back_length: formData.backLength,
       front_length: formData.frontLength,
       high_bust: formData.highBust,
+      manager_id: formData.manager_id, // Include selected manager ID
     };
 
     try {
@@ -151,6 +172,7 @@ const Form = () => {
           backLength: "",
           frontLength: "",
           highBust: "",
+          manager_id: "", // Reset manager ID
         });
 
         // Automatically hide response message after 5 seconds
@@ -175,6 +197,7 @@ const Form = () => {
         onSubmit={handleSubmit}
         className="w-full bg-white rounded-lg shadow-md p-6"
       >
+        
         {/* Name and Gender */}
         <div className="font-bold text-gray-500 text-xl my-3">
           Order Information
@@ -279,6 +302,34 @@ const Form = () => {
               <option value="completed">Completed</option>
             </select>
           </div>
+          
+        {/* Project Manager Dropdown */}
+        <div className="mb-5">
+          <label
+            htmlFor="manager_id"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Select Project Manager (Optional)
+          </label>
+          {loadingManagers ? (
+            <div className="text-center text-gray-500 mt-2">Loading...</div>
+          ) : (
+            <select
+              id="manager_id"
+              name="manager_id"
+              value={formData.manager_id}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
+            >
+              <option value="">Select project manager</option>
+              {managers.map((manager) => (
+                <option key={manager.id} value={manager.user_id}>
+                  {manager.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
@@ -483,39 +534,15 @@ const Form = () => {
         </div>
 
         {/* Photo Upload */}
-        <div
-          className={`flex justify-center items-center border-2 border-dashed p-4 rounded-md ${
-            dragging ? "border-[#ff6c2f] bg-green-100" : "border-gray-300"
-          }`}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragLeave={handleDragLeave}
-        >
-          <input
-            type="file"
-            id="photo"
-            name="photo"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-          <label
-            htmlFor="photo"
-            className="text-sm text-gray-600 hover:text-[#ff6c2f] p-20 cursor-pointer"
-          >
-            {formData.photo
-              ? formData.photo.name
-              : "Drag and drop a photo, or click to upload"}
-          </label>
-        </div>
 
         {/* Submit Button */}
         <div className="mt-6">
           <button
             type="submit"
             className="w-fit px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2"
+            disabled={isSubmitting}
           >
-            Create Order
+            {isSubmitting ? "Creating Order..." : "Create Order"}
           </button>
         </div>
         {responseMessage && (

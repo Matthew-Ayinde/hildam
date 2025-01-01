@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 export default function Table() {
   interface Order {
-    manager_name: ReactNode;
+    manager_name: string;
     id: any;
     order_id: string;
     created_at: string;
@@ -56,7 +56,11 @@ export default function Table() {
 
         setData(result.data);
       } catch (error) {
-        setError(error.message || "An unexpected error occurred");
+        if (error instanceof Error) {
+          setError(error.message || "An unexpected error occurred");
+        } else {
+          setError("An unexpected error occurred");
+        }
       } finally {
         setLoading(false);
       }
@@ -88,7 +92,11 @@ export default function Table() {
       setToastMessage("Order deleted successfully");
       setToastType("success");
     } catch (error) {
-      setToastMessage(error.message || "An unexpected error occurred");
+      if (error instanceof Error) {
+        setToastMessage(error.message || "An unexpected error occurred");
+      } else {
+        setToastMessage("An unexpected error occurred");
+      }
       setToastType("error");
     } finally {
       // Hide toast after 3 seconds
@@ -133,7 +141,9 @@ export default function Table() {
       )}
 
       <div className="flex flex-row gap-5">
-        {[ /* Example stats */ ].map((stat, index) => (
+        {[
+          { label: "Example Label", value: "Example Value" } // Add appropriate stat objects here
+        ].map((stat, index) => (
           <div key={index} className="bg-white rounded-xl flex items-center p-5 mb-5">
             <div className="text-[#81899d]">
               <div className="font-bold text-gray-700">{stat.label}</div>

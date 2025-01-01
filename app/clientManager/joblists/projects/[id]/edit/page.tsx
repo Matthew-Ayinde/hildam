@@ -38,7 +38,13 @@ export default function EditCustomer() {
     waist: "",
     hip: "",
     neck: "",
-    gender: ""
+    gender: "",
+    date: "",
+    shoulderWidth: "",
+    armLength: "",
+    backLength: "",
+    frontLength: "",
+    highBust: ""
   });
 
   const fetchCustomer = async () => {
@@ -60,22 +66,23 @@ export default function EditCustomer() {
       const result = await response.json();
       setCustomer(result.data);
       setFormData({
-        name: result.data.name,
-        age: result.data.age,
-        phone: result.data.phone_number,
-        email: result.data.email,
-        bust: result.data.bust,
-        address: result.data.address,
-        waist: result.data.waist,
-        neck: result.data.neck,
-        gender: result.data.gender,
-        date: result.data.created_at,
-        shoulderWidth: result.data.shoulder_width,
-        armLength: result.data.arm_length,
-        backLength: result.data.back_length,
-        frontLength: result.data.front_length,
-        highBust: result.data.high_bust
-      });
+              name: result.data.name,
+              age: result.data.age,
+              phone: result.data.phone_number,
+              email: result.data.email,
+              bust: result.data.bust,
+              address: result.data.address,
+              waist: result.data.waist,
+              hip: result.data.hip,
+              neck: result.data.neck,
+              gender: result.data.gender,
+              date: result.data.created_at,
+              shoulderWidth: result.data.shoulder_width,
+              armLength: result.data.arm_length,
+              backLength: result.data.back_length,
+              frontLength: result.data.front_length,
+              highBust: result.data.high_bust
+            });
     } catch (err) {
       if (err instanceof Error) {
         if (err instanceof Error) {
@@ -101,7 +108,7 @@ export default function EditCustomer() {
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setError("");
-
+  
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(`/api/customerslist/${id}`, {
@@ -112,14 +119,18 @@ export default function EditCustomer() {
         },
         body: JSON.stringify(formData),
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to update customer data");
       }
-
+  
       router.push(`/admin/customerslist/${id}`);
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
     }
   };
 
@@ -170,7 +181,7 @@ export default function EditCustomer() {
           <label className="block text-gray-700 font-bold">Gender</label>
           <input
             type="text"
-            value={customer.gender}
+            value={customer?.gender || ""}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>
@@ -187,7 +198,7 @@ export default function EditCustomer() {
           <label className="block text-gray-700 font-bold">Create Date</label>
           <input
             type="text"
-            value={customer.date}
+            value={customer?.created_at || ""}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>
@@ -195,7 +206,7 @@ export default function EditCustomer() {
           <label className="block text-gray-700 font-bold">Email</label>
           <input
             type="text"
-            value={customer.email}
+            value={customer?.email || ""}
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
         </div>

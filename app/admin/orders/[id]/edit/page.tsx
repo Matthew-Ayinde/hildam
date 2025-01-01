@@ -40,6 +40,7 @@ export default function EditCustomer() {
     waist: "",
     hip: "",
     neck: "",
+    hips: "",
     gender: "",
     order_status: "",
     date: "",
@@ -54,6 +55,7 @@ export default function EditCustomer() {
     clothing_description: "",
     customer_description: "",
     project_manager_order_status: "",
+    project_manager_amount: "",
   });
 
   const handleChange = (
@@ -89,6 +91,7 @@ export default function EditCustomer() {
         bust: result.data.bust,
         address: result.data.address,
         waist: result.data.waist,
+        hip: result.data.hip,
         neck: result.data.neck,
         gender: result.data.gender,
         date: result.data.created_at,

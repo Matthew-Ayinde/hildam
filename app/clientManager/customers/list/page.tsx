@@ -50,7 +50,11 @@ export default function Table() {
       // Hide popup after 5 seconds
       setTimeout(() => setPopupMessage(null), 5000);
     } catch (error) {
-      console.error("Error deleting customer:", error.message);
+      if (error instanceof Error) {
+        console.error("Error deleting customer:", error.message);
+      } else {
+        console.error("Error deleting customer:", error);
+      }
       setPopupMessage("Error deleting customer");
       setTimeout(() => setPopupMessage(null), 5000);
     }

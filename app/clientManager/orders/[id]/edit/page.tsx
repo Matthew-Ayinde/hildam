@@ -52,6 +52,8 @@ export default function EditCustomer() {
     clothing_description: "",
     customer_description: "",
     project_manager_order_status: "",
+    project_manager_amount: "",
+    hips: "",
   });
 
   
@@ -62,65 +64,61 @@ export default function EditCustomer() {
       setFormData({ ...formData, [name]: value });
     };
 
-  const fetchCustomer = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/orderslist/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch customer data");
-      }
-
-      const result = await response.json();
-      setCustomer(result.data);
-      setFormData({
-        name: result.data.customer_name,
-        age: result.data.age,
-        phone: result.data.phone_number,
-        email: result.data.customer_email,
-        bust: result.data.bust,
-        address: result.data.address,
-        waist: result.data.waist,
-        neck: result.data.neck,
-        gender: result.data.gender,
-        date: result.data.created_at,
-        shoulderWidth: result.data.shoulder_width,
-        armLength: result.data.arm_length,
-        backLength: result.data.back_length,
-        frontLength: result.data.front_length,
-        highBust: result.data.high_bust,
-        order_id: result.data.order_id,
-        priority: result.data.priority,
-        order_status: result.data.order_status,
-        clothing_name: result.data.clothing_name,
-        clothing_description: result.data.clothing_description,
-        customer_description: result.data.customer_description,
-        project_manager_order_status: result.data.project_manager_order_status,
-        hips: result.data.hips,
-        project_manager_amount: result.data.project_manager_amount,
-        
-      });
-    } catch (err) {
-      if (err instanceof Error) {
+    const fetchCustomer = async () => {
+      setLoading(true);
+      setError("");
+    
+      try {
+        const accessToken = sessionStorage.getItem("access_token");
+        const response = await fetch(`/api/orderslist/${id}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+    
+        if (!response.ok) {
+          throw new Error("Failed to fetch customer data");
+        }
+    
+        const result = await response.json();
+        setCustomer(result.data);
+        setFormData({
+          name: result.data.customer_name || "",
+          age: result.data.age || "",
+          phone: result.data.phone_number || "",
+          email: result.data.customer_email || "",
+          bust: result.data.bust || "",
+          address: result.data.address || "",
+          waist: result.data.waist || "",
+          hip: result.data.hip || "", // Ensure this is included
+          neck: result.data.neck || "",
+          gender: result.data.gender || "",
+          date: result.data.created_at || "",
+          shoulderWidth: result.data.shoulder_width || "",
+          armLength: result.data.arm_length || "",
+          backLength: result.data.back_length || "",
+          frontLength: result.data.front_length || "",
+          highBust: result.data.high_bust || "",
+          order_id: result.data.order_id || "",
+          priority: result.data.priority || "",
+          order_status: result.data.order_status || "",
+          clothing_name: result.data.clothing_name || "",
+          clothing_description: result.data.clothing_description || "",
+          customer_description: result.data.customer_description || "",
+          project_manager_order_status: result.data.project_manager_order_status || "",
+          project_manager_amount: result.data.project_manager_amount || "",
+          hips: result.data.hips || "", // Ensure this is included if needed
+        });
+      } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
         } else {
           setError("An unknown error occurred");
         }
-      } else {
-        setError("An unknown error occurred");
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
     setFormData({
@@ -150,7 +148,11 @@ export default function EditCustomer() {
 
       router.push(`/admin/customerslist/${id}`);
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
     }
   };
 
@@ -317,7 +319,7 @@ export default function EditCustomer() {
                 type="number"
                 id="hips"
                 name="hips"
-                value={customer?.hips || ""}
+                value={customer?.hip || ""}
                 placeholder="Hips"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />

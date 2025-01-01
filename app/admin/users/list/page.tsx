@@ -8,11 +8,18 @@ import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
 
 export default function Table() {
-  const [data, setData] = useState([]);
+  interface User {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  }
+
+  const [data, setData] = useState<User[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
 

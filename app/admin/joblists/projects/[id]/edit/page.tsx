@@ -39,7 +39,13 @@ export default function EditCustomer() {
     waist: "",
     hip: "",
     neck: "",
-    gender: ""
+    gender: "",
+    date: "",
+    shoulderWidth: "",
+    armLength: "",
+    backLength: "",
+    frontLength: "",
+    highBust: "",
   });
 
   const fetchCustomer = async () => {
@@ -68,6 +74,7 @@ export default function EditCustomer() {
         bust: result.data.bust,
         address: result.data.address,
         waist: result.data.waist,
+        hip: result.data.hip,
         neck: result.data.neck,
         gender: result.data.gender,
         date: result.data.created_at,
@@ -75,15 +82,11 @@ export default function EditCustomer() {
         armLength: result.data.arm_length,
         backLength: result.data.back_length,
         frontLength: result.data.front_length,
-        highBust: result.data.high_bust
+        highBust: result.data.high_bust,
       });
     } catch (err) {
       if (err instanceof Error) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("An unknown error occurred");
-        }
+        setError(err.message);
       } else {
         setError("An unknown error occurred");
       }
@@ -92,17 +95,17 @@ export default function EditCustomer() {
     }
   };
 
-  const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
+  const handleInputChange = (e: { target: { name: any; value: any } }) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setError("");
-
+  
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(`/api/customerslist/${id}`, {
@@ -113,14 +116,18 @@ export default function EditCustomer() {
         },
         body: JSON.stringify(formData),
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to update customer data");
       }
-
+  
       router.push(`/admin/customerslist/${id}`);
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
     }
   };
 
@@ -129,9 +136,11 @@ export default function EditCustomer() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">
-      <Spinner />
-    </div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -149,198 +158,217 @@ export default function EditCustomer() {
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-6">
-        <div>
-          <label className="block text-gray-700 font-bold">Full Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Age</label>
-          <input
-            type="text"
-            name="age"
-            value={formData.age}
-            onChange={handleInputChange}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Gender</label>
-          <input
-            type="text"
-            value={customer.gender}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Phone</label>
-          <input
-            type="text"
-            value={customer?.phone_number || ""}
-            onChange={handleInputChange}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Create Date</label>
-          <input
-            type="text"
-            value={customer.date}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Email</label>
-          <input
-            type="text"
-            value={customer.email}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        
+          <div>
+            <label className="block text-gray-700 font-bold">Full Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Age</label>
+            <input
+              type="text"
+              name="age"
+              value={formData.age}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Gender</label>
+            <input
+              type="text"
+              value={customer?.gender || ""}
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Phone</label>
+            <input
+              type="text"
+              value={customer?.phone_number || ""}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Create Date</label>
+            <input
+              type="text"
+              value={customer?.created_at || ""}
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Email</label>
+            <input
+              type="text"
+              value={customer?.email || ""}
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
         </div>
         <div className="w-full">
           {/* Measurement Fields */}
-        <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">Measurements</div>
-        <div className="mb-4">
-          <div className="flex space-x-4 mb-4">
-            <div className="w-1/3">
-              <label htmlFor="bust" className="block text-sm font-medium text-gray-700">
-                Bust
-              </label>
-              <input
-                type="number"
-                id="bust"
-                name="bust"
-                value={customer?.bust || ""}
-                placeholder="Bust"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
+          <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
+            Measurements
+          </div>
+          <div className="mb-4">
+            <div className="flex space-x-4 mb-4">
+              <div className="w-1/3">
+                <label
+                  htmlFor="bust"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Bust
+                </label>
+                <input
+                  type="number"
+                  id="bust"
+                  name="bust"
+                  value={customer?.bust || ""}
+                  placeholder="Bust"
+                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                />
+              </div>
+              <div className="w-1/3">
+                <label
+                  htmlFor="waist"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Waist
+                </label>
+                <input
+                  type="number"
+                  id="waist"
+                  name="waist"
+                  value={customer?.waist || ""}
+                  placeholder="Waist"
+                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                />
+              </div>
+              <div className="w-1/3">
+                <label
+                  htmlFor="hips"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Hips
+                </label>
+                <input
+                  type="number"
+                  id="hips"
+                  name="hips"
+                  value={customer?.hip || ""}
+                  placeholder="Hips"
+                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                />
+              </div>
             </div>
-            <div className="w-1/3">
-              <label htmlFor="waist" className="block text-sm font-medium text-gray-700">
-                Waist
-              </label>
-              <input
-                type="number"
-                id="waist"
-                name="waist"
-                value={customer?.waist || ""}
-                placeholder="Waist"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
+            <div className="flex space-x-4 mb-4">
+              <div className="w-1/3">
+                <label
+                  htmlFor="shoulderWidth"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Shoulder Width
+                </label>
+                <input
+                  type="number"
+                  id="shoulderWidth"
+                  name="shoulderWidth"
+                  value={customer?.shoulder_width || ""}
+                  placeholder="Shoulder Width"
+                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                />
+              </div>
+              <div className="w-1/3">
+                <label
+                  htmlFor="neck"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Neck
+                </label>
+                <input
+                  type="number"
+                  id="neck"
+                  name="neck"
+                  value={customer?.neck || ""}
+                  placeholder="Neck"
+                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                />
+              </div>
+              <div className="w-1/3">
+                <label
+                  htmlFor="armLength"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Arm Length
+                </label>
+                <input
+                  type="number"
+                  id="armLength"
+                  name="armLength"
+                  value={customer?.arm_length || ""}
+                  placeholder="Arm Length"
+                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                />
+              </div>
             </div>
-            <div className="w-1/3">
-              <label htmlFor="hips" className="block text-sm font-medium text-gray-700">
-                Hips
-              </label>
-              <input
-                type="number"
-                id="hips"
-                name="hips"
-                value={customer?.hip || ""}
-                placeholder="Hips"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
+            <div className="flex space-x-4 mb-4">
+              <div className="w-1/3">
+                <label
+                  htmlFor="backLength"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Back Length
+                </label>
+                <input
+                  type="number"
+                  id="backLength"
+                  name="backLength"
+                  value={customer?.back_length || ""}
+                  placeholder="Back Length"
+                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                />
+              </div>
+              <div className="w-1/3">
+                <label
+                  htmlFor="frontLength"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Front Length
+                </label>
+                <input
+                  type="number"
+                  id="frontLength"
+                  name="frontLength"
+                  value={customer?.front_length || ""}
+                  placeholder="Front Length"
+                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                />
+              </div>
+              <div className="w-1/3">
+                <label
+                  htmlFor="highBust"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  High Bust
+                </label>
+                <input
+                  type="number"
+                  id="highBust"
+                  name="highBust"
+                  value={customer?.high_bust || ""}
+                  placeholder="High Bust"
+                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                />
+              </div>
             </div>
           </div>
-          <div className="flex space-x-4 mb-4">
-            <div className="w-1/3">
-              <label
-                htmlFor="shoulderWidth"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Shoulder Width
-              </label>
-              <input
-                type="number"
-                id="shoulderWidth"
-                name="shoulderWidth"
-                value={customer?.shoulder_width || ""}
-                placeholder="Shoulder Width"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="neck" className="block text-sm font-medium text-gray-700">
-                Neck
-              </label>
-              <input
-                type="number"
-                id="neck"
-                name="neck"
-                value={customer?.neck || ""}
-                placeholder="Neck"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="armLength" className="block text-sm font-medium text-gray-700">
-                Arm Length
-              </label>
-              <input
-                type="number"
-                id="armLength"
-                name="armLength"
-                value={customer?.arm_length || ""}
-                placeholder="Arm Length"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-          </div>
-          <div className="flex space-x-4 mb-4">
-            <div className="w-1/3">
-              <label
-                htmlFor="backLength"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Back Length
-              </label>
-              <input
-                type="number"
-                id="backLength"
-                name="backLength"
-                value={customer?.back_length || ""}
-                placeholder="Back Length"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label
-                htmlFor="frontLength"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Front Length
-              </label>
-              <input
-                type="number"
-                id="frontLength"
-                name="frontLength"
-                value={customer?.front_length || ""}
-                placeholder="Front Length"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor="highBust" className="block text-sm font-medium text-gray-700">
-                High Bust
-              </label>
-              <input
-                type="number"
-                id="highBust"
-                name="highBust"
-                value={customer?.high_bust || ""}
-                placeholder="High Bust"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              />
-            </div>
-          </div>
-        </div>
         </div>
 
         <div className="col-span-2">

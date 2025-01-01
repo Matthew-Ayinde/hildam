@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { CiEdit } from "react-icons/ci";
@@ -12,6 +12,7 @@ import Spinner from "@/components/Spinner";
 
 export default function Table() {
   interface Order {
+    id: any;
     order_id: string;
     created_at: string;
     customer_name: string;
@@ -23,7 +24,7 @@ export default function Table() {
   const [data, setData] = useState<Order[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const rowsPerPage = 10;
 
   const totalPages = Math.ceil(data.length / rowsPerPage);
@@ -58,7 +59,11 @@ export default function Table() {
 
         setData(result.data);
       } catch (error) {
-        setError(error.message || "An unexpected error occurred");
+        if (error instanceof Error) {
+          setError(error.message || "An unexpected error occurred");
+        } else {
+          setError("An unexpected error occurred");
+        }
       } finally {
         setLoading(false);
       }
@@ -67,8 +72,9 @@ export default function Table() {
     fetchOrders();
   }, []);
 
-  const handlePageChange = (newPage) => {
-    if (newPage > 0 && newPage <= totalPages) {
+  const handlePageChange = (newPage: SetStateAction<number>) => {
+    const pageNumber = typeof newPage === 'number' ? newPage : currentPage;
+    if (pageNumber > 0 && pageNumber <= totalPages) {
       setCurrentPage(newPage);
     }
   };
@@ -92,7 +98,7 @@ export default function Table() {
       }
     }, []);
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string | number | Date) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-GB", {
       day: "numeric",

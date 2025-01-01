@@ -1,18 +1,18 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 
-export default function EditCustomer() {
-  const router = useRouter();
-  const { id } = useParams();
-  const [customer, setCustomer] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const InventoryEditPage = () => {
+  const { id } = useParams(); // Get the dynamic route parameter
+  const [customer, setCustomer] = useState<any>(null);
   const [formData, setFormData] = useState({
     item_name: "",
-    item_quantity: "",
+    item_quantity: 0,
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -37,20 +37,17 @@ export default function EditCustomer() {
         item_quantity: result.data.item_quantity,
       });
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setError(null);
 
@@ -71,68 +68,62 @@ export default function EditCustomer() {
 
       router.push(`/admin/inventory/${id}`);
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
     }
   };
 
   useEffect(() => {
-    fetchCustomer();
+    if (id) {
+      fetchCustomer();
+    }
   }, [id]);
 
-  if (loading) {
-    return <div className="text-center text-gray-500 py-10">Loading...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="text-center text-red-500 py-10">
-        Error: {error}
-        <button onClick={fetchCustomer} className="text-blue-500 underline">
-          Retry
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
-        <div>
-          <label className="block text-gray-700 font-bold">Item Name</label>
-          <input
-            type="text"
-            name="item_name"
-            value={formData.item_name}
-            onChange={handleInputChange}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Quantity</label>
-          <input
-            type="text"
-            name="item_quantity"
-            value={formData.item_quantity}
-            onChange={handleInputChange}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-          />
-        </div>
-        <div className="col-span-2">
-          <button
-            type="submit"
-            className="px-4 py-2 bg-orange-500 text-white rounded"
-          >
-            Save Changes
+    <div>
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p style={{ color: "red" }}>{error}</p>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="item_name">Item Name:</label>
+            <input
+              id="item_name"
+              type="text"
+              value={formData.item_name}
+              onChange={(e) =>
+                setFormData({ ...formData, item_name: e.target.value })
+              }
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="item_quantity">Item Quantity:</label>
+            <input
+              id="item_quantity"
+              type="number"
+              value={formData.item_quantity}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  item_quantity: parseInt(e.target.value, 10),
+                })
+              }
+              required
+            />
+          </div>
+          <button type="submit" disabled={loading}>
+            {loading ? "Saving..." : "Save"}
           </button>
-          <button
-            type="button"
-            onClick={() => router.push(`/admin/inventory/${id}`)}
-            className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+        </form>
+      )}
     </div>
   );
-}
+};
+
+export default InventoryEditPage;

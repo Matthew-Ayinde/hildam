@@ -38,7 +38,13 @@ export default function EditCustomer() {
     waist: "",
     hip: "",
     neck: "",
-    gender: ""
+    gender: "",
+    date: "",
+    shoulderWidth: "",
+    armLength: "",
+    backLength: "",
+    frontLength: "",
+    highBust: "",
   });
 
   const fetchCustomer = async () => {
@@ -67,6 +73,7 @@ export default function EditCustomer() {
         bust: result.data.bust,
         address: result.data.address,
         waist: result.data.waist,
+        hip: result.data.hip,
         neck: result.data.neck,
         gender: result.data.gender,
         date: result.data.created_at,
@@ -101,7 +108,7 @@ export default function EditCustomer() {
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setError("");
-
+  
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(`/api/customerslist/${id}`, {
@@ -112,14 +119,18 @@ export default function EditCustomer() {
         },
         body: JSON.stringify(formData),
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to update customer data");
       }
-
+  
       router.push(`/admin/customerslist/${id}`);
     } catch (err) {
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
     }
   };
 
