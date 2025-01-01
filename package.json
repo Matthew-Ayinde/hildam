@@ -10,16 +10,19 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "fashionapp": "file:",
+    "axios": "^1.7.9",
     "install": "^0.13.0",
+    "jwt-decode": "^4.0.0",
     "next": "15.0.3",
     "npm": "^10.9.1",
     "nprogress": "^0.2.0",
     "react": "19.0.0-rc-66855b96-20241106",
+    "react-animations": "^1.0.0",
     "react-dom": "19.0.0-rc-66855b96-20241106",
     "react-icons": "^5.3.0"
   },
   "devDependencies": {
+    "@types/jwt-decode": "^2.2.1",
     "@types/node": "^20",
     "@types/nprogress": "^0.2.3",
     "@types/react": "^18",
