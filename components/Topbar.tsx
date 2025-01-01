@@ -9,7 +9,7 @@ const Topbar = () => {
     <div>
         <div className='flex justify-between my-10 items-center sticky text-gray-500'>
             <div className='text-xl font-bold'>WELCOME, CEO</div>
-            <div className='flex flex-row items-center'>
+            <div className='lg:flex hidden flex-row items-center'>
                 <div className='w-12 h-12 flex items-center justify-center'>
                 <FaMoon size={20}/>
                 </div>
