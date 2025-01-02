@@ -115,7 +115,7 @@ export default function ShowCustomer() {
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => router.push("/admin/joblists/projects")}
+          onClick={() => router.push("/projectmanager/joblists/projects")}
           className="text-blue-500 underline"
         > 
           Back to List
@@ -355,13 +355,13 @@ export default function ShowCustomer() {
       <div className="mt-6 flex justify-end space-x-4">
       <div
           className="px-4 py-2 bg-gray-500 text-white rounded"
-          onClick={() => router.push(`/admin/joblists/projects/${id}/assign-head-of-tailoring`)}
+          onClick={() => router.push(`/projectmanager/joblists/projects/${id}/assign-head-of-tailoring`)}
         >
           Assign Head of Tailoring
         </div>
         <div
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/admin/joblists/projects/${id}/edit`)}
+          onClick={() => router.push(`/projectmanager/joblists/projects/${id}/edit`)}
         >
           Edit
         </div>

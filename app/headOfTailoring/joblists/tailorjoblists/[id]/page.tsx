@@ -36,7 +36,7 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/customerslist/${id}`, {
+      const response = await fetch(`/api/tailorjoblists/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -51,7 +51,7 @@ export default function ShowCustomer() {
       // Map response to fields used in the Table component
       if (result.data) {
         const mappedCustomer: Customer = {
-          fullName: result.data.name,
+          fullName: result.data.customer_name,
           age: result.data.age,
           gender: result.data.gender,
           phone: result.data.phone_number || "N/A",
@@ -109,7 +109,7 @@ export default function ShowCustomer() {
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => router.push("/admin/customers/list")}
+          onClick={() => router.push("/headoftailoring/joblists/tailorjoblists")}
           className="text-blue-500 underline"
         >
           Back to List
@@ -145,28 +145,10 @@ export default function ShowCustomer() {
           />
         </div>
         <div>
-          <label className="block text-gray-700 font-bold">Phone</label>
-          <input
-            type="text"
-            value={customer.phone}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
           <label className="block text-gray-700 font-bold">Create Date</label>
           <input
             type="text"
             value={customer.date}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Email</label>
-          <input
-            type="text"
-            value={customer.email}
             readOnly
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
           />
@@ -323,7 +305,7 @@ export default function ShowCustomer() {
       <div className="mt-6 flex justify-end space-x-4">
         <div
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/admin/customers/${id}/edit`)}
+          onClick={() => router.push(`/headoftailoring/joblists/tailorjoblists/${id}/edit`)}
         >
           Edit
         </div>

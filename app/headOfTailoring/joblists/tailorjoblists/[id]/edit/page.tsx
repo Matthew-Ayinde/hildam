@@ -53,7 +53,7 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/customerslist/${id}`, {
+      const response = await fetch(`/api/tailorjoblists/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

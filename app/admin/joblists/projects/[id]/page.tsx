@@ -12,6 +12,7 @@ export default function ShowCustomer() {
     fullName: string;
     clothing_name: string;
     order_status: string;
+    head_of_tailoring: string;
     date: string;
     email: string;
     clothing_description: string;
@@ -68,6 +69,7 @@ export default function ShowCustomer() {
           priority: result.data.priority,
           order_status: result.data.order_status,
           email: "",
+          head_of_tailoring: result.data.head_of_tailoring || "N/A",
           clothing_description: result.data.clothing_description || "",
           customer_description: result.data.customer_description || "",
           age: 0,
@@ -155,6 +157,17 @@ export default function ShowCustomer() {
             <input
               type="text"
               value={customer.order_status}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">
+              Head of Tailoring
+            </label>
+            <input
+              type="text"
+              value={customer.head_of_tailoring}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />

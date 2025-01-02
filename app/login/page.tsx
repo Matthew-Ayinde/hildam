@@ -33,7 +33,7 @@ export default function LoginForm() {
         router.push("/projectmanager/joblists/projects");
         break;
       case "store manager":
-        router.push("/storemanager");
+        router.push("/storemanager/inventory/list");
         break;
       case "client manager":
         router.push("/clientmanager/customers/list");

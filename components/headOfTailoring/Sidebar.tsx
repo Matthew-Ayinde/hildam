@@ -22,7 +22,6 @@ const sidebarItems = [
     icon: <FaBoxes />,
     prefix: "/headoftailoring/joblists/",
     links: [
-      { name: "Projects", href: "/headoftailoring/joblists/projects" },
       { name: "Tailor Jobs", href: "/headoftailoring/joblists/tailorjoblists" },
     ],
   },

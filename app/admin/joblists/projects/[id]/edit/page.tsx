@@ -24,6 +24,7 @@ export default function EditCustomer() {
     back_length: number;
     front_length: number;
     high_bust: number;
+    head_of_tailoring: string; // This should match the manager_id
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -46,7 +47,17 @@ export default function EditCustomer() {
     backLength: "",
     frontLength: "",
     highBust: "",
+    manager_id: "", // Changed to manager_id
   });
+
+  const [managers, setManagers] = useState<
+    {
+      id: string;
+      user_id: string;
+      name: string;
+    }[]
+  >([]);
+  const [loadingManagers, setLoadingManagers] = useState(true);
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -67,23 +78,24 @@ export default function EditCustomer() {
       const result = await response.json();
       setCustomer(result.data);
       setFormData({
-        name: result.data.name,
-        age: result.data.age,
-        phone: result.data.phone_number,
-        email: result.data.email,
-        bust: result.data.bust,
-        address: result.data.address,
-        waist: result.data.waist,
-        hip: result.data.hip,
-        neck: result.data.neck,
-        gender: result.data.gender,
-        date: result.data.created_at,
-        shoulderWidth: result.data.shoulder_width,
-        armLength: result.data.arm_length,
-        backLength: result.data.back_length,
-        frontLength: result.data.front_length,
-        highBust: result.data.high_bust,
-      });
+              name: result.data.name,
+              age: result.data.age,
+              phone: result.data.phone_number,
+              email: result.data.email,
+              bust: result.data.bust,
+              address: result.data.address,
+              waist: result.data.waist,
+              hip: result.data.hips,
+              neck: result.data.neck,
+              gender: result.data.gender,
+              date: result.data.created_at,
+              shoulderWidth: result.data.shoulder_width,
+              armLength: result.data.arm_length,
+              backLength: result.data.back_length,
+              frontLength: result.data.front_length,
+              highBust: result.data.high_bust,
+              manager_id: result.data.head_of_tailoring, // Set the current manager_id
+            });
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -92,6 +104,33 @@ export default function EditCustomer() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchManagers = async () => {
+    setLoadingManagers(true);
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      const response = await fetch("/api/headoftailoringlist", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch managers");
+      }
+
+      const result = await response.json();
+      setManagers(result.data);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
+    } finally {
+      setLoadingManagers(false);
     }
   };
 
@@ -105,7 +144,7 @@ export default function EditCustomer() {
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setError("");
-  
+
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(`/api/customerslist/${id}`, {
@@ -116,11 +155,11 @@ export default function EditCustomer() {
         },
         body: JSON.stringify(formData),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to update customer data");
       }
-  
+
       router.push(`/admin/customerslist/${id}`);
     } catch (err) {
       if (err instanceof Error) {
@@ -133,9 +172,10 @@ export default function EditCustomer() {
 
   useEffect(() => {
     fetchCustomer();
+    fetchManagers(); // Fetch managers when the component mounts
   }, [id]);
 
-  if (loading) {
+  if (loading || loadingManagers) {
     return (
       <div className="text-center text-gray-500 py-10">
         <Spinner />
@@ -182,7 +222,9 @@ export default function EditCustomer() {
             <label className="block text-gray-700 font-bold">Gender</label>
             <input
               type="text"
-              value={customer?.gender || ""}
+              name="gender"
+              value={formData.gender || ""}
+              onChange={handleInputChange}
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
@@ -190,7 +232,8 @@ export default function EditCustomer() {
             <label className="block text-gray-700 font-bold">Phone</label>
             <input
               type="text"
-              value={customer?.phone_number || ""}
+              name="phone"
+              value={formData.phone || ""}
               onChange={handleInputChange}
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
@@ -199,7 +242,10 @@ export default function EditCustomer() {
             <label className="block text-gray-700 font-bold">Create Date</label>
             <input
               type="text"
-              value={customer?.created_at || ""}
+              name="date"
+              value={formData.date || ""}
+              onChange={handleInputChange}
+              readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
@@ -207,11 +253,30 @@ export default function EditCustomer() {
             <label className="block text-gray-700 font-bold">Email</label>
             <input
               type="text"
-              value={customer?.email || ""}
+              value={formData.email || ""}
+              onChange={handleInputChange}
+              name="email"
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Head of Tailoring</label>
+            <select
+              name="manager_id"
+              value={formData.manager_id}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            >
+              <option value="">Select Head of Tailoring</option>
+              {managers.map((manager) => (
+                <option key={manager.id} value={manager.user_id}>
+                  {manager.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
+
         <div className="w-full">
           {/* Measurement Fields */}
           <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
@@ -230,7 +295,7 @@ export default function EditCustomer() {
                   type="number"
                   id="bust"
                   name="bust"
-                  value={customer?.bust || ""}
+                  value={formData.bust || ""}
                   placeholder="Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -246,23 +311,23 @@ export default function EditCustomer() {
                   type="number"
                   id="waist"
                   name="waist"
-                  value={customer?.waist || ""}
+                  value={formData.waist || ""}
                   placeholder="Waist"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
               <div className="w-1/3">
                 <label
-                  htmlFor="hips"
+                  htmlFor="hip"
                   className="block text-sm font-medium text-gray-700"
                 >
                   Hips
                 </label>
                 <input
                   type="number"
-                  id="hips"
-                  name="hips"
-                  value={customer?.hip || ""}
+                  id="hip"
+                  name="hip"
+                  value={formData.hip || ""}
                   placeholder="Hips"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -280,7 +345,7 @@ export default function EditCustomer() {
                   type="number"
                   id="shoulderWidth"
                   name="shoulderWidth"
-                  value={customer?.shoulder_width || ""}
+                  value={formData.shoulderWidth || ""}
                   placeholder="Shoulder Width"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -296,7 +361,7 @@ export default function EditCustomer() {
                   type="number"
                   id="neck"
                   name="neck"
-                  value={customer?.neck || ""}
+                  value={formData.neck || ""}
                   placeholder="Neck"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -312,7 +377,7 @@ export default function EditCustomer() {
                   type="number"
                   id="armLength"
                   name="armLength"
-                  value={customer?.arm_length || ""}
+                  value={formData.armLength || ""}
                   placeholder="Arm Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -330,7 +395,7 @@ export default function EditCustomer() {
                   type="number"
                   id="backLength"
                   name="backLength"
-                  value={customer?.back_length || ""}
+                  value={formData.backLength || ""}
                   placeholder="Back Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -346,7 +411,7 @@ export default function EditCustomer() {
                   type="number"
                   id="frontLength"
                   name="frontLength"
-                  value={customer?.front_length || ""}
+                  value={formData.frontLength || ""}
                   placeholder="Front Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -362,7 +427,7 @@ export default function EditCustomer() {
                   type="number"
                   id="highBust"
                   name="highBust"
-                  value={customer?.high_bust || ""}
+                  value={formData.highBust || ""}
                   placeholder="High Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -378,7 +443,7 @@ export default function EditCustomer() {
           >
             Save Changes
           </button>
-          <button
+ <button
             type="button"
             onClick={() => router.push(`/admin/inventory/${id}`)}
             className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
