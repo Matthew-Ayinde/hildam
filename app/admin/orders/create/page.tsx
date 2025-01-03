@@ -9,6 +9,7 @@ const Form = () => {
     clothing_description: string | number | readonly string[] | undefined;
     clothing_name: string | number | readonly string[] | undefined;
     customer_name: string;
+    customer_description: string;
     gender: string;
     age: string;
     phone: string;
@@ -30,6 +31,7 @@ const Form = () => {
     order_status: "",
     priority: "",
     clothing_description: "",
+    customer_description: "",
     clothing_name: "",
     customer_name: "",
     gender: "",
@@ -121,6 +123,7 @@ const Form = () => {
 
     const payload = {
       customer_name: formData.customer_name,
+      customer_description: formData.customer_description,
       customer_email: formData.customer_email,
       clothing_name: formData.clothing_name,
       hips: formData.hips,
@@ -152,6 +155,7 @@ const Form = () => {
         setResponseMessage("Order created successfully");
         setFormData({
           order_status: "",
+          customer_description: "",
           priority: "",
           clothing_description: "",
           clothing_name: "",
@@ -221,6 +225,7 @@ const Form = () => {
               required
             />
           </div>
+         
           <div className="">
             <label
               htmlFor="name"
@@ -309,7 +314,7 @@ const Form = () => {
             htmlFor="manager_id"
             className="block text-sm font-medium text-gray-700"
           >
-            Select Project Manager (Optional)
+            Select Project Manager
           </label>
           {loadingManagers ? (
             <div className="text-center text-gray-500 mt-2">Loading...</div>
@@ -330,6 +335,25 @@ const Form = () => {
             </select>
           )}
         </div>
+
+        <div className="">
+            <label
+              htmlFor="customer_description"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Customer Description
+            </label>
+            <textarea
+              rows={3}
+              id="customer_description"
+              name="customer_description"
+              value={formData.customer_description}
+              onChange={handleChange}
+              placeholder="Enter customer description"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">

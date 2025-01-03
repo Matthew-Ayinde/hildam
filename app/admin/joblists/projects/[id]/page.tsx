@@ -20,13 +20,14 @@ export default function ShowCustomer() {
     address: string;
     bust: number;
     waist: number;
-    hip: number;
+    hips: number;
     shoulderWidth: number;
     neck: number;
     armLength: number;
     backLength: number;
     frontLength: number;
     order_id: string;
+    high_bust: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -59,12 +60,13 @@ export default function ShowCustomer() {
           date: new Date().toLocaleDateString(), // Placeholder date if not provided
           bust: result.data.bust || 0,
           waist: result.data.waist || 0,
-          hip: result.data.hip || 0,
-          shoulderWidth: result.data.shoulderWidth || 0,
+          hips: result.data.hips || 0,
+          shoulderWidth: result.data.shoulder_width || 0,
           neck: result.data.neck || 0,
-          armLength: result.data.armLength || 0,
-          backLength: result.data.backLength || 0,
-          frontLength: result.data.frontLength || 0,
+          armLength: result.data.arm_length || 0,
+          high_bust: result.data.high_bust || 0,
+          backLength: result.data.back_length || 0,
+          frontLength: result.data.front_length || 0,
           order_id: result.data.order_id,
           priority: result.data.priority,
           order_status: result.data.order_status,
@@ -162,17 +164,6 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">
-              Head of Tailoring
-            </label>
-            <input
-              type="text"
-              value={customer.head_of_tailoring}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
             <label className="block text-gray-700 font-bold">Create Date</label>
             <input
               type="text"
@@ -254,7 +245,7 @@ export default function ShowCustomer() {
                   id="hips"
                   name="hips"
                   value={customer.hips}
-                  placeholder="Hips"
+                  placeholder="hips"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
@@ -349,7 +340,7 @@ export default function ShowCustomer() {
               </div>
               <div className="w-1/3">
                 <label
-                  htmlFor="highBust"
+                  htmlFor="high_bust"
                   className="block text-sm font-medium text-gray-700"
                 >
                   High Bust
@@ -357,9 +348,9 @@ export default function ShowCustomer() {
                 <input
                   type="number"
                   readOnly
-                  id="highBust"
-                  name="highBust"
-                  value={customer.highBust}
+                  id="high_bust"
+                  name="high_bust"
+                  value={customer.high_bust}
                   placeholder="High Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />

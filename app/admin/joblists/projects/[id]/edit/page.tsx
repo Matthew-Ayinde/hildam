@@ -7,48 +7,31 @@ import { useEffect, useState } from "react";
 export default function EditCustomer() {
   const router = useRouter();
   const { id } = useParams();
-  interface Customer {
-    name: string;
-    age: string;
-    phone_number: string;
-    email: string;
-    bust: number;
-    address: string;
-    waist: number;
-    hip: number;
-    neck: number;
-    gender: string;
-    created_at: string;
-    shoulder_width: number;
-    arm_length: number;
-    back_length: number;
-    front_length: number;
-    high_bust: number;
-    head_of_tailoring: string; // This should match the manager_id
-  }
-
-  const [customer, setCustomer] = useState<Customer | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [customer, setCustomer] = useState(null)
   const [formData, setFormData] = useState({
-    name: "",
+    customer_name: "",
     age: "",
-    phone: "",
-    email: "",
     bust: "",
-    address: "",
     waist: "",
-    hip: "",
+    hips: "",
     neck: "",
     gender: "",
-    date: "",
-    shoulderWidth: "",
-    armLength: "",
-    backLength: "",
-    frontLength: "",
-    highBust: "",
-    manager_id: "", // Changed to manager_id
+    order_created_at: "",
+    shoulder_width: "",
+    arm_length: "",
+    back_length: "",
+    front_length: "",
+    high_bust: "",
+    manager_id: "",
   });
+const [realdata, setRealdata] = useState({
+  manager_id: "",
+  amount: "",
+  customer_name: "",
+})
+
 
   const [managers, setManagers] = useState<
     {
@@ -65,37 +48,34 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/customerslist/${id}`, {
+      const response = await fetch(`/api/projectlists/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch customer data");
+        throw new Error("Failed to fetch project data");
       }
 
       const result = await response.json();
       setCustomer(result.data);
       setFormData({
-              name: result.data.name,
-              age: result.data.age,
-              phone: result.data.phone_number,
-              email: result.data.email,
-              bust: result.data.bust,
-              address: result.data.address,
-              waist: result.data.waist,
-              hip: result.data.hips,
-              neck: result.data.neck,
-              gender: result.data.gender,
-              date: result.data.created_at,
-              shoulderWidth: result.data.shoulder_width,
-              armLength: result.data.arm_length,
-              backLength: result.data.back_length,
-              frontLength: result.data.front_length,
-              highBust: result.data.high_bust,
-              manager_id: result.data.head_of_tailoring, // Set the current manager_id
-            });
+        customer_name: result.data.customer_name,
+        age: result.data.age,
+        bust: result.data.bust,
+        waist: result.data.waist,
+        hips: result.data.hips,
+        neck: result.data.neck,
+        gender: result.data.gender,
+        order_created_at: result.data.created_at,
+        shoulder_width: result.data.shoulder_width,
+        arm_length: result.data.arm_length,
+        back_length: result.data.back_length,
+        front_length: result.data.front_length,
+        high_bust: result.data.high_bust,
+        manager_id: result.data.manager_id, // Set the current manager_id
+      });
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -117,6 +97,7 @@ export default function EditCustomer() {
         },
       });
 
+
       if (!response.ok) {
         throw new Error("Failed to fetch managers");
       }
@@ -135,32 +116,36 @@ export default function EditCustomer() {
   };
 
   const handleInputChange = (e: { target: { name: any; value: any } }) => {
-    setFormData({
-      ...formData,
+    setRealdata({
+      ...realdata,
       [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    setError("");
+    setError(null);
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/customerslist/${id}`, {
+      const response = await fetch(`/api/editproject/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(realdata),
       });
+
+      
+        // Log the response for debugging
+    console.log(response);
 
       if (!response.ok) {
         throw new Error("Failed to update customer data");
       }
 
-      router.push(`/admin/customerslist/${id}`);
+      router.push("/admin/joblists/projects");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -203,7 +188,7 @@ export default function EditCustomer() {
             <input
               type="text"
               name="name"
-              value={formData.name}
+              value={realdata.customer_name}
               onChange={handleInputChange}
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
             />
@@ -228,42 +213,12 @@ export default function EditCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Phone</label>
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone || ""}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Create Date</label>
-            <input
-              type="text"
-              name="date"
-              value={formData.date || ""}
-              onChange={handleInputChange}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Email</label>
-            <input
-              type="text"
-              value={formData.email || ""}
-              onChange={handleInputChange}
-              name="email"
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
+          
           <div>
             <label className="block text-gray-700 font-bold">Head of Tailoring</label>
             <select
               name="manager_id"
-              value={formData.manager_id}
+              value={realdata.manager_id}
               onChange={handleInputChange}
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             >
@@ -318,17 +273,17 @@ export default function EditCustomer() {
               </div>
               <div className="w-1/3">
                 <label
-                  htmlFor="hip"
+                  htmlFor="hips"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Hips
+                  hips
                 </label>
                 <input
                   type="number"
-                  id="hip"
-                  name="hip"
-                  value={formData.hip || ""}
-                  placeholder="Hips"
+                  id="hips"
+                  name="hips"
+                  value={formData.hips || ""}
+                  placeholder="hips"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
@@ -336,16 +291,16 @@ export default function EditCustomer() {
             <div className="flex space-x-4 mb-4">
               <div className="w-1/3">
                 <label
-                  htmlFor="shoulderWidth"
+                  htmlFor="shoulder_width"
                   className="block text-sm font-medium text-gray-700"
                 >
                   Shoulder Width
                 </label>
                 <input
                   type="number"
-                  id="shoulderWidth"
-                  name="shoulderWidth"
-                  value={formData.shoulderWidth || ""}
+                  id="shoulder_width"
+                  name="shoulder_width"
+                  value={formData.shoulder_width || ""}
                   placeholder="Shoulder Width"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -368,16 +323,16 @@ export default function EditCustomer() {
               </div>
               <div className="w-1/3">
                 <label
-                  htmlFor="armLength"
+                  htmlFor="arm_length"
                   className="block text-sm font-medium text-gray-700"
                 >
                   Arm Length
                 </label>
                 <input
                   type="number"
-                  id="armLength"
-                  name="armLength"
-                  value={formData.armLength || ""}
+                  id="arm_length"
+                  name="arm_length"
+                  value={formData.arm_length || ""}
                   placeholder="Arm Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -386,48 +341,48 @@ export default function EditCustomer() {
             <div className="flex space-x-4 mb-4">
               <div className="w-1/3">
                 <label
-                  htmlFor="backLength"
+                  htmlFor="back_length"
                   className="block text-sm font-medium text-gray-700"
                 >
                   Back Length
                 </label>
                 <input
                   type="number"
-                  id="backLength"
-                  name="backLength"
-                  value={formData.backLength || ""}
+                  id="back_length"
+                  name="back_length"
+                  value={formData.back_length || ""}
                   placeholder="Back Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
               <div className="w-1/3">
                 <label
-                  htmlFor="frontLength"
+                  htmlFor="front_length"
                   className="block text-sm font-medium text-gray-700"
                 >
                   Front Length
                 </label>
                 <input
                   type="number"
-                  id="frontLength"
-                  name="frontLength"
-                  value={formData.frontLength || ""}
+                  id="front_length"
+                  name="front_length"
+                  value={formData.front_length || ""}
                   placeholder="Front Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
               <div className="w-1/3">
                 <label
-                  htmlFor="highBust"
+                  htmlFor="high_bust"
                   className="block text-sm font-medium text-gray-700"
                 >
                   High Bust
                 </label>
                 <input
                   type="number"
-                  id="highBust"
-                  name="highBust"
-                  value={formData.highBust || ""}
+                  id="high_bust"
+                  name="high_bust"
+                  value={formData.high_bust || ""}
                   placeholder="High Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -443,7 +398,7 @@ export default function EditCustomer() {
           >
             Save Changes
           </button>
- <button
+          <button
             type="button"
             onClick={() => router.push(`/admin/inventory/${id}`)}
             className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
