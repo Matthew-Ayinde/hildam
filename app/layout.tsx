@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased text-black`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased text-black bg-[#f9f7f7]`}
       >
         <div className={`w-full flex flex-row bg-[#f9f7f7] ${play.className}`}>
          {children}

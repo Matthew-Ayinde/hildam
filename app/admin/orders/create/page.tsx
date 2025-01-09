@@ -324,6 +324,7 @@ const Form = () => {
               name="manager_id"
               value={formData.manager_id}
               onChange={handleChange}
+              required
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
             >
               <option value="">Select project manager</option>

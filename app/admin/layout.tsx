@@ -27,7 +27,7 @@ export default function RootLayout({
               <div className=""> <Sidebar /> </div>
             </div>
             <div className="lg:mx-10 mx-0 px-5 lg:px-0 h-full w-full lg:w-3/4">
-              <div className="mb-10 lg:mt-0 mt-20">
+              <div className="mb-5 lg:mt-0 mt-20">
                 <Topbar />
               </div>
               <div className="mb-40">{children}</div>

@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  images: {
+    domains: ['hildam.insightpublicis.com'], // Add your domain here
+  },
 };
 
 export default nextConfig;

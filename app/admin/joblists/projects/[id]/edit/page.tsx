@@ -188,7 +188,7 @@ const [realdata, setRealdata] = useState({
             <input
               type="text"
               name="name"
-              value={realdata.customer_name}
+              value={formData.customer_name}
               onChange={handleInputChange}
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
             />

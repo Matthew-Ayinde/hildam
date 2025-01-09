@@ -75,7 +75,7 @@ export default function Table() {
       const token = sessionStorage.getItem("access_token");
       if (!token) throw new Error("No access token found");
 
-      const response = await fetch(`/api/deleteorder/${selectedUserId}`, {
+      const response = await fetch(`/api/deletemyorder/${selectedUserId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -309,7 +309,7 @@ export default function Table() {
               Confirm Deletion
             </h3>
             <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to delete this user? This action cannot be
+              Are you sure you want to delete this order? This action cannot be
               undone.
             </p>
             <div className="flex justify-center space-x-4">

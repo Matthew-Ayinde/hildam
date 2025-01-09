@@ -159,8 +159,11 @@ export default function Table() {
       </div>
 
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
+        <div className="flex flex-row justify-between items-center px-4">
         <div className="mx-2 font-bold text-gray-500 text-xl my-3">Order List</div>
+        <div className="mx-2 font-bold text-gray-500 text-xl my-3">Filter specs</div>
 
+        </div>
         {loading ? (
           <div className="text-center py-10">
             <Spinner />
@@ -316,7 +319,7 @@ export default function Table() {
               Confirm Deletion
             </h3>
             <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to delete this user? This action cannot be
+              Are you sure you want to delete this order? This action cannot be
               undone.
             </p>
             <div className="flex justify-center space-x-4">
