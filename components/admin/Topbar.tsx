@@ -31,7 +31,7 @@ const Topbar = () => {
 
   return (
     <div>
-      <div className="lg:flex justify-between my-10 items-center sticky text-gray-500 hidden">
+      <div className="lg:flex justify-between my-5 items-center sticky py-2 px-4 rounded-xl bg-white text-gray-500 hidden">
         <div className="text-xl font-bold">
           <div>WELCOME, {userName.toUpperCase()}</div>
           <div className="text-sm mt-1">Role: Admin</div>
@@ -41,7 +41,7 @@ const Topbar = () => {
           <div className="w-12 h-12 flex items-center justify-center">
             <IoNotifications size={20} />
           </div>
-          <div className="w-6 h-6 mx-1">
+          <div className="w-8 h-8 mx-1">
             <Image
               src="/profile.jpeg"
               alt="Notification"
@@ -50,9 +50,7 @@ const Topbar = () => {
               className="rounded-full w-full h-full"
             />
           </div>
-          <div className="ml-3 flex items-center">
-            <SearchBar />
-          </div>
+          
         </div>
       </div>
     </div>

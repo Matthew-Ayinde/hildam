@@ -10,6 +10,8 @@ import { usePathname } from "next/navigation";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 import "nprogress/nprogress.css"; // Import default styles for NProgress
 import { IoNotifications } from "react-icons/io5";
+import { MdOutlinePayment } from "react-icons/md";
+import { MdOutlineInventory2 } from "react-icons/md";
 
 const sidebarItems = [
   {
@@ -42,10 +44,21 @@ const sidebarItems = [
       { name: "Tailor Jobs", href: "/admin/joblists/tailorjoblists" },
     ],
   },
+  
+  {
+    id: 6,
+    text: "Payments",
+    icon: <MdOutlinePayment />,
+    prefix: "/admin/payments/",
+    links: [
+      { name: "List", href: "/admin/payments/list" },
+      { name: "Create", href: "/admin/payments/create" },
+    ],
+  },
   {
     id: 4,
     text: "Inventory",
-    icon: <FaBoxes />,
+    icon: <MdOutlineInventory2 />,
     prefix: "/admin/inventory/",
     links: [
       { name: "List", href: "/admin/inventory/list" },
@@ -182,7 +195,7 @@ const Sidebar = () => {
           </Link>
         </div>
 
-        <ul className="space-y-1 mt-3 px-4">
+        <ul className="space-y-1 mt-3 mb-10 px-4">
           {sidebarItems.map((item) => {
             const isMenuOpen = openMenus[item.id] || isActive(item.prefix);
 

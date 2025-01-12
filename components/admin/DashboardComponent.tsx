@@ -181,7 +181,7 @@ export default function Table() {
                           : "text-red-600 bg-white border border-red-600"
                       }`}
                     >
-                      {row.order_status}
+                      {row.order_status || "pending"}
                     </span>
                   </td>
                   <td className="px-4 py-2 text-sm border-b">

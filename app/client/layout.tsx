@@ -30,7 +30,7 @@ export default function RootLayout({
               <div className="mb-10 lg:mt-0 mt-20">
                 <Topbar />
               </div>
-              <div className="mb-40">{children}</div>
+              <div className="mb-40 min-h-screen h-full">{children}</div>
               <div>
                 <Footer />
               </div>
