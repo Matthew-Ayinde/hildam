@@ -6,6 +6,28 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function ShowCustomer() {
+
+  const [price, setPrice] = useState(""); // State for price value
+  const [isPriceModalOpen, setIsPriceModalOpen] = useState(false); // State for modal visibility
+
+  const openPriceModal = () => {
+    setIsPriceModalOpen(true); // Open the price modal
+  };
+
+  const closePriceModal = () => {
+    setIsPriceModalOpen(false); // Close the price modal
+  };
+
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+
+  const handleCustomerImageClick = () => {
+    setIsCustomerModalOpen(true);
+  };
+
+  const handleCustomerCloseModal = () => {
+    setIsCustomerModalOpen(false);
+  };
+
   const router = useRouter();
   const { id } = useParams();
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
@@ -15,7 +37,7 @@ export default function ShowCustomer() {
     fullName: string;
     clothing_name: string;
     order_status: string;
-    head_of_tailoring: string;
+    manager_name: string;
     date: string;
     email: string;
     clothing_description: string;
@@ -32,6 +54,7 @@ export default function ShowCustomer() {
     order_id: string;
     high_bust: string;
     tailor_job_image?: string;
+    style_reference_images?: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -40,6 +63,7 @@ export default function ShowCustomer() {
   const [imageLoading, setImageLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [imageError, setImageError] = useState(false);
+  
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -76,13 +100,14 @@ export default function ShowCustomer() {
           order_id: result.data.order_id,
           order_status: result.data.order_status,
           email: "",
-          head_of_tailoring: result.data.head_of_tailoring || "N/A",
+          manager_name: result.data.manager_name || "N/A",
           clothing_description: result.data.clothing_description || "",
           customer_description: result.data.customer_description || "",
           address: "",
           tailor_job_image: result.data.tailor_job_image || null,
           customer_feedback: result.data.customer_feedback || null,
           customer_approval: result.data.customer_approval || null,
+          style_reference_images: result.data.style_reference_images || null,
         };
         setCustomer(mappedCustomer);
       } else {
@@ -178,7 +203,7 @@ export default function ShowCustomer() {
         prev
           ? {
               ...prev,
-              tailor_job_image: null as string, // Remove the image
+              tailor_job_image: null as unknown as string, // Remove the image
               // tailor_job_image: undefined, // Remove the image
             }
           : null
@@ -236,6 +261,51 @@ export default function ShowCustomer() {
     }
   };
 
+  const handelSetPrice = async () => {
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      const response = await fetch(`/api/editproject/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        //send price to the server as amount
+        body: JSON.stringify({
+          amount: price,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to set price");
+      }
+
+      const result = await response.json();
+      console.log(result);
+      setUploadMessage("Price set successfully"); // Set notification message
+
+      // Show toast notification for 5 seconds
+      setTimeout(() => {
+        setUploadMessage(null); // Clear notification message
+      }, 5000);
+
+    // closePriceModal();
+
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
+    } finally {
+      setLoading(false);
+    }
+
+    handleApproveStyle();
+    // closePriceModal();
+  }
+
+
   if (!customer) {
     return <div className="text-center text-gray-500 py-10">No data found</div>;
   }
@@ -251,7 +321,7 @@ export default function ShowCustomer() {
         </button>
         <div className="text-end font-bond text-lg text-gray-700 flex flex-row">
           <div className="font-bold me-3">Head of Tailoring:</div>{" "}
-          {customer.head_of_tailoring}
+          {customer.manager_name}
         </div>
       </div>
       <form>
@@ -317,6 +387,46 @@ export default function ShowCustomer() {
               rows={3}
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             ></textarea>
+          </div>
+
+          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+            <div className="">
+              <label className="block text-gray-700 font-bold">
+                Customer Style
+              </label>
+              <img
+                src={customer.style_reference_images}
+                alt="style_reference_images"
+                className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
+                onClick={handleCustomerImageClick} // Open modal on click
+              />
+              <div className="text-sm">Please click to open</div>
+            </div>
+
+            {isCustomerModalOpen && (
+              <div
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+                onClick={handleCustomerCloseModal}
+              >
+                <div
+                  className="bg-white rounded-lg p-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img
+                    src={customer.style_reference_images}
+                    alt="Style Reference"
+                    className="w-[500px] h-[500px] object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = ""; // Clear the image source
+                      e.currentTarget.alt = "Image failed to load"; // Update alt text
+                    }}
+                  />
+                  {/* <p className="text-red-500 text-center mt-2">
+                    Image failed to load
+                  </p> */}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="w-full">
@@ -486,6 +596,49 @@ export default function ShowCustomer() {
           </div>
         </div>
       </form>
+
+
+      <button onClick={openPriceModal} className="btn-open-modal">
+        Open Price Modal
+      </button>
+
+      {/* Price Modal */}
+      {isPriceModalOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={closePriceModal}
+        >
+          <div
+            className="bg-white p-4 rounded-lg shadow-lg relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* <button
+              onClick={closePriceModal}
+              className="absolute bg-gray-100 border-red-500 py-2 px-4 rounded-lg top-2 right-2 text-xl text-red-500 hover:text-red-400"
+            >
+              Close
+            </button> */}
+            <div className="text-center text-xl font-bold mb-4">
+              Set Price
+            </div>
+            <input
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="Enter price"
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+            />
+            <button
+              className="mt-4 px-4 py-2 bg-green-500 text-white rounded"
+              onClick={handelSetPrice}
+            >
+              Set Price
+            </button>
+          </div>
+        </div>
+      )}
+
+
       <div className="mt-10">
         <h2 className="text-xl font-bold mb-4">Tailor Job Image</h2>
         {!customer.tailor_job_image && (
@@ -503,6 +656,7 @@ export default function ShowCustomer() {
               onLoad={handleImageLoad}
               onError={handleImageError}
             />
+            please click to view full image
           </div>
         )}
         {/* Display approval status directly under the image */}
@@ -512,14 +666,17 @@ export default function ShowCustomer() {
         {customer.customer_approval === "Rejected" && (
           <div className="text-red-500 mt-2">Style rejected</div>
         )}
-        {customer.customer_approval === null && customer.tailor_job_image !== null && (
-          <div className="text-red-500 mt-2">Send Image to Customer</div>
+        {/* {customer.customer_approval === null && customer.tailor_job_image !== null && (
+          <div className="text-red-500 mt-2">Awaiting Approval from Customer</div>
+        )} */}
+        {customer.customer_approval === null && (
+          <div className="text-red-500 mt-2">Awaiting review from customer</div>
         )}
 
         {/* customer feedback */}
         {customer.customer_feedback !== null && (
           <div className="mt-3">
-            <div className="text-red-500">Image Rejected by customer</div>
+            {/* <div className="text-red-500">Image Rejected by customer</div> */}
           <div className="text-xl font-bold">Customer Feedback</div>
           <div className=" py-2 px-3 bg-gray-50 rounded-lg w-1/2">
             {customer.customer_feedback}
@@ -533,6 +690,9 @@ export default function ShowCustomer() {
           </div>
         )}
       </div>
+
+      
+
       {showModal && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 modal-overlay"
@@ -562,11 +722,13 @@ export default function ShowCustomer() {
               <button
                 className="px-4 py-2 bg-green-500 text-white rounded"
                 onClick={() => {
-                  handleApproveStyle();
+                  // handleApproveStyle();
+                  openPriceModal();
+                  handelSetPrice();
                   closeModal();
                 }}
               >
-                Approve
+                Send to Customer
               </button>
               <button
                 className="px-4 py-2 bg-red-500 text-white rounded"

@@ -3,15 +3,83 @@
 import Spinner from "@/components/Spinner";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function EditCustomer() {
+  const [isDisabled, setIsDisabled] = useState(false);
+  const [realTestdata, setRealTestdata] = useState<{
+    duration: string;
+    order_status: string;
+    first_fitting_date: Date | null;
+    second_fitting_date: Date | null;
+  }>({
+    duration: "",
+    order_status: "",
+    first_fitting_date: null,
+    second_fitting_date: null,
+  });
+
+  const handleDateChange = (date: Date | null, field: string) => {
+    setRealTestdata({
+      ...realTestdata,
+      [field]: date,
+    });
+  };
+
+  const handleTestSubmit = async (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+    // Add validation to ensure dates are not in the past
+    const today = new Date();
+    if (
+      (realTestdata.first_fitting_date &&
+        realTestdata.first_fitting_date < today) ||
+      (realTestdata.second_fitting_date &&
+        realTestdata.second_fitting_date < today)
+    ) {
+      alert("Fitting dates cannot be in the past.");
+      return;
+    }
+    // Handle form submission logic here
+    console.log(realTestdata);
+
+    e.preventDefault();
+    setError(null);
+
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      const response = await fetch(`/api/editproject/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(realTestdata),
+      });
+
+      // Log the response for debugging
+      console.log(response);
+
+      if (!response.ok) {
+        throw new Error("Failed to update customer data");
+      }
+
+      router.push("/admin/joblists/projects");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
+    }
+  };
+
   const router = useRouter();
   const { id } = useParams();
-   const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [customer, setCustomer] = useState(null)
+  const [customer, setCustomer] = useState(null);
   const [formData, setFormData] = useState({
-    customer_name: "",
     age: "",
     bust: "",
     waist: "",
@@ -25,13 +93,13 @@ export default function EditCustomer() {
     front_length: "",
     high_bust: "",
     manager_id: "",
+    order_id: "",
+    customer_approval: "",
   });
-const [realdata, setRealdata] = useState({
-  manager_id: "",
-  amount: "",
-  customer_name: "",
-})
-
+  const [realdata, setRealdata] = useState({
+    manager_id: "",
+    duration: "",
+  });
 
   const [managers, setManagers] = useState<
     {
@@ -61,7 +129,6 @@ const [realdata, setRealdata] = useState({
       const result = await response.json();
       setCustomer(result.data);
       setFormData({
-        customer_name: result.data.customer_name,
         age: result.data.age,
         bust: result.data.bust,
         waist: result.data.waist,
@@ -75,6 +142,8 @@ const [realdata, setRealdata] = useState({
         front_length: result.data.front_length,
         high_bust: result.data.high_bust,
         manager_id: result.data.manager_id, // Set the current manager_id
+        order_id: result.data.order_id,
+        customer_approval: result.data.customer_approval,
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -96,7 +165,6 @@ const [realdata, setRealdata] = useState({
           Authorization: `Bearer ${accessToken}`,
         },
       });
-
 
       if (!response.ok) {
         throw new Error("Failed to fetch managers");
@@ -121,6 +189,12 @@ const [realdata, setRealdata] = useState({
       [e.target.name]: e.target.value,
     });
   };
+  const handleInputTestChange = (e: { target: { name: any; value: any } }) => {
+    setRealTestdata({
+      ...realTestdata,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -137,9 +211,8 @@ const [realdata, setRealdata] = useState({
         body: JSON.stringify(realdata),
       });
 
-      
-        // Log the response for debugging
-    console.log(response);
+      // Log the response for debugging
+      console.log(response);
 
       if (!response.ok) {
         throw new Error("Failed to update customer data");
@@ -180,42 +253,24 @@ const [realdata, setRealdata] = useState({
   }
 
   return (
-    <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+    <div className="w-full h-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <label className="block text-gray-700 font-bold">Full Name</label>
+            <label className="block text-gray-700 font-bold">Order ID</label>
             <input
               type="text"
-              name="name"
-              value={formData.customer_name}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Age</label>
-            <input
-              type="text"
-              name="age"
-              value={formData.age}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Gender</label>
-            <input
-              type="text"
-              name="gender"
-              value={formData.gender || ""}
+              name="order_id"
+              value={formData.order_id || ""}
               onChange={handleInputChange}
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
-          
+
           <div>
-            <label className="block text-gray-700 font-bold">Head of Tailoring</label>
+            <label className="block text-gray-700 font-bold">
+              Head of Tailoring
+            </label>
             <select
               name="manager_id"
               value={realdata.manager_id}
@@ -232,166 +287,7 @@ const [realdata, setRealdata] = useState({
           </div>
         </div>
 
-        <div className="w-full">
-          {/* Measurement Fields */}
-          <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
-            Measurements
-          </div>
-          <div className="mb-4">
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="bust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Bust
-                </label>
-                <input
-                  type="number"
-                  id="bust"
-                  name="bust"
-                  value={formData.bust || ""}
-                  placeholder="Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="waist"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Waist
-                </label>
-                <input
-                  type="number"
-                  id="waist"
-                  name="waist"
-                  value={formData.waist || ""}
-                  placeholder="Waist"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="hips"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  hips
-                </label>
-                <input
-                  type="number"
-                  id="hips"
-                  name="hips"
-                  value={formData.hips || ""}
-                  placeholder="hips"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-            </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="shoulder_width"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Shoulder Width
-                </label>
-                <input
-                  type="number"
-                  id="shoulder_width"
-                  name="shoulder_width"
-                  value={formData.shoulder_width || ""}
-                  placeholder="Shoulder Width"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="neck"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Neck
-                </label>
-                <input
-                  type="number"
-                  id="neck"
-                  name="neck"
-                  value={formData.neck || ""}
-                  placeholder="Neck"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="arm_length"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Arm Length
-                </label>
-                <input
-                  type="number"
-                  id="arm_length"
-                  name="arm_length"
-                  value={formData.arm_length || ""}
-                  placeholder="Arm Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-            </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="back_length"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Back Length
-                </label>
-                <input
-                  type="number"
-                  id="back_length"
-                  name="back_length"
-                  value={formData.back_length || ""}
-                  placeholder="Back Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="front_length"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Front Length
-                </label>
-                <input
-                  type="number"
-                  id="front_length"
-                  name="front_length"
-                  value={formData.front_length || ""}
-                  placeholder="Front Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="high_bust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  High Bust
-                </label>
-                <input
-                  type="number"
-                  id="high_bust"
-                  name="high_bust"
-                  value={formData.high_bust || ""}
-                  placeholder="High Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-span-2">
+        <div className="col-span-2 mt-10">
           <button
             type="submit"
             className="px-4 py-2 bg-orange-500 text-white rounded"
@@ -407,6 +303,84 @@ const [realdata, setRealdata] = useState({
           </button>
         </div>
       </form>
+
+      {formData.customer_approval === "Approved" && (
+        <div className={`my-10 mt-10`}>
+          <h1 className="text-2xl font-bold">Add Other details</h1>
+
+          <form onSubmit={handleTestSubmit}>
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-gray-700 font -bold">
+                  Duration ( days )
+                </label>
+                <input
+                  type="text"
+                  name="duration"
+                  value={realTestdata.duration}
+                  onChange={handleInputTestChange}
+                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-bold">
+                  Order Status
+                </label>
+                <select
+                  name="order_status"
+                  value={realTestdata.order_status}
+                  onChange={handleInputTestChange}
+                  className="px-4 py-2 border rounded w-full"
+                >
+                  <option value="transfer">Pending</option>
+                  <option value="processing">Processing</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+              <div className="w-full">
+                <label className="block text-gray-700 font-bold">
+                  First Fitting Date
+                </label>
+                <div className="w-full">
+                  <DatePicker
+                    selected={realTestdata.first_fitting_date}
+                    onChange={(date) =>
+                      handleDateChange(date, "first_fitting_date")
+                    }
+                    dateFormat="dd/MM/yyyy"
+                    className="w-full border placeholder:w-full border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                    placeholderText="Select a date"
+                    filterDate={(date) => date >= new Date()} // Disable past dates
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-bold">
+                  Second Fitting Date
+                </label>
+                <DatePicker
+                  selected={realTestdata.second_fitting_date}
+                  onChange={(date) =>
+                    handleDateChange(date, "second_fitting_date")
+                  }
+                  dateFormat="dd/MM/yyyy"
+                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                  placeholderText="Select a date"
+                  filterDate={(date) => date >= new Date()} // Disable past dates
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-orange-500 text-white rounded"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

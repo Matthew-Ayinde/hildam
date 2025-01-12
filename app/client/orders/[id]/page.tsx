@@ -28,6 +28,9 @@ export default function ShowCustomer() {
     project_manager_amount: string;
     clothing_description: string;
     clothing_name: string;
+    duration: string;
+    first_fitting_date: string;
+    second_fitting_date: string;
     order_id: string;
     priority: string;
     order_status: string;
@@ -82,6 +85,9 @@ export default function ShowCustomer() {
           frontLength: result.data.front_length || 0,
           clothing_description: result.data.clothing_description || "N/A",
           clothing_name: result.data.clothing_name || "N/A",
+          first_fitting_date: result.data.first_fitting_date || "N/A",
+          second_fitting_date: result.data.second_fitting_date || "N/A",
+          duration: result.data.duration || "N/A",
           order_id: result.data.order_id || "N/A",
           priority: result.data.priority || "N/A",
           order_status: result.data.order_status || "N/A",
@@ -120,7 +126,7 @@ export default function ShowCustomer() {
     setIsFeedbackModalOpen(false);
     setCustomerFeedback(""); // Reset feedback when closing modal
   };
-
+ 
   const handleApproveStyle = async () => {
     setLoading(true);
     setError(null);
@@ -190,7 +196,7 @@ export default function ShowCustomer() {
       // Remove the image from the page
       setCustomer((prev) => prev ? {
         ...prev,
-        tailor_job_image: null as string, // Remove the image
+        tailor_job_image: null as unknown as string, // Remove the image
       } : null);
 
       // Show toast notification for 5 seconds
@@ -244,6 +250,9 @@ export default function ShowCustomer() {
           <div className="font-bold me-3">Client Manager:</div> {customer.manager_name}
         </div>
       </div>
+
+      <div className="my-3 font-bold text-2xl text-center">Order Information</div>
+
       <form>
         <div className="grid grid-cols-2 gap-6 mb-5">
           <div>
@@ -293,15 +302,7 @@ export default function ShowCustomer() {
           </div>
         </div>
         <div className="w-full">
-          <label className="block text-gray-700 font-bold">Address</label>
-          <textarea
-            value={customer.address}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div className="w-full">
-          <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">Measurements</div>
+          <div className="block text-xl text-gray-700 font-bold mt-10 mb-1">Measurements</div>
           <div className="mb-4">
             <div className="flex space-x-4 mb-4">
               <div className="w-1/3">
@@ -447,6 +448,7 @@ export default function ShowCustomer() {
               <div className ="text-red-500 mt-2">Style Rejected</div>
             )}
           </div>
+          <div className="text-sm my-5">Please click to open</div>
         </div>
       )}
       {isModalOpen && (
@@ -460,7 +462,10 @@ export default function ShowCustomer() {
             />
             <div className="mt-4 flex justify-between">
               <button 
-                onClick={handleApproveStyle} 
+                onClick={
+                  //use the router to push to the make payment page
+                  () => router.push(`/client/orders/${id}/make-payment`)
+                } 
                 className={`px-4 py-2 ${customer.approval === "Approved" ? "bg-gray-500" : "bg-green-500"} text-white rounded`}
                 disabled={customer.approval === "Approved"}
               >
@@ -499,6 +504,62 @@ export default function ShowCustomer() {
           </div>
         </div>
       )}
+
+      {customer.first_fitting_date === null && (
+              <div className={`my-10 mt-10`}>
+                <h1 className="text-2xl font-bold">Other details</h1>
+      
+                <form className="my-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-gray-700 font -bold">
+                        Duration ( days )
+                      </label>
+                      <input
+                        className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                        type="text"
+                        name="duration"
+                        value={customer.duration}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 font-bold">
+                        Order Status
+                      </label>
+                      <input
+                        type="text"
+                        name="duration"
+                        value={customer.order_status}
+                        className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                      />
+                    </div>
+                    <div className="w-full">
+                      <label className="block text-gray-700 font-bold">
+                        First Fitting Date
+                      </label>
+                      <input
+                        className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                        type="text"
+                        name="duration"
+                        value={customer.first_fitting_date}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 font-bold">
+                        Second Fitting Date
+                      </label>
+                      <input
+                        className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                        type="text"
+                        name="duration"
+                        value={customer.second_fitting_date}
+                      />
+                    </div>
+                  </div>
+                </form>
+              </div>
+            )}
+
       <div className="mt-6 flex justify-end space-x-4">
         <div
           className="px-4 py-2 bg-orange-500 text-white rounded"

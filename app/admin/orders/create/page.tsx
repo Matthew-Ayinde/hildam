@@ -19,6 +19,7 @@ const Form = () => {
     photo: File | null;
     bust: string;
     waist: string;
+    style_reference_images: File | null;
     hips: string;
     shoulderWidth: string;
     neck: string;
@@ -43,6 +44,7 @@ const Form = () => {
     photo: null,
     bust: "",
     waist: "",
+    style_reference_images: null,
     hips: "",
     shoulderWidth: "",
     neck: "",
@@ -64,6 +66,7 @@ const Form = () => {
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [popupMessage, setPopupMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null); // State for image preview
 
   useEffect(() => {
     const fetchProjectManagers = async () => {
@@ -104,8 +107,20 @@ const Form = () => {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type } = e.target;
+    if (type === "file" && e.target instanceof HTMLInputElement) {
+      const file = e.target.files ? e.target.files[0] : null;
+      setFormData({ ...formData, [name]: file });
+      // Create a URL for the selected image
+      if (file) {
+        const fileURL = URL.createObjectURL(file);
+        setImagePreview(fileURL); // Set the image preview URL
+      } else {
+        setImagePreview(null); // Reset the preview if no file is selected
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -121,34 +136,38 @@ const Form = () => {
       return;
     }
 
-    const payload = {
-      customer_name: formData.customer_name,
-      customer_description: formData.customer_description,
-      customer_email: formData.customer_email,
-      clothing_name: formData.clothing_name,
-      hips: formData.hips,
-      bust: formData.bust,
-      waist: formData.waist,
-      clothing_description: formData.clothing_description,
-      order_status: formData.order_status,
-      priority: formData.priority,
-      shoulder_width: formData.shoulderWidth,
-      neck: formData.neck,
-      arm_length: formData.armLength,
-      back_length: formData.backLength,
-      front_length: formData.frontLength,
-      high_bust: formData.highBust,
-      manager_id: formData.manager_id, // Include selected manager ID
-    };
+    const payload = new FormData();
+    payload.append("customer_name", formData.customer_name);
+    payload.append("customer_description", formData.customer_description);
+    payload.append("customer_email", formData.customer_email);
+    payload.append("clothing_name", formData.clothing_name?.toString() || "");
+    payload.append("hips", formData.hips);
+    payload.append("bust", formData.bust);
+    payload.append("waist", formData.waist);
+    if (formData.style_reference_images) {
+      payload.append("style_reference_images", formData.style_reference_images);
+    }
+    payload.append(
+      "clothing_description",
+      formData.clothing_description?.toString() || ""
+    );
+    payload.append("order_status", formData.order_status?.toString() || "");
+    payload.append("priority", formData.priority?.toString() || "");
+    payload.append("shoulder_width", formData.shoulderWidth);
+    payload.append("neck", formData.neck);
+    payload.append("arm_length", formData.armLength);
+    payload.append("back_length", formData.backLength);
+    payload.append("front_length", formData.frontLength);
+    payload.append("high_bust", formData.highBust);
+    payload.append("manager_id", formData.manager_id); // Include selected manager ID
 
     try {
       const response = await fetch("/api/createorder", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify(payload),
+        body: payload,
       });
 
       if (response.ok) {
@@ -169,6 +188,7 @@ const Form = () => {
           photo: null,
           bust: "",
           waist: "",
+          style_reference_images: null,
           hips: "",
           shoulderWidth: "",
           neck: "",
@@ -178,6 +198,7 @@ const Form = () => {
           highBust: "",
           manager_id: "", // Reset manager ID
         });
+        setImagePreview(null); // Reset image preview
 
         // Automatically hide response message after 5 seconds
         setTimeout(() => {
@@ -201,7 +222,6 @@ const Form = () => {
         onSubmit={handleSubmit}
         className="w-full bg-white rounded-lg shadow-md p-6"
       >
-        
         {/* Name and Gender */}
         <div className="font-bold text-gray-500 text-xl my-3">
           Order Information
@@ -225,10 +245,9 @@ const Form = () => {
               required
             />
           </div>
-         
           <div className="">
             <label
-              htmlFor="name"
+              htmlFor="customer_email"
               className="block text-sm font-medium text-gray-700"
             >
               Email
@@ -246,7 +265,7 @@ const Form = () => {
           </div>
           <div className="">
             <label
-              htmlFor="name"
+              htmlFor="phone"
               className="block text-sm font-medium text-gray-700"
             >
               Phone
@@ -284,60 +303,8 @@ const Form = () => {
               <option value="low">Low</option>
             </select>
           </div>
-          <div className="">
-            <label
-              htmlFor="order_status"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Order Status
-            </label>
-            <select
-              id="order_status"
-              name="order_status"
-              value={formData.order_status}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
-              required
-            >
-              <option value="" disabled>
-                Select Order Status
-              </option>
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="completed">Completed</option>
-            </select>
-          </div>
           
-        {/* Project Manager Dropdown */}
-        <div className="mb-5">
-          <label
-            htmlFor="manager_id"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Select Project Manager
-          </label>
-          {loadingManagers ? (
-            <div className="text-center text-gray-500 mt-2">Loading...</div>
-          ) : (
-            <select
-              id="manager_id"
-              name="manager_id"
-              value={formData.manager_id}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
-            >
-              <option value="">Select project manager</option>
-              {managers.map((manager) => (
-                <option key={manager.id} value={manager.user_id}>
-                  {manager.name}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        <div className="">
+          <div className="">
             <label
               htmlFor="customer_description"
               className="block text-sm font-medium text-gray-700"
@@ -345,7 +312,7 @@ const Form = () => {
               Customer Description
             </label>
             <textarea
-              rows={3}
+              rows={4}
               id="customer_description"
               name="customer_description"
               value={formData.customer_description}
@@ -355,9 +322,6 @@ const Form = () => {
               required
             />
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
           <div className="">
             <label
               htmlFor="clothing_name"
@@ -366,6 +330,7 @@ const Form = () => {
               Cloth Name
             </label>
             <textarea
+              rows={3}
               id="clothing_name"
               name="clothing_name"
               value={formData.clothing_name}
@@ -376,7 +341,7 @@ const Form = () => {
           </div>
           <div className="">
             <label
-              htmlFor="description"
+              htmlFor="clothing_description"
               className="block text-sm font-medium text-gray-700"
             >
               Clothing Description
@@ -390,6 +355,59 @@ const Form = () => {
               className="mt-1 block w-full h-24 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
             />
           </div>
+      
+          <div className="">
+            <label
+              htmlFor="style_reference_images"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Style Reference Images
+            </label>
+            <input
+              type="file"
+              id="style_reference_images"
+              name="style_reference_images"
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+            />
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Selected"
+                className="mt-2 w-24 h-24 object-cover rounded-lg"
+              />
+            )}
+          </div>
+
+              {/* Project Manager Dropdown */}
+              <div className="mb-5">
+            <label
+              htmlFor="manager_id"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Select Project Manager
+            </label>
+            {loadingManagers ? (
+              <div className="text-center text-gray-500 mt-2">Loading...</div>
+            ) : (
+              <select
+                id="manager_id"
+                name="manager_id"
+                value={formData.manager_id}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
+              >
+                <option value="">Select project manager</option>
+                {managers.map((manager) => (
+                  <option key={manager.id} value={manager.user_id}>
+                    {manager.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
         </div>
 
         {/* Measurement Fields */}
@@ -557,8 +575,6 @@ const Form = () => {
             </div>
           </div>
         </div>
-
-        {/* Photo Upload */}
 
         {/* Submit Button */}
         <div className="mt-6">

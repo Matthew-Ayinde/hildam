@@ -6,6 +6,17 @@ import { useEffect, useState } from "react";
 import Image from "next/image"; // Import Next.js Image component
 
 export default function ShowCustomer() {
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+
+  const handleCustomerImageClick = () => {
+    setIsCustomerModalOpen(true);
+  };
+
+  const handleCustomerCloseModal = () => {
+    setIsCustomerModalOpen(false);
+  };
+
+
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -35,6 +46,7 @@ export default function ShowCustomer() {
     high_bust: number;
     tailor_image?: string;
     project_manager_approval?: string;
+    style_reference_images?: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -83,6 +95,7 @@ export default function ShowCustomer() {
           tailor_image: result.data.tailor_image || null,
           project_manager_approval: result.data.project_manager_approval || null,
           customer_feedback: result.data.customer_feedback || null,
+          style_reference_images: result.data.style_reference_images || null,
         };
         setCustomer(mappedCustomer);
       } else {
@@ -285,6 +298,47 @@ export default function ShowCustomer() {
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
+          </div>
+          <div>
+          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+            <div className="">
+              <label className="block text-gray-700 font-bold">
+                Customer Style
+              </label>
+              <img
+                src={customer.style_reference_images}
+                alt="style_reference_images"
+                className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
+                onClick={handleCustomerImageClick} // Open modal on click
+              />
+              <div className="text-sm my-2">Click to view</div>
+            </div>
+
+            {isCustomerModalOpen && (
+              <div
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+                onClick={handleCustomerCloseModal}
+              >
+                <div
+                  className="bg-white rounded-lg p-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img
+                    src={customer.style_reference_images}
+                    alt="Style Reference"
+                    className="w-[500px] h-[500px] object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = ""; // Clear the image source
+                      e.currentTarget.alt = "Image failed to load"; // Update alt text
+                    }}
+                  />
+                  {/* <p className="text-red-500 text-center mt-2">
+                    Image failed to load
+                  </p> */}
+                </div>
+              </div>
+            )}
+          </div>
           </div>
         </div>
         <div className="w-full">
@@ -493,7 +547,7 @@ export default function ShowCustomer() {
                 className="h-24 w-24 rounded-lg object-cover"
               />
               <div className="text-gray-700 mt-2">
-                Image uploaded successfully!
+                Image sent, awaiting approval
               </div>
               <button
                 onClick={handleSendToProjectManager}

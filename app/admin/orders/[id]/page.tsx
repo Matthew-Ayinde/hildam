@@ -5,6 +5,16 @@ import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ShowCustomer() {
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+
+  const handleCustomerImageClick = () => {
+    setIsCustomerModalOpen(true);
+  };
+
+  const handleCustomerCloseModal = () => {
+    setIsCustomerModalOpen(false);
+  };
+
   const router = useRouter();
   const { id } = useParams();
   interface Customer {
@@ -26,12 +36,12 @@ export default function ShowCustomer() {
     project_manager_order_status: string;
     project_manager_amount: string;
     clothing_description: string;
+    style_reference_images: string;
     clothing_name: string;
     order_id: string;
     priority: string;
     order_status: string;
     customer_description: string;
-
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -76,11 +86,13 @@ export default function ShowCustomer() {
           frontLength: result.data.front_length || 0,
           clothing_description: result.data.clothing_description || "N/A",
           clothing_name: result.data.clothing_name || "N/A",
+          style_reference_images: result.data.style_reference_images || "N/A",
           order_id: result.data.order_id || "N/A",
           priority: result.data.priority || "N/A",
           order_status: result.data.order_status || "N/A",
           customer_description: result.data.customer_description || "N/A",
-          project_manager_order_status: result.data.project_manager_order_status || "N/A",
+          project_manager_order_status:
+            result.data.project_manager_order_status || "N/A",
           project_manager_amount: result.data.project_manager_amount || "N/A",
           manager_name: result.data.manager_name || "N/A",
         };
@@ -104,9 +116,11 @@ export default function ShowCustomer() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">
-      <Spinner />
-    </div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -133,8 +147,10 @@ export default function ShowCustomer() {
         >
           Back to List
         </button>
-      <div className="text-end font-bond text-lg text-gray-700 flex flex-row"><div className="font-bold me-3">Project Manager:</div> {customer.manager_name}</div>
-
+        <div className="text-end font-bond text-lg text-gray-700 flex flex-row">
+          <div className="font-bold me-3">Project Manager:</div>{" "}
+          {customer.manager_name}
+        </div>
       </div>
       <form>
         <div className="grid grid-cols-2 gap-6 mb-5">
@@ -175,7 +191,9 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Order Status</label>
+            <label className="block text-gray-700 font-bold">
+              Order Status
+            </label>
             <input
               type="text"
               value={customer.order_status}
@@ -193,7 +211,9 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Customer Name</label>
+            <label className="block text-gray-700 font-bold">
+              Customer Name
+            </label>
             <input
               type="text"
               value={customer.fullName}
@@ -229,7 +249,9 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Customer Email</label>
+            <label className="block text-gray-700 font-bold">
+              Customer Email
+            </label>
             <input
               type="text"
               value={customer.email}
@@ -238,7 +260,9 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Project Manager Order Status</label>
+            <label className="block text-gray-700 font-bold">
+              Project Manager Order Status
+            </label>
             <input
               type="text"
               value={customer.project_manager_order_status}
@@ -257,7 +281,7 @@ export default function ShowCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
-          <div className=" mb-6">
+          <div className="">
             <div className="block text-gray-700 font-bold">
               Clothing Description
             </div>
@@ -268,15 +292,55 @@ export default function ShowCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
+          <div className="">
+            <label className="block text-gray-700 font-bold">Address</label>
+            <textarea
+              value={customer.address}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
         </div>
-        <div className="w-full">
-          <label className="block text-gray-700 font-bold">Address</label>
-          <textarea
-            value={customer.address}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
+
+        <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+            <div className="">
+              <label className="block text-gray-700 font-bold">
+                Customer Style
+              </label>
+              <img
+                src={customer.style_reference_images}
+                alt="style_reference_images"
+                className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
+                onClick={handleCustomerImageClick} // Open modal on click
+              />
+            </div>
+
+            {isCustomerModalOpen && (
+              <div
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+                onClick={handleCustomerCloseModal}
+              >
+                <div
+                  className="bg-white rounded-lg p-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img
+                    src={customer.style_reference_images}
+                    alt="Style Reference"
+                    className="w-[500px] h-[500px] object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = ""; // Clear the image source
+                      e.currentTarget.alt = "Image failed to load"; // Update alt text
+                    }}
+                  />
+                  {/* <p className="text-red-500 text-center mt-2">
+                    Image failed to load
+                  </p> */}
+                </div>
+              </div>
+            )}
+          </div>
+
         <div className="w-full">
           {/* Measurement Fields */}
           <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
@@ -446,12 +510,6 @@ export default function ShowCustomer() {
         </div>
       </form>
       <div className="mt-6 flex justify-end space-x-4">
-      <div
-          className="px-4 py-2 bg-gray-500 text-white rounded"
-          onClick={() => router.push(`/admin/orders/${id}/assign-manager`)}
-        >
-          Assign Project Manager
-        </div>
         <div
           className="px-4 py-2 bg-orange-500 text-white rounded"
           onClick={() => router.push(`/admin/orders/${id}/edit`)}
