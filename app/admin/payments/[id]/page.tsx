@@ -5,12 +5,22 @@ import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ShowCustomer() {
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+
+  const handleCustomerImageClick = () => {
+    setIsCustomerModalOpen(true);
+  };
+
+  const handleCustomerCloseModal = () => {
+    setIsCustomerModalOpen(false);
+  };
   const router = useRouter();
   const { id } = useParams();
   interface Customer {
     [x: string]: string | number | readonly string[] | undefined;
     fullName: string;
-    gender: string;
+    phone_number: string;
+    payment_receipt: string;
     phone: string;
     date: string;
     email: string;
@@ -23,13 +33,14 @@ export default function ShowCustomer() {
     armLength: number;
     backLength: number;
     frontLength: number;
-    project_manager_order_status: string;
+    project_manager_payment_method: string;
     project_manager_amount: string;
     clothing_description: string;
     clothing_name: string;
     order_id: string;
-    priority: string;
-    order_status: string;
+    customer_email: string;
+    payment_method: string;
+    payment_status: string;
     customer_description: string;
 
   }
@@ -44,7 +55,7 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/orderslist/${id}`, {
+      const response = await fetch(`/api/payment/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -60,8 +71,10 @@ export default function ShowCustomer() {
       if (result.data) {
         const mappedCustomer: Customer = {
           fullName: result.data.customer_name || "N/A",
-          gender: result.data.gender || "N/A",
+          phone_number: result.data.phone_number || "N/A",
+          payment_receipt: result.data.payment_receipt || "N/A",
           phone: result.data.phone_number || "N/A",
+          payment_status: result.data.payment_status || "N/A",
           date: new Date().toLocaleDateString(), // Placeholder date if not provided
           email: result.data.customer_email || "N/A",
           address: result.data.address || "N/A",
@@ -77,10 +90,10 @@ export default function ShowCustomer() {
           clothing_description: result.data.clothing_description || "N/A",
           clothing_name: result.data.clothing_name || "N/A",
           order_id: result.data.order_id || "N/A",
-          priority: result.data.priority || "N/A",
-          order_status: result.data.order_status || "N/A",
+          customer_email: result.data.customer_email || "N/A",
+          payment_method: result.data.payment_method || "N/A",
           customer_description: result.data.customer_description || "N/A",
-          project_manager_order_status: result.data.project_manager_order_status || "N/A",
+          project_manager_payment_method: result.data.project_manager_payment_method || "N/A",
           project_manager_amount: result.data.project_manager_amount || "N/A",
           manager_name: result.data.manager_name || "N/A",
         };
@@ -133,61 +146,15 @@ export default function ShowCustomer() {
         >
           Back to List
         </button>
-      <div className="text-end font-bond text-lg text-gray-700 flex flex-row"><div className="font-bold me-3">Project Manager:</div> {customer.manager_name}</div>
 
       </div>
       <form>
         <div className="grid grid-cols-2 gap-6 mb-5">
           <div>
-            <label className="block text-gray-700 font-bold">ID</label>
-            <input
-              type="text"
-              value={id}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
             <label className="block text-gray-700 font-bold">Order ID</label>
             <input
               type="text"
               value={customer.order_id}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Cloth Name</label>
-            <input
-              type="text"
-              value={customer.clothing_name}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Priority</label>
-            <input
-              type="text"
-              value={customer.priority}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Order Status</label>
-            <input
-              type="text"
-              value={customer.order_status}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Full Name</label>
-            <input
-              type="text"
-              value={customer.fullName}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
@@ -202,28 +169,10 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Gender</label>
+            <label className="block text-gray-700 font-bold">Cloth Name</label>
             <input
               type="text"
-              value={customer.gender}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Phone</label>
-            <input
-              type="text"
-              value={customer.phone}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Create Date</label>
-            <input
-              type="text"
-              value={customer.date}
+              value={customer.clothing_name}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
@@ -232,229 +181,92 @@ export default function ShowCustomer() {
             <label className="block text-gray-700 font-bold">Customer Email</label>
             <input
               type="text"
-              value={customer.email}
+              value={customer.customer_email}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Project Manager Order Status</label>
+            <label className="block text-gray-700 font-bold">Payment Method</label>
             <input
               type="text"
-              value={customer.project_manager_order_status}
+              value={customer.payment_method}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
-          <div className="">
-            <div className="block text-gray-700 font-bold">
-              Customer Description
-            </div>
-            <textarea
-              rows={1}
-              value={customer.customer_description}
+          <div>
+            <label className="block text-gray-700 font-bold">Payment Status</label>
+            <input
+              type="text"
+              value={customer.payment_status}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
-          <div className=" mb-6">
-            <div className="block text-gray-700 font-bold">
-              Clothing Description
-            </div>
-            <textarea
-              rows={1}
-              value={customer.clothing_description}
+          <div>
+            <label className="block text-gray-700 font-bold">Phone Number</label>
+            <input
+              type="text"
+              value={customer.phone_number}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
-        </div>
-        <div className="w-full">
-          <label className="block text-gray-700 font-bold">Address</label>
-          <textarea
-            value={customer.address}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div className="w-full">
-          {/* Measurement Fields */}
-          <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
-            Measurements
+          <div>
+            <label className="block text-gray-700 font-bold">Date</label>
+            <input
+              type="text"
+              value={customer.date}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
           </div>
-          <div className="mb-4">
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="bust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Bust
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="bust"
-                  name="bust"
-                  value={customer.bust}
-                  placeholder="Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="waist"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Waist
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="waist"
-                  name="waist"
-                  value={customer.waist}
-                  placeholder="Waist"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="hips"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Hips
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="hips"
-                  name="hips"
-                  value={customer.hip}
-                  placeholder="Hips"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+            <div className="">
+              <label className="block text-gray-700 font-bold">
+                Proof of Payment
+              </label>
+              <img
+                src={typeof customer.payment_receipt === 'string' ? customer.payment_receipt : undefined}
+                alt="style_reference_images"
+                className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
+                onClick={handleCustomerImageClick} // Open modal on click
+              />
+              <div className="text-sm my-2">Click to view</div>
             </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="shoulderWidth"
-                  className="block text-sm font-medium text-gray-700"
+
+            {isCustomerModalOpen && (
+              <div
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+                onClick={handleCustomerCloseModal}
+              >
+                <div
+                  className="bg-white rounded-lg p-4"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  Shoulder Width
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="shoulderWidth"
-                  name="shoulderWidth"
-                  value={customer.shoulderWidth}
-                  placeholder="Shoulder Width"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
+                  <img
+                    src={customer.payment_receipt}
+                    alt="Style Reference"
+                    className="w-[500px] h-[500px] object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = ""; // Clear the image source
+                      e.currentTarget.alt = "Image failed to load"; // Update alt text
+                    }}
+                  />
+                  {/* <p className="text-red-500 text-center mt-2">
+                    Image failed to load
+                  </p> */}
+                </div>
               </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="neck"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Neck
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="neck"
-                  name="neck"
-                  value={customer.neck}
-                  placeholder="Neck"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="armLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Arm Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="armLength"
-                  name="armLength"
-                  value={customer.armLength}
-                  placeholder="Arm Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-            </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="backLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Back Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="backLength"
-                  name="backLength"
-                  value={customer.backLength}
-                  placeholder="Back Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="frontLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Front Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="frontLength"
-                  name="frontLength"
-                  value={customer.frontLength}
-                  placeholder="Front Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="highBust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  High Bust
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="highBust"
-                  name="highBust"
-                  value={customer.highBust}
-                  placeholder="High Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </form>
       <div className="mt-6 flex justify-end space-x-4">
-      <div
-          className="px-4 py-2 bg-gray-500 text-white rounded"
-          onClick={() => router.push(`/admin/orders/${id}/assign-manager`)}
-        >
-          Assign Project Manager
-        </div>
         <div
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/admin/orders/${id}/edit`)}
+          onClick={() => router.push(`/admin/payments/${id}/edit`)}
         >
           Edit
         </div>

@@ -11,6 +11,7 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { GoClock } from "react-icons/go";
 import { useRouter } from "next/navigation";
+import Spinner from "@/components/Spinner";
 
 
 export default function Table() {
@@ -100,7 +101,9 @@ export default function Table() {
   }, []);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">Loading...</div>;
+    return <div className="text-center text-gray-500 py-10">
+      <Spinner />
+    </div>;
   }
 
   
@@ -205,7 +208,7 @@ export default function Table() {
           <span className="font-bold">
             {Math.min(currentPage * rowsPerPage, data.length)}
           </span>{" "}
-          of <span className="font-bold">{data.length}</span> Orders
+          of <span className="font-bold">{data.length}</span> Projects
         </div>
         <div className="flex items-center space-x-2">
           <button

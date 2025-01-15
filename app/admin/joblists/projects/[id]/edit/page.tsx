@@ -287,12 +287,12 @@ export default function EditCustomer() {
           </div>
         </div>
 
-        <div className="col-span-2 mt-10">
+        <div className="col-span-2 mt-10 flex justify-end">
           <button
             type="submit"
             className="px-4 py-2 bg-orange-500 text-white rounded"
           >
-            Save Changes
+            Save the Changes
           </button>
           <button
             type="button"

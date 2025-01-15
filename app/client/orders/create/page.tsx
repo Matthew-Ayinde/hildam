@@ -15,7 +15,7 @@ const Form = () => {
     customer_email: string;
     address: string;
     description: string;
-    photo: File | null;
+    style_reference_images: File | null;
     bust: string;
     waist: string;
     hips: string;
@@ -37,7 +37,7 @@ const Form = () => {
     customer_email: "",
     address: "",
     description: "",
-    photo: null,
+    style_reference_images: null,
     bust: "",
     waist: "",
     hips: "",
@@ -53,17 +53,20 @@ const Form = () => {
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [popupMessage, setPopupMessage] = useState("");
   const [dragging, setDragging] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null); // State for image preview
+  
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setFormData({ ...formData, photo: file });
+    setFormData({ ...formData, style_reference_images: file });
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (file) {
-      setFormData({ ...formData, photo: file });
+      setFormData({ ...formData, style_reference_images: file });
     }
     setDragging(false);
   };
@@ -77,13 +80,25 @@ const Form = () => {
     setDragging(false);
   };
 
-  const handleChange = (
+const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type } = e.target;
+    if (type === "file" && e.target instanceof HTMLInputElement) {
+      const file = e.target.files ? e.target.files[0] : null;
+      setFormData({ ...formData, [name]: file });
+      // Create a URL for the selected image
+      if (file) {
+        const fileURL = URL.createObjectURL(file);
+        setImagePreview(fileURL); // Set the image preview URL
+      } else {
+        setImagePreview(null); // Reset the preview if no file is selected
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,6 +130,7 @@ const Form = () => {
       back_length: formData.backLength,
       front_length: formData.frontLength,
       high_bust: formData.highBust,
+      style_reference_images: formData.style_reference_images,
     };
 
     try {
@@ -141,7 +157,7 @@ const Form = () => {
           customer_email: "",
           address: "",
           description: "",
-          photo: null,
+          style_reference_images: null,
           bust: "",
           waist: "",
           hips: "",
@@ -186,8 +202,8 @@ const Form = () => {
           
         </div>
 
-        <div className="w-full flex flex-row space-x-4">
-          <div className="mb-4 w-1/2">
+        <div className="w-full grid grid-cols-2 space-x-4">
+          <div className="mb-4">
             <label
               htmlFor="clothing_name"
               className="block text-sm font-medium text-gray-700"
@@ -203,7 +219,7 @@ const Form = () => {
               className="mt-1 block w-full h-24 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
             />
           </div>
-          <div className="mb-4 w-1/2">
+          <div className="mb-4">
             <label
               htmlFor="description"
               className="block text-sm font-medium text-gray-700"
@@ -218,6 +234,28 @@ const Form = () => {
               placeholder="Cloth Description"
               className="mt-1 block w-full h-24 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
             />
+          </div>
+          <div className="">
+            <label
+              htmlFor="style_reference_images"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Style Reference Images
+            </label>
+            <input
+              type="file"
+              id="style_reference_images"
+              name="style_reference_images"
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+            />
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Selected"
+                className="mt-2 w-24 h-24 object-cover rounded-lg"
+              />
+            )}
           </div>
         </div>
 
@@ -387,34 +425,9 @@ const Form = () => {
           </div>
         </div>
 
-        {/* Photo Upload */}
-        <div
-          className={`flex justify-center items-center border-2 border-dashed p-4 rounded-md ${
-            dragging ? "border-[#ff6c2f] bg-green-100" : "border-gray-300"
-          }`}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragLeave={handleDragLeave}
-        >
-          <input
-            type="file"
-            id="photo"
-            name="photo"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-          <label
-            htmlFor="photo"
-            className="text-sm text-gray-600 hover:text-[#ff6c2f] p-20 cursor-pointer"
-          >
-            {formData.photo
-              ? formData.photo.name
-              : "Drag and drop a photo, or click to upload"}
-          </label>
-        </div>
-
-        {/* Submit Button */}
+        {/* 
+        
+        Submit Button */}
         <div className="mt-6">
           <button
             type="submit"

@@ -23,19 +23,9 @@ const sidebarItems = [
     prefix: "/projectmanager/joblists/",
     links: [
       { name: "Projects", href: "/projectmanager/joblists/projects" },
-      { name: "Tailor Jobs", href: "/projectmanager/joblists/tailorjoblists" },
     ],
   },
-  {
-    id: 4,
-    text: "Inventory",
-    icon: <FaBoxes />,
-    prefix: "/projectmanager/inventory/",
-    links: [
-      { name: "List", href: "/projectmanager/inventory/list" },
-      { name: "Create", href: "/projectmanager/inventory/create" },
-    ],
-  },
+  
 ];
 
 const Sidebar = () => {

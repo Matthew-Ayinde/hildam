@@ -186,13 +186,11 @@ export default function Table() {
                   </td>
                   <td className="px-4 py-2 text-sm border-b">
                     <div className="flex flex-row">
-                      <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
+                      <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex flex-row space-x-2"
                       onClick={() => router.push(`/admin/orders/${row.id}`)}
                       >
                         <IoEyeOutline size={20} />
-                      </div>
-                      <div className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg">
-                        <MdOutlineDeleteForever size={20} />
+                        <div>View</div>
                       </div>
                     </div>
                   </td>

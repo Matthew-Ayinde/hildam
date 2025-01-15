@@ -1,3 +1,5 @@
+// Import and use it in /app/layout.tsx
+import Providers from '../components/providers';
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -35,7 +37,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-black bg-[#f9f7f7]`}
       >
         <div className={`w-full flex flex-row bg-[#f9f7f7] ${play.className}`}>
-         {children}
+        <Providers>{children}</Providers>
         </div>
       </body>
     </html>

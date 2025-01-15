@@ -11,6 +11,7 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { GoClock } from "react-icons/go";
 import { useRouter } from "next/navigation";
+import Spinner from "@/components/Spinner";
 
 
 export default function Table() {
@@ -98,7 +99,9 @@ export default function Table() {
   }, []);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">Loading...</div>;
+    return <div className="text-center text-gray-500 py-10">
+      <Spinner />
+    </div>;
   }
 
   
@@ -175,7 +178,7 @@ export default function Table() {
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
                     <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
-                    onClick={() => router.push(`/headoftailoring/joblists/tailorjoblists/${row.id}`)}
+                    onClick={() => router.push(`/admin/joblists/tailorjoblists/${row.id}`)}
                     >
                       <IoEyeOutline size={20} />
                     </div>

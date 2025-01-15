@@ -213,6 +213,12 @@ const Form = () => {
     } finally {
       setIsSubmitting(false);
     }
+    
+    //redirect to orders page
+    setTimeout(() => {
+      window.location.href = "/admin/orders/list";
+    }, 100
+    );
   };
 
   return (
@@ -293,9 +299,9 @@ const Form = () => {
               name="priority"
               value={formData.priority}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
+              className="mt-1 block w-full rounded-md border border-gray-300 text-gray-500 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
             >
-              <option value="" disabled>
+              <option value="" disabled className="">
                 Select Priority
               </option>
               <option value="high">High</option>
@@ -396,7 +402,7 @@ const Form = () => {
                 value={formData.manager_id}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
+                className="mt-1 text-gray-500 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
               >
                 <option value="">Select project manager</option>
                 {managers.map((manager) => (

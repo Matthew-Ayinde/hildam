@@ -9,7 +9,7 @@ import Spinner from "@/components/Spinner";
 
 export default function Table() {
   interface Order {
-    manager_name: string;
+    payment_status: string;
     id: any;
     order_id: string;
     created_at: string;
@@ -218,16 +218,17 @@ export default function Table() {
                       {row.amount}
                     </span>
                   </td> */}
-                  <td className="px-4 py-2 text-sm border-b">{row.manager_name || "Not Assigned"}</td>
+                  <td className="px-4 py-2 text-sm border-b">{row.payment_status || "Unknown"}</td>
                   <td className="px-4 py-2 text-sm border-b">
                     <div className="flex flex-row">
                       <div
-                        className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
-                        onClick={() => router.push(`/admin/orders/${row.id}`)}
+                        className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2"
+                        onClick={() => router.push(`/admin/payments/${row.id}`)}
                       >
                         <IoEyeOutline size={20} />
+                        <div>View</div>
                       </div>
-                      <div
+                      {/* <div
                         className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg"
                         onClick={() => {
                           setSelectedUserId(row.id);
@@ -236,7 +237,7 @@ export default function Table() {
                         }
                       >
                         <MdOutlineDeleteForever size={20} />
-                      </div>
+                      </div> */}
                     </div>
                   </td>
                 </tr>

@@ -16,6 +16,7 @@ export default function ShowCustomer() {
 
   const closePriceModal = () => {
     setIsPriceModalOpen(false); // Close the price modal
+    handelSetPrice();
   };
 
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -303,6 +304,7 @@ export default function ShowCustomer() {
 
     handleApproveStyle();
     // closePriceModal();
+    setIsPriceModalOpen(false); 
   }
 
 
@@ -352,7 +354,7 @@ export default function ShowCustomer() {
             </label>
             <input
               type="text"
-              value={customer.order_status}
+              value={customer.order_status || "pending"}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
@@ -597,10 +599,10 @@ export default function ShowCustomer() {
         </div>
       </form>
 
-
+{/* 
       <button onClick={openPriceModal} className="btn-open-modal">
         Open Price Modal
-      </button>
+      </button> */}
 
       {/* Price Modal */}
       {isPriceModalOpen && (
@@ -677,8 +679,9 @@ export default function ShowCustomer() {
         {customer.customer_feedback !== null && (
           <div className="mt-3">
             {/* <div className="text-red-500">Image Rejected by customer</div> */}
-          <div className="text-xl font-bold">Customer Feedback</div>
-          <div className=" py-2 px-3 bg-gray-50 rounded-lg w-1/2">
+            <div className="my-3 text-red-500">Style rejected</div>
+          <div className="text-lg font-bold">Customer Feedback</div>
+          <div className=" py-2 px-3 bg-gray-50 border border-gray-500 rounded-lg w-1/2">
             {customer.customer_feedback}
           </div>
           </div>
@@ -724,7 +727,6 @@ export default function ShowCustomer() {
                 onClick={() => {
                   // handleApproveStyle();
                   openPriceModal();
-                  handelSetPrice();
                   closeModal();
                 }}
               >
