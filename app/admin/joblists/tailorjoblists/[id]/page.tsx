@@ -16,7 +16,6 @@ export default function ShowCustomer() {
     setIsCustomerModalOpen(false);
   };
 
-
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -93,7 +92,8 @@ export default function ShowCustomer() {
           clothing_description: result.data.clothing_description || "N/A",
           high_bust: result.data.high_bust || 0,
           tailor_image: result.data.tailor_image || null,
-          project_manager_approval: result.data.project_manager_approval || null,
+          project_manager_approval:
+            result.data.project_manager_approval || null,
           customer_feedback: result.data.customer_feedback || null,
           style_reference_images: result.data.style_reference_images || null,
         };
@@ -300,45 +300,45 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-            <div className="">
-              <label className="block text-gray-700 font-bold">
-                Customer Style
-              </label>
-              <img
-                src={customer.style_reference_images}
-                alt="style_reference_images"
-                className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
-                onClick={handleCustomerImageClick} // Open modal on click
-              />
-              <div className="text-sm my-2">Click to view</div>
-            </div>
+            <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+              <div className="">
+                <label className="block text-gray-700 font-bold">
+                  Customer Style
+                </label>
+                <img
+                  src={customer.style_reference_images}
+                  alt="style_reference_images"
+                  className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
+                  onClick={handleCustomerImageClick} // Open modal on click
+                />
+                <div className="text-sm my-2">Click to view</div>
+              </div>
 
-            {isCustomerModalOpen && (
-              <div
-                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-                onClick={handleCustomerCloseModal}
-              >
+              {isCustomerModalOpen && (
                 <div
-                  className="bg-white rounded-lg p-4"
-                  onClick={(e) => e.stopPropagation()}
+                  className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+                  onClick={handleCustomerCloseModal}
                 >
-                  <img
-                    src={customer.style_reference_images}
-                    alt="Style Reference"
-                    className="w-[500px] h-[500px] object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = ""; // Clear the image source
-                      e.currentTarget.alt = "Image failed to load"; // Update alt text
-                    }}
-                  />
-                  {/* <p className="text-red-500 text-center mt-2">
+                  <div
+                    className="bg-white rounded-lg p-4"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <img
+                      src={customer.style_reference_images}
+                      alt="Style Reference"
+                      className="w-[500px] h-[500px] object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = ""; // Clear the image source
+                        e.currentTarget.alt = "Image failed to load"; // Update alt text
+                      }}
+                    />
+                    {/* <p className="text-red-500 text-center mt-2">
                     Image failed to load
                   </p> */}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
           </div>
         </div>
         <div className="w-full">
@@ -510,22 +510,26 @@ export default function ShowCustomer() {
       </form>
       <div className="text-gray-700">
         <div className="font-bold text-xl">Image Style</div>
-        <div className="my-2">Attach proposed images style</div>
-        {!isImageUploaded && ( // Conditionally render input and button
-          <>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="mt-2 block w-full text-sm text-gray-500"
-            />
-            <button
-              onClick={handleUploadImage}
-              className="mt-4 bg-orange-500 text-white py-2 px-4 rounded"
-            >
-              Upload Image
-            </button>
-          </>
+        {customer.project_manager_approval === null || customer.project_manager_approval === 'In Review' && (
+          <div>
+            <div className="my-2">Attach proposed images style</div>
+            {!isImageUploaded && ( // Conditionally render input and button
+              <>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="mt-2 block w-full text-sm text-gray-500"
+                />
+                <button
+                  onClick={handleUploadImage}
+                  className="mt-4 bg-orange-500 text-white py-2 px-4 rounded"
+                >
+                  Upload Image
+                </button>
+              </>
+            )}
+          </div>
         )}
         {loading && <div className="text-gray-500">Loading...</div>}
         {selectedImage && (
@@ -601,7 +605,7 @@ export default function ShowCustomer() {
             )}
           </div>
         )}
-        {!customer.tailor_image && (
+        {customer.tailor_image === null && (
           <div className="mt-4 text-gray-500">Please upload an image</div>
         )}
       </div>

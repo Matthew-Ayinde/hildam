@@ -1,14 +1,12 @@
 "use client";
 
-import { SetStateAction, useEffect, useState } from "react";
-import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes } from "react-icons/fa";
+import { SetStateAction, useEffect, useRef, useState } from "react";
+import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
-import { CiEdit } from "react-icons/ci";
-import { MdOutlineDeleteForever } from "react-icons/md";
-import { GoClock } from "react-icons/go";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
+import gsap from "gsap";
 
 export default function Table() {
   interface Order {
@@ -20,15 +18,14 @@ export default function Table() {
     order_status: string;
   }
 
-  const [userName, setUserName] = useState('CEO');
   const [data, setData] = useState<Order[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const rowsPerPage = 10;
-
   const totalPages = Math.ceil(data.length / rowsPerPage);
   const router = useRouter();
+  const tableRef = useRef<HTMLTableSectionElement>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -38,15 +35,12 @@ export default function Table() {
         const token = sessionStorage.getItem("access_token");
         if (!token) throw new Error("No access token found");
 
-        const response = await fetch(
-          "/api/orderslist",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch("/api/orderslist", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -72,31 +66,22 @@ export default function Table() {
     fetchOrders();
   }, []);
 
+  useEffect(() => {
+    if (tableRef.current && !loading && !error) {
+      const rows = tableRef.current.querySelectorAll("tr");
+      gsap.fromTo(
+        rows,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, stagger: 0.1, duration: 0.6 }
+      );
+    }
+  }, [loading, error, currentPage]);
+
   const handlePageChange = (newPage: SetStateAction<number>) => {
-    const pageNumber = typeof newPage === 'number' ? newPage : currentPage;
-    if (pageNumber > 0 && pageNumber <= totalPages) {
+    if (typeof newPage === "number" && newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
-
-    useEffect(() => {
-      const token = sessionStorage.getItem('access_token');
-      if (token) {
-        try {
-          // Decode the token payload
-          const base64Url = token.split('.')[1];
-          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-          const payload = JSON.parse(atob(base64));
-  
-          // Extract the name from the payload and update the state
-          if (payload?.name) {
-            setUserName(payload.name);
-          }
-        } catch (error) {
-          console.error('Error decoding token:', error);
-        }
-      }
-    }, []);
 
   const formatDate = (dateString: string | number | Date) => {
     const date = new Date(dateString);
@@ -115,15 +100,12 @@ export default function Table() {
   return (
     <div className="w-full">
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
-      <div className="lg:hidden flex">
-        <div className="text-xl font-bold mx-2">WELCOME, {userName.toUpperCase()}</div>
-      </div>
         <div className="mx-2 font-bold text-gray-500 text-xl my-3 flex flex-row justify-between items-center">
           <div>Recent Orders</div>
           <Link href="/admin/orders/create">
-          <div className="w-fit bg-red-100 px-4 py-2 text-base text-orange-500 rounded-lg">
-            + Create Order
-          </div>
+            <div className="w-fit bg-red-100 px-4 py-2 text-base text-orange-500 rounded-lg">
+              + Create Order
+            </div>
           </Link>
         </div>
 
@@ -133,7 +115,7 @@ export default function Table() {
           </div>
         ) : error ? (
           <div className="text-center py-10 text-red-500">
-            {error} {" "}
+            {error}{" "}
             <button
               className="text-blue-500 underline"
               onClick={() => window.location.reload()}
@@ -143,7 +125,7 @@ export default function Table() {
           </div>
         ) : (
           <table className="min-w-full border-collapse border border-gray-200">
-            <thead className="bg-[#f6f8fb] sticky top-0 z-10">
+            <thead className="bg-[#f6f8fb]">
               <tr className="text-[#5d7186]">
                 {[
                   "Order ID",
@@ -162,7 +144,7 @@ export default function Table() {
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody ref={tableRef}>
               {paginatedData.map((row, index) => (
                 <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
                   <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
@@ -185,13 +167,12 @@ export default function Table() {
                     </span>
                   </td>
                   <td className="px-4 py-2 text-sm border-b">
-                    <div className="flex flex-row">
-                      <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex flex-row space-x-2"
+                    <div
+                      className="me-4 px-3 bg-red-100 text-orange-600 w-fit p-2 rounded-lg flex flex-row space-x-2"
                       onClick={() => router.push(`/admin/orders/${row.id}`)}
-                      >
-                        <IoEyeOutline size={20} />
-                        <div>View</div>
-                      </div>
+                    >
+                      <IoEyeOutline size={20} />
+                      <div>View</div>
                     </div>
                   </td>
                 </tr>
@@ -205,7 +186,7 @@ export default function Table() {
       {!loading && !error && (
         <div className="bottom-0 flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200 text-[#A5A8AB]">
           <div>
-            Showing {" "}
+            Showing{" "}
             <span className="font-bold">
               {currentPage * rowsPerPage - rowsPerPage + 1}
             </span>
@@ -223,24 +204,6 @@ export default function Table() {
             >
               <FaArrowLeft />
             </button>
-            {Array.from(
-              { length: Math.min(3, totalPages) },
-              (_, i) => currentPage + i - 1
-            )
-              .filter((page) => page > 0 && page <= totalPages)
-              .map((page) => (
-                <button
-                  key={page}
-                  className={`px-4 py-2 text-sm ${
-                    page === currentPage
-                      ? "bg-[#ff6c2f] text-white rounded"
-                      : "text-gray-600"
-                  }`}
-                  onClick={() => handlePageChange(page)}
-                >
-                  {page}
-                </button>
-              ))}
             <button
               className="p-3 text-sm text-gray-600 bg-gray-200 rounded disabled:opacity-50"
               disabled={currentPage === totalPages}

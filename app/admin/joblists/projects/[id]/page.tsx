@@ -671,8 +671,11 @@ export default function ShowCustomer() {
         {/* {customer.customer_approval === null && customer.tailor_job_image !== null && (
           <div className="text-red-500 mt-2">Awaiting Approval from Customer</div>
         )} */}
-        {customer.customer_approval === null && (
+        {customer.customer_approval === "In Review" && customer.tailor_job_image !== null && (
           <div className="text-red-500 mt-2">Awaiting review from customer</div>
+        )}
+        {customer.customer_approval === null && (
+          <div className="text-red-500 mt-2">Image yet to be sent to customer</div>
         )}
 
         {/* customer feedback */}
@@ -721,27 +724,29 @@ export default function ShowCustomer() {
                 onError={handleImageError}
               />
             )}
-            <div className="mt-4 flex justify-between">
-              <button
-                className="px-4 py-2 bg-green-500 text-white rounded"
-                onClick={() => {
-                  // handleApproveStyle();
-                  openPriceModal();
-                  closeModal();
-                }}
-              >
-                Send to Customer
-              </button>
-              <button
-                className="px-4 py-2 bg-red-500 text-white rounded"
-                onClick={() => {
-                  handleRejectStyle();
-                  closeModal();
-                }}
-              >
-                Reject
-              </button>
-            </div>
+            {customer.customer_approval === null && (
+                <div className="mt-4 flex justify-between">
+                <button
+                  className="px-4 py-2 bg-green-500 text-white rounded"
+                  onClick={() => {
+                    // handleApproveStyle();
+                    openPriceModal();
+                    closeModal();
+                  }}
+                >
+                  Send to Customer
+                </button>
+                <button
+                  className="px-4 py-2 bg-red-500 text-white rounded"
+                  onClick={() => {
+                    handleRejectStyle();
+                    closeModal();
+                  }}
+                >
+                  Reject
+                </button>
+              </div>
+              )}
           </div>
         </div>
       )}
