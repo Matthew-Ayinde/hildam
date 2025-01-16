@@ -6,24 +6,22 @@ import { IoNotifications } from "react-icons/io5";
 import LogoutButton from "./Logout";
 import { useRouter } from "next/navigation";
 
-const notificationsData = [
-  { id: 1, text: "New user registration", isRead: false, timestamp: new Date() },
-  { id: 2, text: "Server maintenance scheduled", isRead: false, timestamp: new Date() },
-  { id: 3, text: "Password change request", isRead: true, timestamp: new Date() },
-  { id: 4, text: "New comment on your post", isRead: false, timestamp: new Date() },
-  { id: 5, text: "New message from John", isRead: true, timestamp: new Date() },
-  { id: 6, text: "Update available for your app", isRead: false, timestamp: new Date() },
-  { id: 7, text: "New follower", isRead: false, timestamp: new Date() },
-  { id: 8, text: "Event reminder", isRead: true, timestamp: new Date() },
-  { id: 9, text: "New like on your photo", isRead: false, timestamp: new Date() },
-  { id: 10, text: "System update completed", isRead: true, timestamp: new Date() },
-];
-
 const Topbar = () => {
   const [userName, setUserName] = useState("CEO");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const router = useRouter();
+  interface Notification {
+    id: string;
+    message: string;
+    link: string;
+    read: string;
+    created_at: string;
+  }
+  
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const token = sessionStorage.getItem("access_token");
@@ -41,6 +39,49 @@ const Topbar = () => {
     }
   }, []);
 
+  const fetchNotifications = async () => {
+    try {
+      setError(null);
+      const token = sessionStorage.getItem("access_token");
+      if (!token) throw new Error("No access token found");
+
+      const response = await fetch("/api/allnotifications", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch notifications");
+      }
+
+      const data = await response.json();
+      if (data.status === "success") {
+        setNotifications(data.data);
+        setUnreadCount(
+          data.data.filter((notif: any) => notif.read === "0").length
+        );
+      } else {
+        throw new Error("Cannot fetch notifications");
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      setError("Cannot fetch notifications");
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+
+    // Set up polling to fetch notifications every 10 seconds
+    const intervalId = setInterval(() => {
+      fetchNotifications();
+    }, 2000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (event: { target: any }) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -54,25 +95,45 @@ const Topbar = () => {
     };
   }, []);
 
-  const unreadCount = notificationsData.filter(
-    (notification) => !notification.isRead
-  ).length;
+  const markAsRead = async (id: string, message: string, link: string) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) throw new Error("No access token found");
 
-  const handleSeeMore = () => {
-    router.push("/notifications");
+      await fetch(`/api/readnotification/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message, link }),
+      });
+
+      setNotifications((prev) =>
+        prev.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif))
+      );
+      setUnreadCount((prev) => prev - 1);
+
+      // Close the dropdown after marking as read
+      setDropdownOpen(false);
+
+      // Optionally, navigate to the notification's link if required
+      // if (link) {
+      //   router.push(link);
+      // }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
   };
 
   return (
     <div className="sticky top-0 z-50 mt-5">
-      <div className="shadow-lg rounded-xl lg:flex justify-between items-center py-3 px-6 text-gray-700">
+      <div className="shadow-lg rounded-xl lg:flex justify-between items-center py-3 px-6 text-gray-700 bg-white">
         <div className="text-xl font-bold">
           <div className="uppercase">Welcome, {userName}</div>
           <div className="text-sm mt-1">Role: Admin</div>
         </div>
-        <div
-          className="flex items-center gap-4 relative"
-          ref={dropdownRef}
-        >
+        <div className="flex items-center gap-4 relative" ref={dropdownRef}>
           <LogoutButton />
           <div
             className="relative w-12 h-12 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
@@ -91,35 +152,55 @@ const Topbar = () => {
               alt="Profile"
               width={500}
               height={500}
-              className="rounded-full border-2 border-white  shadow-md hover:scale-105 transition-transform"
+              className="rounded-full border-2 border-white shadow-md hover:scale-105 transition-transform"
             />
           </div>
           {dropdownOpen && (
-            <div className="absolute top-full right-0 w-72 bg-white rounded-lg shadow-xl z-50 border border-gray-200">
+            <div className="absolute top-full right-0 w-80 bg-white rounded-lg shadow-xl z-50 border border-gray-200">
               <div className="p-4 border-b border-gray-200 font-semibold text-gray-700">
                 Notifications
               </div>
               <div className="max-h-72 overflow-y-auto">
-                {notificationsData.slice(0, 4).map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-3 hover:bg-gray-100 ${
-                      notification.isRead
-                        ? "text-gray-600"
-                        : "text-blue-600 font-semibold"
-                    } border-b border-gray-200`}
-                  >
-                    {notification.text}
+                {error && (
+                  <div className="p-3 text-red-600 text-center">{error}</div>
+                )}
+                {!error && notifications.length === 0 && (
+                  <div className="p-3 text-gray-600 text-center">
+                    No recent notifications
                   </div>
-                ))}
-                {notificationsData.length > 4 && (
+                )}
+                {!error &&
+                  notifications.length > 0 &&
+                  notifications.slice(0, 20).map((notification: any) => (
+                    <div
+                      key={notification.id}
+                      className={`p-3 hover:bg-gray-100 cursor-pointer ${
+                        notification.read === "0"
+                          ? "text-blue-600 font-semibold"
+                          : "text-gray-600"
+                      } border-b border-gray-200 flex justify-between items-center`}
+                      onClick={() =>
+                        markAsRead(
+                          notification.id,
+                          notification.message,
+                          notification.link
+                        )
+                      }
+                    >
+                      <span>{notification.message}</span>
+                      <span className="text-xs text-gray-500">
+                        {new Date(notification.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                {notifications.length > 4 && (
                   <div className="flex justify-center p-2">
                     <button
-                    onClick={handleSeeMore}
-                    className="text-white w-fit px-20 rounded-xl bg-blue-500 hover:underline p-2 font-medium"
-                  >
-                    See More
-                  </button>
+                      onClick={() => router.push("/notifications")}
+                      className="text-white w-fit px-20 rounded-xl bg-blue-500 hover:bg-blue-600 p-2 font-medium"
+                    >
+                      See More
+                    </button>
                   </div>
                 )}
               </div>
