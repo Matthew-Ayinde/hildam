@@ -1,10 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { MdOutlineHideSource } from "react-icons/md";
 
 const Form = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<{
     name: string;
@@ -85,6 +87,8 @@ const Form = () => {
     } finally {
       setIsSubmitting(false);
     }
+    //return <Redirect to="/admin/users" />;
+    router.push("/admin/users");
   };
 
   return (
@@ -95,7 +99,7 @@ const Form = () => {
       >
         {/* Popup Message */}
         {popupMessage && (
-          <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded-md shadow-lg">
+          <div className="fixed top-5 flex z-50 left-1/2 transform-translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded-md shadow-lg">
             {popupMessage}
           </div>
         )}

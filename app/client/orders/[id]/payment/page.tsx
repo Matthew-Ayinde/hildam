@@ -109,7 +109,7 @@ const Invoice = () => {
       }, 5000);
 
       // Redirect to the orders page
-      router.push(`/client/orders/list`);
+      router.push(`/client/orders`);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

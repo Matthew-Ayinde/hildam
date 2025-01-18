@@ -152,7 +152,7 @@ export default function Table() {
                   <td className="px-4 py-2 text-sm border-b text-[#da6d35]">
                     {row.customer_name}
                   </td>
-                  <td className="px-4 py-2 text-sm border-b">{row.priority}</td>
+                  <td className="px-4 py-2 text-sm border-b">{row.priority || "medium"}</td>
                   <td className="px-4 py-2 text-sm border-b">
                     <span
                       className={`px-3 py-1 text-sm font-medium rounded ${

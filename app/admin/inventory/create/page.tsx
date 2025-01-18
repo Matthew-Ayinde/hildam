@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
  
 const Form = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState<{
     name: string;
     gender: string;
@@ -95,6 +97,8 @@ const Form = () => {
     } finally {
       setLoading(false);
     }
+
+    router.push("/admin/inventory");
   };
 
   return (
@@ -121,10 +125,6 @@ const Form = () => {
               required
             />
           </div>
-        </div>
-
-        {/* Quantity */}
-        <div className="flex space-x-4 mb-4">
           <div className="w-1/2">
             <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
               Quantity
@@ -142,6 +142,7 @@ const Form = () => {
           </div>
         </div>
 
+
         {/* Submit Button */}
         <div className="mt-6">
           <button
@@ -156,7 +157,7 @@ const Form = () => {
         </div>
 
         {responseMessage && (
-          <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
+          <div className="fixed top-5 flex z-50 left-1/2 transform-translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded-md shadow-lg">
             {responseMessage}
           </div>
         )}

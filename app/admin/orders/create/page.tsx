@@ -216,7 +216,7 @@ const Form = () => {
     
     //redirect to orders page
     setTimeout(() => {
-      window.location.href = "/admin/orders/list";
+      window.location.href = "/admin/orders";
     }, 100
     );
   };

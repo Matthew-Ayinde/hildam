@@ -27,7 +27,7 @@ export default function LoginForm() {
         router.push("/admin");
         break;
       case "customer":
-        router.push("/client/orders/list");
+        router.push("/client/orders");
         break;
       case "project manager":
         router.push("/projectmanager/joblists/projects");
@@ -36,7 +36,7 @@ export default function LoginForm() {
         router.push("/storemanager/inventory/list");
         break;
       case "client manager":
-        router.push("/clientmanager/customers/list");
+        router.push("/clientmanager/customers");
         break;
       case "head of tailoring":
         router.push("/headoftailoring/inventory/list");

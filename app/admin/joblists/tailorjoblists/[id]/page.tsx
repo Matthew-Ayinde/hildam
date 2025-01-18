@@ -251,7 +251,7 @@ export default function ShowCustomer() {
       )}
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => router.push("/admin/customers/list")}
+          onClick={() => router.push("/admin/customers")}
           className="text-blue-500 underline"
         >
           Back to List
@@ -510,7 +510,8 @@ export default function ShowCustomer() {
       </form>
       <div className="text-gray-700">
         <div className="font-bold text-xl">Image Style</div>
-        {customer.project_manager_approval === null || customer.project_manager_approval === 'In Review' && (
+        {/* {customer.project_manager_approval === null || customer.project_manager_approval === 'In Review' && ( */}
+        
           <div>
             <div className="my-2">Attach proposed images style</div>
             {!isImageUploaded && ( // Conditionally render input and button
@@ -530,7 +531,7 @@ export default function ShowCustomer() {
               </>
             )}
           </div>
-        )}
+        
         {loading && <div className="text-gray-500">Loading...</div>}
         {selectedImage && (
           <div className="flex items-center mt-4">

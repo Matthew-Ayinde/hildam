@@ -14,6 +14,7 @@ export default function EditCustomer() {
     item_name: "",
     item_quantity: "",
   });
+  const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -73,8 +74,14 @@ export default function EditCustomer() {
       if (!response.ok) {
         throw new Error("Failed to update customer data");
       }
-  
-      router.push(`/admin/inventory/${id}`);
+
+      // Show confirmation message
+      setConfirmationMessage("Inventory item updated");
+      setTimeout(() => {
+        setConfirmationMessage(null);
+      }, 3000);
+
+      router.push(`/admin/inventory`);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -106,44 +113,51 @@ export default function EditCustomer() {
   }
 
   return (
-    <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
-        <div>
-          <label className="block text-gray-700 font-bold">Item Name</label>
-          <input
-            type="text"
-            name="item_name"
-            value={formData.item_name}
-            onChange={handleInputChange}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-          />
+    <div className="relative">
+      {confirmationMessage && (
+        <div className="fixed top-5 rounded-lg left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-2 w-fit z-50">
+          {confirmationMessage}
         </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Quantity</label>
-          <input
-            type="text"
-            name="item_quantity"
-            value={formData.item_quantity}
-            onChange={handleInputChange}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-          />
-        </div>
-        <div className="col-span-2">
-          <button
-            type="submit"
-            className="px-4 py-2 bg-orange-500 text-white rounded"
-          >
-            Save Changes
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push(`/admin/inventory/${id}`)}
-            className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+      )}
+      <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-gray-700 font-bold">Item Name</label>
+            <input
+              type="text"
+              name="item_name"
+              value={formData.item_name}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Quantity</label>
+            <input
+              type="text"
+              name="item_quantity"
+              value={formData.item_quantity}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+            />
+          </div>
+          <div className="col-span-2">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-orange-500 text-white rounded"
+            >
+              Save Changes
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(`/admin/inventory/${id}`)}
+              className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

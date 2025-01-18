@@ -112,7 +112,7 @@ export default function ShowCustomer() {
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => router.push("/admin/customers/list")}
+          onClick={() => router.push("/admin/customers")}
           className="text-blue-500 underline"
         >
           Back to List

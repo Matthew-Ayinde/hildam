@@ -22,7 +22,7 @@ const sidebarItems = [
     icon: <FaUsers />,
     prefix: "/clientmanager/customers/",
     links: [
-      { name: "List", href: "/clientmanager/customers/list" },
+      { name: "List", href: "/clientmanager/customers" },
       { name: "Create", href: "/clientmanager/customers/create" },
     ],
   },
@@ -32,7 +32,7 @@ const sidebarItems = [
     icon: <FaShoppingCart />,
     prefix: "/clientmanager/orders/",
     links: [
-      { name: "List", href: "/clientmanager/orders/list" },
+      { name: "List", href: "/clientmanager/orders" },
       { name: "Create Order", href: "/clientmanager/orders/create" },
     ],
   },

@@ -20,9 +20,9 @@ const sidebarItems = [
     id: 2,
     text: "My Orders",
     icon: <FaShoppingCart />,
-    prefix: "/client/orders/",
+    prefix: "/client/orders",
     links: [
-      { name: "List", href: "/client/orders/list" },
+      { name: "List", href: "/client/orders" },
       { name: "Create Order", href: "/client/orders/create" },
     ],
   },

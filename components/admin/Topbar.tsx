@@ -15,8 +15,9 @@ const Topbar = () => {
     link: string;
     read: string;
     created_at: string;
+    action_type: string;
   }
-  
+
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -124,6 +125,20 @@ const Topbar = () => {
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
+
+    //get the id from the end of the link value and save it with linking_id
+    const linking_id = link.split("/").pop();
+    console.log(linking_id);
+
+    //check if action_type is project_lists, if so redirect to project lists
+    if (link.includes("orderslist")) {
+      router.push("/admin/orders/" + linking_id);
+    }
+    if (link.includes("projectlist")) {
+      router.push("/admin/orders/" + linking_id);
+    }
+
+    // router.push("/admin/joblists/projects");
   };
 
   return (
@@ -164,40 +179,40 @@ const Topbar = () => {
                 {error && (
                   <div className="p-3 text-red-600 text-center">{error}</div>
                 )}
-                {!error && notifications.length === 0 && (
-                  <div className="p-3 text-gray-600 text-center">
-                    No recent notifications
-                  </div>
-                )}
                 {!error &&
-                  notifications.length > 0 &&
-                  notifications.slice(0, 20).map((notification: any) => (
-                    <div
-                      key={notification.id}
-                      className={`p-3 hover:bg-gray-100 cursor-pointer ${
-                        notification.read === "0"
-                          ? "text-blue-600 font-semibold"
-                          : "text-gray-600"
-                      } border-b border-gray-200 flex justify-between items-center`}
-                      onClick={() =>
-                        markAsRead(
-                          notification.id,
-                          notification.message,
-                          notification.link
-                        )
-                      }
-                    >
-                      <span>{notification.message}</span>
-                      <span className="text-xs text-gray-500">
-                        {new Date(notification.created_at).toLocaleString()}
-                      </span>
+                  notifications.filter((notif) => notif.read === "0").length ===
+                    0 && (
+                    <div className="p-3 text-gray-600 text-center">
+                      No unread notifications
                     </div>
-                  ))}
-                {notifications.length > 4 && (
+                  )}
+                {!error &&
+                  notifications
+                    .filter((notif) => notif.read === "0")
+                    .map((notification: any) => (
+                      <div
+                        key={notification.id}
+                        className="p-3 text-sm hover:bg-gray-100 cursor-pointer text-orange-600 border-b border-gray-200 flex justify-between items-center"
+                        onClick={() =>
+                          markAsRead(
+                            notification.id,
+                            notification.message,
+                            notification.link
+                          )
+                        }
+                      >
+                        <span>{notification.message}</span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(notification.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                {notifications.filter((notif) => notif.read === "0").length >
+                  4 && (
                   <div className="flex justify-center p-2">
                     <button
                       onClick={() => router.push("/notifications")}
-                      className="text-white w-fit px-20 rounded-xl bg-blue-500 hover:bg-blue-600 p-2 font-medium"
+                      className="text-white w-fit px-10 rounded-xl bg-orange-500 hover:bg-orange-600 p-2 font-medium"
                     >
                       See More
                     </button>

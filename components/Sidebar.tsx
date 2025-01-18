@@ -16,7 +16,7 @@ const sidebarItems = [
     text: "Customers",
     icon: <FaUsers />,
     links: [
-      { name: "List", href: "/customers/list" },
+      { name: "List", href: "/customers" },
       { name: "Create", href: "/customers/create" },
     ],
   },
@@ -25,7 +25,7 @@ const sidebarItems = [
     text: "Orders",
     icon: <FaShoppingCart />,
     links: [
-      { name: "List", href: "/orders/list" },
+      { name: "List", href: "/orders" },
       { name: "Create Order", href: "/orders/create" },
     ],
   },
@@ -33,7 +33,7 @@ const sidebarItems = [
     id: 3,
     text: "Payments",
     icon: <FaCreditCard />,
-    links: [{ name: "List", href: "/payments/list" }],
+    links: [{ name: "List", href: "/payments" }],
   },
   {
     id: 4,
@@ -49,7 +49,7 @@ const sidebarItems = [
     text: "Users",
     icon: <FaUser />,
     links: [
-      { name: "List", href: "/users/list" },
+      { name: "List", href: "/users" },
       { name: "Create", href: "/users/create" },
     ],
   },

@@ -100,7 +100,7 @@ export default function EditCustomer() {
 
       setSuccessMessage("Customer data updated successfully!");
       setTimeout(() => {
-        router.push('/admin/orders/list');
+        router.push('/admin/orders');
       }, 2000); // Redirect after 2 seconds
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
