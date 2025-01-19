@@ -359,7 +359,7 @@ export default function EditCustomer() {
           </button>
           <button
             type="button"
-            onClick={() => router.push(`/admin/inventory/${id}`)}
+            onClick={() => router.push(`/headoftailoring/joblists/tailorjoblists`)}
             className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
           >
             Cancel

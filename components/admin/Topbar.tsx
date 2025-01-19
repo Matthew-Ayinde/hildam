@@ -135,20 +135,23 @@ const Topbar = () => {
       router.push("/admin/orders/" + linking_id);
     }
     if (link.includes("projectlist")) {
-      router.push("/admin/orders/" + linking_id);
+      router.push("/admin/joblists/projects/" + linking_id);
+    }
+    if (link.includes("tailorjoblist")) {
+      router.push("/admin/joblists/tailorjoblists/" + linking_id);
     }
 
     // router.push("/admin/joblists/projects");
   };
 
   return (
-    <div className="sticky top-0 z-50 mt-5">
+    <div className="sticky top-0 z-40 mt-5">
       <div className="shadow-lg rounded-xl lg:flex justify-between items-center py-3 px-6 text-gray-700 bg-white">
         <div className="text-xl font-bold">
           <div className="uppercase">Welcome, {userName}</div>
           <div className="text-sm mt-1">Role: Admin</div>
         </div>
-        <div className="flex items-center gap-4 relative" ref={dropdownRef}>
+        <div className="lg:flex hidden items-center gap-4 relative" ref={dropdownRef}>
           <LogoutButton />
           <div
             className="relative w-12 h-12 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"

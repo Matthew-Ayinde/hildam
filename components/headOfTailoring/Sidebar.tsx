@@ -25,16 +25,6 @@ const sidebarItems = [
       { name: "Tailor Jobs", href: "/headoftailoring/joblists/tailorjoblists" },
     ],
   },
-  {
-    id: 4,
-    text: "Inventory",
-    icon: <FaBoxes />,
-    prefix: "/headoftailoring/inventory/",
-    links: [
-      { name: "List", href: "/headoftailoring/inventory/list" },
-      { name: "Create", href: "/headoftailoring/inventory/create" },
-    ],
-  },
 ];
 
 const Sidebar = () => {

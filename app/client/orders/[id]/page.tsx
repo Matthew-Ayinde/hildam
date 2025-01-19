@@ -4,6 +4,8 @@ import Spinner from "@/components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { IoIosArrowBack } from "react-icons/io";
 
 export default function ShowCustomer() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -251,12 +253,15 @@ export default function ShowCustomer() {
   return (
     <div className="w-full mx-auto p-6 min-h-full h-full bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => router.push("/admin/customers")}
-          className="text-blue-500 underline"
+      <Link
+          href={`/client/orders`}
+          className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
         >
+          <IoIosArrowBack size={30}/>
+          <div className="mx-2">
           Back to List
-        </button>
+          </div>
+        </Link>
         <div className="text-end font-bond text-lg text-gray-700 flex flex-row">
           <div className="font-bold me-3">Client Manager:</div> {customer.manager_name}
         </div>
@@ -610,12 +615,11 @@ export default function ShowCustomer() {
             )}
 
       <div className="mt-6 flex justify-end space-x-4">
-        <div
+        <Link href={`/client/orders/${id}/edit`}
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/client/orders/${id}/edit`)}
         >
           Edit
-        </div>
+        </Link>
         <button className="px-4 py-2 bg-red-500 text-white rounded">
           Delete
         </button>

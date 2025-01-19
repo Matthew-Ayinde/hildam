@@ -6,6 +6,7 @@ import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
+import Link from "next/link";
 
 export default function Table() {
   interface Order {
@@ -217,12 +218,13 @@ export default function Table() {
                   </td>
                   <td className="px-4 py-2 text-sm border-b">
                     <div className="flex flex-row">
+                      <Link href={`/client/orders/${row.id}`}>
                       <div
                         className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
-                        onClick={() => router.push(`/client/orders/${row.id}`)}
                       >
                         <IoEyeOutline size={20} />
                       </div>
+                      </Link>
                       <div
                         className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg"
                         onClick={() => {

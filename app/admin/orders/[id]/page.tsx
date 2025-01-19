@@ -3,6 +3,7 @@
 import Spinner from "@/components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { IoIosArrowBack } from "react-icons/io";
 
 export default function ShowCustomer() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -61,7 +62,7 @@ export default function ShowCustomer() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch customer data");
+        throw new Error("Failed to fetch orders");
       }
 
       const result = await response.json();
@@ -143,9 +144,12 @@ export default function ShowCustomer() {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => router.push("/admin/customers")}
-          className="text-blue-500 underline"
+          className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
         >
+          <IoIosArrowBack size={30}/>
+          <div className="mx-2">
           Back to List
+          </div>
         </button>
         <div className="text-end font-bond text-lg text-gray-700 flex flex-row">
           <div className="font-bold me-3">Project Manager:</div>{" "}

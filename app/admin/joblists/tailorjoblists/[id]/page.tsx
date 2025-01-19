@@ -4,6 +4,7 @@ import Spinner from "@/components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image"; // Import Next.js Image component
+import { IoIosArrowBack } from "react-icons/io";
 
 export default function ShowCustomer() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -251,13 +252,17 @@ export default function ShowCustomer() {
       )}
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => router.push("/admin/customers")}
-          className="text-blue-500 underline"
-        >
-          Back to List
-        </button>
+                  onClick={() => router.push("/admin/joblists/tailorjoblists")}
+                  className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-2"
+                >
+                  <IoIosArrowBack size={30}/>
+                  <div className="mx-2">
+                  Back to List
+                  </div>
+                </button>
       </div>
       <form>
+          <div className="text-2xl text-gray-700 font-bold mb-2">Tailor Job Information</div>
         <div className="grid grid-cols-2 gap-6 mb-5">
           <div>
             <label className="block text-gray-700 font-bold">

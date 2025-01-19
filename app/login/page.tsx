@@ -39,7 +39,7 @@ export default function LoginForm() {
         router.push("/clientmanager/customers");
         break;
       case "head of tailoring":
-        router.push("/headoftailoring/inventory/list");
+        router.push("/headoftailoring/joblists/tailorjoblists");
         break;
       default:
         setError("Invalid role detected. Please contact support.");

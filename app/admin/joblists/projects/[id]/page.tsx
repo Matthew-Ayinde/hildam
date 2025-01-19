@@ -4,6 +4,8 @@ import Spinner from "@/components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { IoIosArrowBack } from "react-icons/io";
+
 
 export default function ShowCustomer() {
 
@@ -315,11 +317,14 @@ export default function ShowCustomer() {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
-        <button
+      <button
           onClick={() => router.push("/admin/joblists/projects")}
-          className="text-blue-500 underline"
+          className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
         >
+          <IoIosArrowBack size={30}/>
+          <div className="mx-2">
           Back to List
+          </div>
         </button>
         <div className="text-end font-bond text-lg text-gray-700 flex flex-row">
           <div className="font-bold me-3">Head of Tailoring:</div>{" "}
@@ -671,7 +676,7 @@ export default function ShowCustomer() {
         {/* {customer.customer_approval === null && customer.tailor_job_image !== null && (
           <div className="text-red-500 mt-2">Awaiting Approval from Customer</div>
         )} */}
-        {customer.customer_approval === "In Review" && customer.tailor_job_image !== null && (
+        {customer.customer_approval === "In Review" && (
           <div className="text-red-500 mt-2">Awaiting review from customer</div>
         )}
         {customer.customer_approval === null && (

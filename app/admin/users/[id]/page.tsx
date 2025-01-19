@@ -3,6 +3,7 @@
 import Spinner from "@/components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { IoIosArrowBack } from "react-icons/io";
 
 export default function ShowCustomer() {
   const router = useRouter();
@@ -79,11 +80,14 @@ export default function ShowCustomer() {
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => router.push("/admin/users")}
-          className="text-blue-500 underline"
-        >
-          Back to List
-        </button>
+                  onClick={() => router.push("/admin/users")}
+                  className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
+                >
+                  <IoIosArrowBack size={30}/>
+                  <div className="mx-2">
+                  Back to List
+                  </div>
+                </button>
       </div>
       <form className="grid grid-cols-2 gap-6">
         <div>
@@ -129,11 +133,11 @@ export default function ShowCustomer() {
         {/* Additional fields */}
       </form>
       <div className="mt-6 flex justify-end space-x-4">
-        <button className="px-4 py-2 bg-orange-500 text-white rounded" 
+        {/* <button className="px-4 py-2 bg-orange-500 text-white rounded" 
         onClick={() => router.push(`/admin/users/${id}/edit`)}
         >
           Edit
-        </button>
+        </button> */}
         <button className="px-4 py-2 bg-red-500 text-white rounded">
           Delete
         </button>

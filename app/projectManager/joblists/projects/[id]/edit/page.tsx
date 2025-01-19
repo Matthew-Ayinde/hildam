@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { IoIosArrowBack } from "react-icons/io";
 
 export default function EditCustomer() {
   const [isDisabled, setIsDisabled] = useState(false);
@@ -254,6 +255,15 @@ export default function EditCustomer() {
 
   return (
     <div className="w-full h-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+      <button
+                onClick={() => router.push("/projectmanager/joblists/projects")}
+                className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
+              >
+                <IoIosArrowBack size={30}/>
+                <div className="mx-2">
+                Back to List
+                </div>
+              </button>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-6">
           <div>
@@ -287,16 +297,16 @@ export default function EditCustomer() {
           </div>
         </div>
 
-        <div className="col-span-2 mt-10">
+        <div className="col-span-2 mt-10 flex justify-end">
           <button
             type="submit"
             className="px-4 py-2 bg-orange-500 text-white rounded"
           >
-            Save Changes
+            Save the Changes
           </button>
           <button
             type="button"
-            onClick={() => router.push(`/projectmanager/inventory/${id}`)}
+            onClick={() => router.push(`/projectmanager/joblists/projects`) }
             className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
           >
             Cancel
@@ -317,6 +327,7 @@ export default function EditCustomer() {
                 <input
                   type="text"
                   name="duration"
+                  placeholder="Enter days required"
                   value={realTestdata.duration}
                   onChange={handleInputTestChange}
                   className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"

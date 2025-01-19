@@ -3,6 +3,7 @@
 import Spinner from "@/components/Spinner";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { IoIosArrowBack } from "react-icons/io";
 
 export default function EditCustomer() {
   const router = useRouter();
@@ -181,6 +182,15 @@ export default function EditCustomer() {
           {successMessage}
         </div>
       )}
+      <button
+                onClick={() => router.push("/admin/orders")}
+                className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
+              >
+                <IoIosArrowBack size={30}/>
+                <div className="mx-2">
+                Back to List
+                </div>
+              </button>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-6">
           <div>

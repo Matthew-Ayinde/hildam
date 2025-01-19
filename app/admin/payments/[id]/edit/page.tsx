@@ -3,6 +3,7 @@
 import Spinner from "@/components/Spinner";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { IoIosArrowBack } from "react-icons/io";
 
 export default function EditCustomer() {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function EditCustomer() {
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [formData, setFormData] = useState({
-    payment_status: "",
+    payment_status_id: "",
     order_id: "",
       });
 
@@ -62,7 +63,7 @@ export default function EditCustomer() {
       setCustomer(result.data);
       setFormData({
         order_id: result.data.order_id,
-        payment_status: result.data.payment_status,
+        payment_status_id: result.data.payment_status_id,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
@@ -95,12 +96,12 @@ export default function EditCustomer() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update customer data");
+        throw new Error("Failed to update payment data");
       }
 
-      setSuccessMessage("Customer data updated successfully!");
+      setSuccessMessage("Payment data updated successfully!");
       setTimeout(() => {
-        router.push('/admin/orders');
+        router.push('/admin/payments');
       }, 2000); // Redirect after 2 seconds
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
@@ -136,6 +137,15 @@ export default function EditCustomer() {
         </div>
       )}
       <form onSubmit={handleSubmit}>
+        <button
+                  onClick={() => router.push("/admin/payments")}
+                  className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
+                >
+                  <IoIosArrowBack size={30}/>
+                  <div className="mx-2">
+                  Back to List
+                  </div>
+                </button>
         <div className="grid grid-cols-2 gap-6">
           <div>
             <label className="block text-gray-700 font-bold">Order ID</label>
@@ -151,17 +161,17 @@ export default function EditCustomer() {
           <div>
             <label className="block text-gray-700 font-bold">Payment Status</label>
             <select
-              name="payment_status"
-              value={formData.payment_status}
+              name="payment_status_id"
+              value={formData.payment_status_id}
               onChange={handleInputChange}
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-white"
             >
-              <option value="" disabled>
+              <option value="">
                 Select Payment Status
               </option>
-              <option value="In Review">In Review</option>
-              <option value="Paid">Paid</option>
-              <option value="Not Paid">Not paid</option>
+              <option value="2">In Review</option>
+              <option value="3">Paid</option>
+              <option value="1">Not paid</option>
             </select>
           </div>
           
