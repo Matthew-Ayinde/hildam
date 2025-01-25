@@ -46,12 +46,15 @@ const Topbar = () => {
       const token = sessionStorage.getItem("access_token");
       if (!token) throw new Error("No access token found");
 
-      const response = await fetch("/api/allnotifications", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/allnotifications",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch notifications");
@@ -101,14 +104,17 @@ const Topbar = () => {
       const token = sessionStorage.getItem("access_token");
       if (!token) throw new Error("No access token found");
 
-      await fetch(`/api/readnotification/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ message, link }),
-      });
+      await fetch(
+        `https://hildam.insightpublicis.com/api/readnotification/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ message, link }),
+        }
+      );
 
       setNotifications((prev) =>
         prev.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif))
@@ -151,7 +157,10 @@ const Topbar = () => {
           <div className="uppercase">Welcome, {userName}</div>
           <div className="text-sm mt-1">Role: Project Manager</div>
         </div>
-        <div className="lg:flex hidden items-center gap-4 relative" ref={dropdownRef}>
+        <div
+          className="lg:flex hidden items-center gap-4 relative"
+          ref={dropdownRef}
+        >
           <LogoutButton />
           <div
             className="relative w-12 h-12 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"

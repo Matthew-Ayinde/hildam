@@ -1,11 +1,12 @@
 "use client";
 
-import Spinner from "@/components/Spinner";
+import Spinner from "../../../../../../components/Spinner";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { IoIosArrowBack } from "react-icons/io";
+import React from "react";
 
 export default function EditCustomer() {
   const [isDisabled, setIsDisabled] = useState(false);
@@ -21,14 +22,15 @@ export default function EditCustomer() {
     second_fitting_date: null,
   });
 
-  const handleDateChange = (date: Date | null, field: string) => {
-    setRealTestdata({
-      ...realTestdata,
-      [field]: date,
-    });
-  };
+  const handleDateChange = (date: Date | [Date, Date] | null, field: string) => {
+      const selectedDate = Array.isArray(date) ? date[0] : date;
+      setRealTestdata({
+        ...realTestdata,
+        [field]: selectedDate,
+      });
+    };
 
-  const handleTestSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleTestSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     // Add validation to ensure dates are not in the past
     const today = new Date();
@@ -49,14 +51,17 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/editproject/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(realTestdata),
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/editproject/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(realTestdata),
+        }
+      );
 
       // Log the response for debugging
       console.log(response);
@@ -117,11 +122,14 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/projectlists/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/projectlists/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch project data");
@@ -161,11 +169,14 @@ export default function EditCustomer() {
     setLoadingManagers(true);
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch("/api/headoftailoringlist", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/headoftailoringlist",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch managers");
@@ -203,14 +214,17 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/editproject/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(realdata),
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/editproject/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(realdata),
+        }
+      );
 
       // Log the response for debugging
       console.log(response);
@@ -256,14 +270,12 @@ export default function EditCustomer() {
   return (
     <div className="w-full h-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <button
-                onClick={() => router.push("/admin/joblists/projects")}
-                className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
-              >
-                <IoIosArrowBack size={30}/>
-                <div className="mx-2">
-                Back to List
-                </div>
-              </button>
+        onClick={() => router.push("/admin/joblists/projects")}
+        className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
+      >
+        <IoIosArrowBack size={30} />
+        <div className="mx-2">Back to List</div>
+      </button>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-6">
           <div>
@@ -355,7 +367,7 @@ export default function EditCustomer() {
                 <div className="w-full">
                   <DatePicker
                     selected={realTestdata.first_fitting_date}
-                    onChange={(date) =>
+                    onChange={(date: Date | null) =>
                       handleDateChange(date, "first_fitting_date")
                     }
                     dateFormat="dd/MM/yyyy"
@@ -371,7 +383,7 @@ export default function EditCustomer() {
                 </label>
                 <DatePicker
                   selected={realTestdata.second_fitting_date}
-                  onChange={(date) =>
+                  onChange={(date: Date | null) =>
                     handleDateChange(date, "second_fitting_date")
                   }
                   dateFormat="dd/MM/yyyy"

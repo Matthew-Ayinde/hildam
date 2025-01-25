@@ -43,7 +43,6 @@ export default function ShowCustomer() {
     payment_method: string;
     payment_status: string;
     customer_description: string;
-
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -56,11 +55,14 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/payment/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/payment/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -94,7 +96,8 @@ export default function ShowCustomer() {
           customer_email: result.data.customer_email || "N/A",
           payment_method: result.data.payment_method || "N/A",
           customer_description: result.data.customer_description || "N/A",
-          project_manager_payment_method: result.data.project_manager_payment_method || "N/A",
+          project_manager_payment_method:
+            result.data.project_manager_payment_method || "N/A",
           project_manager_amount: result.data.project_manager_amount || "N/A",
           manager_name: result.data.manager_name || "N/A",
         };
@@ -118,9 +121,11 @@ export default function ShowCustomer() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">
-      <Spinner />
-    </div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -142,15 +147,12 @@ export default function ShowCustomer() {
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
         <button
-                  onClick={() => router.push("/admin/payments")}
-                  className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
-                >
-                  <IoIosArrowBack size={30}/>
-                  <div className="mx-2">
-                  Back to List
-                  </div>
-                </button>
-
+          onClick={() => router.push("/admin/payments")}
+          className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
+        >
+          <IoIosArrowBack size={30} />
+          <div className="mx-2">Back to List</div>
+        </button>
       </div>
       <form>
         <div className="grid grid-cols-2 gap-6 mb-5">
@@ -164,7 +166,9 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Customer Name</label>
+            <label className="block text-gray-700 font-bold">
+              Customer Name
+            </label>
             <input
               type="text"
               value={customer.fullName}
@@ -182,7 +186,9 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Customer Email</label>
+            <label className="block text-gray-700 font-bold">
+              Customer Email
+            </label>
             <input
               type="text"
               value={customer.customer_email}
@@ -191,7 +197,9 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Payment Method</label>
+            <label className="block text-gray-700 font-bold">
+              Payment Method
+            </label>
             <input
               type="text"
               value={customer.payment_method}
@@ -200,7 +208,9 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Payment Status</label>
+            <label className="block text-gray-700 font-bold">
+              Payment Status
+            </label>
             <input
               type="text"
               value={customer.payment_status}
@@ -209,7 +219,9 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Phone Number</label>
+            <label className="block text-gray-700 font-bold">
+              Phone Number
+            </label>
             <input
               type="text"
               value={customer.phone_number}
@@ -232,7 +244,11 @@ export default function ShowCustomer() {
                 Proof of Payment
               </label>
               <img
-                src={typeof customer.payment_receipt === 'string' ? customer.payment_receipt : undefined}
+                src={
+                  typeof customer.payment_receipt === "string"
+                    ? customer.payment_receipt
+                    : undefined
+                }
                 alt="style_reference_images"
                 className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
                 onClick={handleCustomerImageClick} // Open modal on click

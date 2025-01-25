@@ -54,8 +54,6 @@ const Form = () => {
   const [popupMessage, setPopupMessage] = useState("");
   const [dragging, setDragging] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null); // State for image preview
-  
-
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -80,7 +78,7 @@ const Form = () => {
     setDragging(false);
   };
 
-const handleChange = (
+  const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
@@ -134,14 +132,17 @@ const handleChange = (
     };
 
     try {
-      const response = await fetch("/api/addorders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/addorders",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (response.ok) {
         setResponseMessage("Order created successfully");
@@ -195,12 +196,9 @@ const handleChange = (
         <div className="font-bold text-gray-500 text-xl my-3">
           Order Information
         </div>
-        <div className="flex space-x-4 mb-4">
-        </div>
-        
-        <div className="flex flex-row space-x-4 mb-5">
-          
-        </div>
+        <div className="flex space-x-4 mb-4"></div>
+
+        <div className="flex flex-row space-x-4 mb-5"></div>
 
         <div className="w-full grid grid-cols-2 space-x-4">
           <div className="mb-4">

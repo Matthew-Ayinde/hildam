@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const Form = () => {
   const [formData, setFormData] = useState<{
@@ -9,6 +9,7 @@ const Form = () => {
     clothing_description: string | number | readonly string[] | undefined;
     clothing_name: string | number | readonly string[] | undefined;
     customer_name: string;
+    customer_description: string;
     gender: string;
     age: string;
     phone: string;
@@ -18,6 +19,7 @@ const Form = () => {
     photo: File | null;
     bust: string;
     waist: string;
+    style_reference_images: File | null;
     hips: string;
     shoulderWidth: string;
     neck: string;
@@ -25,10 +27,12 @@ const Form = () => {
     backLength: string;
     frontLength: string;
     highBust: string;
+    manager_id: string; // New field for selected project manager
   }>({
     order_status: "",
     priority: "",
     clothing_description: "",
+    customer_description: "",
     clothing_name: "",
     customer_name: "",
     gender: "",
@@ -40,6 +44,7 @@ const Form = () => {
     photo: null,
     bust: "",
     waist: "",
+    style_reference_images: null,
     hips: "",
     shoulderWidth: "",
     neck: "",
@@ -47,131 +52,183 @@ const Form = () => {
     backLength: "",
     frontLength: "",
     highBust: "",
+    manager_id: "", // Initialize with empty string
   });
 
-  
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [managers, setManagers] = useState<
+    {
+      id: string;
+      user_id: string;
+      name: string;
+    }[]
+  >([]);
+  const [loadingManagers, setLoadingManagers] = useState(true);
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [popupMessage, setPopupMessage] = useState("");
-  const [dragging, setDragging] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null); // State for image preview
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData({ ...formData, photo: file });
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      setFormData({ ...formData, photo: file });
-    }
-    setDragging(false);
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setDragging(false);
-  };
-
-    const handleChange = (
-      e: React.ChangeEvent<
-        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-      >
-    ) => {
-      const { name, value } = e.target;
-      setFormData({ ...formData, [name]: value });
-    };
-  
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setIsSubmitting(true);
-      setResponseMessage(null);
-    
-      const accessToken = sessionStorage.getItem("access_token");
-    
-      if (!accessToken) {
-        alert("No access token found! Please login first.");
-        setIsSubmitting(false);
-        return;
-      }
-    
-      const payload = {
-        customer_name: formData.customer_name,
-        customer_email: formData.customer_email,
-        clothing_name: formData.clothing_name,
-        hips: formData.hips,
-        bust: formData.bust,
-        waist: formData.waist,
-        clothing_description: formData.clothing_description,
-        order_status: formData.order_status,
-        priority: formData.priority,
-        shoulder_width: formData.shoulderWidth,
-        neck: formData.neck,
-        arm_length: formData.armLength,
-        back_length: formData.backLength,
-        front_length: formData.frontLength,
-        high_bust: formData.highBust
-      };
-    
+  useEffect(() => {
+    const fetchProjectManagers = async () => {
       try {
-        const response = await fetch("/api/createorder", {
+        setLoadingManagers(true);
+        const token = sessionStorage.getItem("access_token");
+        if (!token) throw new Error("No access token found");
+
+        const response = await fetch(
+          "https://hildam.insightpublicis.com/api/projectmanagerlist",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (!result.data) {
+          throw new Error("Failed to fetch project managers");
+        }
+
+        setManagers(result.data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingManagers(false);
+      }
+    };
+
+    fetchProjectManagers();
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value, type } = e.target;
+    if (type === "file" && e.target instanceof HTMLInputElement) {
+      const file = e.target.files ? e.target.files[0] : null;
+      setFormData({ ...formData, [name]: file });
+      // Create a URL for the selected image
+      if (file) {
+        const fileURL = URL.createObjectURL(file);
+        setImagePreview(fileURL); // Set the image preview URL
+      } else {
+        setImagePreview(null); // Reset the preview if no file is selected
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setResponseMessage(null);
+
+    const accessToken = sessionStorage.getItem("access_token");
+
+    if (!accessToken) {
+      alert("No access token found! Please login first.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const payload = new FormData();
+    payload.append("customer_name", formData.customer_name);
+    payload.append("customer_description", formData.customer_description);
+    payload.append("customer_email", formData.customer_email);
+    payload.append("clothing_name", formData.clothing_name?.toString() || "");
+    payload.append("hips", formData.hips);
+    payload.append("bust", formData.bust);
+    payload.append("waist", formData.waist);
+    if (formData.style_reference_images) {
+      payload.append("style_reference_images", formData.style_reference_images);
+    }
+    payload.append(
+      "clothing_description",
+      formData.clothing_description?.toString() || ""
+    );
+    payload.append("order_status", formData.order_status?.toString() || "");
+    payload.append("priority", formData.priority?.toString() || "");
+    payload.append("shoulder_width", formData.shoulderWidth);
+    payload.append("neck", formData.neck);
+    payload.append("arm_length", formData.armLength);
+    payload.append("back_length", formData.backLength);
+    payload.append("front_length", formData.frontLength);
+    payload.append("high_bust", formData.highBust);
+    payload.append("manager_id", formData.manager_id); // Include selected manager ID
+
+    try {
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/createorder",
+        {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify(payload),
-        });
-    
-        if (response.ok) {
-          setResponseMessage("Order created successfully");
-          setFormData({
-                      order_status: "",
-                      priority: "",
-                      clothing_description: "",
-                      clothing_name: "",
-                      customer_name: "",
-                      gender: "",
-                      age: "",
-                      phone: "",
-                      customer_email: "",
-                      address: "",
-                      description: "",
-                      photo: null,
-                      bust: "",
-                      waist: "",
-                      hips: "",
-                      shoulderWidth: "",
-                      neck: "",
-                      armLength: "",
-                      backLength: "",
-                      frontLength: "",
-                      highBust: "",
-                    });
-    
-          // Automatically hide response message after 5 seconds
-          setTimeout(() => {
-            setResponseMessage(null);
-          }, 5000);
-        } else {
-          const error = await response.json();
-          alert(`Failed to create order: ${error.message || "Unknown error"}`);
+          body: payload,
         }
-      } catch (err) {
-        alert("Network error. Please try again later.");
-      } finally {
-        setIsSubmitting(false);
+      );
+
+      if (response.ok) {
+        setResponseMessage("Order created successfully");
+        setFormData({
+          order_status: "",
+          customer_description: "",
+          priority: "",
+          clothing_description: "",
+          clothing_name: "",
+          customer_name: "",
+          gender: "",
+          age: "",
+          phone: "",
+          customer_email: "",
+          address: "",
+          description: "",
+          photo: null,
+          bust: "",
+          waist: "",
+          style_reference_images: null,
+          hips: "",
+          shoulderWidth: "",
+          neck: "",
+          armLength: "",
+          backLength: "",
+          frontLength: "",
+          highBust: "",
+          manager_id: "", // Reset manager ID
+        });
+        setImagePreview(null); // Reset image preview
+
+        // Automatically hide response message after 5 seconds
+        setTimeout(() => {
+          setResponseMessage(null);
+        }, 5000);
+      } else {
+        const error = await response.json();
+        alert(`Failed to create order: ${error.message || "Unknown error"}`);
       }
-    };
+    } catch (err) {
+      alert("Network error. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
+
+    //redirect to orders page
+    setTimeout(() => {
+      window.location.href = "/clientmanager/orders";
+    }, 100);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
-      {popupMessage && (<div>{popupMessage}</div>)}
+      {popupMessage && <div>{popupMessage}</div>}
       <form
         onSubmit={handleSubmit}
         className="w-full bg-white rounded-lg shadow-md p-6"
@@ -180,8 +237,8 @@ const Form = () => {
         <div className="font-bold text-gray-500 text-xl my-3">
           Order Information
         </div>
-        <div className="flex space-x-4 mb-4">
-          <div className="w-1/2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-6 gap-5 mb-5">
+          <div className="">
             <label
               htmlFor="customer_name"
               className="block text-sm font-medium text-gray-700"
@@ -199,9 +256,9 @@ const Form = () => {
               required
             />
           </div>
-          <div className="w-1/2">
+          <div className="">
             <label
-              htmlFor="name"
+              htmlFor="customer_email"
               className="block text-sm font-medium text-gray-700"
             >
               Email
@@ -212,17 +269,14 @@ const Form = () => {
               name="customer_email"
               value={formData.customer_email}
               onChange={handleChange}
-              placeholder="Enter your name"
+              placeholder="Enter your email"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
           </div>
-        </div>
-
-        <div className="flex flex-row space-x-4 mb-5">
-          <div className="w-1/2">
+          <div className="">
             <label
-              htmlFor="name"
+              htmlFor="phone"
               className="block text-sm font-medium text-gray-700"
             >
               Phone
@@ -238,51 +292,48 @@ const Form = () => {
               required
             />
           </div>
-
-          <div className="w-1/2">
+          <div className="">
             <label
-              htmlFor="name"
+              htmlFor="priority"
               className="block text-sm font-medium text-gray-700"
             >
               Priority
             </label>
-            <input
-              type="text"
+            <select
               id="priority"
               name="priority"
               value={formData.priority}
               onChange={handleChange}
-              placeholder="Set Priority"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-            />
+              className="mt-1 block w-full rounded-md border border-gray-300 text-gray-500 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
+            >
+              <option value="" disabled className="">
+                Select Priority
+              </option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
           </div>
 
-        </div>
-
-        <div className="flex flex-row space-x-4 mb-5">
-          <div className="w-1/2">
+          <div className="">
             <label
-              htmlFor="name"
+              htmlFor="customer_description"
               className="block text-sm font-medium text-gray-700"
             >
-              Order Status
+              Customer Description
             </label>
-            <input
-              type="text"
-              id="order_status"
-              name="order_status"
-              value={formData.order_status}
+            <textarea
+              rows={4}
+              id="customer_description"
+              name="customer_description"
+              value={formData.customer_description}
               onChange={handleChange}
-              placeholder="Order Status"
+              placeholder="Enter customer description"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
           </div>
-
-        </div>
-
-        <div className="w-full flex flex-row space-x-4">
-          <div className="mb-4 w-1/2">
+          <div className="">
             <label
               htmlFor="clothing_name"
               className="block text-sm font-medium text-gray-700"
@@ -290,6 +341,7 @@ const Form = () => {
               Cloth Name
             </label>
             <textarea
+              rows={3}
               id="clothing_name"
               name="clothing_name"
               value={formData.clothing_name}
@@ -298,9 +350,9 @@ const Form = () => {
               className="mt-1 block w-full h-24 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
             />
           </div>
-          <div className="mb-4 w-1/2">
+          <div className="">
             <label
-              htmlFor="description"
+              htmlFor="clothing_description"
               className="block text-sm font-medium text-gray-700"
             >
               Clothing Description
@@ -314,9 +366,59 @@ const Form = () => {
               className="mt-1 block w-full h-24 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
             />
           </div>
+
+          <div className="">
+            <label
+              htmlFor="style_reference_images"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Style Reference Images
+            </label>
+            <input
+              type="file"
+              id="style_reference_images"
+              name="style_reference_images"
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+            />
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Selected"
+                className="mt-2 w-24 h-24 object-cover rounded-lg"
+              />
+            )}
+          </div>
+
+          {/* Project Manager Dropdown */}
+          <div className="mb-5">
+            <label
+              htmlFor="manager_id"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Select Project Manager
+            </label>
+            {loadingManagers ? (
+              <div className="text-center text-gray-500 mt-2">Loading...</div>
+            ) : (
+              <select
+                id="manager_id"
+                name="manager_id"
+                value={formData.manager_id}
+                onChange={handleChange}
+                required
+                className="mt-1 text-gray-500 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
+              >
+                <option value="">Select project manager</option>
+                {managers.map((manager) => (
+                  <option key={manager.id} value={manager.user_id}>
+                    {manager.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
-
-
 
         {/* Measurement Fields */}
         <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
@@ -484,53 +586,24 @@ const Form = () => {
           </div>
         </div>
 
-        {/* Photo Upload */}
-        <div
-          className={`flex justify-center items-center border-2 border-dashed p-4 rounded-md ${
-            dragging ? "border-[#ff6c2f] bg-green-100" : "border-gray-300"
-          }`}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragLeave={handleDragLeave}
-        >
-          <input
-            type="file"
-            id="photo"
-            name="photo"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-          <label
-            htmlFor="photo"
-            className="text-sm text-gray-600 hover:text-[#ff6c2f] p-20 cursor-pointer"
-          >
-            {formData.photo
-              ? formData.photo.name
-              : "Drag and drop a photo, or click to upload"}
-          </label>
-        </div>
-
         {/* Submit Button */}
         <div className="mt-6">
           <button
             type="submit"
             className="w-fit px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2"
+            disabled={isSubmitting}
           >
-            Create Order
+            {isSubmitting ? "Creating Order..." : "Create Order"}
           </button>
         </div>
         {responseMessage && (
-        <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
-          {responseMessage}
-        </div>
-      )}
+          <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
+            {responseMessage}
+          </div>
+        )}
       </form>
-
-      
     </div>
   );
 };
 
 export default Form;
-

@@ -37,7 +37,7 @@ export default function Table() {
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
-          "/api/orderslist",
+          "https://hildam.insightpublicis.com/api/orderslist",
           {
             method: "GET",
             headers: {
@@ -71,7 +71,7 @@ export default function Table() {
   }, []);
 
   const handlePageChange = (newPage: SetStateAction<number>) => {
-    if (typeof newPage === 'number' && newPage > 0 && newPage <= totalPages) {
+    if (typeof newPage === "number" && newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
@@ -96,9 +96,9 @@ export default function Table() {
         <div className="mx-2 font-bold text-gray-500 text-xl my-3 flex flex-row justify-between items-center">
           <div>Recent Orders</div>
           <Link href="/admin/orders/create">
-          <div className="w-fit bg-red-100 px-4 py-2 text-base text-orange-500 rounded-lg">
-            + Create Order
-          </div>
+            <div className="w-fit bg-red-100 px-4 py-2 text-base text-orange-500 rounded-lg">
+              + Create Order
+            </div>
           </Link>
         </div>
 
@@ -106,7 +106,7 @@ export default function Table() {
           <div className="text-center py-10">Loading...</div>
         ) : error ? (
           <div className="text-center py-10 text-red-500">
-            {error} {" "}
+            {error}{" "}
             <button
               className="text-blue-500 underline"
               onClick={() => window.location.reload()}
@@ -139,7 +139,9 @@ export default function Table() {
               {paginatedData.map((row, index) => (
                 <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
                   <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
-                  <td className="px-4 py-2 text-sm border-b">{formatDate(row.created_at)}</td>
+                  <td className="px-4 py-2 text-sm border-b">
+                    {formatDate(row.created_at)}
+                  </td>
                   <td className="px-4 py-2 text-sm border-b text-[#da6d35]">
                     {row.customer_name}
                   </td>
@@ -159,8 +161,9 @@ export default function Table() {
                   </td>
                   <td className="px-4 py-2 text-sm border-b">
                     <div className="flex flex-row">
-                      <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
-                      onClick={() => router.push(`/admin/orders/${row.id}`)}
+                      <div
+                        className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
+                        onClick={() => router.push(`/admin/orders/${row.id}`)}
                       >
                         <IoEyeOutline size={20} />
                       </div>
@@ -180,7 +183,7 @@ export default function Table() {
       {!loading && !error && (
         <div className="bottom-0 flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200 text-[#A5A8AB]">
           <div>
-            Showing {" "}
+            Showing{" "}
             <span className="font-bold">
               {currentPage * rowsPerPage - rowsPerPage + 1}
             </span>

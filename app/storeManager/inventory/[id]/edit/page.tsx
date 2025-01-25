@@ -20,11 +20,14 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/inventory/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/inventory/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -43,27 +46,30 @@ export default function EditCustomer() {
     }
   };
 
-  const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
+  const handleInputChange = (e: { target: { name: any; value: any } }) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setError(null);
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/inventory/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/inventory/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to update customer data");

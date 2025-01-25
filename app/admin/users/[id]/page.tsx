@@ -28,11 +28,14 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/users/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/users/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -56,9 +59,11 @@ export default function ShowCustomer() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">
-      <Spinner />
-    </div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -80,14 +85,12 @@ export default function ShowCustomer() {
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
         <button
-                  onClick={() => router.push("/admin/users")}
-                  className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
-                >
-                  <IoIosArrowBack size={30}/>
-                  <div className="mx-2">
-                  Back to List
-                  </div>
-                </button>
+          onClick={() => router.push("/admin/users")}
+          className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
+        >
+          <IoIosArrowBack size={30} />
+          <div className="mx-2">Back to List</div>
+        </button>
       </div>
       <form className="grid grid-cols-2 gap-6">
         <div>
@@ -129,7 +132,7 @@ export default function ShowCustomer() {
             readOnly
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
           />
-        </div> 
+        </div>
         {/* Additional fields */}
       </form>
       <div className="mt-6 flex justify-end space-x-4">

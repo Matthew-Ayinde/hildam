@@ -13,7 +13,7 @@ export default function EditCustomer() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    role: ""
+    role: "",
   });
 
   const fetchCustomer = async () => {
@@ -22,11 +22,14 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/users/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/users/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -37,7 +40,7 @@ export default function EditCustomer() {
       setFormData({
         name: result.data.name,
         email: result.data.email,
-        role: result.data.role || ""
+        role: result.data.role || "",
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -50,32 +53,35 @@ export default function EditCustomer() {
     }
   };
 
-  const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
+  const handleInputChange = (e: { target: { name: any; value: any } }) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setError(null);
-  
+
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/users/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(formData),
-      });
-  
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/users/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to update customer data");
       }
-  
+
       router.push(`/admin/users/${id}`);
     } catch (err) {
       if (err instanceof Error) {
@@ -91,9 +97,11 @@ export default function EditCustomer() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">
-      <Spinner />
-    </div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -131,28 +139,28 @@ export default function EditCustomer() {
           />
         </div>
         <div className="">
-            <label
-              htmlFor="role"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              // onChange={handleChange}
-              className="mt-1 block w-full text-gray-700 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            >
-              <option value="">Select Role</option>
-              <option value="1">Admin</option>
-              <option value="2">Client Manager</option>
-              <option value="3">Project Manager</option>
-              <option value="4">Store Manager</option>
-              <option value="5">Head of Tailoring</option>
-            </select>
-          </div>
+          <label
+            htmlFor="role"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Role
+          </label>
+          <select
+            id="role"
+            name="role"
+            value={formData.role}
+            // onChange={handleChange}
+            className="mt-1 block w-full text-gray-700 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+            required
+          >
+            <option value="">Select Role</option>
+            <option value="1">Admin</option>
+            <option value="2">Client Manager</option>
+            <option value="3">Project Manager</option>
+            <option value="4">Store Manager</option>
+            <option value="5">Head of Tailoring</option>
+          </select>
+        </div>
         <div className="col-span-2">
           <button
             type="submit"

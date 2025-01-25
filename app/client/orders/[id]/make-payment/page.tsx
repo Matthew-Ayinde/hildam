@@ -1,14 +1,12 @@
-"use client"
+"use client";
 
 import Spinner from "@/components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-
 const Invoice = () => {
-
-const router = useRouter();
+  const router = useRouter();
   const { id } = useParams();
   interface Customer {
     [x: string]: string | number | readonly string[] | undefined;
@@ -35,8 +33,8 @@ const router = useRouter();
     priority: string;
     order_status: string;
     customer_description: string;
-    tailor_job_image?: string; 
-    manager_name?: string; 
+    tailor_job_image?: string;
+    manager_name?: string;
     approval?: string; // Add approval to the Customer interface
   }
 
@@ -54,11 +52,14 @@ const router = useRouter();
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/myorders/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/myorders/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -90,7 +91,8 @@ const router = useRouter();
           priority: result.data.priority || "N/A",
           order_status: result.data.order_status || "N/A",
           customer_description: result.data.customer_description || "N/A",
-          project_manager_order_status: result.data.project_manager_order_status || "N/A",
+          project_manager_order_status:
+            result.data.project_manager_order_status || "N/A",
           project_manager_amount: result.data.project_manager_amount || "N/A",
           manager_name: result.data.manager_name || "N/A",
           tailor_job_image: result.data.tailor_job_image || null,
@@ -131,13 +133,16 @@ const router = useRouter();
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/approvestyle/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/approvestyle/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to send image to project manager");
@@ -176,14 +181,17 @@ const router = useRouter();
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/rejectstyle/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ customer_feedback: customerFeedback }), // Send feedback in the request body
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/rejectstyle/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ customer_feedback: customerFeedback }), // Send feedback in the request body
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to reject image");
@@ -194,10 +202,14 @@ const router = useRouter();
       setUploadMessage("Image rejected with feedback"); // Set notification message
 
       // Remove the image from the page
-      setCustomer((prev) => prev ? {
-        ...prev,
-        tailor_job_image: null as unknown as string, // Remove the image
-      } : null);
+      setCustomer((prev) =>
+        prev
+          ? {
+              ...prev,
+              tailor_job_image: null as unknown as string, // Remove the image
+            }
+          : null
+      );
 
       // Show toast notification for 5 seconds
       setTimeout(() => {
@@ -217,9 +229,11 @@ const router = useRouter();
   };
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">
-      <Spinner />
-    </div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -237,16 +251,12 @@ const router = useRouter();
     return <div className="text-center text-gray-500 py-10">No data found</div>;
   }
 
-
   const handlePrint = () => {
     window.print();
   };
 
-
-
   return (
     <div className="p-6">
-      
       <div className="border p-4 rounded shadow-lg">
         <div className="flex justify-between mb-4">
           <div>
@@ -277,10 +287,18 @@ const router = useRouter();
             </thead>
             <tbody>
               <tr className="text-center">
-                <td className="border border-gray-200 p-2">{customer.clothing_name}</td>
-                <td className="border border-gray-200 p-2">{customer.clothing_description}</td>
-                <td className="border border-gray-200 p-2">₦{customer.amount}</td>
-                <td className="border border-gray-200 p-2">₦{customer.amount}</td>
+                <td className="border border-gray-200 p-2">
+                  {customer.clothing_name}
+                </td>
+                <td className="border border-gray-200 p-2">
+                  {customer.clothing_description}
+                </td>
+                <td className="border border-gray-200 p-2">
+                  ₦{customer.amount}
+                </td>
+                <td className="border border-gray-200 p-2">
+                  ₦{customer.amount}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -293,15 +311,15 @@ const router = useRouter();
           <h2 className="text-xl font-bold">Payment Mode:</h2>
           <p>Transfer</p>
         </div>
-        <div className='flex justify-end'>
-        <button
-        // onClick={handleApproveStyle}
-        //route to payment page
-        onClick={() => router.push(`/client/orders/${id}/payment`)}
-        className="mb-4 px-4 py-2 bg-orange-500 flex text-white rounded hover:bg-orange-600"
-      >
-        Make Payment
-      </button>
+        <div className="flex justify-end">
+          <button
+            // onClick={handleApproveStyle}
+            //route to payment page
+            onClick={() => router.push(`/client/orders/${id}/payment`)}
+            className="mb-4 px-4 py-2 bg-orange-500 flex text-white rounded hover:bg-orange-600"
+          >
+            Make Payment
+          </button>
         </div>
       </div>
     </div>
@@ -309,6 +327,3 @@ const router = useRouter();
 };
 
 export default Invoice;
-
-
-

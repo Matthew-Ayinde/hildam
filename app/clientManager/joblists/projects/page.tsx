@@ -11,7 +11,8 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { GoClock } from "react-icons/go";
 import { useRouter } from "next/navigation";
-
+import Spinner from "@/components/Spinner";
+import Link from "next/link";
 
 export default function Table() {
   interface ProjectItem {
@@ -57,11 +58,14 @@ export default function Table() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch("/api/projectlists", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/projectlists",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch data");
@@ -95,15 +99,18 @@ export default function Table() {
     }
   };
 
- useEffect(() => {
+  useEffect(() => {
     fetchData();
   }, []);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">Loading...</div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
-  
   if (error) {
     return (
       <div className="text-center text-red-500 py-10">
@@ -112,11 +119,11 @@ export default function Table() {
     );
   }
 
-
   return (
     <div className="w-full bg-white rounded-2xl py-3">
-
-      <div className="my-5 mx-5 font-bold text-gray-500 text-xl">Project Lists</div>
+      <div className="my-5 mx-5 font-bold text-gray-500 text-xl">
+        Project Lists
+      </div>
 
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-200">
@@ -144,8 +151,12 @@ export default function Table() {
             {paginatedData.map((row, index) => (
               <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
                 <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
-                <td className="px-4 py-2 text-sm border-b">{row.customer_name}</td>
-                <td className="px-4 py-2 text-sm border-b">{row.clothing_name}</td>
+                <td className="px-4 py-2 text-sm border-b">
+                  {row.customer_name}
+                </td>
+                <td className="px-4 py-2 text-sm border-b">
+                  {row.clothing_name}
+                </td>
                 <td className="px-4 py-2 text-sm border-b">{row.date}</td>
                 {/* <td className="px-4 py-2 text-sm border-b">
                   <span
@@ -173,20 +184,21 @@ export default function Table() {
                         : "text-red-600 bg-white border border-red-600"
                     }`}
                   >
-                    {row.order_status}
+                    {row.order_status || "pending"}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-sm border-b">{row.manager_name}</td>
+                <td className="px-4 py-2 text-sm border-b">
+                  {row.manager_name || "Not Assigned"}
+                </td>
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
-                    <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
-                    onClick={() => router.push(`/admin/joblists/projects/${row.id}`)}
+                    <Link
+                      href={`/clientmanager/joblists/projects/${row.id}`}
+                      className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2"
                     >
                       <IoEyeOutline size={20} />
-                    </div>
-                    <div className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg">
-                      <MdOutlineDeleteForever size={20} />
-                    </div>
+                      <div>View</div>
+                    </Link>
                   </div>
                 </td>
               </tr>
@@ -205,7 +217,7 @@ export default function Table() {
           <span className="font-bold">
             {Math.min(currentPage * rowsPerPage, data.length)}
           </span>{" "}
-          of <span className="font-bold">{data.length}</span> Orders
+          of <span className="font-bold">{data.length}</span> Projects
         </div>
         <div className="flex items-center space-x-2">
           <button

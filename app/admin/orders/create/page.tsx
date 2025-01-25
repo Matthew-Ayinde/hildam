@@ -75,12 +75,15 @@ const Form = () => {
         const token = sessionStorage.getItem("access_token");
         if (!token) throw new Error("No access token found");
 
-        const response = await fetch("/api/projectmanagerlist", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "https://hildam.insightpublicis.com/api/projectmanagerlist",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -162,13 +165,16 @@ const Form = () => {
     payload.append("manager_id", formData.manager_id); // Include selected manager ID
 
     try {
-      const response = await fetch("/api/createorder", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: payload,
-      });
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/createorder",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: payload,
+        }
+      );
 
       if (response.ok) {
         setResponseMessage("Order created successfully");
@@ -213,12 +219,11 @@ const Form = () => {
     } finally {
       setIsSubmitting(false);
     }
-    
+
     //redirect to orders page
     setTimeout(() => {
       window.location.href = "/admin/orders";
-    }, 100
-    );
+    }, 100);
   };
 
   return (
@@ -309,7 +314,7 @@ const Form = () => {
               <option value="low">Low</option>
             </select>
           </div>
-          
+
           <div className="">
             <label
               htmlFor="customer_description"
@@ -361,7 +366,7 @@ const Form = () => {
               className="mt-1 block w-full h-24 rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
             />
           </div>
-      
+
           <div className="">
             <label
               htmlFor="style_reference_images"
@@ -385,8 +390,8 @@ const Form = () => {
             )}
           </div>
 
-              {/* Project Manager Dropdown */}
-              <div className="mb-5">
+          {/* Project Manager Dropdown */}
+          <div className="mb-5">
             <label
               htmlFor="manager_id"
               className="block text-sm font-medium text-gray-700"
@@ -413,7 +418,6 @@ const Form = () => {
               </select>
             )}
           </div>
-
         </div>
 
         {/* Measurement Fields */}

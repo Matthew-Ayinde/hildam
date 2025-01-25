@@ -23,11 +23,14 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/inventory/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/inventory/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -119,12 +122,13 @@ export default function ShowCustomer() {
             readOnly
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
           />
-        </div> 
+        </div>
         {/* Additional fields */}
       </form>
       <div className="mt-6 flex justify-end space-x-4">
-        <button className="px-4 py-2 bg-orange-500 text-white rounded" 
-        onClick={() => router.push(`/admin/inventory/${id}/edit`)}
+        <button
+          className="px-4 py-2 bg-orange-500 text-white rounded"
+          onClick={() => router.push(`/admin/inventory/${id}/edit`)}
         >
           Edit
         </button>

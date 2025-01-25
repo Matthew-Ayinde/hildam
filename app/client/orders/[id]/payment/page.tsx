@@ -7,12 +7,12 @@ import { useEffect, useState } from "react";
 const Invoice = () => {
   const router = useRouter();
   const { id } = useParams();
-  
+
   interface Customer {
     [x: string]: string | number | readonly string[] | undefined;
     date: string;
     order_id: string;
-    amount: string
+    amount: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -27,11 +27,14 @@ const Invoice = () => {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/myorders/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/myorders/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -43,7 +46,7 @@ const Invoice = () => {
         const mappedCustomer: Customer = {
           date: new Date().toLocaleDateString(),
           order_id: result.data.order_id || "N/A",
-          amount: result.data.amount
+          amount: result.data.amount,
         };
         setCustomer(mappedCustomer);
       } else {
@@ -87,13 +90,16 @@ const Invoice = () => {
       formData.append("order_id", customer?.order_id || "N/A");
       formData.append("payment_status_id", "1");
 
-      const response = await fetch(`/api/makepayment/${id}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: formData, // Send FormData with the file
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/makepayment/${id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData, // Send FormData with the file
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Upload failed");
@@ -129,13 +135,16 @@ const Invoice = () => {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/approvestyle/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/approvestyle/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to send image to project manager");
@@ -206,21 +215,35 @@ const Invoice = () => {
         <h1 className="text-3xl my-2 font-bold text-center">Payment Page</h1>
         <div className="flex justify-center py-10">
           <div className="w-[700px] p-6 bg-white rounded-lg shadow-lg transition-transform transform hover:scale-105 my-5">
-            <h2 className="text-2xl font-bold text-center">Account Information</h2>
+            <h2 className="text-2xl font-bold text-center">
+              Account Information
+            </h2>
             <p className="text-center mb-6">Order ID: {customer.order_id}</p>
 
             <div className="grid grid-cols-1 gap-4">
               <div className="flex items-center">
-                <div className="text-lg font-semibold mr-4 whitespace-nowrap">Account Number:</div>
-                <div className="px-4 py-2 border border-gray-300 rounded-md w-full">2270293089</div>
+                <div className="text-lg font-semibold mr-4 whitespace-nowrap">
+                  Account Number:
+                </div>
+                <div className="px-4 py-2 border border-gray-300 rounded-md w-full">
+                  2270293089
+                </div>
               </div>
               <div className="flex items-center">
-                <div className="text-lg font-semibold mr-4 whitespace-nowrap">Account Name:</div>
-                <div className="px-4 py-2 border border-gray-300 rounded-md w-full">Hildam Couture</div>
+                <div className="text-lg font-semibold mr-4 whitespace-nowrap">
+                  Account Name:
+                </div>
+                <div className="px-4 py-2 border border-gray-300 rounded-md w-full">
+                  Hildam Couture
+                </div>
               </div>
               <div className="flex items-center">
-                <div className="text-lg font-semibold mr-4 whitespace-nowrap">Bank Name:</div>
-                <div className="px-4 py-2 border border-gray-300 rounded-md w-full">First City Monument Bank</div>
+                <div className="text-lg font-semibold mr-4 whitespace-nowrap">
+                  Bank Name:
+                </div>
+                <div className="px-4 py-2 border border-gray-300 rounded-md w-full">
+                  First City Monument Bank
+                </div>
               </div>
               <div className="flex items-center">
                 <label
@@ -256,7 +279,9 @@ const Invoice = () => {
             </div>
             <div className="flex justify-between items-center mt-6 border-t pt-4">
               <h2 className="text-lg font-semibold">Subtotal:</h2>
-              <p className="text-lg font-semibold text-green-600">₦{customer.amount}</p>
+              <p className="text-lg font-semibold text-green-600">
+                ₦{customer.amount}
+              </p>
             </div>
             <div className="flex justify-between items-center mt-2">
               <h2 className="text-lg font-semibold">Payment Mode:</h2>

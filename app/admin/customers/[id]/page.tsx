@@ -1,7 +1,8 @@
 "use client";
 
-import Spinner from "@/components/Spinner";
+import Spinner from "../../../../components/Spinner";
 import { useRouter, useParams } from "next/navigation";
+import React from "react";
 import { useEffect, useState } from "react";
 
 export default function ShowCustomer() {
@@ -23,10 +24,9 @@ export default function ShowCustomer() {
     neck: number;
     armLength: number;
     backLength: number;
-    frontLength: number,
-
+    frontLength: number;
   }
-  
+
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,11 +37,14 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/customerslist/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/customerslist/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -88,9 +91,11 @@ export default function ShowCustomer() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">
-      <Spinner />
-    </div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -119,63 +124,62 @@ export default function ShowCustomer() {
         </button>
       </div>
       <form>
-        <div  className="grid grid-cols-2 gap-6 mb-5">
-        <div>
-          <label className="block text-gray-700 font-bold">Full Name</label>
-          <input
-            type="text"
-            value={customer.fullName}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
+        <div className="grid grid-cols-2 gap-6 mb-5">
+          <div>
+            <label className="block text-gray-700 font-bold">Full Name</label>
+            <input
+              type="text"
+              value={customer.fullName}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Age</label>
+            <input
+              type="text"
+              value={customer.age}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Gender</label>
+            <input
+              type="text"
+              value={customer.gender}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Phone</label>
+            <input
+              type="text"
+              value={customer.phone}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Create Date</label>
+            <input
+              type="text"
+              value={customer.date}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Email</label>
+            <input
+              type="text"
+              value={customer.email}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
         </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Age</label>
-          <input
-            type="text"
-            value={customer.age}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Gender</label>
-          <input
-            type="text"
-            value={customer.gender}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Phone</label>
-          <input
-            type="text"
-            value={customer.phone}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Create Date</label>
-          <input
-            type="text"
-            value={customer.date}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Email</label>
-          <input
-            type="text"
-            value={customer.email}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        </div>
-        
       </form>
       <div className="mt-6 flex justify-end space-x-4">
         {/* <div
@@ -191,11 +195,6 @@ export default function ShowCustomer() {
     </div>
   );
 }
-
-
-
-
-
 
 // <div className="w-full">
 // {/* Measurement Fields */}
@@ -343,4 +342,4 @@ export default function ShowCustomer() {
 //   </div>
 // </div>
 // </div>
-// </div> 
+// </div>

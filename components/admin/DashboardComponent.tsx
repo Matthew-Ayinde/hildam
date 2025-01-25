@@ -27,6 +27,8 @@ export default function Table() {
   const router = useRouter();
   const tableRef = useRef<HTMLTableSectionElement>(null);
 
+  const statsRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -35,12 +37,15 @@ export default function Table() {
         const token = sessionStorage.getItem("access_token");
         if (!token) throw new Error("No access token found");
 
-        const response = await fetch("/api/orderslist", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "https://hildam.insightpublicis.com/api/orderslist",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -77,6 +82,19 @@ export default function Table() {
     }
   }, [loading, error, currentPage]);
 
+  useEffect(() => {
+    if (statsRef.current) {
+      const items = statsRef.current.children; // Get all child elements
+      gsap.fromTo(
+        items,
+        { opacity: 0, x: 50 }, // Start from opacity 0 and x position 50 (off-screen right)
+        { opacity: 1, x: 0, stagger: 0.2, duration: 0.6 } // Animate to opacity 1 and x position 0 with stagger
+      );
+    }
+  }, []); // Empty dependency array to run only on mount
+  
+  
+
   const handlePageChange = (newPage: SetStateAction<number>) => {
     if (typeof newPage === "number" && newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -99,25 +117,29 @@ export default function Table() {
 
   return (
     <div className="w-full">
-
-      <div className="flex flex-row gap-5 overflow-x-auto">
-              {[
-                { label: "Total Orders", value: data.length },
-                { label: "Total Customers", value: data.length },
-                { label: "Total Users", value: data.length },
-                // Add more stats as needed
-              ].map((stat, index) => (
-                <div key={index} className="bg-white rounded-xl flex items-center p-5 mb-5">
-                  <div className="text-[#81899d]">
-                    <div className="font-bold text-gray-700 whitespace-nowrap">{stat.label}</div>
-                    <div className="text-2xl text-[#5d7186]">{stat.value}</div>
-                  </div>
-                  <div className="p-4 rounded-lg bg-[#fff0ea] text-[#ff6c2f] ml-5">
-                    <FaRegCalendarTimes size={30} />
-                  </div>
-                </div>
-              ))}
+        <div ref={statsRef} className="flex flex-row gap-5 overflow-x-auto">
+      {[
+        { label: "Total Orders", value: data.length },
+        { label: "Total Customers", value: data.length },
+        { label: "Total Users", value: data.length },
+        // Add more stats as needed
+      ].map((stat, index) => (
+        <div
+          key={index}
+          className="bg-white rounded-xl flex items-center p-5 mb-5"
+        >
+          <div className="text-[#81899d]">
+            <div className="font-bold text-gray-700 whitespace-nowrap">
+              {stat.label}
             </div>
+            <div className="text-2xl text-[#5d7186]">{stat.value}</div>
+          </div>
+          <div className="p-4 rounded-lg bg-[#fff0ea] text-[#ff6c2f] ml-5">
+            <FaRegCalendarTimes size={30} />
+          </div>
+        </div>
+      ))}
+    </div>
 
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
         <div className="mx-2 font-bold text-gray-500 text-xl my-3 flex flex-row justify-between items-center">
@@ -168,11 +190,15 @@ export default function Table() {
               {paginatedData.map((row, index) => (
                 <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
                   <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
-                  <td className="px-4 py-2 text-sm border-b">{formatDate(row.created_at)}</td>
+                  <td className="px-4 py-2 text-sm border-b">
+                    {formatDate(row.created_at)}
+                  </td>
                   <td className="px-4 py-2 text-sm border-b text-[#da6d35]">
                     {row.customer_name}
                   </td>
-                  <td className="px-4 py-2 text-sm border-b">{row.priority || "medium"}</td>
+                  <td className="px-4 py-2 text-sm border-b">
+                    {row.priority || "medium"}
+                  </td>
                   <td className="px-4 py-2 text-sm border-b">
                     <span
                       className={`px-3 py-1 text-sm font-medium rounded ${

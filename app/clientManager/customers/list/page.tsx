@@ -29,13 +29,16 @@ export default function Table() {
         throw new Error("Authentication token not found");
       }
 
-      const response = await fetch(`/api/deletecustomer/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/deletecustomer/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete customer");
@@ -68,7 +71,7 @@ export default function Table() {
       return;
     }
 
-    fetch("/api/customerslist", {
+    fetch("https://hildam.insightpublicis.com/api/customerslist", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -164,7 +167,9 @@ export default function Table() {
                   <div className="flex flex-row">
                     <div
                       className="ml-0 me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:cursor-pointer"
-                      onClick={() => router.push(`/admin/customers/${row.id}`)}
+                      onClick={() =>
+                        router.push(`/clientmanager/customers/${row.id}`)
+                      }
                     >
                       <IoEyeOutline size={20} />
                     </div>

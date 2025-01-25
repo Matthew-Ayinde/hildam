@@ -60,11 +60,14 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/tailorjoblists/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/tailorjoblists/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -135,13 +138,16 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/edittailorjob/${id}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/edittailorjob/${id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to upload image");
@@ -177,16 +183,19 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/sendtoprojectmanager/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          image_path: imagePath,
-        }),
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/sendtoprojectmanager/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            image_path: imagePath,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to send image to project manager");
@@ -252,17 +261,19 @@ export default function ShowCustomer() {
       )}
       <div className="flex items-center justify-between mb-6">
         <button
-                  onClick={() => router.push("/headoftailoring/joblists/tailorjoblists")}
-                  className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-2"
-                >
-                  <IoIosArrowBack size={30}/>
-                  <div className="mx-2">
-                  Back to List
-                  </div>
-                </button>
+          onClick={() =>
+            router.push("/headoftailoring/joblists/tailorjoblists")
+          }
+          className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-2"
+        >
+          <IoIosArrowBack size={30} />
+          <div className="mx-2">Back to List</div>
+        </button>
       </div>
       <form>
-          <div className="text-2xl text-gray-700 font-bold mb-2">Tailor Job Information</div>
+        <div className="text-2xl text-gray-700 font-bold mb-2">
+          Tailor Job Information
+        </div>
         <div className="grid grid-cols-2 gap-6 mb-5">
           <div>
             <label className="block text-gray-700 font-bold">
@@ -516,27 +527,27 @@ export default function ShowCustomer() {
       <div className="text-gray-700">
         <div className="font-bold text-xl">Image Style</div>
         {/* {customer.project_manager_approval === null || customer.project_manager_approval === 'In Review' && ( */}
-        
-          <div>
-            <div className="my-2">Attach proposed images style</div>
-            {!isImageUploaded && ( // Conditionally render input and button
-              <>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="mt-2 block w-full text-sm text-gray-500"
-                />
-                <button
-                  onClick={handleUploadImage}
-                  className="mt-4 bg-orange-500 text-white py-2 px-4 rounded"
-                >
-                  Upload Image
-                </button>
-              </>
-            )}
-          </div>
-        
+
+        <div>
+          <div className="my-2">Attach proposed images style</div>
+          {!isImageUploaded && ( // Conditionally render input and button
+            <>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="mt-2 block w-full text-sm text-gray-500"
+              />
+              <button
+                onClick={handleUploadImage}
+                className="mt-4 bg-orange-500 text-white py-2 px-4 rounded"
+              >
+                Upload Image
+              </button>
+            </>
+          )}
+        </div>
+
         {loading && <div className="text-gray-500">Loading...</div>}
         {selectedImage && (
           <div className="flex items-center mt-4">

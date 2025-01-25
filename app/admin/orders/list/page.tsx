@@ -39,12 +39,15 @@ export default function Table() {
         const token = sessionStorage.getItem("access_token");
         if (!token) throw new Error("No access token found");
 
-        const response = await fetch("/api/orderslist", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "https://hildam.insightpublicis.com/api/orderslist",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -75,12 +78,15 @@ export default function Table() {
       const token = sessionStorage.getItem("access_token");
       if (!token) throw new Error("No access token found");
 
-      const response = await fetch(`/api/deleteorder/${selectedUserId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/deleteorder/${selectedUserId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const result = await response.json();
       if (!response.ok) {
@@ -88,7 +94,9 @@ export default function Table() {
       }
 
       // Update state
-      setData((prevData) => prevData.filter((order) => order.id !== selectedUserId));
+      setData((prevData) =>
+        prevData.filter((order) => order.id !== selectedUserId)
+      );
       setIsPopupOpen(false);
       setToastMessage("Order deleted successfully");
       setToastType("success");
@@ -146,7 +154,10 @@ export default function Table() {
           { label: "Total Orders", value: data.length },
           // Add more stats as needed
         ].map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl flex items-center p-5 mb-5">
+          <div
+            key={index}
+            className="bg-white rounded-xl flex items-center p-5 mb-5"
+          >
             <div className="text-[#81899d]">
               <div className="font-bold text-gray-700">{stat.label}</div>
               <div className="text-2xl text-[#5d7186]">{stat.value}</div>
@@ -160,9 +171,12 @@ export default function Table() {
 
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
         <div className="flex flex-row justify-between items-center px-4">
-        <div className="mx-2 font-bold text-gray-500 text-xl my-3">Order List</div>
-        <div className="mx-2 font-bold text-gray-500 text-xl my-3">Filter specs</div>
-
+          <div className="mx-2 font-bold text-gray-500 text-xl my-3">
+            Order List
+          </div>
+          <div className="mx-2 font-bold text-gray-500 text-xl my-3">
+            Filter specs
+          </div>
         </div>
         {loading ? (
           <div className="text-center py-10">
@@ -206,11 +220,17 @@ export default function Table() {
                   <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
                   <td className="px-4 py-2 text-sm border-b">
                     {formatDate(row.created_at)}
-                  </td> 
+                  </td>
                   <td className="px-4 py-2 text-sm border-b text-[#da6d35]">
                     {row.customer_name}
                   </td>
-                  <td className={`px-4 py-2 text-sm border-b ${row.priority === "high" ? "text-red-500" : ''}`}>{row.priority || "medium"}</td>
+                  <td
+                    className={`px-4 py-2 text-sm border-b ${
+                      row.priority === "high" ? "text-red-500" : ""
+                    }`}
+                  >
+                    {row.priority || "medium"}
+                  </td>
                   <td className="px-4 py-2 text-sm border-b">
                     <span
                       className={`px-3 py-1 text-sm font-medium rounded ${
@@ -224,7 +244,9 @@ export default function Table() {
                       {row.order_status || "Pending"}
                     </span>
                   </td>
-                  <td className="px-4 py-2 text-sm border-b">{row.manager_name || "Not Assigned"}</td>
+                  <td className="px-4 py-2 text-sm border-b">
+                    {row.manager_name || "Not Assigned"}
+                  </td>
                   <td className="px-4 py-2 text-sm border-b">
                     <div className="flex flex-row">
                       <div
@@ -238,8 +260,7 @@ export default function Table() {
                         onClick={() => {
                           setSelectedUserId(row.id);
                           setIsPopupOpen(true);
-                        }
-                        }
+                        }}
                       >
                         <MdOutlineDeleteForever size={20} />
                       </div>
@@ -303,8 +324,8 @@ export default function Table() {
         </div>
       )}
 
-       {/* Popup */}
-       {isPopupOpen && (
+      {/* Popup */}
+      {isPopupOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
           onClick={() => setIsPopupOpen(false)}

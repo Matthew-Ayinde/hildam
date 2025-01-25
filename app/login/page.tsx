@@ -52,7 +52,7 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/login", {
+      const response = await fetch("https://hildam.insightpublicis.com/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

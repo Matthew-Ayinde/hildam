@@ -12,7 +12,7 @@ export default function EditCustomer() {
     name: string;
     age: string;
     phone_number: string;
- email: string;
+    email: string;
     bust: number;
     address: string;
     waist: number;
@@ -60,7 +60,9 @@ export default function EditCustomer() {
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -72,11 +74,14 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/orderslist/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/orderslist/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -112,34 +117,39 @@ export default function EditCustomer() {
         project_manager_amount: result.data.project_manager_amount,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
+  const handleInputChange = (e: { target: { name: any; value: any } }) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/editorder/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/editorder/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to update customer data");
@@ -147,10 +157,12 @@ export default function EditCustomer() {
 
       setSuccessMessage("Customer data updated successfully!");
       setTimeout(() => {
-        router.push('/admin/orders');
+        router.push("/admin/orders");
       }, 2000); // Redirect after 2 seconds
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
     }
   };
 
@@ -159,9 +171,11 @@ export default function EditCustomer() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">
-      <Spinner />
-    </div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -170,7 +184,7 @@ export default function EditCustomer() {
         Error: {error}
         <button onClick={fetchCustomer} className="text-blue-500 underline">
           Retry
- </button>
+        </button>
       </div>
     );
   }
@@ -178,19 +192,15 @@ export default function EditCustomer() {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       {successMessage && (
-        <div className="text-center text-green-500 py-2">
-          {successMessage}
-        </div>
+        <div className="text-center text-green-500 py-2">{successMessage}</div>
       )}
       <button
-                onClick={() => router.push("/admin/orders")}
-                className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
-              >
-                <IoIosArrowBack size={30}/>
-                <div className="mx-2">
-                Back to List
-                </div>
-              </button>
+        onClick={() => router.push("/admin/orders")}
+        className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
+      >
+        <IoIosArrowBack size={30} />
+        <div className="mx-2">Back to List</div>
+      </button>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-6">
           <div>
@@ -199,7 +209,7 @@ export default function EditCustomer() {
               type="text"
               name="order_id"
               value={formData.order_id}
-              onChange={handleInputChange}
+              disabled
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
             />
           </div>
@@ -214,7 +224,9 @@ export default function EditCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Order Priority</label>
+            <label className="block text-gray-700 font-bold">
+              Order Priority
+            </label>
             <select
               name="priority"
               value={formData.priority}
@@ -230,7 +242,9 @@ export default function EditCustomer() {
             </select>
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Order Status</label>
+            <label className="block text-gray-700 font-bold">
+              Order Status
+            </label>
             <select
               name="order_status"
               value={formData.order_status}
@@ -246,36 +260,6 @@ export default function EditCustomer() {
             </select>
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Customer Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Age</label>
-            <input
-              type="text"
-              name="age"
-              value={formData.age}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Gender</label>
-            <input
-              type="text"
-              name="gender"
-              onChange={handleInputChange}
-              value={formData.gender}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
             <label className="block text-gray-700 font-bold">Phone</label>
             <input
               type="text"
@@ -285,32 +269,19 @@ export default function EditCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Create Date</label>
-            <input
-              type="text"
-              value={formData.date}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Email</label>
-            <input
-              type="text"
-              onChange={handleInputChange}
-              value={formData.email}
-              name="email"
-              className ="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
         </div>
         <div className="w-full">
           {/* Measurement Fields */}
-          <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">Measurements</div>
+          <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
+            Measurements
+          </div>
           <div className="mb-4">
             <div className="flex space-x-4 mb-4">
               <div className="w-1/3">
-                <label htmlFor="bust" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="bust"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Bust
                 </label>
                 <input
@@ -318,29 +289,39 @@ export default function EditCustomer() {
                   id="bust"
                   name="bust"
                   value={formData.bust || ""}
+              onChange={handleInputChange}
+
                   placeholder="Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
               <div className="w-1/3">
-                <label htmlFor="waist" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="waist"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Waist
                 </label>
                 <input
                   type="number"
                   id="waist"
                   name="waist"
+              onChange={handleInputChange}
                   value={formData.waist || ""}
                   placeholder="Waist"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
               <div className="w-1/3">
-                <label htmlFor="hips" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="hips"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Hips
                 </label>
                 <input
                   type="number"
+              onChange={handleInputChange}
                   id="hips"
                   name="hips"
                   value={formData.hips || ""}
@@ -351,7 +332,10 @@ export default function EditCustomer() {
             </div>
             <div className="flex space-x-4 mb-4">
               <div className="w-1/3">
-                <label htmlFor="shoulderWidth" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="shoulderWidth"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Shoulder Width
                 </label>
                 <input
@@ -359,12 +343,16 @@ export default function EditCustomer() {
                   id="shoulderWidth"
                   name="shoulderWidth"
                   value={formData.shoulderWidth || ""}
+              onChange={handleInputChange}
                   placeholder="Shoulder Width"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
               <div className="w-1/3">
-                <label htmlFor="neck" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="neck"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Neck
                 </label>
                 <input
@@ -372,17 +360,22 @@ export default function EditCustomer() {
                   id="neck"
                   name="neck"
                   value={formData.neck || ""}
+              onChange={handleInputChange}
                   placeholder="Neck"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
               <div className="w-1/3">
-                <label htmlFor="armLength" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="armLength"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Arm Length
                 </label>
                 <input
                   type="number"
                   id="armLength"
+              onChange={handleInputChange}
                   name="armLength"
                   value={formData.armLength || ""}
                   placeholder="Arm Length"
@@ -392,40 +385,52 @@ export default function EditCustomer() {
             </div>
             <div className="flex space-x-4 mb-4">
               <div className="w-1/3">
-                <label htmlFor="backLength" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="backLength"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Back Length
                 </label>
                 <input
                   type="number"
                   id="backLength"
                   name="backLength"
-                  value={formData.backLength || ""}
+              onChange={handleInputChange}
+              value={formData.backLength || ""}
                   placeholder="Back Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
               <div className="w-1/3">
-                <label htmlFor="frontLength" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="frontLength"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Front Length
                 </label>
                 <input
                   type="number"
                   id="frontLength"
                   name="frontLength"
-                  value={formData.frontLength || ""}
+              onChange={handleInputChange}
+              value={formData.frontLength || ""}
                   placeholder="Front Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
               <div className="w-1/3">
-                <label htmlFor="highBust" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="highBust"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   High Bust
                 </label>
                 <input
                   type="number"
                   id="highBust"
                   name="highBust"
-                  value={formData.highBust || ""}
+              onChange={handleInputChange}
+              value={formData.highBust || ""}
                   placeholder="High Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Spinner from "@/components/Spinner";
 
 export default function ProjectManagerDropdown() {
   const { id } = useParams();
@@ -30,12 +31,15 @@ export default function ProjectManagerDropdown() {
         const token = sessionStorage.getItem("access_token");
         if (!token) throw new Error("No access token found");
 
-        const response = await fetch("/api/projectmanagerlist", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "https://hildam.insightpublicis.com/api/projectmanagerlist",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -78,14 +82,17 @@ export default function ProjectManagerDropdown() {
     };
 
     try {
-      const response = await fetch(`/api/assignprojectmanager/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/assignprojectmanager/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (response.ok) {
         setPopupMessage("Project manager assigned successfully");
@@ -125,7 +132,9 @@ export default function ProjectManagerDropdown() {
             Select Project Manager
           </label>
           {loading ? (
-            <div className="text-center text-gray-500 mt-2">Loading...</div>
+            <div className="text-center text-gray-500 mt-2">
+              <Spinner />
+            </div>
           ) : error ? (
             <div className="text-red-500 mt-2">
               {error}{" "}

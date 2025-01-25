@@ -37,12 +37,15 @@ export default function Table() {
           return;
         }
 
-        const response = await fetch("/api/users", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        const response = await fetch(
+          "https://hildam.insightpublicis.com/api/users",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           console.error("Failed to fetch data:", response.statusText);
@@ -57,7 +60,7 @@ export default function Table() {
         setLoading(false);
       }
     };
- 
+
     fetchData();
   }, []);
 
@@ -69,12 +72,15 @@ export default function Table() {
         return;
       }
 
-      const response = await fetch(`/api/users/${selectedUserId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/users/${selectedUserId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         console.error("Failed to delete user:", response.statusText);
@@ -84,7 +90,9 @@ export default function Table() {
         return;
       }
 
-      setData((prevData) => prevData.filter((user) => user.id !== selectedUserId));
+      setData((prevData) =>
+        prevData.filter((user) => user.id !== selectedUserId)
+      );
       setIsPopupOpen(false);
       setToastMessage("User deleted successfully.");
       setShowToast(true);
@@ -140,7 +148,10 @@ export default function Table() {
             </thead>
             <tbody>
               {paginatedData.map((row) => (
-                <tr key={row.id} className="hover:cursor-pointer text-[#5d7186]">
+                <tr
+                  key={row.id}
+                  className="hover:cursor-pointer text-[#5d7186]"
+                >
                   <td className="px-4 py-2 text-sm border-b">{row.name}</td>
                   <td className="px-4 py-2 text-sm border-b">{row.email}</td>
                   <td className="px-4 py-2 text-sm border-b">{row.role}</td>

@@ -1,14 +1,13 @@
 "use client";
 
-import Spinner from "@/components/Spinner";
+import Spinner from "../../../../../components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { IoIosArrowBack } from "react-icons/io";
-
+import React from "react";
 
 export default function ShowCustomer() {
-
   const [price, setPrice] = useState(""); // State for price value
   const [isPriceModalOpen, setIsPriceModalOpen] = useState(false); // State for modal visibility
 
@@ -66,7 +65,6 @@ export default function ShowCustomer() {
   const [imageLoading, setImageLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [imageError, setImageError] = useState(false);
-  
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -74,11 +72,14 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/projectlists/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/projectlists/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -185,13 +186,16 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/rejecttailorstyle/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/rejecttailorstyle/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to send image to project manager");
@@ -233,13 +237,16 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/sendtocustomer/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/sendtocustomer/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to send image to project manager");
@@ -267,17 +274,20 @@ export default function ShowCustomer() {
   const handelSetPrice = async () => {
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/editproject/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        //send price to the server as amount
-        body: JSON.stringify({
-          amount: price,
-        }),
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/editproject/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          //send price to the server as amount
+          body: JSON.stringify({
+            amount: price,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to set price");
@@ -292,8 +302,7 @@ export default function ShowCustomer() {
         setUploadMessage(null); // Clear notification message
       }, 5000);
 
-    // closePriceModal();
-
+      // closePriceModal();
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -306,9 +315,8 @@ export default function ShowCustomer() {
 
     handleApproveStyle();
     // closePriceModal();
-    setIsPriceModalOpen(false); 
-  }
-
+    setIsPriceModalOpen(false);
+  };
 
   if (!customer) {
     return <div className="text-center text-gray-500 py-10">No data found</div>;
@@ -317,14 +325,12 @@ export default function ShowCustomer() {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
-      <button
+        <button
           onClick={() => router.push("/admin/joblists/projects")}
           className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
         >
-          <IoIosArrowBack size={30}/>
-          <div className="mx-2">
-          Back to List
-          </div>
+          <IoIosArrowBack size={30} />
+          <div className="mx-2">Back to List</div>
         </button>
         <div className="text-end font-bond text-lg text-gray-700 flex flex-row">
           <div className="font-bold me-3">Head of Tailoring:</div>{" "}
@@ -604,7 +610,7 @@ export default function ShowCustomer() {
         </div>
       </form>
 
-{/* 
+      {/* 
       <button onClick={openPriceModal} className="btn-open-modal">
         Open Price Modal
       </button> */}
@@ -625,9 +631,7 @@ export default function ShowCustomer() {
             >
               Close
             </button> */}
-            <div className="text-center text-xl font-bold mb-4">
-              Set Price
-            </div>
+            <div className="text-center text-xl font-bold mb-4">Set Price</div>
             <input
               type="number"
               value={price}
@@ -644,7 +648,6 @@ export default function ShowCustomer() {
           </div>
         </div>
       )}
-
 
       <div className="mt-10">
         <h2 className="text-xl font-bold mb-4">Tailor Job Image</h2>
@@ -680,7 +683,9 @@ export default function ShowCustomer() {
           <div className="text-red-500 mt-2">Awaiting review from customer</div>
         )}
         {customer.customer_approval === null && (
-          <div className="text-red-500 mt-2">Image yet to be sent to customer</div>
+          <div className="text-red-500 mt-2">
+            Image yet to be sent to customer
+          </div>
         )}
 
         {/* customer feedback */}
@@ -688,21 +693,21 @@ export default function ShowCustomer() {
           <div className="mt-3">
             {/* <div className="text-red-500">Image Rejected by customer</div> */}
             <div className="my-3 text-red-500">Style rejected</div>
-          <div className="text-lg font-bold">Customer Feedback</div>
-          <div className=" py-2 px-3 bg-gray-50 border border-gray-500 rounded-lg w-1/2">
-            {customer.customer_feedback}
-          </div>
+            <div className="text-lg font-bold">Customer Feedback</div>
+            <div className=" py-2 px-3 bg-gray-50 border border-gray-500 rounded-lg w-1/2">
+              {customer.customer_feedback}
+            </div>
           </div>
         )}
         {customer.customer_feedback === "In Review" && (
           <div className="mt-3">
             <div>Status:</div>
-           <div className="text-red-500 text-sm">Awaiting Confirmation from customer</div>
+            <div className="text-red-500 text-sm">
+              Awaiting Confirmation from customer
+            </div>
           </div>
         )}
       </div>
-
-      
 
       {showModal && (
         <div
@@ -717,7 +722,9 @@ export default function ShowCustomer() {
               Close
             </button>
             {imageLoading && <Spinner />}
-            {imageError && <div className="text-red-500">Error loading images</div>}
+            {imageError && (
+              <div className="text-red-500">Error loading images</div>
+            )}
             {customer.tailor_job_image && !imageError && (
               <Image
                 src={customer.tailor_job_image}
@@ -730,7 +737,7 @@ export default function ShowCustomer() {
               />
             )}
             {customer.customer_approval === null && (
-                <div className="mt-4 flex justify-between">
+              <div className="mt-4 flex justify-between">
                 <button
                   className="px-4 py-2 bg-green-500 text-white rounded"
                   onClick={() => {
@@ -751,7 +758,7 @@ export default function ShowCustomer() {
                   Reject
                 </button>
               </div>
-              )}
+            )}
           </div>
         </div>
       )}

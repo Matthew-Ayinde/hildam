@@ -22,8 +22,53 @@ export default function Table() {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
   const router = useRouter();
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
 
   const totalPages = Math.ceil(data.length / rowsPerPage);
+
+  const handleDelete = async () => {
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      if (!accessToken) {
+        console.error("No access token found in sessionStorage.");
+        return;
+      }
+
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/inventory/${selectedUserId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Failed to delete user:", response.statusText);
+        setToastMessage("Failed to delete user.");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+        return;
+      }
+
+      setData((prevData) =>
+        prevData.filter((user) => user.id !== selectedUserId)
+      );
+      setIsPopupOpen(false);
+      setToastMessage("User deleted successfully.");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      setToastMessage("An error occurred. Please try again.");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  };
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -42,11 +87,14 @@ export default function Table() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch("/api/inventory", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/inventory",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch data");
@@ -80,9 +128,11 @@ export default function Table() {
   }, []);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">
-      <Spinner />
-    </div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -95,19 +145,30 @@ export default function Table() {
 
   return (
     <div className="w-full bg-white py-3 rounded-2xl">
-      <div className="mx-2 font-bold text-gray-500 text-xl my-3">Inventory List</div>
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-sm px-6 py-3 rounded-lg shadow-lg z-50">
+          {toastMessage}
+        </div>
+      )}
+
+      <div className="mx-2 font-bold text-gray-500 text-xl my-3">
+        Inventory List
+      </div>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-200">
           <thead className="bg-[#f6f8fb] sticky top-0 z-10">
             <tr className="text-[#5d7186]">
-              {["ID", "Item", "Item Quantity", "Created On", "Action"].map((header) => (
-                <th
-                  key={header}
-                  className="px-4 py-4 text-left text-sm font-extrabold text-gray-700 border-b border-gray-200"
-                >
-                  {header}
-                </th>
-              ))}
+              {["ID", "Item", "Item Quantity", "Created On", "Action"].map(
+                (header) => (
+                  <th
+                    key={header}
+                    className="px-4 py-4 text-left text-sm font-extrabold text-gray-700 border-b border-gray-200"
+                  >
+                    {header}
+                  </th>
+                )
+              )}
             </tr>
           </thead>
           <tbody>
@@ -115,17 +176,28 @@ export default function Table() {
               <tr key={row.id} className="hover:cursor-pointer text-[#5d7186]">
                 <td className="px-4 py-2 text-sm border-b">{row.id}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.itemData}</td>
-                <td className="px-4 py-2 text-sm border-b">{row.itemQuantity}</td>
+                <td className="px-4 py-2 text-sm border-b">
+                  {row.itemQuantity}
+                </td>
                 <td className="px-4 py-2 text-sm border-b">{row.date}</td>
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
                     <div
                       className="ml-0 me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:cursor-pointer"
-                      onClick={() => router.push(`/admin/inventory/${row.id}`)}
+                      onClick={() =>
+                        router.push(`/clientmanager/inventory/${row.id}`)
+                      }
                     >
                       <IoEyeOutline size={20} />
                     </div>
-                    <div className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg">
+                    <div
+                      className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg"
+                      onClick={() => {
+                        setSelectedUserId(row.id);
+                        setIsPopupOpen(true);
+                        console.log("Delete button clicked");
+                      }}
+                    >
                       <MdOutlineDeleteForever size={20} />
                     </div>
                   </div>
@@ -183,6 +255,43 @@ export default function Table() {
           </button>
         </div>
       </div>
+
+      {/* Popup */}
+      {isPopupOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={() => setIsPopupOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg w-96 p-6 text-center"
+            onClick={(e) => e.stopPropagation()}
+            aria-modal="true"
+            role="dialog"
+          >
+            <h3 className="text-lg font-bold text-gray-700 mb-4">
+              Confirm Deletion
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to delete this item? This action cannot be
+              undone.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg"
+                onClick={handleDelete}
+              >
+                Confirm
+              </button>
+              <button
+                className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg"
+                onClick={() => setIsPopupOpen(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

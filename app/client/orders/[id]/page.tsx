@@ -46,8 +46,8 @@ export default function ShowCustomer() {
     priority: string;
     order_status: string;
     customer_description: string;
-    tailor_job_image?: string; 
-    manager_name?: string; 
+    tailor_job_image?: string;
+    manager_name?: string;
     approval?: string; // Add approval to the Customer interface
     style_reference_images?: string;
   }
@@ -66,11 +66,14 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/myorders/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/myorders/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -104,7 +107,8 @@ export default function ShowCustomer() {
           priority: result.data.priority || "N/A",
           order_status: result.data.order_status || "Pending",
           customer_description: result.data.customer_description || "N/A",
-          project_manager_order_status: result.data.project_manager_order_status || "N/A",
+          project_manager_order_status:
+            result.data.project_manager_order_status || "N/A",
           project_manager_amount: result.data.project_manager_amount || "N/A",
           manager_name: result.data.manager_name || "N/A",
           tailor_job_image: result.data.tailor_job_image || null,
@@ -139,20 +143,23 @@ export default function ShowCustomer() {
     setIsFeedbackModalOpen(false);
     setCustomerFeedback(""); // Reset feedback when closing modal
   };
- 
+
   const handleApproveStyle = async () => {
     setLoading(true);
     setError(null);
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/approvestyle/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/approvestyle/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to send image to project manager");
@@ -189,14 +196,17 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/rejectstyle/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ customer_feedback: customerFeedback }), // Send feedback in the request body
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/rejectstyle/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ customer_feedback: customerFeedback }), // Send feedback in the request body
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to reject image");
@@ -207,10 +217,14 @@ export default function ShowCustomer() {
       setUploadMessage("Image rejected with feedback"); // Set notification message
 
       // Remove the image from the page
-      setCustomer((prev) => prev ? {
-        ...prev,
-        tailor_job_image: null as unknown as string, // Remove the image
-      } : null);
+      setCustomer((prev) =>
+        prev
+          ? {
+              ...prev,
+              tailor_job_image: null as unknown as string, // Remove the image
+            }
+          : null
+      );
 
       // Show toast notification for 5 seconds
       setTimeout(() => {
@@ -230,9 +244,11 @@ export default function ShowCustomer() {
   };
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">
-      <Spinner />
-    </div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -253,21 +269,22 @@ export default function ShowCustomer() {
   return (
     <div className="w-full mx-auto p-6 min-h-full h-full bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
-      <Link
+        <Link
           href={`/client/orders`}
           className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
         >
-          <IoIosArrowBack size={30}/>
-          <div className="mx-2">
-          Back to List
-          </div>
+          <IoIosArrowBack size={30} />
+          <div className="mx-2">Back to List</div>
         </Link>
         <div className="text-end font-bond text-lg text-gray-700 flex flex-row">
-          <div className="font-bold me-3">Client Manager:</div> {customer.manager_name}
+          <div className="font-bold me-3">Client Manager:</div>{" "}
+          {customer.manager_name}
         </div>
       </div>
 
-      <div className="my-3 font-bold text-2xl text-center">Order Information</div>
+      <div className="my-3 font-bold text-2xl text-center">
+        Order Information
+      </div>
 
       <form>
         <div className="grid grid-cols-2 gap-6 mb-5">
@@ -281,7 +298,9 @@ export default function ShowCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Order Status</label>
+            <label className="block text-gray-700 font-bold">
+              Order Status
+            </label>
             <input
               type="text"
               value={customer.order_status}
@@ -308,7 +327,9 @@ export default function ShowCustomer() {
             />
           </div>
           <div className="">
-            <div className="block text-gray-700 font-bold">Clothing Description</div>
+            <div className="block text-gray-700 font-bold">
+              Clothing Description
+            </div>
             <textarea
               rows={1}
               value={customer.clothing_description}
@@ -317,62 +338,74 @@ export default function ShowCustomer() {
             />
           </div>
         </div>
-          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-            <div className="">
-              <label className="block text-gray-700 font-bold">
-                Style Reference
-              </label>
-              <img
-                src={customer.style_reference_images}
-                alt="style_reference_images"
-                className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
-                onClick={handleCustomerImageClick} // Open modal on click
-              />
-            </div>
+        <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+          <div className="">
+            <label className="block text-gray-700 font-bold">
+              Style Reference
+            </label>
+            <img
+              src={customer.style_reference_images}
+              alt="style_reference_images"
+              className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
+              onClick={handleCustomerImageClick} // Open modal on click
+            />
+          </div>
 
-            {isCustomerModalOpen && (
+          {isCustomerModalOpen && (
+            <div
+              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+              onClick={handleCustomerCloseModal}
+            >
               <div
-                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-                onClick={handleCustomerCloseModal}
+                className="bg-white rounded-lg p-4"
+                onClick={(e) => e.stopPropagation()}
               >
-                <div
-                  className="bg-white rounded-lg p-4"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <img
-                    src={customer.style_reference_images}
-                    alt="Style Reference"
-                    className="w-[500px] h-[500px] object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = ""; // Clear the image source
-                      e.currentTarget.alt = "Image failed to load"; // Update alt text
-                    }}
-                  />
-                  {/* <p className="text-red-500 text-center mt-2">
+                <img
+                  src={customer.style_reference_images}
+                  alt="Style Reference"
+                  className="w-[500px] h-[500px] object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = ""; // Clear the image source
+                    e.currentTarget.alt = "Image failed to load"; // Update alt text
+                  }}
+                />
+                {/* <p className="text-red-500 text-center mt-2">
                     Image failed to load
                   </p> */}
-                </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
         <div className="w-full">
-          <div className="block text-xl text-gray-700 font-bold mt-10 mb-1">Measurements</div>
+          <div className="block text-xl text-gray-700 font-bold mt-10 mb-1">
+            Measurements
+          </div>
           <div className="mb-4">
             <div className="flex space-x-4 mb-4">
               <div className="w-1/3">
-                <label htmlFor="bust" className="block text-sm font-medium text-gray-700">Bust</label>
+                <label
+                  htmlFor="bust"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Bust
+                </label>
                 <input
                   type="number"
                   readOnly
                   id="bust"
                   name="bust"
-                  value={customer.bust }
+                  value={customer.bust}
                   placeholder="Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
               <div className="w-1/3">
-                <label htmlFor="waist" className="block text-sm font-medium text-gray-700">Waist</label>
+                <label
+                  htmlFor="waist"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Waist
+                </label>
                 <input
                   type="number"
                   readOnly
@@ -384,7 +417,12 @@ export default function ShowCustomer() {
                 />
               </div>
               <div className="w-1/3">
-                <label htmlFor="hips" className="block text-sm font-medium text-gray-700">Hips</label>
+                <label
+                  htmlFor="hips"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Hips
+                </label>
                 <input
                   type="number"
                   readOnly
@@ -398,7 +436,12 @@ export default function ShowCustomer() {
             </div>
             <div className="flex space-x-4 mb-4">
               <div className="w-1/3">
-                <label htmlFor="shoulderWidth" className="block text-sm font-medium text-gray-700">Shoulder Width</label>
+                <label
+                  htmlFor="shoulderWidth"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Shoulder Width
+                </label>
                 <input
                   type="number"
                   readOnly
@@ -410,7 +453,12 @@ export default function ShowCustomer() {
                 />
               </div>
               <div className="w-1/3">
-                <label htmlFor="neck" className="block text-sm font-medium text-gray-700">Neck</label>
+                <label
+                  htmlFor="neck"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Neck
+                </label>
                 <input
                   type="number"
                   readOnly
@@ -422,7 +470,12 @@ export default function ShowCustomer() {
                 />
               </div>
               <div className="w-1/3">
-                <label htmlFor="armLength" className="block text-sm font-medium text-gray-700">Arm Length</label>
+                <label
+                  htmlFor="armLength"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Arm Length
+                </label>
                 <input
                   type="number"
                   readOnly
@@ -436,7 +489,12 @@ export default function ShowCustomer() {
             </div>
             <div className="flex space-x-4 mb-4">
               <div className="w-1/3">
-                <label htmlFor="backLength" className="block text-sm font-medium text-gray-700">Back Length</label>
+                <label
+                  htmlFor="backLength"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Back Length
+                </label>
                 <input
                   type="number"
                   readOnly
@@ -448,7 +506,12 @@ export default function ShowCustomer() {
                 />
               </div>
               <div className="w-1/3">
-                <label htmlFor="frontLength" className="block text-sm font-medium text-gray-700">Front Length</label>
+                <label
+                  htmlFor="frontLength"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Front Length
+                </label>
                 <input
                   type="number"
                   readOnly
@@ -499,15 +562,21 @@ export default function ShowCustomer() {
               <div className="text-green-500 mt-2">Style Approved</div>
             )}
             {customer.approval === "1" && (
-              <div className ="text-red-500 mt-2">Style Rejected</div>
+              <div className="text-red-500 mt-2">Style Rejected</div>
             )}
           </div>
           <div className="text-sm my-5">Please click to open</div>
         </div>
       )}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" onClick={handleCloseModal}>
-          <div className="bg-white rounded-lg p-4" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={handleCloseModal}
+        >
+          <div
+            className="bg-white rounded-lg p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Image
               src={customer.tailor_job_image || ""}
               alt="Proposed Tailor Job"
@@ -515,19 +584,27 @@ export default function ShowCustomer() {
               height={400}
             />
             <div className="mt-4 flex justify-between">
-              <button 
+              <button
                 onClick={
                   //use the router to push to the make payment page
                   () => router.push(`/client/orders/${id}/make-payment`)
-                } 
-                className={`px-4 py-2 ${customer.approval === "Approved" ? "bg-gray-500" : "bg-green-500"} text-white rounded`}
+                }
+                className={`px-4 py-2 ${
+                  customer.approval === "Approved"
+                    ? "bg-gray-500"
+                    : "bg-green-500"
+                } text-white rounded`}
                 disabled={customer.approval === "Approved"}
               >
                 Approve Style
               </button>
-              <button 
-                onClick={handleRejectStyle} 
-                className={`px-4 py-2 ${customer.approval === "Rejected" ? "bg-gray-500" : "bg-red-500"} text-white rounded`}
+              <button
+                onClick={handleRejectStyle}
+                className={`px-4 py-2 ${
+                  customer.approval === "Rejected"
+                    ? "bg-gray-500"
+                    : "bg-red-500"
+                } text-white rounded`}
                 disabled={customer.approval === "Rejected"}
               >
                 Reject Style
@@ -537,8 +614,14 @@ export default function ShowCustomer() {
         </div>
       )}
       {isFeedbackModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" onClick={handleCloseModal}>
-          <div className="bg-white w-[400px] rounded-lg p-4" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={handleCloseModal}
+        >
+          <div
+            className="bg-white w-[400px] rounded-lg p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h2 className="text-lg font-bold">Customer Feedback</h2>
             <textarea
               value={customerFeedback}
@@ -548,8 +631,8 @@ export default function ShowCustomer() {
               placeholder="Enter your feedback here..."
             />
             <div className="mt-4 flex justify-end">
-              <button 
-                onClick={handleSubmitFeedback} 
+              <button
+                onClick={handleSubmitFeedback}
                 className="px-4 py-2 bg-orange-500 text-white rounded"
               >
                 Submit Feedback
@@ -560,62 +643,63 @@ export default function ShowCustomer() {
       )}
 
       {customer.first_fitting_date === null && (
-              <div className={`my-10 mt-10`}>
-                <h1 className="text-2xl font-bold">Other details</h1>
-      
-                <form className="my-6">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-gray-700 font -bold">
-                        Duration ( days )
-                      </label>
-                      <input
-                        className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-                        type="text"
-                        name="duration"
-                        value={customer.duration}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 font-bold">
-                        Order Status
-                      </label>
-                      <input
-                        type="text"
-                        name="duration"
-                        value={customer.order_status}
-                        className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-                      />
-                    </div>
-                    <div className="w-full">
-                      <label className="block text-gray-700 font-bold">
-                        First Fitting Date
-                      </label>
-                      <input
-                        className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-                        type="text"
-                        name="duration"
-                        value={customer.first_fitting_date}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 font-bold">
-                        Second Fitting Date
-                      </label>
-                      <input
-                        className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-                        type="text"
-                        name="duration"
-                        value={customer.second_fitting_date}
-                      />
-                    </div>
-                  </div>
-                </form>
+        <div className={`my-10 mt-10`}>
+          <h1 className="text-2xl font-bold">Other details</h1>
+
+          <form className="my-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-gray-700 font -bold">
+                  Duration ( days )
+                </label>
+                <input
+                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                  type="text"
+                  name="duration"
+                  value={customer.duration}
+                />
               </div>
-            )}
+              <div>
+                <label className="block text-gray-700 font-bold">
+                  Order Status
+                </label>
+                <input
+                  type="text"
+                  name="duration"
+                  value={customer.order_status}
+                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                />
+              </div>
+              <div className="w-full">
+                <label className="block text-gray-700 font-bold">
+                  First Fitting Date
+                </label>
+                <input
+                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                  type="text"
+                  name="duration"
+                  value={customer.first_fitting_date}
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-bold">
+                  Second Fitting Date
+                </label>
+                <input
+                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                  type="text"
+                  name="duration"
+                  value={customer.second_fitting_date}
+                />
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="mt-6 flex justify-end space-x-4">
-        <Link href={`/client/orders/${id}/edit`}
+        <Link
+          href={`/client/orders/${id}/edit`}
           className="px-4 py-2 bg-orange-500 text-white rounded"
         >
           Edit

@@ -22,10 +22,9 @@ export default function ShowCustomer() {
     neck: number;
     armLength: number;
     backLength: number;
-    frontLength: number,
-
+    frontLength: number;
   }
-  
+
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,11 +35,14 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/customerslist/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/customerslist/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -109,75 +111,74 @@ export default function ShowCustomer() {
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => router.push("/admin/customers")}
+          onClick={() => router.push("/clientmanager/customers")}
           className="text-blue-500 underline"
         >
           Back to List
         </button>
       </div>
       <form>
-        <div  className="grid grid-cols-2 gap-6 mb-5">
-        <div>
-          <label className="block text-gray-700 font-bold">Full Name</label>
-          <input
-            type="text"
-            value={customer.fullName}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
+        <div className="grid grid-cols-2 gap-6 mb-5">
+          <div>
+            <label className="block text-gray-700 font-bold">Full Name</label>
+            <input
+              type="text"
+              value={customer.fullName}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Age</label>
+            <input
+              type="text"
+              value={customer.age}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Gender</label>
+            <input
+              type="text"
+              value={customer.gender}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Phone</label>
+            <input
+              type="text"
+              value={customer.phone}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Create Date</label>
+            <input
+              type="text"
+              value={customer.date}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Email</label>
+            <input
+              type="text"
+              value={customer.email}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
         </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Age</label>
-          <input
-            type="text"
-            value={customer.age}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Gender</label>
-          <input
-            type="text"
-            value={customer.gender}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Phone</label>
-          <input
-            type="text"
-            value={customer.phone}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Create Date</label>
-          <input
-            type="text"
-            value={customer.date}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Email</label>
-          <input
-            type="text"
-            value={customer.email}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-          />
-        </div>
-        </div>
-        
       </form>
       <div className="mt-6 flex justify-end space-x-4">
         {/* <div
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/admin/customers/${id}/edit`)}
+          onClick={() => router.push(`/clientmanager/customers/${id}/edit`)}
         >
           Edit
         </div> */}
@@ -188,11 +189,6 @@ export default function ShowCustomer() {
     </div>
   );
 }
-
-
-
-
-
 
 // <div className="w-full">
 // {/* Measurement Fields */}
@@ -340,4 +336,4 @@ export default function ShowCustomer() {
 //   </div>
 // </div>
 // </div>
-// </div> 
+// </div>

@@ -41,11 +41,14 @@ export default function Table() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch("/api/inventory", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/inventory",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch data");
@@ -92,19 +95,23 @@ export default function Table() {
 
   return (
     <div className="w-full bg-white py-3 rounded-2xl">
-      <div className="mx-2 font-bold text-gray-500 text-xl my-3">Inventory List</div>
+      <div className="mx-2 font-bold text-gray-500 text-xl my-3">
+        Inventory List
+      </div>
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border border-gray-200">
           <thead className="bg-[#f6f8fb] sticky top-0 z-10">
             <tr className="text-[#5d7186]">
-              {["ID", "Item", "Item Quantity", "Created On", "Action"].map((header) => (
-                <th
-                  key={header}
-                  className="px-4 py-4 text-left text-sm font-extrabold text-gray-700 border-b border-gray-200"
-                >
-                  {header}
-                </th>
-              ))}
+              {["ID", "Item", "Item Quantity", "Created On", "Action"].map(
+                (header) => (
+                  <th
+                    key={header}
+                    className="px-4 py-4 text-left text-sm font-extrabold text-gray-700 border-b border-gray-200"
+                  >
+                    {header}
+                  </th>
+                )
+              )}
             </tr>
           </thead>
           <tbody>
@@ -112,7 +119,9 @@ export default function Table() {
               <tr key={row.id} className="hover:cursor-pointer text-[#5d7186]">
                 <td className="px-4 py-2 text-sm border-b">{row.id}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.itemData}</td>
-                <td className="px-4 py-2 text-sm border-b">{row.itemQuantity}</td>
+                <td className="px-4 py-2 text-sm border-b">
+                  {row.itemQuantity}
+                </td>
                 <td className="px-4 py-2 text-sm border-b">{row.date}</td>
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">

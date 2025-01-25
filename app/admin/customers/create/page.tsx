@@ -81,21 +81,24 @@ const Form = () => {
         })
       );
 
-      const response = await fetch("/api/addcustomer", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          gender: formData.gender,
-          email: formData.email,
-          phone_number: formData.phone,
-          password: formData.password,
-          age: formData.age,
-        }),
-      });
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/addcustomer",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            gender: formData.gender,
+            email: formData.email,
+            phone_number: formData.phone,
+            password: formData.password,
+            age: formData.age,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to create customer.");
@@ -232,38 +235,36 @@ const Form = () => {
             />
           </div>
           <div className="w-1/2 relative">
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Password
-          </label>
-          <input
-            type={showPassword ? "text" : "password"}
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter your password"
-            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-            required
-          />
-          <button
-            type="button"
-            onClick={togglePasswordVisibility}
-            className="absolute right-3 top-9 text-gray-500 hover:text-[#ff6c2f]"
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? (
-              <MdOutlineHideSource size={30} className="h-5 w-5" />
-            ) : (
-              <MdOutlineRemoveRedEye size={30} className="h-5 w-5" />
-            )}
-          </button>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="absolute right-3 top-9 text-gray-500 hover:text-[#ff6c2f]"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <MdOutlineHideSource size={30} className="h-5 w-5" />
+              ) : (
+                <MdOutlineRemoveRedEye size={30} className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
-        </div>
-
-        
 
         {/* <div className="flex space-x-4 mb-4">
         <div className="w-1/2">

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
- 
+
 const Form = () => {
   const router = useRouter();
   const [formData, setFormData] = useState<{
@@ -47,7 +47,9 @@ const Form = () => {
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -64,17 +66,20 @@ const Form = () => {
         throw new Error("Access token not found in session storage.");
       }
 
-      const response = await fetch("/api/inventory", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          item_name: formData.name,
-          item_quantity: formData.quantity,
-        }),
-      });
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/inventory",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            item_name: formData.name,
+            item_quantity: formData.quantity,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to create Inventory.");
@@ -108,10 +113,15 @@ const Form = () => {
         className="w-full bg-white rounded-lg shadow-md p-6"
       >
         {/* Name and Gender */}
-        <div className="font-bold text-gray-500 text-xl my-3">Add Inventory</div>
+        <div className="font-bold text-gray-500 text-xl my-3">
+          Add Inventory
+        </div>
         <div className="flex space-x-4 mb-4">
           <div className="w-1/2">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
               Name
             </label>
             <input
@@ -126,7 +136,10 @@ const Form = () => {
             />
           </div>
           <div className="w-1/2">
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="quantity"
+              className="block text-sm font-medium text-gray-700"
+            >
               Quantity
             </label>
             <input
@@ -141,7 +154,6 @@ const Form = () => {
             />
           </div>
         </div>
-
 
         {/* Submit Button */}
         <div className="mt-6">

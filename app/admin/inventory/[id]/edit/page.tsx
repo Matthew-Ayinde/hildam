@@ -1,6 +1,7 @@
 "use client";
 
-import Spinner from "@/components/Spinner";
+import Spinner from "../../../../../components/Spinner";
+import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -14,7 +15,9 @@ export default function EditCustomer() {
     item_name: "",
     item_quantity: "",
   });
-  const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
+  const [confirmationMessage, setConfirmationMessage] = useState<string | null>(
+    null
+  );
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -22,11 +25,14 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/inventory/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/inventory/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -49,28 +55,31 @@ export default function EditCustomer() {
     }
   };
 
-  const handleInputChange = (e: { target: { name: any; value: any; }; }) => {
+  const handleInputChange = (e: { target: { name: any; value: any } }) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setError(null);
-  
+
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/inventory/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(formData),
-      });
-  
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/inventory/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to update customer data");
       }
@@ -96,9 +105,11 @@ export default function EditCustomer() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">
-      <Spinner />
-    </div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {

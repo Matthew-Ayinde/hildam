@@ -56,14 +56,17 @@ const Form = () => {
     };
 
     try {
-      const response = await fetch("/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/users",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (response.ok) {
         setPopupMessage("User created successfully");

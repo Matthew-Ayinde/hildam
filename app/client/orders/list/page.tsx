@@ -39,12 +39,15 @@ export default function Table() {
         const token = sessionStorage.getItem("access_token");
         if (!token) throw new Error("No access token found");
 
-        const response = await fetch("/api/myorders", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "https://hildam.insightpublicis.com/api/myorders",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -75,12 +78,15 @@ export default function Table() {
       const token = sessionStorage.getItem("access_token");
       if (!token) throw new Error("No access token found");
 
-      const response = await fetch(`/api/deletemyorder/${selectedUserId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/deletemyorder/${selectedUserId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const result = await response.json();
       if (!response.ok) {
@@ -88,7 +94,9 @@ export default function Table() {
       }
 
       // Update state
-      setData((prevData) => prevData.filter((order) => order.id !== selectedUserId));
+      setData((prevData) =>
+        prevData.filter((order) => order.id !== selectedUserId)
+      );
       setIsPopupOpen(false);
       setToastMessage("Order deleted successfully");
       setToastType("success");
@@ -147,7 +155,10 @@ export default function Table() {
           { label: "Pending Orders", value: 30 },
           { label: "Completed Orders", value: 90 },
         ].map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl flex items-center p-5 mb-5">
+          <div
+            key={index}
+            className="bg-white rounded-xl flex items-center p-5 mb-5"
+          >
             <div className="text-[#81899d]">
               <div className="font-bold text-gray-700">{stat.label}</div>
               <div className="text-2xl text-[#5d7186]">{stat.value}</div>
@@ -160,7 +171,9 @@ export default function Table() {
       </div>
 
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
-        <div className="mx-2 font-bold text-gray-500 text-xl my-3">Order List</div>
+        <div className="mx-2 font-bold text-gray-500 text-xl my-3">
+          Order List
+        </div>
 
         {loading ? (
           <div className="text-center py-10">
@@ -180,19 +193,16 @@ export default function Table() {
           <table className="min-w-full border-collapse border border-gray-200">
             <thead className="bg-[#f6f8fb] sticky top-0 z-10">
               <tr className="text-[#5d7186]">
-                {[
-                  "Order ID",
-                  "Date",
-                  "Order Status",
-                  "Action",
-                ].map((header) => (
-                  <th
-                    key={header}
-                    className="px-4 py-4 text-left text-sm font-extrabold text-gray-700 border-b border-gray-200"
-                  >
-                    {header}
-                  </th>
-                ))}
+                {["Order ID", "Date", "Order Status", "Action"].map(
+                  (header) => (
+                    <th
+                      key={header}
+                      className="px-4 py-4 text-left text-sm font-extrabold text-gray-700 border-b border-gray-200"
+                    >
+                      {header}
+                    </th>
+                  )
+                )}
               </tr>
             </thead>
             <tbody>
@@ -201,7 +211,7 @@ export default function Table() {
                   <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
                   <td className="px-4 py-2 text-sm border-b">
                     {formatDate(row.created_at)}
-                  </td> 
+                  </td>
                   <td className="px-4 py-2 text-sm border-b">
                     <span
                       className={`px-3 py-1 text-sm font-medium rounded ${
@@ -228,8 +238,7 @@ export default function Table() {
                         onClick={() => {
                           setSelectedUserId(row.id);
                           setIsPopupOpen(true);
-                        }
-                        }
+                        }}
                       >
                         <MdOutlineDeleteForever size={20} />
                       </div>
@@ -293,8 +302,8 @@ export default function Table() {
         </div>
       )}
 
-       {/* Popup */}
-       {isPopupOpen && (
+      {/* Popup */}
+      {isPopupOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
           onClick={() => setIsPopupOpen(false)}

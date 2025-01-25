@@ -1,17 +1,14 @@
-import React from 'react'
+import React from "react";
 
 const page = () => {
-  return (
-    <div>page</div>
-  )
-}
+  return <div>page</div>;
+};
 
-export default page
-
-
+export default page;
 
 // "use client";
 
+// import Spinner from "@/components/Spinner";
 // import { useEffect, useState } from "react";
 
 // export default function ProjectManagerDropdown() {
@@ -28,7 +25,7 @@ export default page
 //         if (!token) throw new Error("No access token found");
 
 //         const response = await fetch(
-//           "/api/projectmanagerlist",
+//           "https://hildam.insightpublicis.com/api/projectmanagerlist",
 //           {
 //             method: "GET",
 //             headers: {
@@ -67,7 +64,9 @@ export default page
 //         Select Project Manager
 //       </label>
 //       {loading ? (
-//         <div className="text-center text-gray-500 mt-2">Loading...</div>
+//         <div className="text-center text-gray-500 mt-2">
+//           <Spinner />
+//         </div>
 //       ) : error ? (
 //         <div className="text-red-500 mt-2">
 //           {error}{" "}
@@ -92,7 +91,6 @@ export default page
 //           ))}
 //         </select>
 
-
 //         <div
 //           className="mt-2 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-green-300 focus:outline-none"
 //         >
@@ -105,8 +103,6 @@ export default page
 //           ))}
 //         </div>
 //         </div>
-
-
 
 //       )}
 //     </div>

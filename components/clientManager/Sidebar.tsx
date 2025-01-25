@@ -2,35 +2,23 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  FaUsers,
-  FaShoppingCart,
-  FaBoxes,
-  FaUser,
-} from "react-icons/fa";
+import { FaUsers, FaShoppingCart, FaBoxes, FaUser } from "react-icons/fa";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import Image from "next/image";
 import { MdDashboard } from "react-icons/md";
 import { usePathname } from "next/navigation";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 import "nprogress/nprogress.css"; // Import default styles for NProgress
+import { IoNotifications } from "react-icons/io5";
+import { MdOutlinePayment } from "react-icons/md";
+import { MdOutlineInventory2 } from "react-icons/md";
 
 const sidebarItems = [
-  {
-    id: 1,
-    text: "Customers",
-    icon: <FaUsers />,
-    prefix: "/clientmanager/customers/",
-    links: [
-      { name: "List", href: "/clientmanager/customers" },
-      { name: "Create", href: "/clientmanager/customers/create" },
-    ],
-  },
   {
     id: 2,
     text: "Orders",
     icon: <FaShoppingCart />,
-    prefix: "/clientmanager/orders/",
+    prefix: "/clientmanager/orders",
     links: [
       { name: "List", href: "/clientmanager/orders" },
       { name: "Create Order", href: "/clientmanager/orders/create" },
@@ -46,13 +34,24 @@ const sidebarItems = [
       { name: "Tailor Jobs", href: "/clientmanager/joblists/tailorjoblists" },
     ],
   },
+  
+  {
+    id: 6,
+    text: "Payments",
+    icon: <MdOutlinePayment />,
+    prefix: "/clientmanager/payments",
+    links: [
+      { name: "List", href: "/clientmanager/payments" },
+      { name: "Create", href: "/clientmanager/payments/create" },
+    ],
+  },
   {
     id: 4,
     text: "Inventory",
-    icon: <FaBoxes />,
-    prefix: "/clientmanager/inventory/",
+    icon: <MdOutlineInventory2 />,
+    prefix: "/clientmanager/inventory",
     links: [
-      { name: "List", href: "/clientmanager/inventory/list" },
+      { name: "List", href: "/clientmanager/inventory" },
       { name: "Create", href: "/clientmanager/inventory/create" },
     ],
   },
@@ -98,14 +97,31 @@ const Sidebar = () => {
             height={40}
             className="w-10 h-10"
           />
-          <div className="ml-2 text-white font-bold text-lg">HildaM Couture</div>
+          <div className="ml-2 text-white font-bold text-lg">
+            HildaM Couture
+          </div>
         </div>
-        <button
-          onClick={toggleSidebar}
-          className="text-3xl text-white focus:outline-none"
-        >
-          {isSidebarOpen ? <HiX /> : <HiMenuAlt3 />}
-        </button>
+        <div className="flex flex-row space-x-1 items-center">
+          <div className="w-7 h-7 flex items-center justify-center">
+            <Image
+              src={"/profile.jpeg"}
+              alt="Profile picture"
+              width={100}
+              height={100}
+              className="w-full h-full rounded-full"
+            />
+          </div>
+
+          <div className="w-12 h-12 flex items-center justify-center">
+            <IoNotifications size={20} />
+          </div>
+          <button
+            onClick={toggleSidebar}
+            className="text-3xl text-white focus:outline-none"
+          >
+            {isSidebarOpen ? <HiX /> : <HiMenuAlt3 />}
+          </button>
+        </div>
       </div>
 
       {isSidebarOpen && (
@@ -133,7 +149,9 @@ const Sidebar = () => {
                 className="w-full h-full"
               />
             </div>
-            <div className="ml-2 text-white font-bold text-lg">HildaM Couture</div>
+            <div className="ml-2 text-white font-bold text-lg">
+              HildaM Couture
+            </div>
           </div>
         </div>
 
@@ -157,7 +175,7 @@ const Sidebar = () => {
           </Link>
         </div>
 
-        <ul className="space-y-1 mt-3 px-4">
+        <ul className="space-y-1 mt-3 mb-10 px-4">
           {sidebarItems.map((item) => {
             const isMenuOpen = openMenus[item.id] || isActive(item.prefix);
 
@@ -209,6 +227,13 @@ const Sidebar = () => {
               </li>
             );
           })}
+
+          <div className="relative lg:hidden flex justify-center">
+            <button className="border bg-white px-8 py-2 hover:cursor-pointer hover:text-black shadow-2xl rounded-lg">
+              Logout
+            </button>
+          </div>
+
         </ul>
       </div>
     </>

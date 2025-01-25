@@ -20,7 +20,9 @@ export default function Table() {
   const [currentPage, setCurrentPage] = useState(1);
   const [popupMessage, setPopupMessage] = useState<string | null>(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+    null
+  );
   const rowsPerPage = 10;
   const router = useRouter();
 
@@ -33,20 +35,25 @@ export default function Table() {
         throw new Error("Authentication token not found");
       }
 
-      const response = await fetch(`/api/deletecustomer/${selectedCustomerId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/deletecustomer/${selectedCustomerId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete customer");
       }
 
       // Remove the deleted customer from the local state
-      setData((prevData) => prevData.filter((customer) => customer.id !== selectedCustomerId));
+      setData((prevData) =>
+        prevData.filter((customer) => customer.id !== selectedCustomerId)
+      );
 
       // Show success popup
       setPopupMessage("Customer successfully deleted");
@@ -74,7 +81,7 @@ export default function Table() {
       return;
     }
 
-    fetch("/api/customerslist", {
+    fetch("https://hildam.insightpublicis.com/api/customerslist", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -134,7 +141,7 @@ export default function Table() {
         </div>
       )}
       <div className="overflow-x-auto bg-white rounded-2xl py-3">
-        <div className ="mx-2 font-bold text-gray-500 text-xl my-3">
+        <div className="mx-2 font-bold text-gray-500 text-xl my-3">
           Customers List
         </div>
         <table className="min-w-full border-collapse border border-gray-200">
@@ -246,7 +253,7 @@ export default function Table() {
         >
           <div
             className="bg-white rounded-lg shadow-lg w-96 p-6 text-center"
-            onClick ={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             aria-modal="true"
             role="dialog"
           >
@@ -254,7 +261,8 @@ export default function Table() {
               Confirm Deletion
             </h3>
             <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to delete this customer? This action cannot be undone.
+              Are you sure you want to delete this customer? This action cannot
+              be undone.
             </p>
             <div className="flex justify-center space-x-4">
               <button

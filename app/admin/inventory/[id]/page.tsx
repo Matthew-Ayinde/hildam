@@ -1,10 +1,11 @@
 "use client";
 
-import Spinner from "@/components/Spinner";
+import Spinner from "../../../../components/Spinner";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
+import React from "react";
 
 export default function ShowCustomer() {
   const router = useRouter();
@@ -26,11 +27,14 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/inventory/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/inventory/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");

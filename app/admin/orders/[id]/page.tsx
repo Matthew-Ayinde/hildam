@@ -55,11 +55,14 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`/api/orderslist/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/orderslist/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch orders");
@@ -90,7 +93,7 @@ export default function ShowCustomer() {
           style_reference_images: result.data.style_reference_images || "N/A",
           order_id: result.data.order_id || "N/A",
           priority: result.data.priority || "N/A",
-          order_status: result.data.order_status || "N/A",
+          order_status: result.data.order_status || "pending",
           customer_description: result.data.customer_description || "N/A",
           project_manager_order_status:
             result.data.project_manager_order_status || "N/A",
@@ -146,10 +149,8 @@ export default function ShowCustomer() {
           onClick={() => router.push("/admin/customers")}
           className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
         >
-          <IoIosArrowBack size={30}/>
-          <div className="mx-2">
-          Back to List
-          </div>
+          <IoIosArrowBack size={30} />
+          <div className="mx-2">Back to List</div>
         </button>
         <div className="text-end font-bond text-lg text-gray-700 flex flex-row">
           <div className="font-bold me-3">Project Manager:</div>{" "}
@@ -263,17 +264,6 @@ export default function ShowCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
-          <div>
-            <label className="block text-gray-700 font-bold">
-              Project Manager Order Status
-            </label>
-            <input
-              type="text"
-              value={customer.project_manager_order_status}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
           <div className="">
             <div className="block text-gray-700 font-bold">
               Customer Description
@@ -299,6 +289,7 @@ export default function ShowCustomer() {
           <div className="">
             <label className="block text-gray-700 font-bold">Address</label>
             <textarea
+              rows={1}
               value={customer.address}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
@@ -307,43 +298,43 @@ export default function ShowCustomer() {
         </div>
 
         <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-            <div className="">
-              <label className="block text-gray-700 font-bold">
-                Customer Style
-              </label>
-              <img
-                src={customer.style_reference_images}
-                alt="style_reference_images"
-                className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
-                onClick={handleCustomerImageClick} // Open modal on click
-              />
-            </div>
+          <div className="">
+            <label className="block text-gray-700 font-bold">
+              Customer Style
+            </label>
+            <img
+              src={customer.style_reference_images}
+              alt="style_reference_images"
+              className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
+              onClick={handleCustomerImageClick} // Open modal on click
+            />
+          </div>
 
-            {isCustomerModalOpen && (
+          {isCustomerModalOpen && (
+            <div
+              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+              onClick={handleCustomerCloseModal}
+            >
               <div
-                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-                onClick={handleCustomerCloseModal}
+                className="bg-white rounded-lg p-4"
+                onClick={(e) => e.stopPropagation()}
               >
-                <div
-                  className="bg-white rounded-lg p-4"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <img
-                    src={customer.style_reference_images}
-                    alt="Style Reference"
-                    className="w-[500px] h-[500px] object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = ""; // Clear the image source
-                      e.currentTarget.alt = "Image failed to load"; // Update alt text
-                    }}
-                  />
-                  {/* <p className="text-red-500 text-center mt-2">
+                <img
+                  src={customer.style_reference_images}
+                  alt="Style Reference"
+                  className="w-[500px] h-[500px] object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = ""; // Clear the image source
+                    e.currentTarget.alt = "Image failed to load"; // Update alt text
+                  }}
+                />
+                {/* <p className="text-red-500 text-center mt-2">
                     Image failed to load
                   </p> */}
-                </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
 
         <div className="w-full">
           {/* Measurement Fields */}
