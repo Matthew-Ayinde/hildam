@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import Image from "next/image";
 import React, { useEffect, useState, useRef } from "react";
@@ -6,18 +6,17 @@ import { IoNotifications } from "react-icons/io5";
 import LogoutButton from "./Logout";
 import { useRouter } from "next/navigation";
 
+type Notification = {
+  id: string;
+  message: string;
+  link: string;
+  read: string;
+  created_at: string;
+};
+
 const Topbar = () => {
   const [userName, setUserName] = useState("CEO");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  interface Notification {
-    id: string;
-    message: string;
-    link: string;
-    read: string;
-    created_at: string;
-    action_type: string;
-  }
-
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +77,6 @@ const Topbar = () => {
   useEffect(() => {
     fetchNotifications();
 
-    // Set up polling to fetch notifications every 10 seconds
     const intervalId = setInterval(() => {
       fetchNotifications();
     }, 2000);
@@ -120,34 +118,21 @@ const Topbar = () => {
         prev.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif))
       );
       setUnreadCount((prev) => prev - 1);
-
-      // Close the dropdown after marking as read
       setDropdownOpen(false);
 
-      // Optionally, navigate to the notification's link if required
-      // if (link) {
-      //   router.push(link);
-      // }
+      const linking_id = link.split("/").pop();
+      if (link.includes("orderslist")) {
+        router.push("/admin/orders/" + linking_id);
+      }
+      if (link.includes("projectlist")) {
+        router.push("/admin/joblists/projects/" + linking_id);
+      }
+      if (link.includes("tailorjoblist")) {
+        router.push("/admin/joblists/tailorjoblists/" + linking_id);
+      }
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
-
-    //get the id from the end of the link value and save it with linking_id
-    const linking_id = link.split("/").pop();
-    console.log(linking_id);
-
-    //check if action_type is project_lists, if so redirect to project lists
-    if (link.includes("orderslist")) {
-      router.push("/admin/orders/" + linking_id);
-    }
-    if (link.includes("projectlist")) {
-      router.push("/admin/joblists/projects/" + linking_id);
-    }
-    if (link.includes("tailorjoblist")) {
-      router.push("/admin/joblists/tailorjoblists/" + linking_id);
-    }
-
-    // router.push("/admin/joblists/projects");
   };
 
   return (
@@ -166,7 +151,7 @@ const Topbar = () => {
             className="relative w-12 h-12 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
             onClick={() => setDropdownOpen(!dropdownOpen)}
           >
-            <IoNotifications size={24} className="text-gray-700" />
+            <IoNotifications size={24} className="text-gray-700 rounded-full m-2" />
             {unreadCount > 0 && (
               <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
                 {unreadCount}
@@ -183,26 +168,28 @@ const Topbar = () => {
             />
           </div>
           {dropdownOpen && (
-            <div className="absolute top-full right-0 w-80 bg-white rounded-lg shadow-xl z-50 border border-gray-200">
-              <div className="p-4 border-b border-gray-200 font-semibold text-gray-700">
-                Notifications
+            <div className="absolute top-full right-0 w-80 bg-white rounded-lg shadow-lg z-50 border border-gray-200 p-2 mt-2">
+              <div className="flex justify-between items-center p-4 border-b border-gray-200 font-semibold text-gray-700">
+                <span>Notifications</span>
+                <button
+                  className="text-gray-500 hover:text-gray-700 text-xs"
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  Close
+                </button>
               </div>
               <div className="max-h-72 overflow-y-auto">
-                {error && <div className="p-3 text-center">{error}</div>}
-                {!error &&
-                  notifications.filter((notif) => notif.read === "0").length ===
-                    0 && (
-                    <div className="p-3 text-gray-600 text-center">
-                      No unread notifications
-                    </div>
-                  )}
+                {error && <div className="p-3 text-center text-red-500">{error}</div>}
+                {!error && notifications.filter((notif) => notif.read === "0").length === 0 && (
+                  <div className="p-3 text-gray-600 text-center">No unread notifications</div>
+                )}
                 {!error &&
                   notifications
                     .filter((notif) => notif.read === "0")
                     .map((notification: any) => (
                       <div
                         key={notification.id}
-                        className="p-3 text-sm hover:bg-gray-100 cursor-pointer text-orange-600 border-b border-gray-200 flex justify-between items-center"
+                        className="p-3 text-sm hover:bg-gray-100 cursor-pointer text-orange-600 border-b border-gray-200 flex justify-between items-center rounded-lg transition-all duration-200"
                         onClick={() =>
                           markAsRead(
                             notification.id,
@@ -217,12 +204,11 @@ const Topbar = () => {
                         </span>
                       </div>
                     ))}
-                {notifications.filter((notif) => notif.read === "0").length >
-                  4 && (
+                {notifications.filter((notif) => notif.read === "0").length > 4 && (
                   <div className="flex justify-center p-2">
                     <button
                       onClick={() => router.push("/notifications")}
-                      className="text-white w-fit px-10 rounded-xl bg-orange-500 hover:bg-orange-600 p-2 font-medium"
+                      className="text-white px-8 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 transition-all duration-300"
                     >
                       See More
                     </button>

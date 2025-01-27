@@ -104,7 +104,7 @@ export default function ShowCustomer() {
           order_id: result.data.order_id,
           order_status: result.data.order_status,
           email: "",
-          manager_name: result.data.manager_name || "N/A",
+          manager_name: result.data.manager_name || "Not Assigned",
           clothing_description: result.data.clothing_description || "",
           customer_description: result.data.customer_description || "",
           address: "",
@@ -682,7 +682,7 @@ export default function ShowCustomer() {
         {customer.customer_approval === "In Review" && (
           <div className="text-red-500 mt-2">Awaiting review from customer</div>
         )}
-        {customer.customer_approval === null && (
+        {customer.customer_approval === null && customer.tailor_job_image !== null && (
           <div className="text-red-500 mt-2">
             Image yet to be sent to customer
           </div>

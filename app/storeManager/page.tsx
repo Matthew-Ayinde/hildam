@@ -1,4 +1,4 @@
-import DashboardComponent from "@/components/admin/DashboardComponent";
+import DashboardComponent from "@/components/storeManager/DashboardComponent";
 
 export default function Home() {
   return (
