@@ -11,13 +11,13 @@
 !.yarn/versions
 
 
-.next.zip
 
 # testing
 /coverage
 
 # next.js
 /.next/
+.next.zip
 /out/
 
 # production
