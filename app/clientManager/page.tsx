@@ -1,10 +1,10 @@
-import DashboardComponent from "@/components/admin/DashboardComponent";
+import DashboardComponent from "@/components/clientManager/DashboardComponent";
 
 export default function Home() {
   return (
-    <div className="bg-white overflow-hidden rounded-2xl text-black ">
-      {/* <DashboardComponent /> */}
-      <div>hii</div>
+    <div className="overflow-hidden rounded-2xl text-black ">
+      
+      <DashboardComponent />
     </div>
   );
 }

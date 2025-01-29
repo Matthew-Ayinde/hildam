@@ -169,7 +169,7 @@ const Topbar = () => {
           </div>
           <div className="w-8 h-8">
             <Image
-              src="/profile.jpeg"
+              src="/no-profile.jpg"
               alt="Profile"
               width={500}
               height={500}

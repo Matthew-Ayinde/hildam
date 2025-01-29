@@ -17,7 +17,7 @@ const Topbar = () => {
                 <IoNotifications size={20} className=''/>
                 </div>
                 <div className='w-6 h-6 mx-1'>
-                    <Image src='/profile.jpeg' alt='Notification' width={500} height={500} className='rounded-full w-full h-full' />
+                    <Image src='/no-profile.jpg' alt='Notification' width={500} height={500} className='rounded-full w-full h-full' />
                 </div>
                 <div className='ml-3 flex items-center'>
                     <SearchBar />

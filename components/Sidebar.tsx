@@ -90,7 +90,7 @@ const Sidebar = () => {
           <Image src="/logo.png" alt="Logo" width={50} height={50} />
         </div>
         <div className="w-10 h-10 overflow-hidden rounded-full">
-          <Image src="/profile.jpeg" alt="Profile" width={30} height={30} className="w-full" />
+          <Image src="/no-profile.jpg" alt="Profile" width={30} height={30} className="w-full" />
         </div>
       </div>
 

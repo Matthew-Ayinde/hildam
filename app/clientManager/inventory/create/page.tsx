@@ -116,8 +116,8 @@ const Form = () => {
         <div className="font-bold text-gray-500 text-xl my-3">
           Add Inventory
         </div>
-        <div className="flex space-x-4 mb-4">
-          <div className="w-1/2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-6 gap-5 mb-5">
+          <div className="">
             <label
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
@@ -135,7 +135,7 @@ const Form = () => {
               required
             />
           </div>
-          <div className="w-1/2">
+          <div className="">
             <label
               htmlFor="quantity"
               className="block text-sm font-medium text-gray-700"

@@ -1,7 +1,6 @@
 "use client";
 
 import { SetStateAction, useEffect, useState } from "react";
-import { mockData } from "@/data/mockDataForPaymentList";
 import { FaArrowRight } from "react-icons/fa";
 import { FaArrowLeft } from "react-icons/fa";
 import Image from "next/image";
@@ -11,8 +10,9 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { GoClock } from "react-icons/go";
 import { useRouter } from "next/navigation";
-import Spinner from "@/components/Spinner";
+import Spinner from "../../../../components/Spinner";
 import Link from "next/link";
+import React from "react";
 
 export default function Table() {
   interface ProjectItem {

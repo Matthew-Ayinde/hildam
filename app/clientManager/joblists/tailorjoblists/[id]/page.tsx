@@ -1,10 +1,11 @@
 "use client";
 
-import Spinner from "@/components/Spinner";
+import Spinner from "../../../../../components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image"; // Import Next.js Image component
 import { IoIosArrowBack } from "react-icons/io";
+import React from "react";
 
 export default function ShowCustomer() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -96,8 +97,7 @@ export default function ShowCustomer() {
           clothing_description: result.data.clothing_description || "N/A",
           high_bust: result.data.high_bust || 0,
           tailor_image: result.data.tailor_image || null,
-          project_manager_approval:
-            result.data.project_manager_approval || null,
+          project_manager_approval: result.data.project_manager_approval || null,
           customer_feedback: result.data.customer_feedback || null,
           style_reference_images: result.data.style_reference_images || null,
         };
@@ -565,9 +565,11 @@ export default function ShowCustomer() {
                 alt="Uploaded"
                 className="h-24 w-24 rounded-lg object-cover"
               />
-              <div className="text-gray-700 mt-2">
-                Image sent, awaiting approval
-              </div>
+              {customer.project_manager_approval === "In Review" && (
+                <>
+                  <div className="text-gray-700 mt-2">
+                  Image sent, awaiting approval
+                </div>
               <button
                 onClick={handleSendToProjectManager}
                 className="mt-4 bg-orange-500 text-white py-2 px-4 rounded"
@@ -575,6 +577,9 @@ export default function ShowCustomer() {
               >
                 Send to Project Manager
               </button>
+                </>
+              )}
+
               {uploadMessage && (
                 <div className="text-green-500 mt-2">{uploadMessage}</div>
               )}
@@ -590,7 +595,7 @@ export default function ShowCustomer() {
               className="rounded-lg"
             />
             {customer.project_manager_approval === "In Review" && (
-              <div className="text-red-500 mt-2">Image pending approval</div>
+              <div className="mt-2">Image pending approval</div>
             )}
             {customer.project_manager_approval === "Rejected" && (
               <div className="text-red-500 mt-2">

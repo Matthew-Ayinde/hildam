@@ -209,7 +209,7 @@ export default function EditCustomer() {
               type="text"
               name="order_id"
               value={formData.order_id}
-              onChange={handleInputChange}
+              disabled
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
             />
           </div>
@@ -260,62 +260,12 @@ export default function EditCustomer() {
             </select>
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">
-              Customer Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Age</label>
-            <input
-              type="text"
-              name="age"
-              value={formData.age}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Gender</label>
-            <input
-              type="text"
-              name="gender"
-              onChange={handleInputChange}
-              value={formData.gender}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
             <label className="block text-gray-700 font-bold">Phone</label>
             <input
               type="text"
               name="phone"
               value={formData.phone || ""}
               onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Create Date</label>
-            <input
-              type="text"
-              value={formData.date}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Email</label>
-            <input
-              type="text"
-              onChange={handleInputChange}
-              value={formData.email}
-              name="email"
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
@@ -339,6 +289,8 @@ export default function EditCustomer() {
                   id="bust"
                   name="bust"
                   value={formData.bust || ""}
+              onChange={handleInputChange}
+
                   placeholder="Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -354,6 +306,7 @@ export default function EditCustomer() {
                   type="number"
                   id="waist"
                   name="waist"
+              onChange={handleInputChange}
                   value={formData.waist || ""}
                   placeholder="Waist"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -368,6 +321,7 @@ export default function EditCustomer() {
                 </label>
                 <input
                   type="number"
+              onChange={handleInputChange}
                   id="hips"
                   name="hips"
                   value={formData.hips || ""}
@@ -389,6 +343,7 @@ export default function EditCustomer() {
                   id="shoulderWidth"
                   name="shoulderWidth"
                   value={formData.shoulderWidth || ""}
+              onChange={handleInputChange}
                   placeholder="Shoulder Width"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -405,6 +360,7 @@ export default function EditCustomer() {
                   id="neck"
                   name="neck"
                   value={formData.neck || ""}
+              onChange={handleInputChange}
                   placeholder="Neck"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -419,6 +375,7 @@ export default function EditCustomer() {
                 <input
                   type="number"
                   id="armLength"
+              onChange={handleInputChange}
                   name="armLength"
                   value={formData.armLength || ""}
                   placeholder="Arm Length"
@@ -438,7 +395,8 @@ export default function EditCustomer() {
                   type="number"
                   id="backLength"
                   name="backLength"
-                  value={formData.backLength || ""}
+              onChange={handleInputChange}
+              value={formData.backLength || ""}
                   placeholder="Back Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -454,7 +412,8 @@ export default function EditCustomer() {
                   type="number"
                   id="frontLength"
                   name="frontLength"
-                  value={formData.frontLength || ""}
+              onChange={handleInputChange}
+              value={formData.frontLength || ""}
                   placeholder="Front Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -470,7 +429,8 @@ export default function EditCustomer() {
                   type="number"
                   id="highBust"
                   name="highBust"
-                  value={formData.highBust || ""}
+              onChange={handleInputChange}
+              value={formData.highBust || ""}
                   placeholder="High Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />

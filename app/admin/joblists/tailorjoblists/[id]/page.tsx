@@ -566,10 +566,10 @@ export default function ShowCustomer() {
                 className="h-24 w-24 rounded-lg object-cover"
               />
               {customer.project_manager_approval === "In Review" && (
-                <div className="text-gray-700 mt-2">
+                <>
+                  <div className="text-gray-700 mt-2">
                   Image sent, awaiting approval
                 </div>
-              )}
               <button
                 onClick={handleSendToProjectManager}
                 className="mt-4 bg-orange-500 text-white py-2 px-4 rounded"
@@ -577,6 +577,9 @@ export default function ShowCustomer() {
               >
                 Send to Project Manager
               </button>
+                </>
+              )}
+
               {uploadMessage && (
                 <div className="text-green-500 mt-2">{uploadMessage}</div>
               )}

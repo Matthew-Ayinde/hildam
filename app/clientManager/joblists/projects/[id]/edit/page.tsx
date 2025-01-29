@@ -1,11 +1,12 @@
 "use client";
 
-import Spinner from "@/components/Spinner";
+import Spinner from "../../../../../../components/Spinner";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { IoIosArrowBack } from "react-icons/io";
+import React from "react";
 
 export default function EditCustomer() {
   const [isDisabled, setIsDisabled] = useState(false);
@@ -21,12 +22,13 @@ export default function EditCustomer() {
     second_fitting_date: null,
   });
 
-  const handleDateChange = (date: Date | null, field: string) => {
-    setRealTestdata({
-      ...realTestdata,
-      [field]: date,
-    });
-  };
+  const handleDateChange = (date: Date | [Date, Date] | null, field: string) => {
+      const selectedDate = Array.isArray(date) ? date[0] : date;
+      setRealTestdata({
+        ...realTestdata,
+        [field]: selectedDate,
+      });
+    };
 
   const handleTestSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -365,7 +367,7 @@ export default function EditCustomer() {
                 <div className="w-full">
                   <DatePicker
                     selected={realTestdata.first_fitting_date}
-                    onChange={(date) =>
+                    onChange={(date: Date | null) =>
                       handleDateChange(date, "first_fitting_date")
                     }
                     dateFormat="dd/MM/yyyy"
@@ -381,7 +383,7 @@ export default function EditCustomer() {
                 </label>
                 <DatePicker
                   selected={realTestdata.second_fitting_date}
-                  onChange={(date) =>
+                  onChange={(date: Date | null) =>
                     handleDateChange(date, "second_fitting_date")
                   }
                   dateFormat="dd/MM/yyyy"

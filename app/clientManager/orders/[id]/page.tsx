@@ -93,7 +93,7 @@ export default function ShowCustomer() {
           style_reference_images: result.data.style_reference_images || "N/A",
           order_id: result.data.order_id || "N/A",
           priority: result.data.priority || "N/A",
-          order_status: result.data.order_status || "N/A",
+          order_status: result.data.order_status || "pending",
           customer_description: result.data.customer_description || "N/A",
           project_manager_order_status:
             result.data.project_manager_order_status || "N/A",
@@ -160,15 +160,6 @@ export default function ShowCustomer() {
       <form>
         <div className="grid grid-cols-2 gap-6 mb-5">
           <div>
-            <label className="block text-gray-700 font-bold">ID</label>
-            <input
-              type="text"
-              value={id}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
             <label className="block text-gray-700 font-bold">Order ID</label>
             <input
               type="text"
@@ -202,15 +193,6 @@ export default function ShowCustomer() {
             <input
               type="text"
               value={customer.order_status}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Full Name</label>
-            <input
-              type="text"
-              value={customer.fullName}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
@@ -264,17 +246,6 @@ export default function ShowCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
-          <div>
-            <label className="block text-gray-700 font-bold">
-              Project Manager Order Status
-            </label>
-            <input
-              type="text"
-              value={customer.project_manager_order_status}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
           <div className="">
             <div className="block text-gray-700 font-bold">
               Customer Description
@@ -293,14 +264,6 @@ export default function ShowCustomer() {
             <textarea
               rows={1}
               value={customer.clothing_description}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div className="">
-            <label className="block text-gray-700 font-bold">Address</label>
-            <textarea
-              value={customer.address}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />

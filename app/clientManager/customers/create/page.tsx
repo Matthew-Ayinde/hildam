@@ -1,9 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { MdOutlineHideSource, MdOutlineRemoveRedEye } from "react-icons/md";
 
 const Form = () => {
+  const router = useRouter();
+  const [passwordError, setPasswordError] = useState(false);
+
   const [formData, setFormData] = useState<{
     name: string;
     gender: string;
@@ -121,6 +125,8 @@ const Form = () => {
     } finally {
       setLoading(false);
     }
+
+    router.push('/clientmanager/customers')
   };
 
   {
@@ -177,24 +183,40 @@ const Form = () => {
         </div>
 
         <div className="flex space-x-4 mb-4">
-          <div className="w-1/2">
-            <label
-              htmlFor="phone"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="Enter your phone number"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            />
-          </div>
+        <div className="w-1/2">
+  <label
+    htmlFor="phone"
+    className="block text-sm font-medium text-gray-700"
+  >
+    Phone Number
+  </label>
+  <input
+    type="tel"
+    id="phone"
+    name="phone"
+    value={formData.phone}
+    onChange={(e) => {
+      let value = e.target.value.replace(/\D/g, ""); // Remove all non-numeric characters
+      if (value.length <= 11) {
+        // Format the phone number dynamically
+        if (value.length > 4 && value.length <= 7) {
+          value = `${value.slice(0, 4)} ${value.slice(4)}`;
+        } else if (value.length > 7) {
+          value = `${value.slice(0, 4)} ${value.slice(4, 7)} ${value.slice(7)}`;
+        }
+        handleChange({
+          target: { name: "phone", value } 
+        } as React.ChangeEvent<HTMLInputElement>); // Update the formatted value in state
+      }
+    }}
+    placeholder="XXXX XXX XXXX"
+    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+    required
+  />
+  
+</div>
+
+
           <div className="w-1/2">
             <label
               htmlFor="gender"
@@ -202,69 +224,90 @@ const Form = () => {
             >
               Gender
             </label>
-            <input
-              type="text"
+            <select
               id="gender"
               name="gender"
               value={formData.gender}
               onChange={handleChange}
-              placeholder="Enter your Gender"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
-            />
+            >
+              <option value="">Select your gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
           </div>
         </div>
 
         <div className="flex space-x-4 mb-4">
+          {/* Age Field */}
           <div className="w-1/2">
             <label
-              htmlFor="phone"
+              htmlFor="age"
               className="block text-sm font-medium text-gray-700"
             >
               Age
             </label>
             <input
-              type="string"
+              type="number"
               id="age"
               name="age"
               value={formData.age}
-              onChange={handleChange}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d*$/.test(value) && Number(value) <= 100) {
+                  handleChange(e); // Update only if the input is a valid number and <= 100
+                }
+              }}
               placeholder="Enter your age"
+              min="0"
+              max="100" // Restricts the maximum age to 100
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
           </div>
-        </div>
 
-        <div className="w-1/2 relative">
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Password
-          </label>
-          <input
-            type={showPassword ? "text" : "password"}
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter your password"
-            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-            required
-          />
-          <button
-            type="button"
-            onClick={togglePasswordVisibility}
-            className="absolute right-3 top-9 text-gray-500 hover:text-[#ff6c2f]"
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? (
-              <MdOutlineHideSource size={30} className="h-5 w-5" />
-            ) : (
-              <MdOutlineRemoveRedEye size={30} className="h-5 w-5" />
+          <div className="w-1/2 relative">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={(e) => {
+                handleChange(e); // Update the state
+                setPasswordError(e.target.value.length < 6); // Check length
+              }}
+              placeholder="Enter your password"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="absolute right-3 top-9 text-gray-500 hover:text-[#ff6c2f]"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <MdOutlineHideSource size={30} className="h-5 w-5" />
+              ) : (
+                <MdOutlineRemoveRedEye size={30} className="h-5 w-5" />
+              )}
+            </button>
+
+            {/* Validation Message */}
+            {passwordError && (
+              <p className="mt-2 text-sm text-red-600">
+                Password must be at least 6 characters long.
+              </p>
             )}
-          </button>
+          </div>
         </div>
 
         {/* <div className="flex space-x-4 mb-4">

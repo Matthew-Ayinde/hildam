@@ -1,34 +1,68 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
-import { CiEdit } from "react-icons/ci";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
-import Spinner from "../../../components/Spinner";
-import React from "react";
+import { useRouter } from "next/navigation";
+import Spinner from "@/components/Spinner";
 
 export default function Table() {
-  interface InventoryItem {
-    id: number;
-    itemData: string;
-    itemQuantity: number;
-    date: string;
+  interface User {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
   }
 
-  const [data, setData] = useState<InventoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<User[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 10;
-  const router = useRouter();
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
 
+  const rowsPerPage = 10;
   const totalPages = Math.ceil(data.length / rowsPerPage);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const accessToken = sessionStorage.getItem("access_token");
+        if (!accessToken) {
+          console.error("No access token found in sessionStorage.");
+          return;
+        }
+
+        const response = await fetch(
+          "https://hildam.insightpublicis.com/api/users",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          console.error("Failed to fetch data:", response.statusText);
+          return;
+        }
+
+        const result = await response.json();
+        setData(result.data || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleDelete = async () => {
     try {
@@ -39,7 +73,7 @@ export default function Table() {
       }
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/inventory/${selectedUserId}`,
+        `https://hildam.insightpublicis.com/api/users/${selectedUserId}`,
         {
           method: "DELETE",
           headers: {
@@ -49,8 +83,8 @@ export default function Table() {
       );
 
       if (!response.ok) {
-        console.error("Failed to delete inventory item:", response.statusText);
-        setToastMessage("Failed to delete inventory item.");
+        console.error("Failed to delete user:", response.statusText);
+        setToastMessage("Failed to delete user.");
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
         return;
@@ -60,11 +94,11 @@ export default function Table() {
         prevData.filter((user) => user.id !== selectedUserId)
       );
       setIsPopupOpen(false);
-      setToastMessage("Inventory item deleted successfully.");
+      setToastMessage("User deleted successfully.");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
-      console.error("Error deleting inventory item:", error);
+      console.error("Error deleting user:", error);
       setToastMessage("An error occurred. Please try again.");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
@@ -82,70 +116,10 @@ export default function Table() {
     currentPage * rowsPerPage
   );
 
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(
-        "https://hildam.insightpublicis.com/api/inventory",
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
-
-      const result = await response.json();
-      const formattedData = result.data.map((item: any) => ({
-        id: item.id,
-        itemData: item.item_name,
-        itemQuantity: item.item_quantity,
-        date: new Date(item.created_at).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        }),
-      }));
-      setData(formattedData);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unknown error occurred");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="text-center text-gray-500 py-10">
-        <Spinner />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center text-red-500 py-10">
-        Error: {error} <button onClick={fetchData}>Retry</button>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full bg-white py-3 rounded-2xl">
+    <div className="w-full bg-white rounded-2xl py-2">
+      <div className="mx-2 font-bold text-gray-500 text-xl my-3">Users</div>
+
       {/* Toast Notification */}
       {showToast && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-sm px-6 py-3 rounded-lg shadow-lg z-50">
@@ -153,71 +127,72 @@ export default function Table() {
         </div>
       )}
 
-      <div className="mx-2 font-bold text-gray-500 text-xl my-3">
-        Inventory List
-      </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse border border-gray-200">
-          <thead className="bg-[#f6f8fb] sticky top-0 z-10">
-            <tr className="text-[#5d7186]">
-              {["ID", "Item", "Item Quantity", "Created On", "Action"].map(
-                (header) => (
+      {loading ? (
+        <div className="text-center py-10">
+          <Spinner />
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full border-collapse border border-gray-200">
+            <thead className="bg-[#f6f8fb] sticky top-0 z-10">
+              <tr className="text-[#5d7186]">
+                {["Name", "Email", "Roles", "Action"].map((header) => (
                   <th
                     key={header}
                     className="px-4 py-4 text-left text-sm font-extrabold text-gray-700 border-b border-gray-200"
                   >
                     {header}
                   </th>
-                )
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.map((row) => (
-              <tr key={row.id} className="hover:cursor-pointer text-[#5d7186]">
-                <td className="px-4 py-2 text-sm border-b">{row.id}</td>
-                <td className="px-4 py-2 text-sm border-b">{row.itemData}</td>
-                <td className="px-4 py-2 text-sm border-b">
-                  {row.itemQuantity}
-                </td>
-                <td className="px-4 py-2 text-sm border-b">{row.date}</td>
-                <td className="px-4 py-2 text-sm border-b">
-                  <div className="flex flex-row">
-                    <div
-                      className="ml-0 me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:cursor-pointer"
-                      onClick={() => router.push(`/clientmanager/inventory/${row.id}`)}
-                    >
-                      <IoEyeOutline size={20} />
-                    </div>
-                    <div
-                      className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg"
-                      onClick={() => {
-                        setSelectedUserId(row.id);
-                        setIsPopupOpen(true);
-                        console.log("Delete button clicked");
-                      }}
-                    >
-                      <MdOutlineDeleteForever size={20} />
-                    </div>
-                  </div>
-                </td>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {paginatedData.map((row) => (
+                <tr
+                  key={row.id}
+                  className="hover:cursor-pointer text-[#5d7186]"
+                >
+                  <td className="px-4 py-2 text-sm border-b">{row.name}</td>
+                  <td className="px-4 py-2 text-sm border-b">{row.email}</td>
+                  <td className="px-4 py-2 text-sm border-b">{row.role}</td>
+                  <td className="px-4 py-2 text-sm border-b">
+                    <div className="flex flex-row">
+                      <div
+                        className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
+                        onClick={() => router.push(`/admin/users/${row.id}`)}
+                      >
+                        <IoEyeOutline size={20} />
+                      </div>
+                      <div
+                        className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg cursor-pointer"
+                        onClick={() => {
+                          setSelectedUserId(row.id);
+                          setIsPopupOpen(true);
+                        }}
+                      >
+                        <MdOutlineDeleteForever size={20} />
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {/* Pagination Bar */}
       <div className="bottom-0 flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200 text-[#A5A8AB]">
         <div>
           Showing{" "}
           <span className="font-bold">
-            {currentPage * rowsPerPage - rowsPerPage + 1}{" "}
+            {Math.min(currentPage * rowsPerPage - rowsPerPage + 1, data.length)}
           </span>
           -
           <span className="font-bold">
             {Math.min(currentPage * rowsPerPage, data.length)}
           </span>{" "}
-          of <span className="font-bold">{data.length}</span> Inventory Items
+          of <span className="font-bold">{data.length}</span> Users
         </div>
         <div className="flex items-center space-x-2">
           <button
@@ -271,7 +246,7 @@ export default function Table() {
               Confirm Deletion
             </h3>
             <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to delete this item? This action cannot be
+              Are you sure you want to delete this user? This action cannot be
               undone.
             </p>
             <div className="flex justify-center space-x-4">

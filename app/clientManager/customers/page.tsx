@@ -5,6 +5,7 @@ import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Table() {
   interface Customer {
@@ -175,12 +176,12 @@ export default function Table() {
 
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
-                    <div
+                    <Link
+                      href={`/clientmanager/customers/${row.id}`}
                       className="ml-0 me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:cursor-pointer"
-                      onClick={() => router.push(`/clientmanager/customers/${row.id}`)}
                     >
                       <IoEyeOutline size={20} />
-                    </div>
+                    </Link>
                     <div
                       className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg hover:cursor-pointer"
                       onClick={() => {

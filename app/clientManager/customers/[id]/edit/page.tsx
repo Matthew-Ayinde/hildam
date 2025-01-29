@@ -1,8 +1,10 @@
 "use client";
 
+import Spinner from "../../../../../components/Spinner";
 import { useParams, useRouter } from "next/navigation";
+import React from "react";
 import { useEffect, useState } from "react";
-
+ 
 export default function EditCustomer() {
   const router = useRouter();
   const { id } = useParams();
@@ -88,11 +90,7 @@ export default function EditCustomer() {
       });
     } catch (err) {
       if (err instanceof Error) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("An unknown error occurred");
-        }
+        setError(err.message);
       } else {
         setError("An unknown error occurred");
       }
@@ -130,7 +128,7 @@ export default function EditCustomer() {
         throw new Error("Failed to update customer data");
       }
 
-      router.push(`/clientmanager/customers/list/${id}`);
+      router.push(`/clientmanager/customerslist/${id}`);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -145,7 +143,11 @@ export default function EditCustomer() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">Loading...</div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {

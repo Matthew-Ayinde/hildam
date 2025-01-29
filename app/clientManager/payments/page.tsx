@@ -232,9 +232,7 @@ export default function Table() {
                     <div className="flex flex-row">
                       <div
                         className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2"
-                        onClick={() =>
-                          router.push(`/clientmanager/payments/${row.id}`)
-                        }
+                        onClick={() => router.push(`/clientmanager/payments/${row.id}`)}
                       >
                         <IoEyeOutline size={20} />
                         <div>View</div>

@@ -1,6 +1,8 @@
 "use client";
 
+import Spinner from "../../../../components/Spinner";
 import { useRouter, useParams } from "next/navigation";
+import React from "react";
 import { useEffect, useState } from "react";
 
 export default function ShowCustomer() {
@@ -89,7 +91,11 @@ export default function ShowCustomer() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">Loading...</div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {

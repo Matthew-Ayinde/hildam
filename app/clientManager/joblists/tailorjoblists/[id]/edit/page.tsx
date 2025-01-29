@@ -1,8 +1,9 @@
 "use client";
 
-import Spinner from "@/components/Spinner";
+import Spinner from "../../../../../../components/Spinner";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import React from "react";
 
 export default function EditCustomer() {
   const router = useRouter();

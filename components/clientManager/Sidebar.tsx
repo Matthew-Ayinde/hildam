@@ -104,7 +104,7 @@ const Sidebar = () => {
         <div className="flex flex-row space-x-1 items-center">
           <div className="w-7 h-7 flex items-center justify-center">
             <Image
-              src={"/profile.jpeg"}
+              src={"/no-profile.jpg"}
               alt="Profile picture"
               width={100}
               height={100}
