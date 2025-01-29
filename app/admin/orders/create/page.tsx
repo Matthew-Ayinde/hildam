@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 const Form = () => {
   const [formData, setFormData] = useState<{
@@ -227,7 +228,12 @@ const Form = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-gray-100 flex justify-center"
+    >
       {popupMessage && <div>{popupMessage}</div>}
       <form
         onSubmit={handleSubmit}
@@ -245,14 +251,16 @@ const Form = () => {
             >
               Name
             </label>
-            <input
+            <motion.input
+              whileFocus={{ scale: 1.02 }}
+              whileHover={{ scale: 1.01 }}
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               type="text"
               id="customer_name"
               name="customer_name"
               value={formData.customer_name}
               onChange={handleChange}
               placeholder="Enter your name"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
           </div>
@@ -263,14 +271,16 @@ const Form = () => {
             >
               Email
             </label>
-            <input
+            <motion.input
+              whileFocus={{ scale: 1.02 }}
+              whileHover={{ scale: 1.01 }}
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               type="text"
               id="customer_email"
               name="customer_email"
               value={formData.customer_email}
               onChange={handleChange}
               placeholder="Enter your email"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
           </div>
@@ -281,14 +291,16 @@ const Form = () => {
             >
               Phone
             </label>
-            <input
+            <motion.input
+              whileFocus={{ scale: 1.02 }}
+              whileHover={{ scale: 1.01 }}
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               type="text"
               id="phone"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
               placeholder="Enter your phone number"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
           </div>
@@ -374,12 +386,14 @@ const Form = () => {
             >
               Style Reference Images
             </label>
-            <input
+            <motion.input
+              whileFocus={{ scale: 1.02 }}
+              whileHover={{ scale: 1.01 }}
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               type="file"
               id="style_reference_images"
               name="style_reference_images"
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
             />
             {imagePreview && (
               <img
@@ -433,14 +447,16 @@ const Form = () => {
               >
                 Bust
               </label>
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 type="number"
                 id="bust"
                 name="bust"
                 value={formData.bust}
                 onChange={handleChange}
                 placeholder="Bust"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />
             </div>
             <div className="w-1/3">
@@ -450,14 +466,16 @@ const Form = () => {
               >
                 Waist
               </label>
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 type="number"
                 id="waist"
                 name="waist"
                 value={formData.waist}
                 onChange={handleChange}
                 placeholder="Waist"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />
             </div>
             <div className="w-1/3">
@@ -467,14 +485,16 @@ const Form = () => {
               >
                 Hips
               </label>
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 type="number"
                 id="hips"
                 name="hips"
                 value={formData.hips}
                 onChange={handleChange}
                 placeholder="Hips"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />
             </div>
           </div>
@@ -486,14 +506,16 @@ const Form = () => {
               >
                 Shoulder Width
               </label>
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 type="number"
                 id="shoulderWidth"
                 name="shoulderWidth"
                 value={formData.shoulderWidth}
                 onChange={handleChange}
                 placeholder="Shoulder Width"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />
             </div>
             <div className="w-1/3">
@@ -503,14 +525,16 @@ const Form = () => {
               >
                 Neck
               </label>
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 type="number"
                 id="neck"
                 name="neck"
                 value={formData.neck}
                 onChange={handleChange}
                 placeholder="Neck"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />
             </div>
             <div className="w-1/3">
@@ -520,14 +544,16 @@ const Form = () => {
               >
                 Arm Length
               </label>
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 type="number"
                 id="armLength"
                 name="armLength"
                 value={formData.armLength}
                 onChange={handleChange}
                 placeholder="Arm Length"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />
             </div>
           </div>
@@ -539,14 +565,16 @@ const Form = () => {
               >
                 Back Length
               </label>
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 type="number"
                 id="backLength"
                 name="backLength"
                 value={formData.backLength}
                 onChange={handleChange}
                 placeholder="Back Length"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />
             </div>
             <div className="w-1/3">
@@ -556,14 +584,16 @@ const Form = () => {
               >
                 Front Length
               </label>
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 type="number"
                 id="frontLength"
                 name="frontLength"
                 value={formData.frontLength}
                 onChange={handleChange}
                 placeholder="Front Length"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />
             </div>
             <div className="w-1/3">
@@ -573,14 +603,16 @@ const Form = () => {
               >
                 High Bust
               </label>
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 type="number"
                 id="highBust"
                 name="highBust"
                 value={formData.highBust}
                 onChange={handleChange}
                 placeholder="High Bust"
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               />
             </div>
           </div>
@@ -588,13 +620,15 @@ const Form = () => {
 
         {/* Submit Button */}
         <div className="mt-6">
-          <button
-            type="submit"
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             className="w-fit px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2"
+            type="submit"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Creating Order..." : "Create Order"}
-          </button>
+          </motion.button>
         </div>
         {responseMessage && (
           <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
@@ -602,7 +636,7 @@ const Form = () => {
           </div>
         )}
       </form>
-    </div>
+    </motion.div>
   );
 };
 

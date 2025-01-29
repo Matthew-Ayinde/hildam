@@ -49,8 +49,8 @@ export default function Table() {
       );
 
       if (!response.ok) {
-        console.error("Failed to delete user:", response.statusText);
-        setToastMessage("Failed to delete user.");
+        console.error("Failed to delete inventory item:", response.statusText);
+        setToastMessage("Failed to delete inventory item.");
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
         return;
@@ -60,11 +60,11 @@ export default function Table() {
         prevData.filter((user) => user.id !== selectedUserId)
       );
       setIsPopupOpen(false);
-      setToastMessage("User deleted successfully.");
+      setToastMessage("Inventory item deleted successfully.");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error("Error deleting inventory item:", error);
       setToastMessage("An error occurred. Please try again.");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
