@@ -97,7 +97,8 @@ export default function ShowCustomer() {
           clothing_description: result.data.clothing_description || "N/A",
           high_bust: result.data.high_bust || 0,
           tailor_image: result.data.tailor_image || null,
-          project_manager_approval: result.data.project_manager_approval || null,
+          project_manager_approval:
+            result.data.project_manager_approval || null,
           customer_feedback: result.data.customer_feedback || null,
           style_reference_images: result.data.style_reference_images || null,
         };
@@ -272,7 +273,7 @@ export default function ShowCustomer() {
         <div className="text-2xl text-gray-700 font-bold mb-2">
           Tailor Job Information
         </div>
-        <div className="grid grid-cols-2 gap-6 mb-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
           <div>
             <label className="block text-gray-700 font-bold">
               Customer Name
@@ -356,174 +357,176 @@ export default function ShowCustomer() {
           </div>
         </div>
         <div className="w-full">
-          <div className="block text-xl font-bold text-gray-700 mt-10 mb-1">
+          <div className="block text-xl font-bold text-gray-700 mt-10 mb-4">
             Measurements
           </div>
-          <div className="mb-4">
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="bust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Bust
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="bust"
-                  name="bust"
-                  value={customer.bust}
-                  placeholder="Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="waist"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Waist
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="waist"
-                  name="waist"
-                  value={customer.waist}
-                  placeholder="Waist"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="hips"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Hips
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="hips"
-                  name="hips"
-                  value={customer.hips}
-                  placeholder="Hips"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label
+                htmlFor="bust"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Bust
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="bust"
+                name="bust"
+                value={customer.bust}
+                placeholder="Bust"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
             </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="shoulder_width"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Shoulder Width
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="shoulder_width"
-                  name="shoulder_width"
-                  value={customer.shoulder_width}
-                  placeholder="Shoulder Width"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="neck"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Neck
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="neck"
-                  name="neck"
-                  value={customer.neck}
-                  placeholder="Neck"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="arm_length"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Arm Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="arm_length"
-                  name="arm_length"
-                  value={customer.arm_length}
-                  placeholder="Arm Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+
+            <div>
+              <label
+                htmlFor="waist"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Waist
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="waist"
+                name="waist"
+                value={customer.waist}
+                placeholder="Waist"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
             </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="back_length"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Back Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="back_length"
-                  name="back_length"
-                  value={customer.back_length}
-                  placeholder="Back Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="front_length"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Front Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="front_length"
-                  name="front_length"
-                  value={customer.front_length}
-                  placeholder="Front Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="highBust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  High Bust
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="highBust"
-                  name="highBust"
-                  value={customer.high_bust}
-                  placeholder="High Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+
+            <div>
+              <label
+                htmlFor="hips"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Hips
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="hips"
+                name="hips"
+                value={customer.hips}
+                placeholder="Hips"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="shoulder_width"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Shoulder Width
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="shoulder_width"
+                name="shoulder_width"
+                value={customer.shoulder_width}
+                placeholder="Shoulder Width"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="neck"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Neck
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="neck"
+                name="neck"
+                value={customer.neck}
+                placeholder="Neck"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="arm_length"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Arm Length
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="arm_length"
+                name="arm_length"
+                value={customer.arm_length}
+                placeholder="Arm Length"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="back_length"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Back Length
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="back_length"
+                name="back_length"
+                value={customer.back_length}
+                placeholder="Back Length"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="front_length"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Front Length
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="front_length"
+                name="front_length"
+                value={customer.front_length}
+                placeholder="Front Length"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="highBust"
+                className="block text-sm font-medium text-gray-700"
+              >
+                High Bust
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="highBust"
+                name="highBust"
+                value={customer.high_bust}
+                placeholder="High Bust"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
             </div>
           </div>
         </div>
       </form>
       <div className="text-gray-700">
-        <div className="font-bold text-xl">Image Style</div>
+        <div className="font-bold text-xl mt-5">Image Style</div>
         {/* {customer.project_manager_approval === null || customer.project_manager_approval === 'In Review' && ( */}
 
         <div>
@@ -565,20 +568,18 @@ export default function ShowCustomer() {
                 alt="Uploaded"
                 className="h-24 w-24 rounded-lg object-cover"
               />
-              {customer.project_manager_approval === "In Review" && (
-                <>
+              
                   <div className="text-gray-700 mt-2">
-                  Image sent, awaiting approval
-                </div>
-              <button
-                onClick={handleSendToProjectManager}
-                className="mt-4 bg-orange-500 text-white py-2 px-4 rounded"
-                disabled={loading}
-              >
-                Send to Project Manager
-              </button>
-                </>
-              )}
+                    Image sent, awaiting approval
+                  </div>
+                  <button
+                    onClick={handleSendToProjectManager}
+                    className="mt-4 bg-orange-500 text-white py-2 px-4 rounded"
+                    disabled={loading}
+                  >
+                    Send to Project Manager
+                  </button>
+                
 
               {uploadMessage && (
                 <div className="text-green-500 mt-2">{uploadMessage}</div>

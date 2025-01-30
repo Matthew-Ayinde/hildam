@@ -126,7 +126,7 @@ const Form = () => {
       setLoading(false);
     }
 
-    router.push('/admin/customers')
+    router.push("/admin/customers");
   };
 
   {
@@ -134,7 +134,7 @@ const Form = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
+    <div className=" bg-gray-100 flex justify-center">
       <form
         onSubmit={handleSubmit}
         className="w-full bg-white rounded-lg shadow-md p-6"
@@ -143,8 +143,9 @@ const Form = () => {
           Customer Information
         </div>
 
-        <div className="flex space-x-4 mb-4">
-          <div className="w-1/2">
+        {/* Name & Email */}
+        <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
+          <div className="w-full md:w-1/2">
             <label
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
@@ -162,7 +163,7 @@ const Form = () => {
               required
             />
           </div>
-          <div className="w-1/2">
+          <div className="w-full md:w-1/2 mt-4 md:mt-0">
             <label
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
@@ -182,42 +183,42 @@ const Form = () => {
           </div>
         </div>
 
-        <div className="flex space-x-4 mb-4">
-        <div className="w-1/2">
-  <label
-    htmlFor="phone"
-    className="block text-sm font-medium text-gray-700"
-  >
-    Phone Number
-  </label>
-  <input
-    type="tel"
-    id="phone"
-    name="phone"
-    value={formData.phone}
-    onChange={(e) => {
-      let value = e.target.value.replace(/\D/g, ""); // Remove all non-numeric characters
-      if (value.length <= 11) {
-        // Format the phone number dynamically
-        if (value.length > 4 && value.length <= 7) {
-          value = `${value.slice(0, 4)} ${value.slice(4)}`;
-        } else if (value.length > 7) {
-          value = `${value.slice(0, 4)} ${value.slice(4, 7)} ${value.slice(7)}`;
-        }
-        handleChange({
-          target: { name: "phone", value } 
-        } as React.ChangeEvent<HTMLInputElement>); // Update the formatted value in state
-      }
-    }}
-    placeholder="XXXX XXX XXXX"
-    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-    required
-  />
-  
-</div>
-
-
-          <div className="w-1/2">
+        {/* Phone & Gender */}
+        <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
+          <div className="w-full md:w-1/2">
+            <label
+              htmlFor="phone"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={(e) => {
+                let value = e.target.value.replace(/\D/g, "");
+                if (value.length <= 11) {
+                  if (value.length > 4 && value.length <= 7) {
+                    value = `${value.slice(0, 4)} ${value.slice(4)}`;
+                  } else if (value.length > 7) {
+                    value = `${value.slice(0, 4)} ${value.slice(
+                      4,
+                      7
+                    )} ${value.slice(7)}`;
+                  }
+                  handleChange({
+                    target: { name: "phone", value },
+                  } as React.ChangeEvent<HTMLInputElement>);
+                }
+              }}
+              placeholder="XXXX XXX XXXX"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+          </div>
+          <div className="w-full md:w-1/2 mt-4 md:mt-0">
             <label
               htmlFor="gender"
               className="block text-sm font-medium text-gray-700"
@@ -240,9 +241,9 @@ const Form = () => {
           </div>
         </div>
 
-        <div className="flex space-x-4 mb-4">
-          {/* Age Field */}
-          <div className="w-1/2">
+        {/* Age & Password */}
+        <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
+          <div className="w-full md:w-1/2">
             <label
               htmlFor="age"
               className="block text-sm font-medium text-gray-700"
@@ -257,18 +258,17 @@ const Form = () => {
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\d*$/.test(value) && Number(value) <= 100) {
-                  handleChange(e); // Update only if the input is a valid number and <= 100
+                  handleChange(e);
                 }
               }}
               placeholder="Enter your age"
               min="0"
-              max="100" // Restricts the maximum age to 100
+              max="100"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
           </div>
-
-          <div className="w-1/2 relative">
+          <div className="w-full md:w-1/2 relative mt-4 md:mt-0">
             <label
               htmlFor="password"
               className="block text-sm font-medium text-gray-700"
@@ -281,8 +281,8 @@ const Form = () => {
               name="password"
               value={formData.password}
               onChange={(e) => {
-                handleChange(e); // Update the state
-                setPasswordError(e.target.value.length < 6); // Check length
+                handleChange(e);
+                setPasswordError(e.target.value.length < 6);
               }}
               placeholder="Enter your password"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -301,7 +301,6 @@ const Form = () => {
               )}
             </button>
 
-            {/* Validation Message */}
             {passwordError && (
               <p className="mt-2 text-sm text-red-600">
                 Password must be at least 6 characters long.
@@ -310,43 +309,11 @@ const Form = () => {
           </div>
         </div>
 
-        {/* <div className="flex space-x-4 mb-4">
-        <div className="w-1/2">
-            <label htmlFor="age" className="block text-sm font-medium text-gray-700">
-              Age
-            </label>
-            <input
-              type="number"
-              id="age"
-              name="age"
-              value={formData.age}
-              onChange={handleChange}
-              placeholder="Enter your age"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            />
-          </div>
-          <div className="w-1/2">
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-              Address
-            </label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="Enter your address"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            />
-          </div>
-        </div> */}
-
-        <div className="mt-6">
+        {/* Submit Button */}
+        <div className="mt-6 text-right"> 
           <button
             type="submit"
-            className={`w-fit px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium ${
+            className={`px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium ${
               loading ? "cursor-not-allowed opacity-50" : "hover:bg-orange-600"
             } focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2`}
             disabled={loading}
@@ -355,6 +322,7 @@ const Form = () => {
           </button>
         </div>
 
+        {/* Response Message */}
         {responseMessage && (
           <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
             {responseMessage}

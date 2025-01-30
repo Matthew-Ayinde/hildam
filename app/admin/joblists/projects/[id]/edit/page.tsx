@@ -7,6 +7,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { IoIosArrowBack } from "react-icons/io";
 import React from "react";
+import Link from "next/link";
 
 export default function EditCustomer() {
   const [isDisabled, setIsDisabled] = useState(false);
@@ -22,13 +23,16 @@ export default function EditCustomer() {
     second_fitting_date: null,
   });
 
-  const handleDateChange = (date: Date | [Date, Date] | null, field: string) => {
-      const selectedDate = Array.isArray(date) ? date[0] : date;
-      setRealTestdata({
-        ...realTestdata,
-        [field]: selectedDate,
-      });
-    };
+  const handleDateChange = (
+    date: Date | [Date, Date] | null,
+    field: string
+  ) => {
+    const selectedDate = Array.isArray(date) ? date[0] : date;
+    setRealTestdata({
+      ...realTestdata,
+      [field]: selectedDate,
+    });
+  };
 
   const handleTestSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -269,15 +273,14 @@ export default function EditCustomer() {
 
   return (
     <div className="w-full h-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-      <button
-        onClick={() => router.push("/admin/joblists/projects")}
-        className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
+      <Link href="/admin/joblists/projects"
+        className="hover:text-orange-700 text-orange-500 flex flex-row items-center mb-5"
       >
         <IoIosArrowBack size={30} />
         <div className="mx-2">Back to List</div>
-      </button>
+      </Link>
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <label className="block text-gray-700 font-bold">Order ID</label>
             <input
@@ -314,96 +317,90 @@ export default function EditCustomer() {
             type="submit"
             className="px-4 py-2 bg-orange-500 text-white rounded"
           >
-            Save the Changes
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push(`/admin/inventory/${id}`)}
-            className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
-          >
-            Cancel
+            Assign
           </button>
         </div>
       </form>
 
       {formData.customer_approval === "Approved" && (
-        <div className={`my-10 mt-10`}>
-          <h1 className="text-2xl font-bold">Add Other details</h1>
+  <div className="my-10 mt-10">
+    <h1 className="text-2xl font-bold">Add Other details</h1>
 
-          <form onSubmit={handleTestSubmit}>
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-gray-700 font -bold">
-                  Duration ( days )
-                </label>
-                <input
-                  type="text"
-                  name="duration"
-                  placeholder="Enter days required"
-                  value={realTestdata.duration}
-                  onChange={handleInputTestChange}
-                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 font-bold">
-                  Order Status
-                </label>
-                <select
-                  name="order_status"
-                  value={realTestdata.order_status}
-                  onChange={handleInputTestChange}
-                  className="px-4 py-2 border rounded w-full"
-                >
-                  <option value="transfer">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </div>
-              <div className="w-full">
-                <label className="block text-gray-700 font-bold">
-                  First Fitting Date
-                </label>
-                <div className="w-full">
-                  <DatePicker
-                    selected={realTestdata.first_fitting_date}
-                    onChange={(date: Date | null) =>
-                      handleDateChange(date, "first_fitting_date")
-                    }
-                    dateFormat="dd/MM/yyyy"
-                    className="w-full border placeholder:w-full border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-                    placeholderText="Select a date"
-                    filterDate={(date) => date >= new Date()} // Disable past dates
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-gray-700 font-bold">
-                  Second Fitting Date
-                </label>
-                <DatePicker
-                  selected={realTestdata.second_fitting_date}
-                  onChange={(date: Date | null) =>
-                    handleDateChange(date, "second_fitting_date")
-                  }
-                  dateFormat="dd/MM/yyyy"
-                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-                  placeholderText="Select a date"
-                  filterDate={(date) => date >= new Date()} // Disable past dates
-                />
-              </div>
-            </div>
-            <div className="mt-4">
-              <button
-                type="submit"
-                className="px-4 py-2 bg-orange-500 text-white rounded"
-              >
-                Save
-              </button>
-            </div>
-          </form>
+    <form onSubmit={handleTestSubmit}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-gray-700 font-bold">
+            Duration ( days )
+          </label>
+          <input
+            type="text"
+            name="duration"
+            placeholder="Enter days required"
+            value={realTestdata.duration}
+            onChange={handleInputTestChange}
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+          />
         </div>
-      )}
+        <div>
+          <label className="block text-gray-700 font-bold">
+            Order Status
+          </label>
+          <select
+            name="order_status"
+            value={realTestdata.order_status}
+            onChange={handleInputTestChange}
+            className="px-4 py-2 border rounded w-full"
+          >
+            <option value="transfer">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div className="w-full">
+          <label className="block text-gray-700 font-bold">
+            First Fitting Date
+          </label>
+          <div className="w-full">
+            <DatePicker
+              selected={realTestdata.first_fitting_date}
+              onChange={(date: Date | null) =>
+                handleDateChange(date, "first_fitting_date")
+              }
+              dateFormat="dd/MM/yyyy"
+              className="w-full border placeholder:w-full border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+              placeholderText="Select a date"
+              filterDate={(date) => date >= new Date()} // Disable past dates
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-gray-700 font-bold">
+            Second Fitting Date
+          </label>
+          <DatePicker
+            selected={realTestdata.second_fitting_date}
+            onChange={(date: Date | null) =>
+              handleDateChange(date, "second_fitting_date")
+            }
+            dateFormat="dd/MM/yyyy"
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            placeholderText="Select a date"
+            filterDate={(date) => date >= new Date()} // Disable past dates
+          />
+        </div>
+      </div>
+      <div className="mt-4">
+        <button
+          type="submit"
+          className="px-4 py-2 bg-orange-500 text-white rounded"
+        >
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+)}
+
     </div>
   );
 }

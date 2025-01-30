@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Footer from "@/components/Footer";
-import Sidebar from "@/components/headOfTailoring/Sidebar";
-import Topbar from "@/components/headOfTailoring/Topbar";
+import Sidebar from "@/components/head-of-tailoring/Sidebar";
+import Topbar from "@/components/head-of-tailoring/Topbar";
 import { Play } from "next/font/google";
 
 const play = Play({ subsets: ["latin"], weight: ["400", "700"] });

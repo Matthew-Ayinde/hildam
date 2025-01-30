@@ -18,20 +18,20 @@ const sidebarItems = [
     id: 2,
     text: "Orders",
     icon: <FaShoppingCart />,
-    prefix: "/clientmanager/orders",
+    prefix: "/client-manager/orders",
     links: [
-      { name: "List", href: "/clientmanager/orders" },
-      { name: "Create Order", href: "/clientmanager/orders/create" },
+      { name: "List", href: "/client-manager/orders" },
+      { name: "Create Order", href: "/client-manager/orders/create" },
     ],
   },
   {
     id: 3,
     text: "Job Lists",
     icon: <FaBoxes />,
-    prefix: "/clientmanager/joblists/",
+    prefix: "/client-manager/joblists/",
     links: [
-      { name: "Projects", href: "/clientmanager/joblists/projects" },
-      { name: "Tailor Jobs", href: "/clientmanager/joblists/tailorjoblists" },
+      { name: "Projects", href: "/client-manager/joblists/projects" },
+      { name: "Tailor Jobs", href: "/client-manager/joblists/tailorjoblists" },
     ],
   },
   
@@ -39,20 +39,20 @@ const sidebarItems = [
     id: 6,
     text: "Payments",
     icon: <MdOutlinePayment />,
-    prefix: "/clientmanager/payments",
+    prefix: "/client-manager/payments",
     links: [
-      { name: "List", href: "/clientmanager/payments" },
-      { name: "Create", href: "/clientmanager/payments/create" },
+      { name: "List", href: "/client-manager/payments" },
+      { name: "Create", href: "/client-manager/payments/create" },
     ],
   },
   {
     id: 4,
     text: "Inventory",
     icon: <MdOutlineInventory2 />,
-    prefix: "/clientmanager/inventory",
+    prefix: "/client-manager/inventory",
     links: [
-      { name: "List", href: "/clientmanager/inventory" },
-      { name: "Create", href: "/clientmanager/inventory/create" },
+      { name: "List", href: "/client-manager/inventory" },
+      { name: "Create", href: "/client-manager/inventory/create" },
     ],
   },
 ];
@@ -160,13 +160,13 @@ const Sidebar = () => {
         <div className="relative mt-5 mx-4">
           <div
             className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
-              pathname === "/clientmanager" ? "opacity-100" : "opacity-0"
+              pathname === "/client-manager" ? "opacity-100" : "opacity-0"
             }`}
           ></div>
           <Link
-            href="/clientmanager"
+            href="/client-manager"
             className={`flex items-center space-x-3 px-4 py-2 text-base font-medium transition-all duration-300 ${
-              pathname === "/clientmanager" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
+              pathname === "/client-manager" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
             }`}
             onClick={closeSidebar}
           >

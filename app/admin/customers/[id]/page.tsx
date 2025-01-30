@@ -1,13 +1,24 @@
 "use client";
 
+import { motion } from "framer-motion";
+import Link from "next/link";
 import Spinner from "../../../../components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import React from "react";
 import { useEffect, useState } from "react";
+import { IoIosArrowBack } from "react-icons/io";
+import { MdOutlineDeleteForever } from "react-icons/md";
 
 export default function ShowCustomer() {
   const router = useRouter();
   const { id } = useParams();
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+    null
+  );
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
+
   interface Customer {
     [x: string]: string | number | readonly string[] | undefined;
     fullName: string;
@@ -30,6 +41,50 @@ export default function ShowCustomer() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleDelete = async () => {
+    if (!selectedCustomerId) return;
+
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      if (!accessToken) {
+        throw new Error("Authentication token not found");
+      }
+
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/deletecustomer/${selectedCustomerId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete customer");
+      }
+
+      // Show success popup
+      setPopupMessage("Customer successfully deleted");
+
+      // Hide popup after 5 seconds
+      setTimeout(() => setPopupMessage(null), 5000);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error deleting customer:", error.message);
+      } else {
+        console.error("Error deleting customer:", error);
+      }
+      setPopupMessage("Error deleting customer");
+      setTimeout(() => setPopupMessage(null), 5000);
+    } finally {
+      setIsPopupOpen(false);
+    }
+
+    router.push("/admin/customers");
+  };
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -114,18 +169,45 @@ export default function ShowCustomer() {
   }
 
   return (
-    <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-      <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => router.push("/admin/customers")}
-          className="text-blue-500 underline"
+    <motion.div
+      initial={{ opacity: 0, x: -50 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md"
+    >
+      {popupMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50"
         >
-          Back to List
-        </button>
+          {popupMessage}
+        </motion.div>
+      )}
+      <div className="flex items-center justify-between mb-6">
+        <Link
+          href="/admin/customers"
+          className="text-orange-500 hover:text-orange-700 flex flex-row space-x-2 items-center"
+        >
+          <IoIosArrowBack />
+          <div>Back to List</div>
+        </Link>
       </div>
       <form>
-        <div className="grid grid-cols-2 gap-6 mb-5">
-          <div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5"
+        >
+          <motion.div
+            key={1}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 1 * 0.1 }}
+          >
             <label className="block text-gray-700 font-bold">Full Name</label>
             <input
               type="text"
@@ -133,8 +215,13 @@ export default function ShowCustomer() {
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
-          </div>
-          <div>
+          </motion.div>
+          <motion.div
+            key={2}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 2 * 0.1 }}
+          >
             <label className="block text-gray-700 font-bold">Age</label>
             <input
               type="text"
@@ -142,8 +229,13 @@ export default function ShowCustomer() {
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
-          </div>
-          <div>
+          </motion.div>
+          <motion.div
+            key={3}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 3 * 0.1 }}
+          >
             <label className="block text-gray-700 font-bold">Gender</label>
             <input
               type="text"
@@ -151,8 +243,13 @@ export default function ShowCustomer() {
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
-          </div>
-          <div>
+          </motion.div>
+          <motion.div
+            key={4}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 4 * 0.1 }}
+          >
             <label className="block text-gray-700 font-bold">Phone</label>
             <input
               type="text"
@@ -160,8 +257,13 @@ export default function ShowCustomer() {
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
-          </div>
-          <div>
+          </motion.div>
+          <motion.div
+            key={5}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 5 * 0.1 }}
+          >
             <label className="block text-gray-700 font-bold">Create Date</label>
             <input
               type="text"
@@ -169,8 +271,13 @@ export default function ShowCustomer() {
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
-          </div>
-          <div>
+          </motion.div>
+          <motion.div
+            key={6}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 6 * 0.1 }}
+          >
             <label className="block text-gray-700 font-bold">Email</label>
             <input
               type="text"
@@ -178,168 +285,74 @@ export default function ShowCustomer() {
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </form>
+
       <div className="mt-6 flex justify-end space-x-4">
-        {/* <div
-          className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/admin/customers/${id}/edit`)}
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="mx-2 px-3 bg-red-500 text-white p-2 rounded hover:cursor-pointer"
+          onClick={() => {
+            if (typeof id === "string") {
+              setSelectedCustomerId(id);
+            }
+            setIsPopupOpen(true);
+          }}
         >
-          Edit
-        </div> */}
-        <button className="px-4 py-2 bg-red-500 text-white rounded">
           Delete
-        </button>
+        </motion.div>
       </div>
-    </div>
+
+      {/* Confirmation Popup */}
+      {isPopupOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={() => setIsPopupOpen(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="bg-white rounded-lg shadow-lg w-96 p-6 text-center"
+            onClick={(e) => e.stopPropagation()}
+            aria-modal="true"
+            role="dialog"
+          >
+            <h3 className="text-lg font-bold text-gray-700 mb-4">
+              Confirm Deletion
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to delete this customer? This action cannot
+              be undone.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg"
+                onClick={handleDelete}
+              >
+                Confirm
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg"
+                onClick={() => setIsPopupOpen(false)}
+              >
+                Cancel
+              </motion.button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </motion.div>
   );
 }
-
-// <div className="w-full">
-// {/* Measurement Fields */}
-// <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">Measurements</div>
-// <div className="mb-4">
-// <div className="flex space-x-4 mb-4">
-//   <div className="w-1/3">
-//     <label htmlFor="bust" className="block text-sm font-medium text-gray-700">
-//       Bust
-//     </label>
-//     <input
-//       type="number"
-//       readOnly
-//       id="bust"
-//       name="bust"
-//       value={customer.bust}
-//       placeholder="Bust"
-//       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//     />
-//   </div>
-//   <div className="w-1/3">
-//     <label htmlFor="waist" className="block text-sm font-medium text-gray-700">
-//       Waist
-//     </label>
-//     <input
-//       type="number"
-//       readOnly
-//       id="waist"
-//       name="waist"
-//       value={customer.waist}
-//       placeholder="Waist"
-//       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//     />
-//   </div>
-//   <div className="w-1/3">
-//     <label htmlFor="hips" className="block text-sm font-medium text-gray-700">
-//       Hips
-//     </label>
-//     <input
-//       type="number"
-//       readOnly
-//       id="hips"
-//       name="hips"
-//       value={customer.hips}
-//       placeholder="Hips"
-//       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//     />
-//   </div>
-// </div>
-// <div className="flex space-x-4 mb-4">
-//   <div className="w-1/3">
-//     <label
-//       htmlFor="shoulderWidth"
-//       className="block text-sm font-medium text-gray-700"
-//     >
-//       Shoulder Width
-//     </label>
-//     <input
-//       type="number"
-//       readOnly
-//       id="shoulderWidth"
-//       name="shoulderWidth"
-//       value={customer.shoulderWidth}
-//       placeholder="Shoulder Width"
-//       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//     />
-//   </div>
-//   <div className="w-1/3">
-//     <label htmlFor="neck" className="block text-sm font-medium text-gray-700">
-//       Neck
-//     </label>
-//     <input
-//       type="number"
-//       readOnly
-//       id="neck"
-//       name="neck"
-//       value={customer.neck}
-//       placeholder="Neck"
-//       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//     />
-//   </div>
-//   <div className="w-1/3">
-//     <label htmlFor="armLength" className="block text-sm font-medium text-gray-700">
-//       Arm Length
-//     </label>
-//     <input
-//       type="number"
-//       readOnly
-//       id="armLength"
-//       name="armLength"
-//       value={customer.armLength}
-//       placeholder="Arm Length"
-//       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//     />
-//   </div>
-// </div>
-// <div className="flex space-x-4 mb-4">
-//   <div className="w-1/3">
-//     <label
-//       htmlFor="backLength"
-//       className="block text-sm font-medium text-gray-700"
-//     >
-//       Back Length
-//     </label>
-//     <input
-//       type="number"
-//       readOnly
-//       id="backLength"
-//       name="backLength"
-//       value={customer.backLength}
-//       placeholder="Back Length"
-//       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//     />
-//   </div>
-//   <div className="w-1/3">
-//     <label
-//       htmlFor="frontLength"
-//       className="block text-sm font-medium text-gray-700"
-//     >
-//       Front Length
-//     </label>
-//     <input
-//       type="number"
-//       readOnly
-//       id="frontLength"
-//       name="frontLength"
-//       value={customer.frontLength}
-//       placeholder="Front Length"
-//       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//     />
-//   </div>
-//   <div className="w-1/3">
-//     <label htmlFor="highBust" className="block text-sm font-medium text-gray-700">
-//       High Bust
-//     </label>
-//     <input
-//       type="number"
-//       readOnly
-//       id="highBust"
-//       name="highBust"
-//       value={customer.highBust}
-//       placeholder="High Bust"
-//       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//     />
-//   </div>
-// </div>
-// </div>
-// </div>
