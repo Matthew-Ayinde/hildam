@@ -49,7 +49,7 @@ export default function LoginForm() {
         router.push("/storemanager/inventory/list");
         break;
       case "client manager":
-        router.push("/clientmanager/orders");
+        router.push("/client-manager/orders");
         break;
       case "head of tailoring":
         router.push("/headoftailoring/joblists/tailorjoblists");
