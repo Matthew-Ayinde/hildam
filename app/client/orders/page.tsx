@@ -149,7 +149,7 @@ export default function Table() {
           {toastMessage}
         </div>
       )}
-
+{/* 
       <div className="flex flex-row gap-5">
         {[
           { label: "Total Orders", value: 120 },
@@ -169,7 +169,7 @@ export default function Table() {
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
 
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
         <div className="mx-2 font-bold text-gray-500 text-xl my-3">

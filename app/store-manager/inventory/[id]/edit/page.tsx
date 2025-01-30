@@ -75,7 +75,7 @@ export default function EditCustomer() {
         throw new Error("Failed to update customer data");
       }
 
-      router.push(`/admin/inventory/${id}`);
+      router.push(`/store-manager/inventory/${id}`);
     } catch (err) {
       setError((err as any).message);
     }
@@ -132,7 +132,7 @@ export default function EditCustomer() {
           </button>
           <button
             type="button"
-            onClick={() => router.push(`/admin/inventory/${id}`)}
+            onClick={() => router.push(`/store-manager/inventory/${id}`)}
             className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
           >
             Cancel

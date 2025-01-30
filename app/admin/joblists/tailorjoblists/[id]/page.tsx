@@ -1,14 +1,25 @@
 "use client";
 
+import React from "react";
 import Spinner from "../../../../../components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image"; // Import Next.js Image component
 import { IoIosArrowBack } from "react-icons/io";
-import React from "react";
+import { FaCheckCircle } from "react-icons/fa";
+import Link from "next/link";
 
 export default function ShowCustomer() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isImageUploaded, setIsImageUploaded] = useState(false); // New state to track upload status
+  const [imagePath, setImagePath] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [sentSuccess, setSentSuccess] = useState(false);
 
   const handleCustomerImageClick = () => {
     setIsCustomerModalOpen(true);
@@ -18,13 +29,102 @@ export default function ShowCustomer() {
     setIsCustomerModalOpen(false);
   };
 
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [isImageUploaded, setIsImageUploaded] = useState(false); // New state to track upload status
-
   const router = useRouter();
   const { id } = useParams();
+
+  useEffect(() => {
+    if (uploadMessage) {
+      setTimeout(() => setUploadMessage(null), 5000);
+    }
+  }, [uploadMessage]);
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
+
+  const handleUploadImage = async () => {
+    if (!selectedImage) return;
+
+    const formData = new FormData();
+    formData.append("design_image", selectedImage);
+
+    setIsUploading(true);
+    setUploadMessage(null);
+    setUploadError(null);
+
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/edittailorjob/${id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const result = await response.json();
+      setImagePath(result.data.image_path);
+      setUploadMessage("Image uploaded successfully!");
+    } catch (err) {
+      setUploadError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleSendToProjectManager = async () => {
+    if (!imagePath) return;
+
+    setIsSending(true);
+    setUploadMessage(null);
+    setUploadError(null);
+
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/sendtoprojectmanager/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ image_path: imagePath }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to send image to project manager");
+      }
+
+      setUploadMessage("Image sent to project manager successfully!");
+      setSentSuccess(true);
+    } catch (err) {
+      setUploadError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   interface Customer {
     [x: string]: string | number | readonly string[] | undefined;
@@ -53,7 +153,6 @@ export default function ShowCustomer() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [imagePath, setImagePath] = useState<string | null>(null);
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -121,105 +220,6 @@ export default function ShowCustomer() {
     fetchCustomer();
   }, [id]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setSelectedImage(e.target.files[0]);
-    }
-  };
-
-  const handleUploadImage = async () => {
-    if (!selectedImage) return;
-
-    const formData = new FormData();
-    formData.append("design_image", selectedImage);
-
-    setLoading(true);
-    setUploadMessage(null);
-    setUploadError(null);
-
-    try {
-      const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(
-        `https://hildam.insightpublicis.com/api/edittailorjob/${id}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to upload image");
-      }
-
-      const result = await response.json();
-      console.log(result);
-      setImagePath(result.data.image_path);
-      setUploadMessage("Image uploaded successfully!");
-      setIsImageUploaded(true); // Set image upload status to true
-
-      setTimeout(() => {
-        setUploadMessage(null);
-      }, 5000);
-
-      setSelectedImage(null);
-    } catch (err) {
-      if (err instanceof Error) {
-        setUploadError(err.message);
-      } else {
-        setUploadError("An unknown error occurred");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSendToProjectManager = async () => {
-    if (!imagePath) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(
-        `https://hildam.insightpublicis.com/api/sendtoprojectmanager/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            image_path: imagePath,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to send image to project manager");
-      }
-
-      const result = await response.json();
-      console.log(result);
-      setUploadMessage("Image sent to project manager successfully!");
-
-      setTimeout(() => {
-        setUploadMessage(null);
-      }, 5000);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unknown error occurred");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="text-center text-gray-500 py-10">
@@ -261,13 +261,12 @@ export default function ShowCustomer() {
         </div>
       )}
       <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => router.push("/admin/joblists/tailorjoblists")}
-          className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-2"
+        <Link href="/admin/joblists/tailorjoblists"
+          className="hover:text-orange-700 text-orange-500 flex flex-row items-center mb-2"
         >
           <IoIosArrowBack size={30} />
           <div className="mx-2">Back to List</div>
-        </button>
+        </Link>
       </div>
       <form>
         <div className="text-2xl text-gray-700 font-bold mb-2">
@@ -525,110 +524,108 @@ export default function ShowCustomer() {
           </div>
         </div>
       </form>
-      <div className="text-gray-700">
-        <div className="font-bold text-xl mt-5">Image Style</div>
-        {/* {customer.project_manager_approval === null || customer.project_manager_approval === 'In Review' && ( */}
 
-        <div>
-          <div className="my-2">Attach proposed images style</div>
-          {!isImageUploaded && ( // Conditionally render input and button
-            <>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="mt-2 block w-full text-sm text-gray-500"
-              />
+      <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">
+        {/* Success/Error Notifications */}
+        {uploadMessage && (
+          <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 flex justify-center w-full">
+            <div className="bg-green-500 text-white p-2 w-52 max-w-96 rounded mb-4 text-center">
+              {uploadMessage}
+            </div>
+          </div>
+        )}
+        {uploadError && (
+          <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 flex justify-center w-full">
+            <div className="bg-red-500 text-white p-2 w-52 max-w-96 rounded mb-4 text-center">
+              {uploadError}{" "}
               <button
                 onClick={handleUploadImage}
-                className="mt-4 bg-orange-500 text-white py-2 px-4 rounded"
+                className="underline text-white"
               >
-                Upload Image
+                Retry
               </button>
-            </>
-          )}
+            </div>
+          </div>
+        )}
+
+        <div className="font-bold text-xl mt-5 text-gray-700">Image Style</div>
+
+        {customer.project_manager_approval === "In Review" && (
+          <div className="flex items-center mt-4">
+            {/* Check if customer.tailor_image exists */}
+            {customer.tailor_image && (
+              <div className="mr-4">
+                <Image
+                  src={customer.tailor_image} // Assuming tailor_image is the URL of the image
+                  alt="Tailor"
+                  width={100}
+                  height={100}
+                  className="rounded" // Optional: Add a class if you want rounded edges
+                />
+              </div>
+            )}
+            <FaCheckCircle className="text-green-500 text-3xl" />
+            <span className="ml-2 text-green-500 font-semibold">
+              A style has been sent to project manager!
+            </span>
+          </div>
+        )}
+        {/* Upload Image Section */}
+        <div className="mb-6">
+          <label className="block text-gray-700 font-normal mb-2">
+            {customer.tailor_image === null ? <div>Please upload an Image</div> : <div className="mt-2 font-bold">Edit Image</div>}
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="border p-2 rounded w-full"
+          />
         </div>
 
-        {loading && <div className="text-gray-500">Loading...</div>}
-        {selectedImage && (
-          <div className="flex items-center mt-4">
+        {imagePreview && (
+          <div className="mb-4 flex flex-col items-center">
             <img
-              src={URL.createObjectURL(selectedImage)}
-              alt={selectedImage.name}
-              className="h-24 w-24 rounded-lg object-cover mr-4"
+              src={imagePreview}
+              alt="Selected"
+              className="w-[200px] h-[200px] object-cover rounded border"
             />
-            <span className="text-gray-700">{selectedImage.name}</span>
+            <button
+              onClick={handleRemoveImage}
+              className="mt-2 text-red-500 hover:text-red-700 text-sm font-semibold"
+            >
+              Remove Image
+            </button>
           </div>
         )}
-        {isImageUploaded &&
-          imagePath && ( // Show uploaded image
-            <div className="mt-4">
-              <img
-                src={imagePath}
-                alt="Uploaded"
-                className="h-24 w-24 rounded-lg object-cover"
-              />
-              
-                  <div className="text-gray-700 mt-2">
-                    Image sent, awaiting approval
-                  </div>
-                  <button
-                    onClick={handleSendToProjectManager}
-                    className="mt-4 bg-orange-500 text-white py-2 px-4 rounded"
-                    disabled={loading}
-                  >
-                    Send to Project Manager
-                  </button>
-                
 
-              {uploadMessage && (
-                <div className="text-green-500 mt-2">{uploadMessage}</div>
-              )}
-            </div>
-          )}
-        {customer.tailor_image && (
-          <div className="mt-4">
-            <Image
-              src={customer.tailor_image}
-              alt="Tailor Image"
-              width={100}
-              height={100}
-              className="rounded-lg"
-            />
-            {customer.project_manager_approval === "In Review" && (
-              <div className="mt-2">Image pending approval</div>
-            )}
-            {customer.project_manager_approval === "Rejected" && (
-              <div className="text-red-500 mt-2">
-                Image rejected by project manager
-                <button
-                  className="ml-2 text-blue-500 underline"
-                  onClick={() => {
-                    setSelectedImage(null);
-                    setImagePath(null);
-                    setIsImageUploaded(false);
-                  }}
-                >
-                  Please upload another image
-                </button>
-              </div>
-            )}
+        {/* Upload Button */}
+        {selectedImage && !imagePath && (
+          <button
+            onClick={handleUploadImage}
+            disabled={isUploading}
+            className={`w-full py-2 rounded text-white font-semibold transition ${
+              isUploading ? "bg-gray-100" : "bg-orange-500 hover:bg-orange-600"
+            }`}
+          >
+            {isUploading ? <Spinner /> : "Upload Image"}
+          </button>
+        )}
 
-            {/* customer feedback */}
-            {customer.customer_feedback !== null && (
-              <div className="mt-3">
-                <div className="text-red-500">Image Rejected by customer</div>
-                <div className="text-xl font-bold">Customer Feedback</div>
-                <div className=" py-2 px-3 bg-gray-50 rounded-lg w-1/2">
-                  {customer.customer_feedback}
-                </div>
-              </div>
-            )}
-          </div>
+        {/* Send to Project Manager Button */}
+        {imagePath && !sentSuccess && (
+          <button
+            onClick={handleSendToProjectManager}
+            disabled={isSending}
+            className={`w-full py-2 rounded text-white font-semibold transition mt-4 ${
+              isSending ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"
+            }`}
+          >
+            {isSending ? <Spinner /> : "Send to Project Manager"}
+          </button>
         )}
-        {customer.tailor_image === null && (
-          <div className="mt-4 text-gray-500">Please upload an image</div>
-        )}
+
+        
       </div>
     </div>
   );

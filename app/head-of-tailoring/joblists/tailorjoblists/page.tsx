@@ -1,7 +1,6 @@
 "use client";
 
 import { SetStateAction, useEffect, useState } from "react";
-import { mockData } from "@/data/mockDataForPaymentList";
 import { FaArrowRight } from "react-icons/fa";
 import { FaArrowLeft } from "react-icons/fa";
 import Image from "next/image";
@@ -11,7 +10,9 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { GoClock } from "react-icons/go";
 import { useRouter } from "next/navigation";
-import Spinner from "@/components/Spinner";
+import Spinner from "../../../../components/Spinner";
+import React from "react";
+import Link from "next/link";
 
 export default function Table() {
   interface ProjectItem {
@@ -180,17 +181,12 @@ export default function Table() {
                 </td> */}
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
-                    <div
+                    <Link href={`/head-of-tailoring/joblists/tailorjoblists/${row.id}`}
                       className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2"
-                      onClick={() =>
-                        router.push(
-                          `/headoftailoring/joblists/tailorjoblists/${row.id}`
-                        )
-                      }
                     >
                       <IoEyeOutline size={20} />
                       <div>View</div>
-                    </div>
+                    </Link>
                   </div>
                 </td>
               </tr>

@@ -111,7 +111,7 @@ export default function EditCustomer() {
 
       setSuccessMessage("Payment data updated successfully!");
       setTimeout(() => {
-        router.push("/clientmanager/payments");
+        router.push("/client-manager/payments");
       }, 2000); // Redirect after 2 seconds
     } catch (err) {
       setError(
@@ -150,7 +150,7 @@ export default function EditCustomer() {
       )}
       <form onSubmit={handleSubmit}>
         <button
-          onClick={() => router.push("/clientmanager/payments")}
+          onClick={() => router.push("/client-manager/payments")}
           className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
         >
           <IoIosArrowBack size={30} />
@@ -195,7 +195,7 @@ export default function EditCustomer() {
           </button>
           <button
             type="button"
-            onClick={() => router.push(`/clientmanager/payments/${id}`)}
+            onClick={() => router.push(`/client-manager/payments/${id}`)}
             className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
           >
             Cancel

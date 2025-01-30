@@ -147,7 +147,7 @@ export default function ShowCustomer() {
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => router.push("/clientmanager/payments")}
+          onClick={() => router.push("/client-manager/payments")}
           className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
         >
           <IoIosArrowBack size={30} />
@@ -286,7 +286,7 @@ export default function ShowCustomer() {
       <div className="mt-6 flex justify-end space-x-4">
         <div
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/clientmanager/payments/${id}/edit`)}
+          onClick={() => router.push(`/client-manager/payments/${id}/edit`)}
         >
           Edit
         </div>

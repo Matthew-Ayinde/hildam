@@ -185,7 +185,7 @@ export default function Table() {
                   <div className="flex flex-row">
                     <div
                       className="ml-0 me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:cursor-pointer"
-                      onClick={() => router.push(`/clientmanager/inventory/${row.id}`)}
+                      onClick={() => router.push(`/client-manager/inventory/${row.id}`)}
                     >
                       <IoEyeOutline size={20} />
                     </div>

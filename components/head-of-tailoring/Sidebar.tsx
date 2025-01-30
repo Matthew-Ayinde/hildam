@@ -20,9 +20,9 @@ const sidebarItems = [
     id: 3,
     text: "Job Lists",
     icon: <FaBoxes />,
-    prefix: "/headoftailoring/joblists/",
+    prefix: "/head-of-tailoring/joblists/",
     links: [
-      { name: "Tailor Jobs", href: "/headoftailoring/joblists/tailorjoblists" },
+      { name: "Tailor Jobs", href: "/head-of-tailoring/joblists/tailorjoblists" },
     ],
   },
 ];
@@ -111,13 +111,13 @@ const Sidebar = () => {
         <div className="relative mt-5 mx-4">
           <div
             className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
-              pathname === "/headoftailoring" ? "opacity-100" : "opacity-0"
+              pathname === "/head-of-tailoring" ? "opacity-100" : "opacity-0"
             }`}
           ></div>
           <Link
-            href="/headoftailoring"
+            href="/head-of-tailoring"
             className={`flex items-center space-x-3 px-4 py-2 text-base font-medium transition-all duration-300 ${
-              pathname === "/headoftailoring" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
+              pathname === "/head-of-tailoring" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
             }`}
             onClick={closeSidebar}
           >

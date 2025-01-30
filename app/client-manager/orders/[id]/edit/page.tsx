@@ -157,7 +157,7 @@ export default function EditCustomer() {
 
       setSuccessMessage("Customer data updated successfully!");
       setTimeout(() => {
-        router.push("/clientmanager/orders");
+        router.push("/client-manager/orders");
       }, 2000); // Redirect after 2 seconds
     } catch (err) {
       setError(
@@ -195,7 +195,7 @@ export default function EditCustomer() {
         <div className="text-center text-green-500 py-2">{successMessage}</div>
       )}
       <button
-        onClick={() => router.push("/clientmanager/orders")}
+        onClick={() => router.push("/client-manager/orders")}
         className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
       >
         <IoIosArrowBack size={30} />
@@ -448,7 +448,7 @@ export default function EditCustomer() {
           </button>
           <button
             type="button"
-            onClick={() => router.push(`/clientmanager/inventory/${id}`)}
+            onClick={() => router.push(`/client-manager/inventory/${id}`)}
             className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
           >
             Cancel

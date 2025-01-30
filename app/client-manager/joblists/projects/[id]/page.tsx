@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { IoIosArrowBack } from "react-icons/io";
 import React from "react";
+import Link from "next/link";
 
 export default function ShowCustomer() {
   const [price, setPrice] = useState(""); // State for price value
@@ -316,6 +317,8 @@ export default function ShowCustomer() {
     handleApproveStyle();
     // closePriceModal();
     setIsPriceModalOpen(false);
+
+    router.push("/client-manager/joblists/projects");
   };
 
   if (!customer) {
@@ -325,13 +328,12 @@ export default function ShowCustomer() {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => router.push("/clientmanager/joblists/projects")}
-          className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
+        <Link href="/client-manager/joblists/projects"
+          className="hover:text-orange-700 text-orange-500 flex flex-row items-center"
         >
           <IoIosArrowBack size={30} />
           <div className="mx-2">Back to List</div>
-        </button>
+        </Link>
         <div className="text-end font-bond text-lg text-gray-700 flex flex-row">
           <div className="font-bold me-3">Head of Tailoring:</div>{" "}
           {customer.manager_name}
@@ -680,7 +682,7 @@ export default function ShowCustomer() {
           <div className="text-red-500 mt-2">Awaiting Approval from Customer</div>
         )} */}
         {customer.customer_approval === "In Review" && (
-          <div className="text-red-500 mt-2">Awaiting review from customer</div>
+          <div className="font-bold mt-2">Awaiting review from customer</div>
         )}
         {customer.customer_approval === null && customer.tailor_job_image !== null && (
           <div className="text-red-500 mt-2">
@@ -763,15 +765,11 @@ export default function ShowCustomer() {
         </div>
       )}
       <div className="mt-6 flex justify-end space-x-4">
-        <div
+        <Link href={`/client-manager/joblists/projects/${id}/edit`}
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/clientmanager/joblists/projects/${id}/edit`)}
         >
           Edit
-        </div>
-        <button className="px-4 py-2 bg-red-500 text-white rounded">
-          Delete
-        </button>
+        </Link>
       </div>
     </div>
   );

@@ -103,7 +103,7 @@ const Form = () => {
       setLoading(false);
     }
 
-    router.push("/clientmanager/inventory");
+    router.push("/client-manager/inventory");
   };
 
   return (

@@ -100,7 +100,7 @@ export default function ShowCustomer() {
           frontLength: result.data.front_length || 0,
           clothing_description: result.data.clothing_description || "N/A",
           clothing_name: result.data.clothing_name || "N/A",
-          first_fitting_date: result.data.first_fitting_date || "N/A",
+          first_fitting_date: result.data.first_fitting_date,
           second_fitting_date: result.data.second_fitting_date || "N/A",
           duration: result.data.duration || "N/A",
           order_id: result.data.order_id || "N/A",
@@ -634,7 +634,7 @@ export default function ShowCustomer() {
         </div>
       )}
 
-{customer.approval === "3" ? (
+{customer.first_fitting_date !== null ? (
   <div className="my-10">
     <h1 className="text-2xl font-bold">Other details</h1>
 
@@ -693,15 +693,13 @@ export default function ShowCustomer() {
 
 
       <div className="mt-6 flex justify-end space-x-4">
-        <Link
+        {/* <Link
           href={`/client/orders/${id}/edit`}
           className="px-4 py-2 bg-orange-500 text-white rounded"
         >
           Edit
         </Link>
-        <button className="px-4 py-2 bg-red-500 text-white rounded">
-          Delete
-        </button>
+         */}
       </div>
     </div>
   );

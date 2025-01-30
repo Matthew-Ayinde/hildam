@@ -76,7 +76,7 @@ export default function ShowCustomer() {
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => router.push("/admin/inventory/list")}
+          onClick={() => router.push("/store-manager/inventory/list")}
           className="text-blue-500 underline"
         >
           Back to List
@@ -128,7 +128,7 @@ export default function ShowCustomer() {
       <div className="mt-6 flex justify-end space-x-4">
         <button
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/admin/inventory/${id}/edit`)}
+          onClick={() => router.push(`/store-manager/inventory/${id}/edit`)}
         >
           Edit
         </button>

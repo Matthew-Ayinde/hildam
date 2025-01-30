@@ -317,6 +317,8 @@ export default function ShowCustomer() {
     handleApproveStyle();
     // closePriceModal();
     setIsPriceModalOpen(false);
+
+    router.push("/admin/joblists/projects");
   };
 
   if (!customer) {
@@ -680,7 +682,7 @@ export default function ShowCustomer() {
           <div className="text-red-500 mt-2">Awaiting Approval from Customer</div>
         )} */}
         {customer.customer_approval === "In Review" && (
-          <div className="text-red-500 mt-2">Awaiting review from customer</div>
+          <div className="font-bold mt-2">Awaiting review from customer</div>
         )}
         {customer.customer_approval === null && customer.tailor_job_image !== null && (
           <div className="text-red-500 mt-2">

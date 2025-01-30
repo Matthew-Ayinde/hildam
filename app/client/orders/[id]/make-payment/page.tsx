@@ -4,6 +4,7 @@ import Spinner from "@/components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 const Invoice = () => {
   const router = useRouter();
@@ -312,14 +313,11 @@ const Invoice = () => {
           <p>Transfer</p>
         </div>
         <div className="flex justify-end">
-          <button
-            // onClick={handleApproveStyle}
-            //route to payment page
-            onClick={() => router.push(`/client/orders/${id}/payment`)}
+          <Link href={`/client/orders/${id}/payment`}
             className="mb-4 px-4 py-2 bg-orange-500 flex text-white rounded hover:bg-orange-600"
           >
             Make Payment
-          </button>
+          </Link>
         </div>
       </div>
     </div>

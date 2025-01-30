@@ -90,7 +90,7 @@ export default function EditCustomer() {
         setConfirmationMessage(null);
       }, 3000);
 
-      router.push(`/clientmanager/inventory`);
+      router.push(`/client-manager/inventory`);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -161,7 +161,7 @@ export default function EditCustomer() {
             </button>
             <button
               type="button"
-              onClick={() => router.push(`/clientmanager/inventory/${id}`)}
+              onClick={() => router.push(`/client-manager/inventory/${id}`)}
               className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
             >
               Cancel

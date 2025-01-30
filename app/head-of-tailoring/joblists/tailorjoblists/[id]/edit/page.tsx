@@ -1,8 +1,9 @@
 "use client";
 
-import Spinner from "@/components/Spinner";
+import Spinner from "../../../../../../components/Spinner";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import React from "react";
 
 export default function EditCustomer() {
   const router = useRouter();
@@ -126,7 +127,7 @@ export default function EditCustomer() {
         throw new Error("Failed to update customer data");
       }
 
-      router.push(`/admin/customerslist/${id}`);
+      router.push(`/head-of-tailoring/customerslist/${id}`);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -385,9 +386,7 @@ export default function EditCustomer() {
           </button>
           <button
             type="button"
-            onClick={() =>
-              router.push(`/headoftailoring/joblists/tailorjoblists`)
-            }
+            onClick={() => router.push(`/head-of-tailoring/inventory/${id}`)}
             className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
           >
             Cancel

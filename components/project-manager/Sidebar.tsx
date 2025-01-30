@@ -20,9 +20,9 @@ const sidebarItems = [
     id: 3,
     text: "Job Lists",
     icon: <FaBoxes />,
-    prefix: "/projectmanager/joblists/",
+    prefix: "/project-manager/joblists/",
     links: [
-      { name: "Projects", href: "/projectmanager/joblists/projects" },
+      { name: "Projects", href: "/project-manager/joblists/projects" },
     ],
   },
   
@@ -112,13 +112,13 @@ const Sidebar = () => {
         <div className="relative mt-5 mx-4">
           <div
             className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
-              pathname === "/projectmanager" ? "opacity-100" : "opacity-0"
+              pathname === "/project-manager" ? "opacity-100" : "opacity-0"
             }`}
           ></div>
           <Link
-            href="/projectmanager"
+            href="/project-manager"
             className={`flex items-center space-x-3 px-4 py-2 text-base font-medium transition-all duration-300 ${
-              pathname === "/projectmanager" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
+              pathname === "/project-manager" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
             }`}
             onClick={closeSidebar}
           >

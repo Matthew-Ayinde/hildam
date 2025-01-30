@@ -193,7 +193,7 @@ export default function Table() {
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
                     <Link
-                      href={`/clientmanager/joblists/projects/${row.id}`}
+                      href={`/client-manager/joblists/projects/${row.id}`}
                       className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2"
                     >
                       <IoEyeOutline size={20} />

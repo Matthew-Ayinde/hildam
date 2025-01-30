@@ -152,7 +152,7 @@ const Invoice = () => {
 
       const result = await response.json();
       console.log(result);
-      setUploadMessage("Image approved"); // Set notification message
+      setUploadMessage("Order approved"); // Set notification message
 
       // Show toast notification for 5 seconds
       setTimeout(() => {
@@ -170,7 +170,7 @@ const Invoice = () => {
 
     handleCloseModal();
     //redirect to the orders:id page
-    router.push(`/client/orders/${id}`);
+    router.push(`/client/orders`);
   };
 
   if (loading) {

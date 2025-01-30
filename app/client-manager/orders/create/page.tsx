@@ -223,7 +223,7 @@ const Form = () => {
 
     //redirect to orders page
     setTimeout(() => {
-      window.location.href = "/clientmanager/orders";
+      window.location.href = "/client-manager/orders";
     }, 100);
   };
 
@@ -435,188 +435,156 @@ const Form = () => {
         </div>
 
         {/* Measurement Fields */}
-        <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
-          Measurements
-        </div>
-        <div className="mb-4">
-          <div className="flex space-x-4 mb-4">
-            <div className="w-1/3">
-              <label
-                htmlFor="bust"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Bust
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                whileHover={{ scale: 1.01 }}
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                type="number"
-                id="bust"
-                name="bust"
-                value={formData.bust}
-                onChange={handleChange}
-                placeholder="Bust"
-              />
-            </div>
-            <div className="w-1/3">
-              <label
-                htmlFor="waist"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Waist
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                whileHover={{ scale: 1.01 }}
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                type="number"
-                id="waist"
-                name="waist"
-                value={formData.waist}
-                onChange={handleChange}
-                placeholder="Waist"
-              />
-            </div>
-            <div className="w-1/3">
-              <label
-                htmlFor="hips"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Hips
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                whileHover={{ scale: 1.01 }}
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                type="number"
-                id="hips"
-                name="hips"
-                value={formData.hips}
-                onChange={handleChange}
-                placeholder="Hips"
-              />
-            </div>
-          </div>
-          <div className="flex space-x-4 mb-4">
-            <div className="w-1/3">
-              <label
-                htmlFor="shoulderWidth"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Shoulder Width
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                whileHover={{ scale: 1.01 }}
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                type="number"
-                id="shoulderWidth"
-                name="shoulderWidth"
-                value={formData.shoulderWidth}
-                onChange={handleChange}
-                placeholder="Shoulder Width"
-              />
-            </div>
-            <div className="w-1/3">
-              <label
-                htmlFor="neck"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Neck
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                whileHover={{ scale: 1.01 }}
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                type="number"
-                id="neck"
-                name="neck"
-                value={formData.neck}
-                onChange={handleChange}
-                placeholder="Neck"
-              />
-            </div>
-            <div className="w-1/3">
-              <label
-                htmlFor="armLength"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Arm Length
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                whileHover={{ scale: 1.01 }}
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                type="number"
-                id="armLength"
-                name="armLength"
-                value={formData.armLength}
-                onChange={handleChange}
-                placeholder="Arm Length"
-              />
-            </div>
-          </div>
-          <div className="flex space-x-4 mb-4">
-            <div className="w-1/3">
-              <label
-                htmlFor="backLength"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Back Length
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                whileHover={{ scale: 1.01 }}
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                type="number"
-                id="backLength"
-                name="backLength"
-                value={formData.backLength}
-                onChange={handleChange}
-                placeholder="Back Length"
-              />
-            </div>
-            <div className="w-1/3">
-              <label
-                htmlFor="frontLength"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Front Length
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                whileHover={{ scale: 1.01 }}
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                type="number"
-                id="frontLength"
-                name="frontLength"
-                value={formData.frontLength}
-                onChange={handleChange}
-                placeholder="Front Length"
-              />
-            </div>
-            <div className="w-1/3">
-              <label
-                htmlFor="highBust"
-                className="block text-sm font-medium text-gray-700"
-              >
-                High Bust
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.02 }}
-                whileHover={{ scale: 1.01 }}
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                type="number"
-                id="highBust"
-                name="highBust"
-                value={formData.highBust}
-                onChange={handleChange}
-                placeholder="High Bust"
-              />
-            </div>
-          </div>
-        </div>
+        <div className="block text-xl font-medium text-gray-700 mt-10 mb-4">
+  Measurements
+</div>
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div>
+    <label htmlFor="bust" className="block text-sm font-medium text-gray-700">
+      Bust
+    </label>
+    <motion.input
+      whileFocus={{ scale: 1.02 }}
+      whileHover={{ scale: 1.01 }}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+      type="number"
+      id="bust"
+      name="bust"
+      value={formData.bust}
+      onChange={handleChange}
+      placeholder="Bust"
+    />
+  </div>
+  <div>
+    <label htmlFor="waist" className="block text-sm font-medium text-gray-700">
+      Waist
+    </label>
+    <motion.input
+      whileFocus={{ scale: 1.02 }}
+      whileHover={{ scale: 1.01 }}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+      type="number"
+      id="waist"
+      name="waist"
+      value={formData.waist}
+      onChange={handleChange}
+      placeholder="Waist"
+    />
+  </div>
+  <div>
+    <label htmlFor="hips" className="block text-sm font-medium text-gray-700">
+      Hips
+    </label>
+    <motion.input
+      whileFocus={{ scale: 1.02 }}
+      whileHover={{ scale: 1.01 }}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+      type="number"
+      id="hips"
+      name="hips"
+      value={formData.hips}
+      onChange={handleChange}
+      placeholder="Hips"
+    />
+  </div>
+  <div>
+    <label htmlFor="shoulderWidth" className="block text-sm font-medium text-gray-700">
+      Shoulder Width
+    </label>
+    <motion.input
+      whileFocus={{ scale: 1.02 }}
+      whileHover={{ scale: 1.01 }}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+      type="number"
+      id="shoulderWidth"
+      name="shoulderWidth"
+      value={formData.shoulderWidth}
+      onChange={handleChange}
+      placeholder="Shoulder Width"
+    />
+  </div>
+  <div>
+    <label htmlFor="neck" className="block text-sm font-medium text-gray-700">
+      Neck
+    </label>
+    <motion.input
+      whileFocus={{ scale: 1.02 }}
+      whileHover={{ scale: 1.01 }}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+      type="number"
+      id="neck"
+      name="neck"
+      value={formData.neck}
+      onChange={handleChange}
+      placeholder="Neck"
+    />
+  </div>
+  <div>
+    <label htmlFor="armLength" className="block text-sm font-medium text-gray-700">
+      Arm Length
+    </label>
+    <motion.input
+      whileFocus={{ scale: 1.02 }}
+      whileHover={{ scale: 1.01 }}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+      type="number"
+      id="armLength"
+      name="armLength"
+      value={formData.armLength}
+      onChange={handleChange}
+      placeholder="Arm Length"
+    />
+  </div>
+  <div>
+    <label htmlFor="backLength" className="block text-sm font-medium text-gray-700">
+      Back Length
+    </label>
+    <motion.input
+      whileFocus={{ scale: 1.02 }}
+      whileHover={{ scale: 1.01 }}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+      type="number"
+      id="backLength"
+      name="backLength"
+      value={formData.backLength}
+      onChange={handleChange}
+      placeholder="Back Length"
+    />
+  </div>
+  <div>
+    <label htmlFor="frontLength" className="block text-sm font-medium text-gray-700">
+      Front Length
+    </label>
+    <motion.input
+      whileFocus={{ scale: 1.02 }}
+      whileHover={{ scale: 1.01 }}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+      type="number"
+      id="frontLength"
+      name="frontLength"
+      value={formData.frontLength}
+      onChange={handleChange}
+      placeholder="Front Length"
+    />
+  </div>
+  <div>
+    <label htmlFor="highBust" className="block text-sm font-medium text-gray-700">
+      High Bust
+    </label>
+    <motion.input
+      whileFocus={{ scale: 1.02 }}
+      whileHover={{ scale: 1.01 }}
+      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+      type="number"
+      id="highBust"
+      name="highBust"
+      value={formData.highBust}
+      onChange={handleChange}
+      placeholder="High Bust"
+    />
+  </div>
+</div>
+
 
         {/* Submit Button */}
         <div className="mt-6">
