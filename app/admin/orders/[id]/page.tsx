@@ -1,6 +1,7 @@
 "use client";
 
 import Spinner from "@/components/Spinner";
+import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
@@ -145,13 +146,12 @@ export default function ShowCustomer() {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => router.push("/admin/customers")}
-          className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
+        <Link href="/admin/customers"
+          className="hover:text-orange-700 text-orange-500 flex flex-row items-center"
         >
           <IoIosArrowBack size={30} />
           <div className="mx-2">Back to List</div>
-        </button>
+        </Link>
         <div className="text-end font-bond text-lg text-gray-700 flex flex-row">
           <div className="font-bold me-3">Project Manager:</div>{" "}
           {customer.manager_name}
@@ -270,7 +270,8 @@ export default function ShowCustomer() {
           </div>
         </div>
 
-        <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+        {customer.style_reference_images && (
+          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
           <div className="">
             <label className="block text-gray-700 font-bold">
               Customer Style
@@ -308,6 +309,7 @@ export default function ShowCustomer() {
             </div>
           )}
         </div>
+        )}
 
         <div className="w-full">
           {/* Measurement Fields */}

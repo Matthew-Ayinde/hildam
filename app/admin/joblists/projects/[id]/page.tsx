@@ -675,9 +675,6 @@ export default function ShowCustomer() {
         {customer.customer_approval === "Approved" && (
           <div className="text-green-500 mt-2">Style approved</div>
         )}
-        {customer.customer_approval === "Rejected" && (
-          <div className="text-red-500 mt-2">Style rejected</div>
-        )}
         {/* {customer.customer_approval === null && customer.tailor_job_image !== null && (
           <div className="text-red-500 mt-2">Awaiting Approval from Customer</div>
         )} */}
@@ -738,7 +735,7 @@ export default function ShowCustomer() {
                 onError={handleImageError}
               />
             )}
-            {customer.customer_approval === null && (
+            {customer.customer_approval === null || customer.customer_approval === null  && (
               <div className="mt-4 flex justify-between">
                 <button
                   className="px-4 py-2 bg-green-500 text-white rounded"

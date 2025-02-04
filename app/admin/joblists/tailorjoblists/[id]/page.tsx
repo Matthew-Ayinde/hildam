@@ -6,8 +6,9 @@ import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image"; // Import Next.js Image component
 import { IoIosArrowBack } from "react-icons/io";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaCheckCircle, FaRegCircle } from "react-icons/fa";
 import Link from "next/link";
+import { FaRegCircleXmark } from "react-icons/fa6";
 
 export default function ShowCustomer() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -124,6 +125,8 @@ export default function ShowCustomer() {
     } finally {
       setIsSending(false);
     }
+
+    router.push("/admin/joblists/tailorjoblists");
   };
 
   interface Customer {
@@ -133,6 +136,7 @@ export default function ShowCustomer() {
     gender: string;
     date: string;
     address: string;
+    order_id: string;
     bust: number;
     waist: number;
     hips: number;
@@ -182,6 +186,7 @@ export default function ShowCustomer() {
           age: result.data.age,
           gender: result.data.gender,
           date: new Date().toLocaleDateString(),
+          order_id: result.data.order_id,
           address: result.data.address || "N/A",
           bust: result.data.bust || 0,
           waist: result.data.waist || 0,
@@ -248,14 +253,14 @@ export default function ShowCustomer() {
       {/* Toast Notification */}
       {uploadMessage && (
         <div className="flex justify-center w-full">
-          <div className="bg-green-500 text-white p-2 w-52 max-w-96 rounded mb-4 text-center">
+          <div className="bg-green-500 text-white p-2 w-fit px-4 rounded mb-4 text-center">
             {uploadMessage}
           </div>
         </div>
       )}
       {uploadError && (
         <div className="flex justify-center w-full">
-          <div className="bg-red-500 text-white p-2 w-52 max-w-96 rounded mb-4 text-center">
+          <div className="bg-red-500 text-white p-2 w-fit px-4 rounded mb-4 text-center">
             {uploadError}
           </div>
         </div>
@@ -271,6 +276,26 @@ export default function ShowCustomer() {
       <form>
         <div className="text-2xl text-gray-700 font-bold mb-2">
           Tailor Job Information
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
+          <div>
+            <label className="block text-gray-700 font-bold">Order ID</label>
+            <input
+              type="text"
+              value={customer.order_id}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Order Date</label>
+            <input
+              type="text"
+              value={customer.date}
+              readOnly
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+            />
+          </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
           <div>
@@ -529,14 +554,14 @@ export default function ShowCustomer() {
         {/* Success/Error Notifications */}
         {uploadMessage && (
           <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 flex justify-center w-full">
-            <div className="bg-green-500 text-white p-2 w-52 max-w-96 rounded mb-4 text-center">
+            <div className="bg-green-500 text-white p-2 w-fit px-4 rounded mb-4 text-center">
               {uploadMessage}
             </div>
           </div>
         )}
         {uploadError && (
           <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 flex justify-center w-full">
-            <div className="bg-red-500 text-white p-2 w-52 max-w-96 rounded mb-4 text-center">
+            <div className="bg-red-500 text-white p-2 w-fit px-4 rounded mb-4 text-center">
               {uploadError}{" "}
               <button
                 onClick={handleUploadImage}
@@ -567,6 +592,27 @@ export default function ShowCustomer() {
             <FaCheckCircle className="text-green-500 text-3xl" />
             <span className="ml-2 text-green-500 font-semibold">
               A style has been sent to project manager!
+            </span>
+          </div>
+        )}
+
+        {customer.project_manager_approval === "Rejected" && (
+          <div className="flex items-center mt-4">
+            {/* Check if customer.tailor_image exists */}
+            {customer.tailor_image && (
+              <div className="mr-4">
+                <Image
+                  src={customer.tailor_image} // Assuming tailor_image is the URL of the image
+                  alt="Tailor"
+                  width={100}
+                  height={100}
+                  className="rounded" // Optional: Add a class if you want rounded edges
+                />
+              </div>
+            )}
+            <FaRegCircleXmark className="text-red-500 text-3xl" />
+            <span className="ml-2 text-red-500 font-semibold">
+              The style has been rejected by project manager!
             </span>
           </div>
         )}
@@ -618,7 +664,7 @@ export default function ShowCustomer() {
             onClick={handleSendToProjectManager}
             disabled={isSending}
             className={`w-full py-2 rounded text-white font-semibold transition mt-4 ${
-              isSending ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"
+              isSending ? "bg-gray-100" : "bg-green-500 hover:bg-green-600"
             }`}
           >
             {isSending ? <Spinner /> : "Send to Project Manager"}

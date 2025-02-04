@@ -14,7 +14,7 @@ type Notification = {
   created_at: string;
 };
 
-const Topbar = () => {
+const Topbar = () => {  
   const [userName, setUserName] = useState("CEO");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);

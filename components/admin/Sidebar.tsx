@@ -12,6 +12,7 @@ import "nprogress/nprogress.css"; // Import default styles for NProgress
 import { IoNotifications } from "react-icons/io5";
 import { MdOutlinePayment } from "react-icons/md";
 import { MdOutlineInventory2 } from "react-icons/md";
+import LogoutButton from "../LogoutMobile";
 
 const sidebarItems = [
   {
@@ -249,9 +250,7 @@ const Sidebar = () => {
           })}
 
           <div className="relative lg:hidden flex justify-center">
-            <button className="border bg-white px-8 py-2 hover:cursor-pointer hover:text-black shadow-2xl rounded-lg">
-              Logout
-            </button>
+            <LogoutButton />
           </div>
 
         </ul>

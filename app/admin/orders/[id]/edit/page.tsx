@@ -1,11 +1,24 @@
 "use client";
 
 import Spinner from "@/components/Spinner";
+import { style } from "framer-motion/client";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 
 export default function EditCustomer() {
+
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+
+  const handleCustomerImageClick = () => {
+    setIsCustomerModalOpen(true);
+  };
+
+  const handleCustomerCloseModal = () => {
+    setIsCustomerModalOpen(false);
+  };
+
+
   const router = useRouter();
   const { id } = useParams();
   interface Customer {
@@ -25,6 +38,7 @@ export default function EditCustomer() {
     back_length: number;
     front_length: number;
     high_bust: number;
+    style_reference_images: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -41,6 +55,7 @@ export default function EditCustomer() {
     waist: "",
     hip: "",
     neck: "",
+    style_reference_images: "",
     hips: "",
     gender: "",
     order_status: "",
@@ -58,6 +73,19 @@ export default function EditCustomer() {
     project_manager_order_status: "",
     project_manager_amount: "",
   });
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      const imageUrl = URL.createObjectURL(file); // Convert file to preview URL
+      setFormData((prev) => ({
+        ...prev,
+        style_reference_images: imageUrl, // Update form data
+      }));
+    }
+  };
+  
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -100,6 +128,7 @@ export default function EditCustomer() {
         hip: result.data.hip,
         neck: result.data.neck,
         gender: result.data.gender,
+        style_reference_images: result.data.style_reference_images,
         date: result.data.created_at,
         shoulderWidth: result.data.shoulder_width,
         armLength: result.data.arm_length,
@@ -142,7 +171,7 @@ export default function EditCustomer() {
       const response = await fetch(
         `https://hildam.insightpublicis.com/api/editorder/${id}`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
@@ -152,10 +181,10 @@ export default function EditCustomer() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to update customer data");
+        throw new Error("Failed to update order");
       }
 
-      setSuccessMessage("Customer data updated successfully!");
+      setSuccessMessage("Order updated successfully!");
       setTimeout(() => {
         router.push("/admin/orders");
       }, 2000); // Redirect after 2 seconds
@@ -192,7 +221,11 @@ export default function EditCustomer() {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       {successMessage && (
-        <div className="text-center text-green-500 py-2">{successMessage}</div>
+        <div className="fixed top-5 left-0 right-0 flex justify-center z-50">
+          <div className="text-center bg-green-500 w-fit px-4 rounded text-white py-2 shadow-lg">
+            {successMessage}
+          </div>
+        </div>
       )}
       <button
         onClick={() => router.push("/admin/orders")}
@@ -270,6 +303,52 @@ export default function EditCustomer() {
             />
           </div>
         </div>
+
+        {formData.style_reference_images && (
+  <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+    <div>
+      <label className="block text-gray-700 font-bold">Customer Style</label>
+      <img
+        src={formData.style_reference_images}
+        alt="style_reference_images"
+        className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
+        onClick={handleCustomerImageClick} // Open modal on click
+      />
+    </div>
+
+    {isCustomerModalOpen && (
+      <div
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+        onClick={handleCustomerCloseModal}
+      >
+        <div
+          className="bg-white rounded-lg p-4 flex flex-col items-center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <img
+            src={formData.style_reference_images}
+            alt="Style Reference"
+            className="w-[500px] h-[500px] object-cover"
+            onError={(e) => {
+              e.currentTarget.src = ""; // Clear the image source
+              e.currentTarget.alt = "Image failed to load"; // Update alt text
+            }}
+          />
+
+          {/* Change Image Button */}
+          <input
+            type="file"
+            accept="image/*"
+            className="mt-4 border border-gray-300 p-2 rounded-md cursor-pointer"
+            onChange={handleImageChange}
+          />
+        </div>
+      </div>
+    )}
+  </div>
+)}
+
+
         <div className="w-full">
           {/* Measurement Fields */}
           <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
@@ -289,8 +368,7 @@ export default function EditCustomer() {
                   id="bust"
                   name="bust"
                   value={formData.bust || ""}
-              onChange={handleInputChange}
-
+                  onChange={handleInputChange}
                   placeholder="Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -306,7 +384,7 @@ export default function EditCustomer() {
                   type="number"
                   id="waist"
                   name="waist"
-              onChange={handleInputChange}
+                  onChange={handleInputChange}
                   value={formData.waist || ""}
                   placeholder="Waist"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -321,7 +399,7 @@ export default function EditCustomer() {
                 </label>
                 <input
                   type="number"
-              onChange={handleInputChange}
+                  onChange={handleInputChange}
                   id="hips"
                   name="hips"
                   value={formData.hips || ""}
@@ -343,7 +421,7 @@ export default function EditCustomer() {
                   id="shoulderWidth"
                   name="shoulderWidth"
                   value={formData.shoulderWidth || ""}
-              onChange={handleInputChange}
+                  onChange={handleInputChange}
                   placeholder="Shoulder Width"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -360,7 +438,7 @@ export default function EditCustomer() {
                   id="neck"
                   name="neck"
                   value={formData.neck || ""}
-              onChange={handleInputChange}
+                  onChange={handleInputChange}
                   placeholder="Neck"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -375,7 +453,7 @@ export default function EditCustomer() {
                 <input
                   type="number"
                   id="armLength"
-              onChange={handleInputChange}
+                  onChange={handleInputChange}
                   name="armLength"
                   value={formData.armLength || ""}
                   placeholder="Arm Length"
@@ -395,8 +473,8 @@ export default function EditCustomer() {
                   type="number"
                   id="backLength"
                   name="backLength"
-              onChange={handleInputChange}
-              value={formData.backLength || ""}
+                  onChange={handleInputChange}
+                  value={formData.backLength || ""}
                   placeholder="Back Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -412,8 +490,8 @@ export default function EditCustomer() {
                   type="number"
                   id="frontLength"
                   name="frontLength"
-              onChange={handleInputChange}
-              value={formData.frontLength || ""}
+                  onChange={handleInputChange}
+                  value={formData.frontLength || ""}
                   placeholder="Front Length"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -429,8 +507,8 @@ export default function EditCustomer() {
                   type="number"
                   id="highBust"
                   name="highBust"
-              onChange={handleInputChange}
-              value={formData.highBust || ""}
+                  onChange={handleInputChange}
+                  value={formData.highBust || ""}
                   placeholder="High Bust"
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
@@ -439,19 +517,12 @@ export default function EditCustomer() {
           </div>
         </div>
 
-        <div className="col-span-2">
+        <div className="flex justify-end mt-6">
           <button
             type="submit"
-            className="px-4 py-2 bg-orange-500 text-white rounded"
+            className="px-4 py-2 hover:bg-orange-700 bg-orange-500 text-white rounded"
           >
-            Save Changes
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push(`/admin/inventory/${id}`)}
-            className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
-          >
-            Cancel
+            Edit order
           </button>
         </div>
       </form>
