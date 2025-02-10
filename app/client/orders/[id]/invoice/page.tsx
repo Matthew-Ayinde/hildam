@@ -253,24 +253,64 @@ const Invoice = () => {
   }
 
   const handlePrint = () => {
-    window.print();
+    const invoiceContent = document.getElementById("invoice-content")?.innerHTML;
+  
+    if (!invoiceContent) return;
+  
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Invoice #${customer.order_id}</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+              .border { border: 1px solid #000; padding: 16px; border-radius: 8px; }
+              .text-center { text-align: center; }
+              .font-bold { font-weight: bold; }
+              .mb-4 { margin-bottom: 16px; }
+              .flex { display: flex; justify-content: space-between; align-items: center; }
+              .uppercase { text-transform: uppercase; }
+              @media print {
+                .no-print { display: none; } /* Hide elements with this class */
+                body { -webkit-print-color-adjust: exact; } 
+                /* Add any additional print-specific styles here */
+              }
+            </style>
+          </head>
+          <body>
+            <div class="border">${invoiceContent}</div>
+            <script>
+              window.onload = function() {
+                window.print();
+                window.onafterprint = function() { window.close(); };
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
   };
+  
 
   return (
-    <div className="p-6">
-      <div className="border p-4 rounded shadow-lg">
+    <div className="p-2">
+      <div className="border p-4 rounded shadow-lg" id="invoice-content">
         <div className="flex justify-between mb-4">
           <div>
             <img src="/logo.png" alt="Company Logo" className="h-12" />
-            <h1 className="text-5xl my-2 font-bold">Hildam Couture</h1>
+            <h1 className="lg:text-5xl text-2xl my-2 font-bold">
+              Hildam Couture
+            </h1>
           </div>
           <div className="text-right">
-            <p className="font-bold">Invoice Number: #12345</p>
+            <p className="font-bold">Invoice Number: #{customer.order_id}</p>
             <p>Date: {new Date().toLocaleDateString()}</p>
           </div>
         </div>
-        <div className="mb-4">
-          <h2 className="text-xl">Bill To:</h2>
+        <div className="mb-4 text-sm lg:text-base">
+          <h2 className="text-lg lg:text-xl">Bill To:</h2>
           <p>Insight Redefini</p>
           <p>19/21 oduduwa street</p>
           <p>Ikeja GRA, Lagos</p>
@@ -279,7 +319,7 @@ const Invoice = () => {
           <h2 className="text-xl font-bold">Invoice Details:</h2>
           <table className="min-w-full border-collapse border border-gray-200">
             <thead>
-              <tr>
+              <tr className="text-sm lg:text-base">
                 <th className="border border-gray-200 p-2">Cloth Name</th>
                 <th className="border border-gray-200 p-2">Description</th>
                 <th className="border border-gray-200 p-2">Unit Price</th>
@@ -305,21 +345,30 @@ const Invoice = () => {
           </table>
         </div>
         <div className="flex justify-between mb-4">
-          <h2 className="text-xl font-bold">Subtotal:</h2>
-          <p className="text-xl font-bold">₦{customer.amount}</p>
+          <h2 className="text-sm lg:text-xl font-bold">Subtotal:</h2>
+          <p className="text-sm lg:text-xl font-bold">₦{customer.amount}</p>
         </div>
         <div className="mb-4 flex justify-between">
-          <h2 className="text-xl font-bold">Payment Mode:</h2>
+          <h2 className="text-sm lg:text-xl font-bold">Payment Mode:</h2>
           <p>Transfer</p>
         </div>
         <div className="flex justify-end">
-          <Link href={`/client/orders/${id}/payment`}
+          <Link
+            href={`/client/orders/${id}/payment`}
             className="mb-4 px-4 py-2 bg-orange-500 flex text-white rounded hover:bg-orange-600"
           >
             Make Payment
           </Link>
         </div>
       </div>
+
+{/* 
+      <button
+        onClick={handlePrint}
+        className="no-print mt-4 bg-green-500 text-white py-2 px-4 rounded"
+      >
+        Print Invoice
+      </button> */}
     </div>
   );
 };

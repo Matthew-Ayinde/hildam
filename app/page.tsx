@@ -17,10 +17,19 @@ export default function Home() {
           router.push("/admin");
           break;
         case "customer":
-          router.push("/client/customers");
+          router.push("/client/orders");
           break;
         case "project manager":
-          router.push("/projectManager/customers");
+          router.push("/project-manager/joblists/projects");
+          break;
+        case "client manager":
+          router.push("/client-manager/orders");
+          break;
+        case "store manager":
+          router.push("/store-manager/joblists/projects");
+          break;
+        case "head of tailoring":
+          router.push("/head-of-tailoring/joblists/tailorjoblists");
           break;
         default:
           sessionStorage.removeItem("access_token");

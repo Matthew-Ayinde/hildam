@@ -133,6 +133,67 @@ export default function ShowCustomer() {
     fetchCustomer();
   }, [id]);
 
+  const [realdata, setRealdata] = useState({
+    manager_id: "",
+  });
+
+  const [managers, setManagers] = useState<
+    {
+      id: string;
+      user_id: string;
+      name: string;
+    }[]
+  >([]);
+  const [loadingManagers, setLoadingManagers] = useState(true);
+  const [selectedManagerId, setSelectedManagerId] = useState<string | null>(
+    null
+  );
+
+  const handleInputChange = (e: { target: { name: any; value: any } }) => {
+    setRealdata({
+      ...realdata,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const fetchManagers = async () => {
+    setLoadingManagers(true);
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/headoftailoringlist",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch managers");
+      }
+
+      const result = await response.json();
+      setManagers(result.data);
+      if (customer && typeof customer.manager_id === "string") {
+        setSelectedManagerId(customer.manager_id); // Pre-select the current manager
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
+    } finally {
+      setLoadingManagers(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomer();
+    fetchManagers(); // Fetch managers when the component mounts
+  }, [id]);
+
   const handleImageLoad = () => {
     setImageLoading(false);
     setImageError(false);
@@ -325,10 +386,46 @@ export default function ShowCustomer() {
     return <div className="text-center text-gray-500 py-10">No data found</div>;
   }
 
+  const handleManagerChange = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    setError(null);
+
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      const response = await fetch(
+        `https://hildam.insightpublicis.com/api/editproject/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(realdata),
+        }
+      );
+
+      // Log the response for debugging
+      console.log(response);
+
+      if (!response.ok) {
+        throw new Error("Failed to update customer data");
+      }
+
+      router.push("/admin/joblists/projects");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
+    }
+  };
+
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
-        <Link href="/admin/joblists/projects"
+        <Link
+          href="/admin/joblists/projects"
           className="hover:text-orange-700 text-orange-500 flex flex-row items-center"
         >
           <IoIosArrowBack size={30} />
@@ -340,7 +437,7 @@ export default function ShowCustomer() {
         </div>
       </div>
       <form>
-        <div className="grid grid-cols-2 gap-6 mb-5">
+        <div className="grid grid:cols-1 lg:grid-cols-2 gap-6 mb-5">
           <div>
             <label className="block text-gray-700 font-bold">Order ID</label>
             <input
@@ -443,14 +540,58 @@ export default function ShowCustomer() {
               </div>
             )}
           </div>
+          <div className="w-full">
+            <form onSubmit={handleManagerChange}>
+              <label className="block text-gray-700 font-bold">
+                Head of Tailoring
+              </label>
+              <div className="flex items-center space-x-2">
+                <select
+                  name="manager_id"
+                  value={selectedManagerId || ""}
+                  onChange={(e) => {
+                    setSelectedManagerId(e.target.value); // Update the selected manager ID
+                  }}
+                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                  disabled={loadingManagers} // Disable while loading
+                >
+                  {loadingManagers ? (
+                    <option>Loading...</option>
+                  ) : (
+                    <>
+                      <option value="">
+                        {customer && customer.manager_name
+                          ? customer.manager_name
+                          : "Select Head of Tailoring"}
+                      </option>
+                      {managers.map((manager) => (
+                        <option key={manager.id} value={manager.user_id}>
+                          {manager.name}
+                        </option>
+                      ))}
+                    </>
+                  )}
+                </select>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-semibold text-white bg-orange-500 rounded hover:bg-orange-700 disabled:bg-gray-400"
+                  disabled={loadingManagers}
+                >
+                  Change
+                </button>
+              </div>
+
+              {error && <div className="text-red-500">{error}</div>}
+            </form>
+          </div>
         </div>
         <div className="w-full">
           <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
             Measurements
           </div>
           <div className="mb-4">
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
+            <div className="flex flex-wrap -mx-2">
+              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
                 <label
                   htmlFor="bust"
                   className="block text-sm font-medium text-gray-700"
@@ -467,7 +608,8 @@ export default function ShowCustomer() {
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
-              <div className="w-1/3">
+
+              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
                 <label
                   htmlFor="waist"
                   className="block text-sm font-medium text-gray-700"
@@ -484,7 +626,8 @@ export default function ShowCustomer() {
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
-              <div className="w-1/3">
+
+              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
                 <label
                   htmlFor="hips"
                   className="block text-sm font-medium text-gray-700"
@@ -501,9 +644,8 @@ export default function ShowCustomer() {
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
-            </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
+
+              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
                 <label
                   htmlFor="shoulderWidth"
                   className="block text-sm font-medium text-gray-700"
@@ -520,7 +662,8 @@ export default function ShowCustomer() {
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
-              <div className="w-1/3">
+
+              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
                 <label
                   htmlFor="neck"
                   className="block text-sm font-medium text-gray-700"
@@ -537,7 +680,8 @@ export default function ShowCustomer() {
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
-              <div className="w-1/3">
+
+              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
                 <label
                   htmlFor="armLength"
                   className="block text-sm font-medium text-gray-700"
@@ -554,9 +698,8 @@ export default function ShowCustomer() {
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
-            </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
+
+              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
                 <label
                   htmlFor="backLength"
                   className="block text-sm font-medium text-gray-700"
@@ -573,7 +716,8 @@ export default function ShowCustomer() {
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
-              <div className="w-1/3">
+
+              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
                 <label
                   htmlFor="frontLength"
                   className="block text-sm font-medium text-gray-700"
@@ -590,7 +734,8 @@ export default function ShowCustomer() {
                   className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                 />
               </div>
-              <div className="w-1/3">
+
+              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
                 <label
                   htmlFor="high_bust"
                   className="block text-sm font-medium text-gray-700"
@@ -638,7 +783,7 @@ export default function ShowCustomer() {
               type="number"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              placeholder="Enter price"
+              placeholder="Enter price in (₦)"
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
             />
             <button
@@ -681,11 +826,12 @@ export default function ShowCustomer() {
         {customer.customer_approval === "In Review" && (
           <div className="font-bold mt-2">Awaiting review from customer</div>
         )}
-        {customer.customer_approval === null && customer.tailor_job_image !== null && (
-          <div className="text-red-500 mt-2">
-            Image yet to be sent to customer
-          </div>
-        )}
+        {customer.customer_approval === null &&
+          customer.tailor_job_image !== null && (
+            <div className="text-red-500 mt-2">
+              Image yet to be sent to customer
+            </div>
+          )}
 
         {/* customer feedback */}
         {customer.customer_feedback !== null && (
@@ -693,7 +839,7 @@ export default function ShowCustomer() {
             {/* <div className="text-red-500">Image Rejected by customer</div> */}
             <div className="my-3 text-red-500">Style rejected</div>
             <div className="text-lg font-bold">Customer Feedback</div>
-            <div className=" py-2 px-3 bg-gray-50 border border-gray-500 rounded-lg w-1/2">
+            <div className=" py-2 px-3 bg-gray-50 border text-gray-700 text-sm border-gray-500 rounded-lg w-full lg:w-1/2">
               {customer.customer_feedback}
             </div>
           </div>
@@ -735,7 +881,30 @@ export default function ShowCustomer() {
                 onError={handleImageError}
               />
             )}
-            {customer.customer_approval === null || customer.customer_approval === null  && (
+            {customer.customer_approval === null && (
+              <div className="mt-4 flex justify-between">
+                <button
+                  className="px-4 py-2 bg-green-500 text-white rounded"
+                  onClick={() => {
+                    // handleApproveStyle();
+                    openPriceModal();
+                    closeModal();
+                  }}
+                >
+                  Send to Customer
+                </button>
+                <button
+                  className="px-4 py-2 bg-red-500 text-white rounded"
+                  onClick={() => {
+                    handleRejectStyle();
+                    closeModal();
+                  }}
+                >
+                  Reject
+                </button>
+              </div>
+            )}
+            {customer.customer_approval === "Rejected" && (
               <div className="mt-4 flex justify-between">
                 <button
                   className="px-4 py-2 bg-green-500 text-white rounded"
@@ -762,7 +931,8 @@ export default function ShowCustomer() {
         </div>
       )}
       <div className="mt-6 flex justify-end space-x-4">
-        <Link href={`/admin/joblists/projects/${id}/edit`}
+        <Link
+          href={`/admin/joblists/projects/${id}/edit`}
           className="px-4 py-2 bg-orange-500 text-white rounded"
         >
           Edit

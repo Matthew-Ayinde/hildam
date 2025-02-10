@@ -1,18 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { FaUsers, FaShoppingCart, FaBoxes, FaUser } from "react-icons/fa";
+import { FaUsers, FaShoppingCart, FaBoxes, FaUser  } from "react-icons/fa";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import Image from "next/image";
 import { MdDashboard } from "react-icons/md";
 import { usePathname } from "next/navigation";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
-import "nprogress/nprogress.css"; // Import default styles for NProgress
 import { IoNotifications } from "react-icons/io5";
 import { MdOutlinePayment } from "react-icons/md";
 import { MdOutlineInventory2 } from "react-icons/md";
 import LogoutButton from "../LogoutMobile";
+import { useRouter } from "next/navigation";
+import { AiOutlineCheck } from "react-icons/ai";
+import { FiBell } from "react-icons/fi";
+
+type Notification = {
+  id: string;
+  message: string;
+  link: string;
+  read: string;
+  created_at: string;
+};
 
 const sidebarItems = [
   {
@@ -45,7 +55,6 @@ const sidebarItems = [
       { name: "Tailor Jobs", href: "/admin/joblists/tailorjoblists" },
     ],
   },
-  
   {
     id: 6,
     text: "Payments",
@@ -69,7 +78,7 @@ const sidebarItems = [
   {
     id: 5,
     text: "Users",
-    icon: <FaUser />,
+    icon: <FaUser  />,
     prefix: "/admin/users",
     links: [
       { name: "List", href: "/admin/users" },
@@ -79,9 +88,16 @@ const sidebarItems = [
 ];
 
 const Sidebar = () => {
+  const router = useRouter();
   const pathname = usePathname();
   const [openMenus, setOpenMenus] = useState<{ [key: number]: boolean }>({});
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  
+  // Create a ref for the dropdown
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const isActive = (prefix: string) => pathname.startsWith(prefix);
 
@@ -100,15 +116,120 @@ const Sidebar = () => {
     setSidebarOpen(false);
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) throw new Error("No access token found");
+
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/allnotifications",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch notifications");
+      }
+
+      const data = await response.json();
+      if (data.status === "success") {
+        setNotifications(data.data);
+        setUnreadCount(data.data.filter((notif: any) => notif.read === "0").length);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const markAsRead = async (id: string, message: string, link: string) => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) throw new Error("No access token found");
+
+      await fetch(
+        `https://hildam.insightpublicis.com/api/readnotification/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ message, link }),
+        }
+      );
+
+      setNotifications((prev) =>
+        prev.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif))
+      );
+      setUnreadCount((prev) => prev - 1);
+      setDropdownOpen(false);
+
+      const linking_id = link.split("/").pop();
+      if (link.includes("orderslist")) {
+        router.push("/admin/orders/" + linking_id);
+      }
+      if (link.includes("projectlist")) {
+        router.push("/admin/joblists/projects/" + linking_id);
+      }
+      if (link.includes("tailorjoblist")) {
+        router.push("/admin/joblists/tailorjoblists/" + linking_id);
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) throw new Error("No access token found");
+
+      await fetch(
+        `https://hildam.insightpublicis.com/api/readallnotification`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+    } catch (error) {
+      console.error("Error marking all notification as read:", error);
+    }
+
+    setDropdownOpen(false);
+
+  };
+
+  // Effect to handle clicks outside the dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    // Add event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    
+    // Cleanup event listener on component unmount
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
+
   return (
     <>
-      <style jsx global>{`
-        #nprogress .bar {
-          background: #ff6c2f;
-          height: 4px;
-        }
-      `}</style>
-
       <div className="lg:hidden fixed top-0 w-full bg-[#262d34] text-white flex justify-between items-center px-4 py-3 z-50 shadow-md">
         <div className="flex items-center">
           <Image
@@ -123,18 +244,13 @@ const Sidebar = () => {
           </div>
         </div>
         <div className="flex flex-row space-x-1 items-center">
-          <div className="w-7 h-7 flex items-center justify-center">
-            <Image
-              src={"/no-profile.jpg"}
-              alt="Profile picture"
-              width={100}
-              height={100}
-              className="w-full h-full rounded-full"
-            />
-          </div>
-
-          <div className="w-12 h-12 flex items-center justify-center">
+          <div className="relative w-12 h-12 flex items-center justify-center cursor-pointer" onClick={() => setDropdownOpen(!dropdownOpen)}>
             <IoNotifications size={20} />
+            {unreadCount > 0 && (
+              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
+                {unreadCount}
+              </span>
+            )}
           </div>
           <button
             onClick={toggleSidebar}
@@ -252,9 +368,59 @@ const Sidebar = () => {
           <div className="relative lg:hidden flex justify-center">
             <LogoutButton />
           </div>
-
         </ul>
       </div>
+
+      {dropdownOpen && (
+      <div
+        ref={dropdownRef}
+        className="absolute top-16 right-0 w-80 bg-white rounded-2xl shadow-xl z-50 border border-gray-200 p-3 mt-2"
+      >
+        <div className="max-h-72 overflow-y-auto">
+          {/* Header */}
+          <div className="p-4 border-b border-gray-200 font-semibold text-gray-700 flex justify-between items-center">
+            <div className="flex items-center gap-2 text-lg">
+              <FiBell className="text-orange-500 text-xl" />
+              <span>Notifications</span>
+            </div>
+            <button 
+              onClick={() => markAllAsRead()}
+            className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-all">
+              <AiOutlineCheck className="text-lg" />
+              Mark All
+            </button>
+          </div>
+
+          {/* No notifications message */}
+          {notifications.length === 0 && (
+            <div className="p-4 text-gray-600 text-center">No new notifications</div>
+          )}
+
+          {/* Notification Items */}
+          {notifications.slice(0, 4).map((notification) => (
+            <div
+              key={notification.id}
+              className="p-3 text-sm flex justify-between items-center hover:bg-gray-100 cursor-pointer text-orange-600 border-b border-gray-200 rounded-lg transition-all duration-200"
+              onClick={() => markAsRead(notification.id, notification.message, notification.link)}
+            >
+              <span className="truncate max-w-[70%]">{notification.message}</span>
+              <span className="text-xs text-gray-500">{new Date(notification.created_at).toLocaleString()}</span>
+            </div>
+          ))}
+
+          {/* See More Button */}
+          {notifications.length > 4 && (
+            <div className="flex justify-center p-3">
+              <Link
+                href="/notifications"
+                className="text-white text-sm font-medium px-6 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 transition-all duration-300"
+              >
+                See More
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>)}
     </>
   );
 };

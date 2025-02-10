@@ -2,12 +2,12 @@
 
 import Spinner from "@/components/Spinner";
 import { style } from "framer-motion/client";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 
 export default function EditCustomer() {
-
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 
   const handleCustomerImageClick = () => {
@@ -17,7 +17,6 @@ export default function EditCustomer() {
   const handleCustomerCloseModal = () => {
     setIsCustomerModalOpen(false);
   };
-
 
   const router = useRouter();
   const { id } = useParams();
@@ -85,7 +84,6 @@ export default function EditCustomer() {
       }));
     }
   };
-  
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -162,6 +160,7 @@ export default function EditCustomer() {
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
+    console.log("function called");
     e.preventDefault();
     setError("");
     setSuccessMessage("");
@@ -227,15 +226,15 @@ export default function EditCustomer() {
           </div>
         </div>
       )}
-      <button
-        onClick={() => router.push("/admin/orders")}
-        className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
+      <Link
+        href={"/admin/orders"}
+        className="hover:text-orange-700 text-orange-500 flex flex-row items-center mb-5"
       >
         <IoIosArrowBack size={30} />
         <div className="mx-2">Back to List</div>
-      </button>
+      </Link>
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <label className="block text-gray-700 font-bold">Order ID</label>
             <input
@@ -305,214 +304,212 @@ export default function EditCustomer() {
         </div>
 
         {formData.style_reference_images && (
-  <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-    <div>
-      <label className="block text-gray-700 font-bold">Customer Style</label>
-      <img
-        src={formData.style_reference_images}
-        alt="style_reference_images"
-        className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
-        onClick={handleCustomerImageClick} // Open modal on click
-      />
-    </div>
+          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+            <div>
+              <label className="block text-gray-700 font-bold">
+                Customer Style
+              </label>
+              <img
+                src={formData.style_reference_images}
+                alt="style_reference_images"
+                className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
+                onClick={handleCustomerImageClick} // Open modal on click
+              />
+            </div>
 
-    {isCustomerModalOpen && (
-      <div
-        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-        onClick={handleCustomerCloseModal}
-      >
-        <div
-          className="bg-white rounded-lg p-4 flex flex-col items-center"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <img
-            src={formData.style_reference_images}
-            alt="Style Reference"
-            className="w-[500px] h-[500px] object-cover"
-            onError={(e) => {
-              e.currentTarget.src = ""; // Clear the image source
-              e.currentTarget.alt = "Image failed to load"; // Update alt text
-            }}
-          />
+            {isCustomerModalOpen && (
+              <div
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+                onClick={handleCustomerCloseModal}
+              >
+                <div
+                  className="bg-white rounded-lg p-4 flex flex-col items-center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img
+                    src={formData.style_reference_images}
+                    alt="Style Reference"
+                    className="lg:w-[400px] lg:h-[400px] w-80 h-80 object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = ""; // Clear the image source
+                      e.currentTarget.alt = "Image failed to load"; // Update alt text
+                    }}
+                  />
 
-          {/* Change Image Button */}
-          <input
-            type="file"
-            accept="image/*"
-            className="mt-4 border border-gray-300 p-2 rounded-md cursor-pointer"
-            onChange={handleImageChange}
-          />
-        </div>
-      </div>
-    )}
-  </div>
-)}
-
+                  {/* Change Image Button */}
+                  <div className="font-bold lg:text-xl text-lg text-gray-700 mt-1 lg:mt-3">
+                    Change Image
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="lg:mt-4 mt-1 border border-gray-300 p-2 rounded-md cursor-pointer"
+                    onChange={handleImageChange}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="w-full">
           {/* Measurement Fields */}
           <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
             Measurements
           </div>
-          <div className="mb-4">
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="bust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Bust
-                </label>
-                <input
-                  type="number"
-                  id="bust"
-                  name="bust"
-                  value={formData.bust || ""}
-                  onChange={handleInputChange}
-                  placeholder="Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="waist"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Waist
-                </label>
-                <input
-                  type="number"
-                  id="waist"
-                  name="waist"
-                  onChange={handleInputChange}
-                  value={formData.waist || ""}
-                  placeholder="Waist"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="hips"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Hips
-                </label>
-                <input
-                  type="number"
-                  onChange={handleInputChange}
-                  id="hips"
-                  name="hips"
-                  value={formData.hips || ""}
-                  placeholder="Hips"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label
+                htmlFor="bust"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Bust
+              </label>
+              <input
+                type="number"
+                id="bust"
+                name="bust"
+                value={formData.bust || ""}
+                onChange={handleInputChange}
+                placeholder="Bust"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
             </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="shoulderWidth"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Shoulder Width
-                </label>
-                <input
-                  type="number"
-                  id="shoulderWidth"
-                  name="shoulderWidth"
-                  value={formData.shoulderWidth || ""}
-                  onChange={handleInputChange}
-                  placeholder="Shoulder Width"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="neck"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Neck
-                </label>
-                <input
-                  type="number"
-                  id="neck"
-                  name="neck"
-                  value={formData.neck || ""}
-                  onChange={handleInputChange}
-                  placeholder="Neck"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="armLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Arm Length
-                </label>
-                <input
-                  type="number"
-                  id="armLength"
-                  onChange={handleInputChange}
-                  name="armLength"
-                  value={formData.armLength || ""}
-                  placeholder="Arm Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+            <div>
+              <label
+                htmlFor="waist"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Waist
+              </label>
+              <input
+                type="number"
+                id="waist"
+                name="waist"
+                value={formData.waist || ""}
+                onChange={handleInputChange}
+                placeholder="Waist"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
             </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="backLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Back Length
-                </label>
-                <input
-                  type="number"
-                  id="backLength"
-                  name="backLength"
-                  onChange={handleInputChange}
-                  value={formData.backLength || ""}
-                  placeholder="Back Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="frontLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Front Length
-                </label>
-                <input
-                  type="number"
-                  id="frontLength"
-                  name="frontLength"
-                  onChange={handleInputChange}
-                  value={formData.frontLength || ""}
-                  placeholder="Front Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="highBust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  High Bust
-                </label>
-                <input
-                  type="number"
-                  id="highBust"
-                  name="highBust"
-                  onChange={handleInputChange}
-                  value={formData.highBust || ""}
-                  placeholder="High Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+            <div>
+              <label
+                htmlFor="hips"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Hips
+              </label>
+              <input
+                type="number"
+                id="hips"
+                name="hips"
+                value={formData.hips || ""}
+                onChange={handleInputChange}
+                placeholder="Hips"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="shoulderWidth"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Shoulder Width
+              </label>
+              <input
+                type="number"
+                id="shoulderWidth"
+                name="shoulderWidth"
+                value={formData.shoulderWidth || ""}
+                onChange={handleInputChange}
+                placeholder="Shoulder Width"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="neck"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Neck
+              </label>
+              <input
+                type="number"
+                id="neck"
+                name="neck"
+                value={formData.neck || ""}
+                onChange={handleInputChange}
+                placeholder="Neck"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="armLength"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Arm Length
+              </label>
+              <input
+                type="number"
+                id="armLength"
+                name="armLength"
+                value={formData.armLength || ""}
+                onChange={handleInputChange}
+                placeholder="Arm Length"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="backLength"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Back Length
+              </label>
+              <input
+                type="number"
+                id="backLength"
+                name="backLength"
+                value={formData.backLength || ""}
+                onChange={handleInputChange}
+                placeholder="Back Length"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="frontLength"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Front Length
+              </label>
+              <input
+                type="number"
+                id="frontLength"
+                name="frontLength"
+                value={formData.frontLength || ""}
+                onChange={handleInputChange}
+                placeholder="Front Length"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="highBust"
+                className="block text-sm font-medium text-gray-700"
+              >
+                High Bust
+              </label>
+              <input
+                type="number"
+                id="highBust"
+                name="highBust"
+                value={formData.highBust || ""}
+                onChange={handleInputChange}
+                placeholder="High Bust"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
             </div>
           </div>
         </div>
@@ -522,7 +519,7 @@ export default function EditCustomer() {
             type="submit"
             className="px-4 py-2 hover:bg-orange-700 bg-orange-500 text-white rounded"
           >
-            Edit order
+            Save
           </button>
         </div>
       </form>

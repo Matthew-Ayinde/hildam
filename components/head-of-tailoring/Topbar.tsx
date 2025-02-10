@@ -151,7 +151,7 @@ const Topbar = () => {
   };
 
   return (
-    <div className="sticky top-0 z-40 mt-5">
+    <div className="mt-5">
       <div className="shadow-lg rounded-xl lg:flex justify-between items-center py-3 px-6 text-gray-700 bg-white">
         <div className="text-xl font-bold">
           <div className="uppercase">Welcome, {userName}</div>

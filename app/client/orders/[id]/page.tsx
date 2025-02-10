@@ -255,7 +255,7 @@ export default function ShowCustomer() {
     return (
       <div className="text-center text-red-500 py-10">
         Error: {error}{" "}
-        <button onClick={fetchCustomer} className="text-blue-500 underline">
+        <button onClick={fetchCustomer} className="text-orange-500 underline">
           Retry
         </button>
       </div>
@@ -271,7 +271,7 @@ export default function ShowCustomer() {
       <div className="flex items-center justify-between mb-6">
         <Link
           href={`/client/orders`}
-          className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
+          className="hover:text-orange-700 text-orange-500 flex flex-row items-center"
         >
           <IoIosArrowBack size={30} />
           <div className="mx-2">Back to List</div>
@@ -287,7 +287,7 @@ export default function ShowCustomer() {
       </div>
 
       <form>
-        <div className="grid grid-cols-2 gap-6 mb-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
           <div>
             <label className="block text-gray-700 font-bold">Order ID</label>
             <input
@@ -363,7 +363,7 @@ export default function ShowCustomer() {
                 <img
                   src={customer.style_reference_images}
                   alt="Style Reference"
-                  className="w-[500px] h-[500px] object-cover"
+                  className="w-80 h-80 lg:w-[500px] lg:h-[500px] object-cover"
                   onError={(e) => {
                     e.currentTarget.src = ""; // Clear the image source
                     e.currentTarget.alt = "Image failed to load"; // Update alt text
@@ -380,165 +380,159 @@ export default function ShowCustomer() {
           <div className="block text-xl text-gray-700 font-bold mt-10 mb-1">
             Measurements
           </div>
-          <div className="mb-4">
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="bust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Bust
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="bust"
-                  name="bust"
-                  value={customer.bust}
-                  placeholder="Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="waist"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Waist
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="waist"
-                  name="waist"
-                  value={customer.waist}
-                  placeholder="Waist"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="hips"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Hips
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="hips"
-                  name="hips"
-                  value={customer.hip}
-                  placeholder="Hips"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label
+                htmlFor="bust"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Bust
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="bust"
+                name="bust"
+                value={customer.bust}
+                placeholder="Bust"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
             </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="shoulderWidth"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Shoulder Width
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="shoulderWidth"
-                  name="shoulderWidth"
-                  value={customer.shoulderWidth}
-                  placeholder="Shoulder Width"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="neck"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Neck
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="neck"
-                  name="neck"
-                  value={customer.neck}
-                  placeholder="Neck"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="armLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Arm Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="armLength"
-                  name="armLength"
-                  value={customer.armLength}
-                  placeholder="Arm Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+            <div>
+              <label
+                htmlFor="waist"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Waist
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="waist"
+                name="waist"
+                value={customer.waist}
+                placeholder="Waist"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
             </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="backLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Back Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="backLength"
-                  name="backLength"
-                  value={customer.backLength}
-                  placeholder="Back Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="frontLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Front Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="frontLength"
-                  name="frontLength"
-                  value={customer.frontLength}
-                  placeholder="Front Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="high_bust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  High Bust
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="high_bust"
-                  name="high_bust"
-                  value={customer.high_bust}
-                  placeholder="High Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+            <div>
+              <label
+                htmlFor="hips"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Hips
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="hips"
+                name="hips"
+                value={customer.hip}
+                placeholder="Hips"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="shoulderWidth"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Shoulder Width
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="shoulderWidth"
+                name="shoulderWidth"
+                value={customer.shoulderWidth}
+                placeholder="Shoulder Width"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="neck"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Neck
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="neck"
+                name="neck"
+                value={customer.neck}
+                placeholder="Neck"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="armLength"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Arm Length
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="armLength"
+                name="armLength"
+                value={customer.armLength}
+                placeholder="Arm Length"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="backLength"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Back Length
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="backLength"
+                name="backLength"
+                value={customer.backLength}
+                placeholder="Back Length"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="frontLength"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Front Length
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="frontLength"
+                name="frontLength"
+                value={customer.frontLength}
+                placeholder="Front Length"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="high_bust"
+                className="block text-sm font-medium text-gray-700"
+              >
+                High Bust
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="high_bust"
+                name="high_bust"
+                value={customer.high_bust}
+                placeholder="High Bust"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
             </div>
           </div>
         </div>
@@ -588,7 +582,7 @@ export default function ShowCustomer() {
                 <button
                   onClick={
                     //use the router to push to the make payment page
-                    () => router.push(`/client/orders/${id}/make-payment`)
+                    () => router.push(`/client/orders/${id}/invoice`)
                   }
                   className={`px-4 py-2 bg-green-500 text-white rounded`}
                 >
@@ -634,63 +628,69 @@ export default function ShowCustomer() {
         </div>
       )}
 
-{customer.first_fitting_date !== null ? (
-  <div className="my-10">
-    <h1 className="text-2xl font-bold">Other details</h1>
+      {customer.first_fitting_date !== null ? (
+        <div className="my-10">
+          <h1 className="text-2xl font-bold">Other details</h1>
 
-    <form className="my-6">
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <label className="block text-gray-700 font-bold">Duration (days)</label>
-          <input
-            type="text"
-            name="duration"
-            value={customer.duration}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            readOnly
-          />
+          <form className="my-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-gray-700 font-bold">
+                  Duration (days)
+                </label>
+                <input
+                  type="text"
+                  name="duration"
+                  value={customer.duration}
+                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                  readOnly
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-bold">
+                  Order Status
+                </label>
+                <input
+                  type="text"
+                  name="order_status"
+                  value={customer.order_status}
+                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                  readOnly
+                />
+              </div>
+
+              <div className="w-full">
+                <label className="block text-gray-700 font-bold">
+                  First Fitting Date
+                </label>
+                <input
+                  type="text"
+                  name="first_fitting_date"
+                  value={customer.first_fitting_date}
+                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                  readOnly
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-bold">
+                  Second Fitting Date
+                </label>
+                <input
+                  type="text"
+                  name="second_fitting_date"
+                  value={customer.second_fitting_date}
+                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                  readOnly
+                />
+              </div>
+            </div>
+          </form>
         </div>
-
-        <div>
-          <label className="block text-gray-700 font-bold">Order Status</label>
-          <input
-            type="text"
-            name="order_status"
-            value={customer.order_status}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            readOnly
-          />
-        </div>
-
-        <div className="w-full">
-          <label className="block text-gray-700 font-bold">First Fitting Date</label>
-          <input
-            type="text"
-            name="first_fitting_date"
-            value={customer.first_fitting_date}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            readOnly
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700 font-bold">Second Fitting Date</label>
-          <input
-            type="text"
-            name="second_fitting_date"
-            value={customer.second_fitting_date}
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            readOnly
-          />
-        </div>
-      </div>
-    </form>
-  </div>
-) : (
-  <p className="text-red-500 font-bold my-10"></p>
-)}
-
-
+      ) : (
+        <p className="text-red-500 font-bold my-10"></p>
+      )}
 
       <div className="mt-6 flex justify-end space-x-4">
         {/* <Link

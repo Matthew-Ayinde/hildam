@@ -13,7 +13,7 @@ type Notification = {
   read: string;
   created_at: string;
 };
-
+ 
 const Topbar = () => {  
   const [userName, setUserName] = useState("CEO");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -135,8 +135,32 @@ const Topbar = () => {
     }
   };
 
+  const markAllAsRead = async () => {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) throw new Error("No access token found");
+
+      await fetch(
+        `https://hildam.insightpublicis.com/api/readallnotification`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+    } catch (error) {
+      console.error("Error marking all notification as read:", error);
+    }
+
+    setDropdownOpen(false);
+
+  };
+
   return (
-    <div className="sticky top-0 z-40 mt-5">
+    <div className="mt-5">
       <div className="shadow-lg rounded-xl lg:flex justify-between items-center py-3 px-6 text-gray-700 bg-white">
         <div className="text-xl font-bold">
           <div className="uppercase">Welcome, {userName}</div>
@@ -171,12 +195,14 @@ const Topbar = () => {
             <div className="absolute top-full right-0 w-80 bg-white rounded-lg shadow-lg z-50 border border-gray-200 p-2 mt-2">
               <div className="flex justify-between items-center p-4 border-b border-gray-200 font-semibold text-gray-700">
                 <span>Notifications</span>
-                <button
-                  className="text-gray-500 hover:text-gray-700 text-xs"
-                  onClick={() => setDropdownOpen(false)}
+                {notifications.length > 0 && (
+                  <button
+                  className="text-white bg-orange-500 px-3 py-1 rounded hover:bg-orange-700 hover:cursor-pointer text-xs"
+                  onClick={() => markAllAsRead()}
                 >
-                  Close
+                  Mark All as Read
                 </button>
+                )}
               </div>
               <div className="max-h-72 overflow-y-auto">
                 {error && <div className="p-3 text-center text-red-500">{error}</div>}

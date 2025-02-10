@@ -1,5 +1,6 @@
 // Import and use it in /app/layout.tsx
 import Providers from '../components/providers';
+import AuthGuard from "@/components/AuthGuard";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -36,9 +37,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-black bg-[#f9f7f7]`}
       >
+        <AuthGuard>
         <div className={`w-full flex flex-row bg-[#f9f7f7] ${play.className}`}>
         <Providers>{children}</Providers>
         </div>
+        </AuthGuard>
       </body>
     </html>
   );

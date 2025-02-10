@@ -202,9 +202,9 @@ export default function Table() {
                   <td className="px-4 py-2 text-sm border-b">
                     <span
                       className={`px-3 py-1 text-sm font-medium rounded ${
-                        row.order_status === "Completed"
+                        row.order_status === "completed"
                           ? "bg-white text-green-800 border border-green-800"
-                          : row.order_status === "Processing"
+                          : row.order_status === "processing"
                           ? "text-yellow-600 bg-white border border-yellow-600"
                           : "text-red-600 bg-white border border-red-600"
                       }`}
@@ -213,13 +213,12 @@ export default function Table() {
                     </span>
                   </td>
                   <td className="px-4 py-2 text-sm border-b">
-                    <div
+                    <Link href={`/admin/orders/${row.id}`}
                       className="me-4 px-3 bg-red-100 text-orange-600 w-fit p-2 rounded-lg flex flex-row space-x-2"
-                      onClick={() => router.push(`/admin/orders/${row.id}`)}
                     >
                       <IoEyeOutline size={20} />
                       <div>View</div>
-                    </div>
+                    </Link>
                   </td>
                 </tr>
               ))}

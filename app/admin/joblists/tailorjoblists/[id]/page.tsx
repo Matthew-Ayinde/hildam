@@ -81,7 +81,7 @@ export default function ShowCustomer() {
 
       const result = await response.json();
       setImagePath(result.data.image_path);
-      setUploadMessage("Image uploaded successfully!");
+      setUploadMessage("Image uploaded successfully");
     } catch (err) {
       setUploadError(
         err instanceof Error ? err.message : "An unknown error occurred"
@@ -116,7 +116,7 @@ export default function ShowCustomer() {
         throw new Error("Failed to send image to project manager");
       }
 
-      setUploadMessage("Image sent to project manager successfully!");
+      setUploadMessage("Image sent to project manager successfully");
       setSentSuccess(true);
     } catch (err) {
       setUploadError(
@@ -152,6 +152,7 @@ export default function ShowCustomer() {
     tailor_image?: string;
     project_manager_approval?: string;
     style_reference_images?: string;
+    customer_approval: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -201,10 +202,10 @@ export default function ShowCustomer() {
           clothing_description: result.data.clothing_description || "N/A",
           high_bust: result.data.high_bust || 0,
           tailor_image: result.data.tailor_image || null,
-          project_manager_approval:
-            result.data.project_manager_approval || null,
+          project_manager_approval: result.data.project_manager_approval || null,
           customer_feedback: result.data.customer_feedback || null,
           style_reference_images: result.data.style_reference_images || null,
+          customer_approval: result.data.customer_approval,
         };
         setCustomer(mappedCustomer);
       } else {
@@ -247,6 +248,8 @@ export default function ShowCustomer() {
   if (!customer) {
     return <div className="text-center text-gray-500 py-10">No data found</div>;
   }
+
+  console.log("customer approval", customer.project_manager_approval);
 
   return (
     <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">
@@ -591,7 +594,28 @@ export default function ShowCustomer() {
             )}
             <FaCheckCircle className="text-green-500 text-3xl" />
             <span className="ml-2 text-green-500 font-semibold">
-              A style has been sent to project manager!
+              Style under review
+            </span>
+          </div>
+        )}
+
+        {customer.project_manager_approval === "Approved" && (
+          <div className="flex items-center mt-4">
+            {/* Check if customer.tailor_image exists */}
+            {customer.tailor_image && (
+              <div className="mr-4">
+                <Image
+                  src={customer.tailor_image} // Assuming tailor_image is the URL of the image
+                  alt="Tailor"
+                  width={100}
+                  height={100}
+                  className="rounded" // Optional: Add a class if you want rounded edges
+                />
+              </div>
+            )}
+            <FaCheckCircle className="text-green-500 text-3xl" />
+            <span className="ml-2 text-green-500 font-semibold">
+              Style accepted
             </span>
           </div>
         )}
@@ -612,12 +636,13 @@ export default function ShowCustomer() {
             )}
             <FaRegCircleXmark className="text-red-500 text-3xl" />
             <span className="ml-2 text-red-500 font-semibold">
-              The style has been rejected by project manager!
+              Style rejected
             </span>
           </div>
         )}
         {/* Upload Image Section */}
-        <div className="mb-6">
+        {customer.project_manager_approval !== "Approved" && (
+          <div className="mb-6">
           <label className="block text-gray-700 font-normal mb-2">
             {customer.tailor_image === null ? <div>Please upload an Image</div> : <div className="mt-2 font-bold">Edit Image</div>}
           </label>
@@ -628,6 +653,7 @@ export default function ShowCustomer() {
             className="border p-2 rounded w-full"
           />
         </div>
+        )}
 
         {imagePreview && (
           <div className="mb-4 flex flex-col items-center">
@@ -670,6 +696,16 @@ export default function ShowCustomer() {
             {isSending ? <Spinner /> : "Send to Project Manager"}
           </button>
         )}
+
+        {/* {customer.customer_approval === "Approved" && (
+          <div className="flex items-center mt-4">
+            <div className="font-bold">Customer Approval:</div>
+            <span className="ml-2 text-green-500 font-semibold">
+              Approved
+            </span>
+            <FaCheckCircle className="text-green-500 text-xl" />
+          </div>
+        )} */}
 
         
       </div>

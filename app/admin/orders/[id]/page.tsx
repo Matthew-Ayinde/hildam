@@ -146,7 +146,8 @@ export default function ShowCustomer() {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
-        <Link href="/admin/customers"
+        <Link
+          href="/admin/customers"
           className="hover:text-orange-700 text-orange-500 flex flex-row items-center"
         >
           <IoIosArrowBack size={30} />
@@ -158,7 +159,7 @@ export default function ShowCustomer() {
         </div>
       </div>
       <form>
-        <div className="grid grid-cols-2 gap-6 mb-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
           <div>
             <label className="block text-gray-700 font-bold">Order ID</label>
             <input
@@ -272,43 +273,49 @@ export default function ShowCustomer() {
 
         {customer.style_reference_images && (
           <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-          <div className="">
-            <label className="block text-gray-700 font-bold">
-              Customer Style
-            </label>
-            <img
-              src={customer.style_reference_images}
-              alt="style_reference_images"
-              className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
-              onClick={handleCustomerImageClick} // Open modal on click
-            />
-          </div>
+            <div className="">
+              <label className="block text-gray-700 font-bold">
+                Customer Style
+              </label>
+              {customer.style_reference_images === "" ? (
+                <div>No image selected</div>
+              ) : (
+                <div>
+                  <img
+                    src={customer.style_reference_images}
+                    alt="style_reference_images"
+                    className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
+                    onClick={handleCustomerImageClick} // Open modal on click
+                  />
+                </div>
+              )}
+            </div>
 
-          {isCustomerModalOpen && (
-            <div
-              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-              onClick={handleCustomerCloseModal}
-            >
+            {isCustomerModalOpen && (
               <div
-                className="bg-white rounded-lg p-4"
-                onClick={(e) => e.stopPropagation()}
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+                onClick={handleCustomerCloseModal}
               >
-                <img
-                  src={customer.style_reference_images}
-                  alt="Style Reference"
-                  className="w-[500px] h-[500px] object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = ""; // Clear the image source
-                    e.currentTarget.alt = "Image failed to load"; // Update alt text
-                  }}
-                />
-                {/* <p className="text-red-500 text-center mt-2">
+                <div
+                  className="bg-white rounded-lg p-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img
+                    src={customer.style_reference_images}
+                    alt="Style Reference"
+                    className="lg:w-[500px] lg:h-[500px] w-80 h-80 object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = ""; // Clear the image source
+                      e.currentTarget.alt = "Image failed to load"; // Update alt text
+                    }}
+                  />
+                  {/* <p className="text-red-500 text-center mt-2">
                     Image failed to load
                   </p> */}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
         )}
 
         <div className="w-full">
@@ -316,179 +323,188 @@ export default function ShowCustomer() {
           <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
             Measurements
           </div>
-          <div className="mb-4">
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="bust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Bust
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="bust"
-                  name="bust"
-                  value={customer.bust}
-                  placeholder="Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="waist"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Waist
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="waist"
-                  name="waist"
-                  value={customer.waist}
-                  placeholder="Waist"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="hips"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Hips
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="hips"
-                  name="hips"
-                  value={customer.hip}
-                  placeholder="Hips"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+
+          <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Bust */}
+            <div className="w-full">
+              <label
+                htmlFor="bust"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Bust
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="bust"
+                name="bust"
+                value={customer.bust}
+                placeholder="Bust"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
             </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="shoulderWidth"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Shoulder Width
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="shoulderWidth"
-                  name="shoulderWidth"
-                  value={customer.shoulderWidth}
-                  placeholder="Shoulder Width"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="neck"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Neck
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="neck"
-                  name="neck"
-                  value={customer.neck}
-                  placeholder="Neck"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="armLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Arm Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="armLength"
-                  name="armLength"
-                  value={customer.armLength}
-                  placeholder="Arm Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+
+            {/* Waist */}
+            <div className="w-full">
+              <label
+                htmlFor="waist"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Waist
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="waist"
+                name="waist"
+                value={customer.waist}
+                placeholder="Waist"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
             </div>
-            <div className="flex space-x-4 mb-4">
-              <div className="w-1/3">
-                <label
-                  htmlFor="backLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Back Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="backLength"
-                  name="backLength"
-                  value={customer.backLength}
-                  placeholder="Back Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="frontLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Front Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="frontLength"
-                  name="frontLength"
-                  value={customer.frontLength}
-                  placeholder="Front Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
-              <div className="w-1/3">
-                <label
-                  htmlFor="highBust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  High Bust
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="highBust"
-                  name="highBust"
-                  value={customer.highBust}
-                  placeholder="High Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+
+            {/* Hips */}
+            <div className="w-full">
+              <label
+                htmlFor="hips"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Hips
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="hips"
+                name="hips"
+                value={customer.hip}
+                placeholder="Hips"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+
+            {/* Shoulder Width */}
+            <div className="w-full">
+              <label
+                htmlFor="shoulderWidth"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Shoulder Width
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="shoulderWidth"
+                name="shoulderWidth"
+                value={customer.shoulderWidth}
+                placeholder="Shoulder Width"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+
+            {/* Neck */}
+            <div className="w-full">
+              <label
+                htmlFor="neck"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Neck
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="neck"
+                name="neck"
+                value={customer.neck}
+                placeholder="Neck"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+
+            {/* Arm Length */}
+            <div className="w-full">
+              <label
+                htmlFor="armLength"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Arm Length
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="armLength"
+                name="armLength"
+                value={customer.armLength}
+                placeholder="Arm Length"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+
+            {/* Back Length */}
+            <div className="w-full">
+              <label
+                htmlFor="backLength"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Back Length
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="backLength"
+                name="backLength"
+                value={customer.backLength}
+                placeholder="Back Length"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+
+            {/* Front Length */}
+            <div className="w-full">
+              <label
+                htmlFor="frontLength"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Front Length
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="frontLength"
+                name="frontLength"
+                value={customer.frontLength}
+                placeholder="Front Length"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
+            </div>
+
+            {/* High Bust */}
+            <div className="w-full">
+              <label
+                htmlFor="highBust"
+                className="block text-sm font-medium text-gray-700"
+              >
+                High Bust
+              </label>
+              <input
+                type="number"
+                readOnly
+                id="highBust"
+                name="highBust"
+                value={customer.highBust}
+                placeholder="High Bust"
+                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              />
             </div>
           </div>
         </div>
       </form>
       <div className="mt-6 flex justify-end space-x-4">
-        <div
+        <Link
+          href={`/admin/orders/${id}/edit`}
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/admin/orders/${id}/edit`)}
         >
           Edit
-        </div>
-        <button className="px-4 py-2 bg-red-500 text-white rounded">
-          Delete
-        </button>
+        </Link>
       </div>
     </div>
   );
