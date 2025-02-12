@@ -13,8 +13,19 @@ import { useRouter } from "next/navigation";
 import Spinner from "../../../../components/Spinner";
 import React from "react";
 import Link from "next/link";
+import { motion } from "framer-motion"; // Import Framer Motion
 
 export default function Table() {
+
+  const tableVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: i * 0.2 }, // Delay for each row
+    }),
+  };
+
   interface ProjectItem {
     items: string;
     status: string;
@@ -141,55 +152,27 @@ export default function Table() {
           </thead>
           <tbody>
             {paginatedData.map((row, index) => (
-              <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
+              <motion.tr
+                key={index}
+                className="hover:cursor-pointer text-[#5d7186]"
+                variants={tableVariants}
+                initial="hidden"
+                animate="visible"
+                custom={index} // Pass the index to control the delay
+              >
                 <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
-                <td className="px-4 py-2 text-sm border-b">
-                  {row.customer_name}
-                </td>
-                <td className="px-4 py-2 text-sm border-b">
-                  {row.clothing_name}
-                </td>
+                <td className="px-4 py-2 text-sm border-b">{row.customer_name}</td>
+                <td className="px-4 py-2 text-sm border-b">{row.clothing_name}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.date}</td>
-                {/* <td className="px-4 py-2 text-sm border-b">
-                  <span
-                    className={`px-4 py-2 text-xs font-medium rounded whitespace-nowrap ${
-                      row.paymentStatus === "Items Recieved"
-                        ? "bg-green-600 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    {row.paymentStatus}
-                  </span>
-                </td> */}
-
-                {/* <td className="px-4 py-2 text-sm border-b">{row.paymentStatus}</td> */}
-                {/* <td className="px-4 py-2 text-sm border-b">
-                  {row.paymentType}
-                </td> */}
-                {/* <td className="px-4 py-2 text-sm border-b">
-                  <span
-                    className={`px-3 py-1 text-sm font-medium rounded ${
-                      row.order_status === "Completed"
-                        ? "bg-white text-green-800 border border-green-800"
-                        : row.status === "Processing"
-                        ? "text-yellow-600 bg-white border border-yellow-600"
-                        : "text-red-600 bg-white border border-red-600"
-                    }`}
-                  >
-                    {row.order_status}
-                  </span>
-                </td> */}
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
-                    <Link href={`/head-of-tailoring/joblists/tailorjoblists/${row.id}`}
-                      className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2"
-                    >
+                    <Link href={`/head-of-tailoring/joblists/tailorjoblists/${row.id}`} className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2">
                       <IoEyeOutline size={20} />
                       <div>View</div>
                     </Link>
                   </div>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>

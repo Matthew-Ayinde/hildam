@@ -1,52 +1,38 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const Form = () => {
+
+  const router = useRouter();
+
   const [formData, setFormData] = useState<{
-    order_status: string | number | readonly string[] | undefined;
-    priority: string | number | readonly string[] | undefined;
-    clothing_description: string | number | readonly string[] | undefined;
-    clothing_name: string | number | readonly string[] | undefined;
-    customer_name: string;
-    gender: string;
-    age: string;
-    phone: string;
-    customer_email: string;
-    address: string;
-    description: string;
+    clothing_description: string;
+    clothing_name: string;
     style_reference_images: File | null;
     bust: string;
     waist: string;
     hips: string;
-    shoulderWidth: string;
+    shoulder_width: string;
     neck: string;
-    armLength: string;
-    backLength: string;
-    frontLength: string;
-    highBust: string;
+    arm_length: string;
+    back_length: string;
+    front_length: string;
+    high_bust: string;
   }>({
-    order_status: "",
-    priority: "",
     clothing_description: "",
     clothing_name: "",
-    customer_name: "",
-    gender: "",
-    age: "",
-    phone: "",
-    customer_email: "",
-    address: "",
-    description: "",
     style_reference_images: null,
     bust: "",
     waist: "",
     hips: "",
-    shoulderWidth: "",
+    shoulder_width: "",
     neck: "",
-    armLength: "",
-    backLength: "",
-    frontLength: "",
-    highBust: "",
+    arm_length: "",
+    back_length: "",
+    front_length: "",
+    high_bust: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,21 +99,17 @@ const Form = () => {
     }
 
     const payload = {
-      customer_name: formData.customer_name,
-      customer_email: formData.customer_email,
       clothing_name: formData.clothing_name,
       hips: formData.hips,
       bust: formData.bust,
       waist: formData.waist,
       clothing_description: formData.clothing_description,
-      order_status: formData.order_status,
-      priority: formData.priority,
-      shoulder_width: formData.shoulderWidth,
+      shoulder_width: formData.shoulder_width,
       neck: formData.neck,
-      arm_length: formData.armLength,
-      back_length: formData.backLength,
-      front_length: formData.frontLength,
-      high_bust: formData.highBust,
+      arm_length: formData.arm_length,
+      back_length: formData.back_length,
+      front_length: formData.front_length,
+      high_bust: formData.high_bust,
       style_reference_images: formData.style_reference_images,
     };
 
@@ -147,27 +129,18 @@ const Form = () => {
       if (response.ok) {
         setResponseMessage("Order created successfully");
         setFormData({
-          order_status: "",
-          priority: "",
           clothing_description: "",
           clothing_name: "",
-          customer_name: "",
-          gender: "",
-          age: "",
-          phone: "",
-          customer_email: "",
-          address: "",
-          description: "",
           style_reference_images: null,
           bust: "",
           waist: "",
           hips: "",
-          shoulderWidth: "",
+          shoulder_width: "",
           neck: "",
-          armLength: "",
-          backLength: "",
-          frontLength: "",
-          highBust: "",
+          arm_length: "",
+          back_length: "",
+          front_length: "",
+          high_bust: "",
         });
 
         // Automatically hide response message after 5 seconds
@@ -183,6 +156,8 @@ const Form = () => {
     } finally {
       setIsSubmitting(false);
     }
+
+    router.push("/client/orders");
   };
 
   return (
@@ -238,7 +213,7 @@ const Form = () => {
               htmlFor="style_reference_images"
               className="block text-sm font-medium text-gray-700"
             >
-              Style Reference Images
+              Style Reference Image
             </label>
             <input
               type="file"
@@ -318,16 +293,16 @@ const Form = () => {
           <div className="flex space-x-4 mb-4">
             <div className="w-1/3">
               <label
-                htmlFor="shoulderWidth"
+                htmlFor="shoulder_width"
                 className="block text-sm font-medium text-gray-700"
               >
                 Shoulder Width
               </label>
               <input
                 type="number"
-                id="shoulderWidth"
-                name="shoulderWidth"
-                value={formData.shoulderWidth}
+                id="shoulder_width"
+                name="shoulder_width"
+                value={formData.shoulder_width}
                 onChange={handleChange}
                 placeholder="Shoulder Width"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -352,16 +327,16 @@ const Form = () => {
             </div>
             <div className="w-1/3">
               <label
-                htmlFor="armLength"
+                htmlFor="arm_length"
                 className="block text-sm font-medium text-gray-700"
               >
                 Arm Length
               </label>
               <input
                 type="number"
-                id="armLength"
-                name="armLength"
-                value={formData.armLength}
+                id="arm_length"
+                name="arm_length"
+                value={formData.arm_length}
                 onChange={handleChange}
                 placeholder="Arm Length"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -371,16 +346,16 @@ const Form = () => {
           <div className="flex space-x-4 mb-4">
             <div className="w-1/3">
               <label
-                htmlFor="backLength"
+                htmlFor="back_length"
                 className="block text-sm font-medium text-gray-700"
               >
                 Back Length
               </label>
               <input
                 type="number"
-                id="backLength"
-                name="backLength"
-                value={formData.backLength}
+                id="back_length"
+                name="back_length"
+                value={formData.back_length}
                 onChange={handleChange}
                 placeholder="Back Length"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -388,16 +363,16 @@ const Form = () => {
             </div>
             <div className="w-1/3">
               <label
-                htmlFor="frontLength"
+                htmlFor="front_length"
                 className="block text-sm font-medium text-gray-700"
               >
                 Front Length
               </label>
               <input
                 type="number"
-                id="frontLength"
-                name="frontLength"
-                value={formData.frontLength}
+                id="front_length"
+                name="front_length"
+                value={formData.front_length}
                 onChange={handleChange}
                 placeholder="Front Length"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -405,16 +380,16 @@ const Form = () => {
             </div>
             <div className="w-1/3">
               <label
-                htmlFor="highBust"
+                htmlFor="high_bust"
                 className="block text-sm font-medium text-gray-700"
               >
                 High Bust
               </label>
               <input
                 type="number"
-                id="highBust"
-                name="highBust"
-                value={formData.highBust}
+                id="high_bust"
+                name="high_bust"
+                value={formData.high_bust}
                 onChange={handleChange}
                 placeholder="High Bust"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -435,7 +410,7 @@ const Form = () => {
           </button>
         </div>
         {responseMessage && (
-          <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg shadow-lg">
             {responseMessage}
           </div>
         )}

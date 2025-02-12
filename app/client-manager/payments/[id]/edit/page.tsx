@@ -1,6 +1,7 @@
 "use client";
 
 import Spinner from "@/components/Spinner";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
@@ -8,26 +9,7 @@ import { IoIosArrowBack } from "react-icons/io";
 export default function EditCustomer() {
   const router = useRouter();
   const { id } = useParams();
-  interface Customer {
-    name: string;
-    age: string;
-    phone_number: string;
-    email: string;
-    bust: number;
-    address: string;
-    waist: number;
-    hip: number;
-    neck: number;
-    gender: string;
-    created_at: string;
-    shoulder_width: number;
-    arm_length: number;
-    back_length: number;
-    front_length: number;
-    high_bust: number;
-  }
 
-  const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
@@ -35,15 +17,6 @@ export default function EditCustomer() {
     payment_status_id: "",
     order_id: "",
   });
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -65,7 +38,6 @@ export default function EditCustomer() {
       }
 
       const result = await response.json();
-      setCustomer(result.data);
       setFormData({
         order_id: result.data.order_id,
         payment_status_id: result.data.payment_status_id,
@@ -83,6 +55,13 @@ export default function EditCustomer() {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
+    });
+  };
+
+  const handlePaymentStatusChange = (statusId: string) => {
+    setFormData({
+      ...formData,
+      payment_status_id: statusId,
     });
   };
 
@@ -109,7 +88,7 @@ export default function EditCustomer() {
         throw new Error("Failed to update payment data");
       }
 
-      setSuccessMessage("Payment data updated successfully!");
+      setSuccessMessage("Payment status updated successfully!");
       setTimeout(() => {
         router.push("/client-manager/payments");
       }, 2000); // Redirect after 2 seconds
@@ -146,16 +125,17 @@ export default function EditCustomer() {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       {successMessage && (
-        <div className="text-center text-green-500 py-2">{successMessage}</div>
-      )}
+  <div className="fixed top-0 left-1/2 mt-5 -translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded shadow-md">
+    {successMessage}
+  </div>
+)}
       <form onSubmit={handleSubmit}>
-        <button
-          onClick={() => router.push("/client-manager/payments")}
-          className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
+        <Link href={"/client-manager/payments"}
+          className="hover:text-orange-700 text-orange-500 flex flex-row items-center mb-5"
         >
           <IoIosArrowBack size={30} />
           <div className="mx-2">Back to List</div>
-        </button>
+        </Link>
         <div className="grid grid-cols-2 gap-6">
           <div>
             <label className="block text-gray-700 font-bold">Order ID</label>
@@ -169,20 +149,30 @@ export default function EditCustomer() {
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">
-              Payment Status
-            </label>
-            <select
-              name="payment_status_id"
-              value={formData.payment_status_id}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-white"
-            >
-              <option value="">Select Payment Status</option>
-              <option value="2">In Review</option>
-              <option value="3">Paid</option>
-              <option value="1">Not paid</option>
-            </select>
+            <label className="block text-gray-700 font-bold">Payment Status</label>
+            <div className="flex space-x-4">
+              <button
+                type="button"
+                onClick={() => handlePaymentStatusChange("2")}
+                className={`px-4 py-2 rounded ${formData.payment_status_id === "2" ? "bg-orange-500 text-white" : "bg-gray-200 text-black"}`}
+              >
+                In Review
+              </button>
+              <button
+                type="button"
+                onClick={() => handlePaymentStatusChange("3")}
+                className={`px-4 py-2 rounded ${formData.payment_status_id === "3" ? "bg-orange-500 text-white" : "bg-gray-200 text-black"}`}
+              >
+                Paid
+              </button>
+              <button
+                type="button"
+                onClick={() => handlePaymentStatusChange("1")}
+                className={`px-4 py-2 rounded ${formData.payment_status_id === "1" ? "bg-orange-500 text-white" : "bg-gray-200 text-black"}`}
+              >
+                Not Paid
+              </button>
+            </div>
           </div>
         </div>
 

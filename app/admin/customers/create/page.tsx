@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { MdOutlineHideSource, MdOutlineRemoveRedEye } from "react-icons/md";
+import { motion } from "framer-motion";
 
 const Form = () => {
   const router = useRouter();
@@ -134,8 +135,16 @@ const Form = () => {
   }
 
   return (
-    <div className=" bg-gray-100 flex justify-center">
-      <form
+    <motion.div
+      initial={{ opacity: 0, x: -50 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className=" bg-gray-100 flex justify-center"
+    >
+      <motion.form
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
         onSubmit={handleSubmit}
         className="w-full bg-white rounded-lg shadow-md p-6"
       >
@@ -310,7 +319,7 @@ const Form = () => {
         </div>
 
         {/* Submit Button */}
-        <div className="mt-6 text-right"> 
+        <div className="mt-6 text-right">
           <button
             type="submit"
             className={`px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium ${
@@ -328,8 +337,8 @@ const Form = () => {
             {responseMessage}
           </div>
         )}
-      </form>
-    </div>
+      </motion.form>
+    </motion.div>
   );
 };
 

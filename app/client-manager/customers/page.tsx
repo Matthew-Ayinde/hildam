@@ -6,6 +6,7 @@ import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion } from "framer-motion"; // Import Framer Motion
 
 export default function Table() {
   interface Customer {
@@ -167,7 +168,13 @@ export default function Table() {
           </thead>
           <tbody>
             {paginatedData.map((row, index) => (
-              <tr key={index} className="text-[#5d7186]">
+              <motion.tr
+                key={index}
+                initial={{ opacity: 0, y: 20 }} // Initial state for animation
+                animate={{ opacity: 1, y: 0 }} // Final state for animation
+                transition={{ duration: 0.2, delay: index * 0.1 }} // Staggered animation with delay
+                className="text-[#5d7186]"
+              >
                 <td className="px-4 py-2 text-sm border-b">{row.fullName}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.age}</td>
                 <td className="px-4 py-2 text-sm border-b">{row.gender}</td>
@@ -177,7 +184,7 @@ export default function Table() {
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
                     <Link
-                      href={`/client-manager/customers/${row.id}`}
+                      href={`/admin/customers/${row.id}`}
                       className="ml-0 me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:cursor-pointer"
                     >
                       <IoEyeOutline size={20} />
@@ -193,7 +200,7 @@ export default function Table() {
                     </div>
                   </div>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>
@@ -248,9 +255,12 @@ export default function Table() {
 
       {/* Confirmation Popup */}
       {isPopupOpen && (
-        <div
+        <motion.div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
           onClick={() => setIsPopupOpen(false)}
+          initial={{ opacity: 0 }} // Initial state for popup animation
+          animate={{ opacity: 1 }} // Final state for popup animation
+          transition={{ duration: 0.3 }} // Animation duration
         >
           <div
             className="bg-white rounded-lg shadow-lg w-96 p-6 text-center"
@@ -280,7 +290,7 @@ export default function Table() {
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );

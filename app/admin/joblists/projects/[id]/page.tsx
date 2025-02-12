@@ -7,6 +7,8 @@ import Image from "next/image";
 import { IoIosArrowBack } from "react-icons/io";
 import React from "react";
 import Link from "next/link";
+import {motion} from "framer-motion";
+
 
 export default function ShowCustomer() {
   const [price, setPrice] = useState(""); // State for price value
@@ -204,7 +206,7 @@ export default function ShowCustomer() {
     setImageError(true);
   };
 
-  const handleImageClick = () => {
+  const handleImageClick = (e: React.MouseEvent) => {
     setShowModal(true);
     setImageLoading(true); // Reset loading state when opening modal
   };
@@ -422,362 +424,130 @@ export default function ShowCustomer() {
   };
 
   return (
+    
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
-        <Link
-          href="/admin/joblists/projects"
-          className="hover:text-orange-700 text-orange-500 flex flex-row items-center"
-        >
+        <Link href="/admin/joblists/projects" className="hover:text-orange-700 text-orange-500 flex flex-row items-center">
           <IoIosArrowBack size={30} />
           <div className="mx-2">Back to List</div>
         </Link>
-        <div className="text-end font-bond text-lg text-gray-700 flex flex-row">
-          <div className="font-bold me-3">Head of Tailoring:</div>{" "}
-          {customer.manager_name}
+        <div className="hidden lg:flex text-gray-700 text-sm">Click <div className="font-bold mx-1"> Edit </div> to modify the order.</div>
+        <div className="text-end font-bold text-lg text-gray-700 flex flex-row">
+          <div className="font-bold me-3">Head of Tailoring:</div> {customer.manager_name}
         </div>
       </div>
       <form>
-        <div className="grid grid:cols-1 lg:grid-cols-2 gap-6 mb-5">
-          <div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <label className="block text-gray-700 font-bold">Order ID</label>
-            <input
-              type="text"
-              value={customer.order_id}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">
-              Clothing Item
-            </label>
-            <input
-              type="text"
-              value={customer.clothing_name}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">
-              Order Status
-            </label>
-            <input
-              type="text"
-              value={customer.order_status || "pending"}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
+            <input type="text" value={customer.order_id} readOnly className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50" />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <label className="block text-gray-700 font-bold">Clothing Item</label>
+            <input type="text" value={customer.clothing_name} readOnly className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50" />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <label className="block text-gray-700 font-bold">Order Status</label>
+            <input type="text" value={customer.order_status || "pending"} readOnly className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50" />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <label className="block text-gray-700 font-bold">Create Date</label>
-            <input
-              type="text"
-              value={customer.date}
-              readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div className="w-full">
-            <label className="block text-gray-700 font-bold">
-              Clothing description
-            </label>
-            <textarea
-              value={customer.clothing_description}
-              readOnly
-              rows={3}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            ></textarea>
-          </div>
-          <div className="w-full">
-            <label className="block text-gray-700 font-bold">
-              Customer description
-            </label>
-            <textarea
-              value={customer.customer_description}
-              readOnly
-              rows={3}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            ></textarea>
-          </div>
+            <input type="text" value={customer.date} readOnly className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50" />
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="w-full">
+            <label className="block text-gray-700 font-bold">Clothing description</label>
+            <textarea value={customer.clothing_description} readOnly rows={3} className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"></textarea>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="w-full">
+            <label className="block text-gray-700 font-bold">Customer description</label>
+            <textarea value={customer.customer_description} readOnly rows={3} className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"></textarea>
+          </motion.div>
 
-          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-            <div className="">
-              <label className="block text-gray-700 font-bold">
-                Customer Style
-              </label>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+            <div>
+              <label className="block text-gray-700 font-bold">Customer Style</label>
               <img
                 src={customer.style_reference_images}
                 alt="style_reference_images"
                 className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
-                onClick={handleCustomerImageClick} // Open modal on click
+                onClick={handleCustomerImageClick}
               />
               <div className="text-sm">Please click to open</div>
             </div>
 
             {isCustomerModalOpen && (
-              <div
-                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-                onClick={handleCustomerCloseModal}
-              >
-                <div
-                  className="bg-white rounded-lg p-4"
-                  onClick={(e) => e.stopPropagation()}
-                >
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" onClick={handleCustomerCloseModal}>
+                <div className="bg-white rounded-lg p-4" onClick={(e) => e.stopPropagation()}>
                   <img
                     src={customer.style_reference_images}
                     alt="Style Reference"
                     className="w-[500px] h-[500px] object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = ""; // Clear the image source
-                      e.currentTarget.alt = "Image failed to load"; // Update alt text
+                      e.currentTarget.src = '';
+                      e.currentTarget.alt = 'Image failed to load';
                     }}
                   />
-                  {/* <p className="text-red-500 text-center mt-2">
-                    Image failed to load
-                  </p> */}
                 </div>
               </div>
             )}
-          </div>
-          <div className="w-full">
-            <form onSubmit={handleManagerChange}>
-              <label className="block text-gray-700 font-bold">
-                Head of Tailoring
-              </label>
-              <div className="flex items-center space-x-2">
-                <select
-                  name="manager_id"
-                  value={selectedManagerId || ""}
-                  onChange={(e) => {
-                    setSelectedManagerId(e.target.value); // Update the selected manager ID
-                  }}
-                  className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-                  disabled={loadingManagers} // Disable while loading
-                >
-                  {loadingManagers ? (
-                    <option>Loading...</option>
-                  ) : (
-                    <>
-                      <option value="">
-                        {customer && customer.manager_name
-                          ? customer.manager_name
-                          : "Select Head of Tailoring"}
-                      </option>
-                      {managers.map((manager) => (
-                        <option key={manager.id} value={manager.user_id}>
-                          {manager.name}
-                        </option>
-                      ))}
-                    </>
-                  )}
-                </select>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-semibold text-white bg-orange-500 rounded hover:bg-orange-700 disabled:bg-gray-400"
-                  disabled={loadingManagers}
-                >
-                  Change
-                </button>
-              </div>
-
-              {error && <div className="text-red-500">{error}</div>}
-            </form>
-          </div>
+          </motion.div>
         </div>
-        <div className="w-full">
-          <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">
-            Measurements
-          </div>
-          <div className="mb-4">
-            <div className="flex flex-wrap -mx-2">
-              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
-                <label
-                  htmlFor="bust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Bust
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="bust"
-                  name="bust"
-                  value={customer.bust}
-                  placeholder="Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+          <div className="w-full">
+            <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">Measurements</div>
+            <div className="mb-4">
+              <div className="flex flex-wrap -mx-2">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }} className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
+                  <label htmlFor="bust" className="block text-sm font-medium text-gray-700">Bust</label>
+                  <input type="number" readOnly id="bust" name="bust" value={customer.bust} placeholder="Bust" className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2" />
+                </motion.div>
 
-              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
-                <label
-                  htmlFor="waist"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Waist
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="waist"
-                  name="waist"
-                  value={customer.waist}
-                  placeholder="Waist"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
+                  <label htmlFor="waist" className="block text-sm font-medium text-gray-700">Waist</label>
+                  <input type="number" readOnly id="waist" name="waist" value={customer.waist} placeholder="Waist" className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2" />
+                </motion.div>
 
-              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
-                <label
-                  htmlFor="hips"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Hips
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="hips"
-                  name="hips"
-                  value={customer.hips}
-                  placeholder="Hips"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0 }} className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
+                  <label htmlFor="hips" className="block text-sm font-medium text-gray-700">Hips</label>
+                  <input type="number" readOnly id="hips" name="hips" value={customer.hips} placeholder="Hips" className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2" />
+                </motion.div>
 
-              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
-                <label
-                  htmlFor="shoulderWidth"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Shoulder Width
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="shoulderWidth"
-                  name="shoulderWidth"
-                  value={customer.shoulderWidth}
-                  placeholder="Shoulder Width"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }} className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
+                  <label htmlFor="shoulderWidth" className="block text-sm font-medium text-gray-700">Shoulder Width</label>
+                  <input type="number" readOnly id="shoulderWidth" name="shoulderWidth" value={customer.shoulderWidth} placeholder="Shoulder Width" className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2" />
+                </motion.div>
 
-              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
-                <label
-                  htmlFor="neck"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Neck
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="neck"
-                  name="neck"
-                  value={customer.neck}
-                  placeholder="Neck"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }} className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
+                  <label htmlFor="neck" className="block text-sm font-medium text-gray-700">Neck</label>
+                  <input type="number" readOnly id="neck" name="neck" value={customer.neck} placeholder="Neck" className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2" />
+                </motion.div>
 
-              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
-                <label
-                  htmlFor="armLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Arm Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="armLength"
-                  name="armLength"
-                  value={customer.armLength}
-                  placeholder="Arm Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.3 }} className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
+                  <label htmlFor="armLength" className="block text-sm font-medium text-gray-700">Arm Length</label>
+                  <input type="number" readOnly id="armLength" name="armLength" value={customer.armLength} placeholder="Arm Length" className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2" />
+                </motion.div>
 
-              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
-                <label
-                  htmlFor="backLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Back Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="backLength"
-                  name="backLength"
-                  value={customer.backLength}
-                  placeholder="Back Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.4 }} className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
+                  <label htmlFor="backLength" className="block text-sm font-medium text-gray-700">Back Length</label>
+                  <input type="number" readOnly id="backLength" name="backLength" value={customer.backLength} placeholder="Back Length" className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2" />
+                </motion.div>
 
-              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
-                <label
-                  htmlFor="frontLength"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Front Length
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="frontLength"
-                  name="frontLength"
-                  value={customer.frontLength}
-                  placeholder="Front Length"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
-              </div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.5 }} className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
+                  <label htmlFor="frontLength" className="block text-sm font-medium text-gray-700">Front Length</label>
+                  <input type="number" readOnly id="frontLength" name="frontLength" value={customer.frontLength} placeholder="Front Length" className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2" />
+                </motion.div>
 
-              <div className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
-                <label
-                  htmlFor="high_bust"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  High Bust
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id="high_bust"
-                  name="high_bust"
-                  value={customer.high_bust}
-                  placeholder="High Bust"
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                />
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.6 }} className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4">
+                  <label htmlFor="high_bust" className="block text-sm font-medium text-gray-700">High Bust</label>
+                  <input type="number" readOnly id="high_bust" name="high_bust" value={customer.high_bust} placeholder="High Bust" className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2" />
+                </motion.div>
               </div>
             </div>
           </div>
-        </div>
       </form>
 
-      {/* 
-      <button onClick={openPriceModal} className="btn-open-modal">
-        Open Price Modal
-      </button> */}
-
-      {/* Price Modal */}
       {isPriceModalOpen && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={closePriceModal}
-        >
-          <div
-            className="bg-white p-4 rounded-lg shadow-lg relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* <button
-              onClick={closePriceModal}
-              className="absolute bg-gray-100 border-red-500 py-2 px-4 rounded-lg top-2 right-2 text-xl text-red-500 hover:text-red-400"
-            >
-              Close
-            </button> */}
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" onClick={closePriceModal}>
+          <div className="bg-white p-4 rounded-lg shadow-lg relative" onClick={(e) => e.stopPropagation()}>
             <div className="text-center text-xl font-bold mb-4">Set Price</div>
             <input
               type="number"
@@ -786,10 +556,7 @@ export default function ShowCustomer() {
               placeholder="Enter price in (₦)"
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
             />
-            <button
-              className="mt-4 px-4 py-2 bg-green-500 text-white rounded"
-              onClick={handelSetPrice}
-            >
+            <button className="mt-4 px-4 py-2 bg-green-500 text-white rounded" onClick={handelSetPrice}>
               Set Price
             </button>
           </div>
@@ -798,9 +565,7 @@ export default function ShowCustomer() {
 
       <div className="mt-10">
         <h2 className="text-xl font-bold mb-4">Tailor Job Image</h2>
-        {!customer.tailor_job_image && (
-          <div className="text-gray-500">Awaiting review</div>
-        )}
+        {!customer.tailor_job_image && <div className="text-gray-500">Awaiting review</div>}
         {imageError && <div className="text-red-500">Error loading Images</div>}
         {customer.tailor_job_image && !imageError && (
           <div onClick={handleImageClick} className="cursor-pointer w-fit">
@@ -816,30 +581,14 @@ export default function ShowCustomer() {
             please click to view full image
           </div>
         )}
-        {/* Display approval status directly under the image */}
-        {customer.customer_approval === "Approved" && (
-          <div className="text-green-500 mt-2">Style approved</div>
-        )}
-        {/* {customer.customer_approval === null && customer.tailor_job_image !== null && (
-          <div className="text-red-500 mt-2">Awaiting Approval from Customer</div>
-        )} */}
-        {customer.customer_approval === "In Review" && (
-          <div className="font-bold mt-2">Awaiting review from customer</div>
-        )}
-        {customer.customer_approval === null &&
-          customer.tailor_job_image !== null && (
-            <div className="text-red-500 mt-2">
-              Image yet to be sent to customer
-            </div>
-          )}
-
-        {/* customer feedback */}
+        {customer.customer_approval === "Approved" && <div className="text-green-500 mt-2">Style approved</div>}
+        {customer.customer_approval === "In Review" && <div className="font-bold mt-2">Awaiting review from customer</div>}
+        {customer.customer_approval === null && customer.tailor_job_image !== null && <div className="text-red-500 mt-2">Image yet to be sent to customer</div>}
         {customer.customer_feedback !== null && (
           <div className="mt-3">
-            {/* <div className="text-red-500">Image Rejected by customer</div> */}
             <div className="my-3 text-red-500">Style rejected</div>
             <div className="text-lg font-bold">Customer Feedback</div>
-            <div className=" py-2 px-3 bg-gray-50 border text-gray-700 text-sm border-gray-500 rounded-lg w-full lg:w-1/2">
+            <div className="py-2 px-3 bg-gray-50 border text-gray-700 text-sm border-gray-500 rounded-lg w-full lg:w-1/2">
               {customer.customer_feedback}
             </div>
           </div>
@@ -847,29 +596,15 @@ export default function ShowCustomer() {
         {customer.customer_feedback === "In Review" && (
           <div className="mt-3">
             <div>Status:</div>
-            <div className="text-red-500 text-sm">
-              Awaiting Confirmation from customer
-            </div>
+            <div className="text-red-500 text-sm">Awaiting Confirmation from customer</div>
           </div>
         )}
       </div>
 
       {showModal && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 modal-overlay"
-          onClick={handleModalClick}
-        >
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" onClick={handleModalClick}>
           <div className="bg-white p-4 rounded shadow-lg relative">
-            <button
-              onClick={closeModal}
-              className="absolute bg-gray-100 border-red-500 py-2 px-4 rounded-lg top-2 right-2 text-xl text-red-500 hover:text-red-400"
-            >
-              Close
-            </button>
-            {imageLoading && <Spinner />}
-            {imageError && (
-              <div className="text-red-500">Error loading images</div>
-            )}
+            {imageError && <div className="text-red-500">Error loading images</div>}
             {customer.tailor_job_image && !imageError && (
               <Image
                 src={customer.tailor_job_image}
@@ -883,46 +618,20 @@ export default function ShowCustomer() {
             )}
             {customer.customer_approval === null && (
               <div className="mt-4 flex justify-between">
-                <button
-                  className="px-4 py-2 bg-green-500 text-white rounded"
-                  onClick={() => {
-                    // handleApproveStyle();
-                    openPriceModal();
-                    closeModal();
-                  }}
-                >
+                <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={() => { openPriceModal(); closeModal(); }}>
                   Send to Customer
                 </button>
-                <button
-                  className="px-4 py-2 bg-red-500 text-white rounded"
-                  onClick={() => {
-                    handleRejectStyle();
-                    closeModal();
-                  }}
-                >
+                <button className="px-4 py-2 bg-red-500 text-white rounded" onClick={() => { handleRejectStyle(); closeModal(); }}>
                   Reject
                 </button>
               </div>
             )}
             {customer.customer_approval === "Rejected" && (
               <div className="mt-4 flex justify-between">
-                <button
-                  className="px-4 py-2 bg-green-500 text-white rounded"
-                  onClick={() => {
-                    // handleApproveStyle();
-                    openPriceModal();
-                    closeModal();
-                  }}
-                >
+                <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={() => { openPriceModal(); closeModal(); }}>
                   Send to Customer
                 </button>
-                <button
-                  className="px-4 py-2 bg-red-500 text-white rounded"
-                  onClick={() => {
-                    handleRejectStyle();
-                    closeModal();
-                  }}
-                >
+                <button className="px-4 py-2 bg-red-500 text-white rounded" onClick={() => { handleRejectStyle(); closeModal(); }}>
                   Reject
                 </button>
               </div>
@@ -931,13 +640,10 @@ export default function ShowCustomer() {
         </div>
       )}
       <div className="mt-6 flex justify-end space-x-4">
-        <Link
-          href={`/admin/joblists/projects/${id}/edit`}
-          className="px-4 py-2 bg-orange-500 text-white rounded"
-        >
+        <Link href={`/admin/joblists/projects/${id}/edit`} className="px-4 py-2 bg-orange-500 text-white rounded">
           Edit
         </Link>
       </div>
     </div>
   );
-}
+};

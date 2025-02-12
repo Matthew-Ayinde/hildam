@@ -20,10 +20,10 @@ const sidebarItems = [
     id: 4,
     text: "Inventory",
     icon: <FaBoxes />,
-    prefix: "/storemanager/inventory/",
+    prefix: "/store-manager/inventory/",
     links: [
-      { name: "List", href: "/storemanager/inventory/list" },
-      { name: "Create", href: "/storemanager/inventory/create" },
+      { name: "List", href: "/store-manager/inventory/list" },
+      { name: "Create", href: "/store-manager/inventory/create" },
     ],
   },
 ];
@@ -112,13 +112,13 @@ const Sidebar = () => {
         <div className="relative mt-5 mx-4">
           <div
             className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
-              pathname === "/storemanager" ? "opacity-100" : "opacity-0"
+              pathname === "/store-manager" ? "opacity-100" : "opacity-0"
             }`}
           ></div>
           <Link
-            href="/storemanager"
+            href="/store-manager"
             className={`flex items-center space-x-3 px-4 py-2 text-base font-medium transition-all duration-300 ${
-              pathname === "/storemanager" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
+              pathname === "/store-manager" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
             }`}
             onClick={closeSidebar}
           >

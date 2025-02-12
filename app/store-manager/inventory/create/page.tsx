@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const Form = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState<{
     name: string;
     gender: string;
@@ -100,6 +102,8 @@ const Form = () => {
     } finally {
       setLoading(false);
     }
+
+    router.push("/store-manager/inventory");
   };
 
   return (
@@ -112,8 +116,8 @@ const Form = () => {
         <div className="font-bold text-gray-500 text-xl my-3">
           Add Inventory
         </div>
-        <div className="flex space-x-4 mb-4">
-          <div className="w-1/2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-6 gap-5 mb-5">
+          <div className="">
             <label
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
@@ -131,11 +135,7 @@ const Form = () => {
               required
             />
           </div>
-        </div>
-
-        {/* Quantity */}
-        <div className="flex space-x-4 mb-4">
-          <div className="w-1/2">
+          <div className="">
             <label
               htmlFor="quantity"
               className="block text-sm font-medium text-gray-700"
@@ -169,7 +169,7 @@ const Form = () => {
         </div>
 
         {responseMessage && (
-          <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
+          <div className="fixed top-5 flex z-50 left-1/2 transform-translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded-md shadow-lg">
             {responseMessage}
           </div>
         )}

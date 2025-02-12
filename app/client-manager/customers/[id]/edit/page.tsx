@@ -128,7 +128,7 @@ export default function EditCustomer() {
         throw new Error("Failed to update customer data");
       }
 
-      router.push(`/client-manager/customerslist/${id}`);
+      router.push(`/client-manager/customers/${id}`);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

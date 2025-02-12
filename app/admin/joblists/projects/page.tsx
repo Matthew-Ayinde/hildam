@@ -1,17 +1,12 @@
 "use client";
 
 import { SetStateAction, useEffect, useState } from "react";
-import { FaArrowRight } from "react-icons/fa";
-import { FaArrowLeft } from "react-icons/fa";
-import Image from "next/image";
+import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
-import { CiEdit } from "react-icons/ci";
-import { MdOutlineDeleteForever } from "react-icons/md";
-import { FaRegCalendarTimes } from "react-icons/fa";
-import { GoClock } from "react-icons/go";
 import { useRouter } from "next/navigation";
 import Spinner from "../../../../components/Spinner";
 import Link from "next/link";
+import { motion } from "framer-motion"; // Import Framer Motion
 import React from "react";
 
 export default function Table() {
@@ -147,9 +142,23 @@ export default function Table() {
               ))}
             </tr>
           </thead>
-          <tbody>
+          <motion.tbody
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { transition: { staggerChildren: 0.1 } },
+              visible: { transition: { staggerChildren: 0.1 } },
+            }}
+          >
             {paginatedData.map((row, index) => (
-              <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
+              <motion.tr
+                key={index}
+                className="hover:cursor-pointer text-[#5d7186] hover:bg-gray-100 transition duration-200"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3, delay: index * 0.3 }} // Staggered delay
+              >
                 <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
                 <td className="px-4 py-2 text-sm border-b">
                   {row.customer_name}
@@ -158,28 +167,12 @@ export default function Table() {
                   {row.clothing_name}
                 </td>
                 <td className="px-4 py-2 text-sm border-b">{row.date}</td>
-                {/* <td className="px-4 py-2 text-sm border-b">
-                  <span
-                    className={`px-4 py-2 text-xs font-medium rounded whitespace-nowrap ${
-                      row.paymentStatus === "Items Recieved"
-                        ? "bg-green-600 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    {row.paymentStatus}
-                  </span>
-                </td> */}
-
-                {/* <td className="px-4 py-2 text-sm border-b">{row.paymentStatus}</td> */}
-                {/* <td className="px-4 py-2 text-sm border-b">
-                  {row.paymentType}
-                </td> */}
                 <td className="px-4 py-2 text-sm border-b">
                   <span
                     className={`px-3 py-1 text-sm font-medium rounded ${
                       row.order_status === "Completed"
                         ? "bg-white text-green-800 border border-green-800"
-                        : row.status === "Processing"
+                        : row.order_status === "Processing"
                         ? "text-yellow-600 bg-white border border-yellow-600"
                         : "text-red-600 bg-white border border-red-600"
                     }`}
@@ -194,16 +187,16 @@ export default function Table() {
                   <div className="flex flex-row">
                     <Link
                       href={`/admin/joblists/projects/${row.id}`}
-                      className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2"
+                      className="me-4 px-3 bg-red-100 hover:bg-orange-600 hover:text-white text-orange-600 p-2 rounded-lg flex space-x-2"
                     >
                       <IoEyeOutline size={20} />
                       <div>View</div>
                     </Link>
                   </div>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
-          </tbody>
+          </motion.tbody>
         </table>
       </div>
       {/* Pagination Bar */}

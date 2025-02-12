@@ -1,14 +1,24 @@
 "use client";
 
 import Spinner from "@/components/Spinner";
-import { style } from "framer-motion/client";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 
 export default function EditCustomer() {
+  interface ProjectManager {
+    user_id: string;
+    name: string;
+  }
+
+  const [projectManagers, setProjectManagers] = useState<ProjectManager[]>([]);
+  const [loadingManagers, setLoadingManagers] = useState(true);
+  const [errorManagers, setErrorManagers] = useState("");
+
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [loadingImage, setLoadingImage] = useState(false);
+  const [previousImage, setPreviousImage] = useState<string | null>(null);
 
   const handleCustomerImageClick = () => {
     setIsCustomerModalOpen(true);
@@ -47,7 +57,7 @@ export default function EditCustomer() {
   const [formData, setFormData] = useState({
     name: "",
     age: "",
-    phone: "",
+    phone_number: "",
     email: "",
     bust: "",
     address: "",
@@ -59,11 +69,11 @@ export default function EditCustomer() {
     gender: "",
     order_status: "",
     date: "",
-    shoulderWidth: "",
-    armLength: "",
-    backLength: "",
-    frontLength: "",
-    highBust: "",
+    shoulder_width: "",
+    arm_length: "",
+    back_length: "",
+    front_length: "",
+    high_bust: "",
     order_id: "",
     priority: "",
     clothing_name: "",
@@ -71,6 +81,8 @@ export default function EditCustomer() {
     customer_description: "",
     project_manager_order_status: "",
     project_manager_amount: "",
+    manager_id: "",
+    manager_name: "",
   });
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,6 +90,7 @@ export default function EditCustomer() {
     if (files && files.length > 0) {
       const file = files[0];
       const imageUrl = URL.createObjectURL(file); // Convert file to preview URL
+      setPreviousImage(formData.style_reference_images); // Store previous image
       setFormData((prev) => ({
         ...prev,
         style_reference_images: imageUrl, // Update form data
@@ -118,7 +131,7 @@ export default function EditCustomer() {
       setFormData({
         name: result.data.customer_name,
         age: result.data.age,
-        phone: result.data.phone_number,
+        phone_number: result.data.phone_number,
         email: result.data.customer_email,
         bust: result.data.bust,
         address: result.data.address,
@@ -128,11 +141,11 @@ export default function EditCustomer() {
         gender: result.data.gender,
         style_reference_images: result.data.style_reference_images,
         date: result.data.created_at,
-        shoulderWidth: result.data.shoulder_width,
-        armLength: result.data.arm_length,
-        backLength: result.data.back_length,
-        frontLength: result.data.front_length,
-        highBust: result.data.high_bust,
+        shoulder_width: result.data.shoulder_width,
+        arm_length: result.data.arm_length,
+        back_length: result.data.back_length,
+        front_length: result.data.front_length,
+        high_bust: result.data.high_bust,
         order_id: result.data.order_id,
         priority: result.data.priority,
         order_status: result.data.order_status,
@@ -142,6 +155,8 @@ export default function EditCustomer() {
         project_manager_order_status: result.data.project_manager_order_status,
         hips: result.data.hips,
         project_manager_amount: result.data.project_manager_amount,
+        manager_id: result.data.manager_id,
+        manager_name: result.data.manager_name,
       });
     } catch (err) {
       setError(
@@ -159,8 +174,42 @@ export default function EditCustomer() {
     });
   };
 
+  const fetchProjectManagers = async () => {
+    setLoadingManagers(true);
+    setErrorManagers("");
+
+    try {
+      const accessToken = sessionStorage.getItem("access_token");
+      const response = await fetch(
+        "https://hildam.insightpublicis.com/api/projectmanagerlist",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch project managers");
+      }
+
+      const result = await response.json();
+      setProjectManagers(result.data);
+    } catch (err) {
+      setErrorManagers(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
+      setLoadingManagers(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomer();
+    fetchProjectManagers(); // Fetch project managers when the component mounts
+  }, [id]);
+
   const handleSubmit = async (e: { preventDefault: () => void }) => {
-    console.log("function called");
     e.preventDefault();
     setError("");
     setSuccessMessage("");
@@ -274,29 +323,36 @@ export default function EditCustomer() {
             </select>
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">
-              Order Status
-            </label>
+            <label className="block text-gray-700 font-bold">Project Manager</label>
             <select
-              name="order_status"
-              value={formData.order_status}
+              name="manager_id"
+              value={formData.manager_id || ""}
               onChange={handleInputChange}
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-white"
+              disabled={loadingManagers}
             >
               <option value="" disabled>
-                Select Order Status
+                {loadingManagers ? "Loading..." : errorManagers ? "Error loading" : "Select Manager"}
               </option>
-              <option value="pending">Pending</option>
-              <option value="processing">Processing</option>
-              <option value="completed">Completed</option>
+              {projectManagers.length > 0 ? (
+                projectManagers.map((manager) => (
+                  <option key={manager.user_id} value={manager.user_id}>
+                    {manager.name}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>
+                  Empty
+                </option>
+              )}
             </select>
           </div>
           <div>
-            <label className="block text-gray-700 font-bold">Phone</label>
+            <label className="block text-gray-700 font-bold">Phone_number</label>
             <input
               type="text"
-              name="phone"
-              value={formData.phone || ""}
+              name="phone_number"
+              value={formData.phone_number || ""}
               onChange={handleInputChange}
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
@@ -315,6 +371,7 @@ export default function EditCustomer() {
                 className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
                 onClick={handleCustomerImageClick} // Open modal on click
               />
+              <div className="text-gray-700 text-sm">click to open</div>
             </div>
 
             {isCustomerModalOpen && (
@@ -326,26 +383,36 @@ export default function EditCustomer() {
                   className="bg-white rounded-lg p-4 flex flex-col items-center"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <img
-                    src={formData.style_reference_images}
-                    alt="Style Reference"
-                    className="lg:w-[400px] lg:h-[400px] w-80 h-80 object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = ""; // Clear the image source
-                      e.currentTarget.alt = "Image failed to load"; // Update alt text
-                    }}
-                  />
+                  {loadingImage ? (
+                    <Spinner />
+                  ) : (
+                    <>
+                      <img
+                        src={formData.style_reference_images}
+                        alt="Style Reference"
+                        className="lg:w-[400px] lg:h-[400px] w-80 h-80 object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = ""; // Clear the image source
+                          e.currentTarget.alt = "Image failed to load"; // Update alt text
+                        }}
+                      />
 
-                  {/* Change Image Button */}
-                  <div className="font-bold lg:text-xl text-lg text-gray-700 mt-1 lg:mt-3">
-                    Change Image
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="lg:mt-4 mt-1 border border-gray-300 p-2 rounded-md cursor-pointer"
-                    onChange={handleImageChange}
-                  />
+                      {/* Change Image Button */}
+                      <div className="font-bold lg:text-xl text-lg text-gray-700 mt-1 lg:mt-3">
+                        Change Image
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="lg:mt-4 mt-1 border border-gray-300 p-2 rounded-md cursor-pointer"
+                        onChange={async (e) => {
+                          setLoadingImage(true);
+                          handleImageChange(e);
+                          setLoadingImage(false);
+                        }}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -411,16 +478,16 @@ export default function EditCustomer() {
             </div>
             <div>
               <label
-                htmlFor="shoulderWidth"
+                htmlFor="shoulder_width"
                 className="block text-sm font-medium text-gray-700"
               >
                 Shoulder Width
               </label>
               <input
                 type="number"
-                id="shoulderWidth"
-                name="shoulderWidth"
-                value={formData.shoulderWidth || ""}
+                id="shoulder_width"
+                name="shoulder_width"
+                value={formData.shoulder_width || ""}
                 onChange={handleInputChange}
                 placeholder="Shoulder Width"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -445,16 +512,16 @@ export default function EditCustomer() {
             </div>
             <div>
               <label
-                htmlFor="armLength"
+                htmlFor="arm_length"
                 className="block text-sm font-medium text-gray-700"
               >
                 Arm Length
               </label>
               <input
                 type="number"
-                id="armLength"
-                name="armLength"
-                value={formData.armLength || ""}
+                id="arm_length"
+                name="arm_length"
+                value={formData.arm_length || ""}
                 onChange={handleInputChange}
                 placeholder="Arm Length"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -462,16 +529,16 @@ export default function EditCustomer() {
             </div>
             <div>
               <label
-                htmlFor="backLength"
+                htmlFor="back_length"
                 className="block text-sm font-medium text-gray-700"
               >
                 Back Length
               </label>
               <input
                 type="number"
-                id="backLength"
-                name="backLength"
-                value={formData.backLength || ""}
+                id="back_length"
+                name="back_length"
+                value={formData.back_length || ""}
                 onChange={handleInputChange}
                 placeholder="Back Length"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -479,16 +546,16 @@ export default function EditCustomer() {
             </div>
             <div>
               <label
-                htmlFor="frontLength"
+                htmlFor="front_length"
                 className="block text-sm font-medium text-gray-700"
               >
                 Front Length
               </label>
               <input
                 type="number"
-                id="frontLength"
-                name="frontLength"
-                value={formData.frontLength || ""}
+                id="front_length"
+                name="front_length"
+                value={formData.front_length || ""}
                 onChange={handleInputChange}
                 placeholder="Front Length"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -496,16 +563,16 @@ export default function EditCustomer() {
             </div>
             <div>
               <label
-                htmlFor="highBust"
+                htmlFor="high_bust"
                 className="block text-sm font-medium text-gray-700"
               >
                 High Bust
               </label>
               <input
                 type="number"
-                id="highBust"
-                name="highBust"
-                value={formData.highBust || ""}
+                id="high_bust"
+                name="high_bust"
+                value={formData.high_bust || ""}
                 onChange={handleInputChange}
                 placeholder="High Bust"
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"

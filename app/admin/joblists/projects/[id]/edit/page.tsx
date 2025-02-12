@@ -334,8 +334,8 @@ export default function EditCustomer() {
 
       {formData.customer_approval === null && (
         <div>
-        <div className="text-gray-700 text-2xl font-bold">Other Details</div>
-        <div className="text-gray-700 font-thin">Order has not been approved by customer yet</div>
+        <div className="text-gray-700 text-xl font-bold">Other Details</div>
+        <div className="text-gray-700 font-thin text-sm">Order has not been approved by customer yet</div>
       </div>
       )}
 

@@ -1,11 +1,32 @@
 "use client";
 
 import Spinner from "@/components/Spinner";
+import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 
 export default function ShowCustomer() {
+  const [successMessage, setSuccessMessage] = useState<string>("");
+  const [formData, setFormData] = useState({
+    payment_status_id: "",
+    order_id: "",
+  });
+
+  const handleInputChange = (e: { target: { name: any; value: any } }) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handlePaymentStatusChange = (statusId: string) => {
+    setFormData({
+      ...formData,
+      payment_status_id: statusId,
+    });
+  };
+
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 
   const handleCustomerImageClick = () => {
@@ -132,12 +153,20 @@ export default function ShowCustomer() {
     return (
       <div className="text-center text-red-500 py-10">
         Error: {error}{" "}
-        <button onClick={fetchCustomer} className="text-blue-500 underline">
+        <button onClick={fetchCustomer} className="text-orange-500 underline">
           Retry
         </button>
       </div>
     );
   }
+
+  const handleApprovePayment = async () => {
+    handleCustomerCloseModal();
+  };
+
+  const handleRejectPayment = async () => {
+    handleCustomerCloseModal();
+  };
 
   if (!customer) {
     return <div className="text-center text-gray-500 py-10">No data found</div>;
@@ -146,16 +175,15 @@ export default function ShowCustomer() {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => router.push("/client-manager/payments")}
-          className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
+        <Link href="/client-manager/payments"
+          className="hover:text-orange-700 text-orange-500 flex flex-row items-center"
         >
           <IoIosArrowBack size={30} />
           <div className="mx-2">Back to List</div>
-        </button>
+        </Link>
       </div>
       <form>
-        <div className="grid grid-cols-2 gap-6 mb-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
           <div>
             <label className="block text-gray-700 font-bold">Order ID</label>
             <input
@@ -196,7 +224,7 @@ export default function ShowCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
-          <div>
+          {/* <div>
             <label className="block text-gray-700 font-bold">
               Payment Method
             </label>
@@ -206,7 +234,7 @@ export default function ShowCustomer() {
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
-          </div>
+          </div> */}
           <div>
             <label className="block text-gray-700 font-bold">
               Payment Status
@@ -238,6 +266,7 @@ export default function ShowCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
+        </div>
           <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
             <div className="">
               <label className="block text-gray-700 font-bold">
@@ -254,6 +283,28 @@ export default function ShowCustomer() {
                 onClick={handleCustomerImageClick} // Open modal on click
               />
               <div className="text-sm my-2">Click to view</div>
+
+              {customer.payment_status === "Paid" && (
+                <div className="flex items-center space-x-2">
+                  <div className="font-bold">Status:</div>
+                  <div className="bg-green-500 text-white w-fit rounded text-sm py-1 px-3">
+                    Paid
+                  </div>
+                </div>
+              )}
+
+              {customer.payment_status === "Not Paid" && (
+                <div className="flex items-center space-x-2">
+                  <div className="font-bold">Status:</div>
+                  <div className="bg-red-500 text-white w-fit rounded text-sm py-1 px-3">
+                    Not Paid
+                  </div>
+                </div>
+              )}
+
+              <div className="text-sm mt-3">
+                Click next to change payment status
+              </div>
             </div>
 
             {isCustomerModalOpen && (
@@ -268,7 +319,7 @@ export default function ShowCustomer() {
                   <img
                     src={customer.payment_receipt}
                     alt="Style Reference"
-                    className="w-[500px] h-[500px] object-cover"
+                    className="w-60 h-60 lg:w-96 lg:h-96 object-cover rounded"
                     onError={(e) => {
                       e.currentTarget.src = ""; // Clear the image source
                       e.currentTarget.alt = "Image failed to load"; // Update alt text
@@ -277,23 +328,98 @@ export default function ShowCustomer() {
                   {/* <p className="text-red-500 text-center mt-2">
                     Image failed to load
                   </p> */}
+                  {/* <div className="flex justify-between mt-3 text-sm lg:text-base">
+                    <button
+                      className="px-4 py-2 bg-green-500 text-white rounded"
+                      onClick={handleApprovePayment}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-red-500 text-white rounded"
+                      onClick={handleRejectPayment}
+                    >
+                      Close
+                    </button>
+                  </div> */}
                 </div>
               </div>
             )}
           </div>
-        </div>
       </form>
       <div className="mt-6 flex justify-end space-x-4">
-        <div
+        <Link
+          href={`/client-manager/payments/${id}/edit`}
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/client-manager/payments/${id}/edit`)}
         >
-          Edit
-        </div>
-        <button className="px-4 py-2 bg-red-500 text-white rounded">
-          Delete
-        </button>
+          Next
+        </Link>
       </div>
+      {/* 
+      <form>
+        <button
+          onClick={() => router.push("/client-manager/payments")}
+          className="hover:text-blue-500 text-orange-500 flex flex-row items-center mb-5"
+        >
+          <IoIosArrowBack size={30} />
+          <div className="mx-2">Back to List</div>
+        </button>
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-gray-700 font-bold">Order ID</label>
+            <input
+              type="text"
+              name="order_id"
+              value={formData.order_id}
+              onChange={handleInputChange}
+              disabled
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Payment Status</label>
+            <div className="flex space-x-4">
+              <button
+                type="button"
+                onClick={() => handlePaymentStatusChange("2")}
+                className={`px-4 py-2 rounded ${formData.payment_status_id === "2" ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
+              >
+                In Review
+              </button>
+              <button
+                type="button"
+                onClick={() => handlePaymentStatusChange("3")}
+                className={`px-4 py-2 rounded ${formData.payment_status_id === "3" ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
+              >
+                Paid
+              </button>
+              <button
+                type="button"
+                onClick={() => handlePaymentStatusChange("1")}
+                className={`px-4 py-2 rounded ${formData.payment_status_id === "1" ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}
+              >
+                Not Paid
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-span-2 mt-10 flex justify-end">
+          <button
+            type="submit"
+            className="px-4 py-2 bg-orange-500 text-white rounded"
+          >
+            Save Changes
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push(`/client-manager/payments/${id}`)}
+            className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
+          >
+            Cancel
+          </button>
+        </div>
+      </form> */}
     </div>
   );
 }

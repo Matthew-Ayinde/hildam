@@ -7,6 +7,7 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function Table() {
   interface Order {
@@ -182,7 +183,12 @@ export default function Table() {
   );
 
   return (
-    <div className="w-full relative">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full relative"
+    >
       {/* Toast */}
       {toastMessage && (
         <div
@@ -305,7 +311,7 @@ export default function Table() {
               </div>
             </div>
             <table className="min-w-full border-collapse border border-gray-200">
-              <thead className="bg-[#f6f8fb] sticky top-0 z-10">
+              <thead className="bg-[#f6f8fb]">
                 <tr className="text-[#5d7186]">
                   {[
                     "Order ID",
@@ -328,9 +334,12 @@ export default function Table() {
               </thead>
               <tbody>
                 {paginatedData.map((row, index) => (
-                  <tr
+                  <motion.tr
                     key={index}
-                    className="hover:cursor-pointer text-[#5d7186]"
+                    className="hover:cursor-pointer text-[#5d7186] hover:bg-gray-100 transition duration-200"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.2 }} // Sequential animation
                   >
                     <td className="px-4 py-2 text-sm border-b">
                       {row.order_id}
@@ -361,7 +370,7 @@ export default function Table() {
                             : "text-red-600 bg-white border border-red-600"
                         }`}
                       >
-                        {row.order_status || "Pending"}
+                        {row.order_status || "pending"}
                       </span>
                     </td>
                     <td className="px-4 py-2 text-sm border-b">
@@ -371,12 +380,12 @@ export default function Table() {
                       <div className="flex flex-row">
                         <Link
                           href={`/admin/orders/${row.id}`}
-                          className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
+                          className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:bg-red-200 transition duration-200"
                         >
                           <IoEyeOutline size={20} />
                         </Link>
                         <div
-                          className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg"
+                          className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg hover:bg-red-200 transition duration-200"
                           onClick={() => {
                             setSelectedUserId(row.id);
                             setIsPopupOpen(true);
@@ -386,7 +395,7 @@ export default function Table() {
                         </div>
                       </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
@@ -451,11 +460,14 @@ export default function Table() {
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
           onClick={() => setIsPopupOpen(false)}
         >
-          <div
+          <motion.div
             className="bg-white rounded-lg shadow-lg w-96 p-6 text-center"
             onClick={(e) => e.stopPropagation()}
             aria-modal="true"
             role="dialog"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3 }}
           >
             <h3 className="text-lg font-bold text-gray-700 mb-4">
               Confirm Deletion
@@ -466,21 +478,21 @@ export default function Table() {
             </p>
             <div className="flex justify-center space-x-4">
               <button
-                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg"
+                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition duration-200"
                 onClick={handleDelete}
               >
                 Confirm
               </button>
               <button
-                className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg"
+                className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-100 transition duration-200"
                 onClick={() => setIsPopupOpen(false)}
               >
                 Cancel
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

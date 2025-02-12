@@ -1,7 +1,11 @@
 "use client";
 
+import Spinner from "../../../../components/Spinner";
+import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { IoIosArrowBack } from "react-icons/io";
+import React from "react";
 
 export default function ShowCustomer() {
   const router = useRouter();
@@ -54,7 +58,11 @@ export default function ShowCustomer() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-gray-500 py-10">Loading...</div>;
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -75,23 +83,15 @@ export default function ShowCustomer() {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => router.push("/store-manager/inventory/list")}
-          className="text-blue-500 underline"
+        <Link
+          href={`/store-manager/inventory`}
+          className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
         >
-          Back to List
-        </button>
+          <IoIosArrowBack size={30} />
+          <div className="mx-2">Back to List</div>
+        </Link>
       </div>
       <form className="grid grid-cols-2 gap-6">
-        <div>
-          <label className="block text-gray-700 font-bold">ID</label>
-          <input
-            type="text"
-            value={customer.id}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
-          />
-        </div>
         <div>
           <label className="block text-gray-700 font-bold">Item Name</label>
           <input
@@ -110,19 +110,6 @@ export default function ShowCustomer() {
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
           />
         </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Created On</label>
-          <input
-            type="text"
-            value={new Date(customer.created_at).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
-          />
-        </div>
         {/* Additional fields */}
       </form>
       <div className="mt-6 flex justify-end space-x-4">
@@ -131,9 +118,6 @@ export default function ShowCustomer() {
           onClick={() => router.push(`/store-manager/inventory/${id}/edit`)}
         >
           Edit
-        </button>
-        <button className="px-4 py-2 bg-red-500 text-white rounded">
-          Delete
         </button>
       </div>
     </div>
