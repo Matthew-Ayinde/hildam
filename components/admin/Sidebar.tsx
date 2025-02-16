@@ -88,14 +88,17 @@ const sidebarItems = [
 ];
 
 const Sidebar = () => {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   const router = useRouter();
   const pathname = usePathname();
+  const [error, setError] = useState<string | null>(null);
   const [openMenus, setOpenMenus] = useState<{ [key: number]: boolean }>({});
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  
+
   // Create a ref for the dropdown
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -118,11 +121,12 @@ const Sidebar = () => {
 
   const fetchNotifications = async () => {
     try {
+      setError(null);
       const token = sessionStorage.getItem("access_token");
       if (!token) throw new Error("No access token found");
 
       const response = await fetch(
-        "https://hildam.insightpublicis.com/api/allnotifications",
+        `${baseUrl}/allnotifications`,
         {
           method: "GET",
           headers: {
@@ -138,10 +142,15 @@ const Sidebar = () => {
       const data = await response.json();
       if (data.status === "success") {
         setNotifications(data.data);
-        setUnreadCount(data.data.filter((notif: any) => notif.read === "0").length);
+        setUnreadCount(
+          data.data.filter((notif: any) => notif.read === "0").length
+        );
+      } else {
+        throw new Error("Cannot fetch notifications");
       }
     } catch (error) {
       console.error("Error fetching notifications:", error);
+      setError("Cannot fetch notifications");
     }
   };
 
@@ -155,7 +164,7 @@ const Sidebar = () => {
       if (!token) throw new Error("No access token found");
 
       await fetch(
-        `https://hildam.insightpublicis.com/api/readnotification/${id}`,
+        `${baseUrl}/readnotification/${id}`,
         {
           method: "PUT",
           headers: {
@@ -193,7 +202,7 @@ const Sidebar = () => {
       if (!token) throw new Error("No access token found");
 
       await fetch(
-        `https://hildam.insightpublicis.com/api/readallnotification`,
+        `${baseUrl}/readallnotification`,
         {
           method: "PUT",
           headers: {
@@ -203,25 +212,30 @@ const Sidebar = () => {
         }
       );
 
+      // Immediately clear notifications from the state
+      setNotifications([]);
+      setUnreadCount(0); // Reset unread count
     } catch (error) {
-      console.error("Error marking all notification as read:", error);
+      console.error("Error marking all notifications as read:", error);
     }
 
     setDropdownOpen(false);
-
   };
 
   // Effect to handle clicks outside the dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false);
       }
     };
 
     // Add event listener
     document.addEventListener("mousedown", handleClickOutside);
-    
+
     // Cleanup event listener on component unmount
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -244,12 +258,82 @@ const Sidebar = () => {
           </div>
         </div>
         <div className="flex flex-row space-x-1 items-center">
-          <div className="relative w-12 h-12 flex items-center justify-center cursor-pointer" onClick={() => setDropdownOpen(!dropdownOpen)}>
+          <div
+            className="relative w-12 h-12 flex items-center justify-center cursor-pointer"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            ref={dropdownRef}
+          >
             <IoNotifications size={20} />
             {unreadCount > 0 && (
               <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
                 {unreadCount}
               </span>
+            )}
+            {dropdownOpen && (
+              <div className="absolute top-10 -right-10 w-80 bg-white rounded-2xl shadow-xl z-50 border border-gray-200 p-3 mt-2">
+                <div className="max-h-72 overflow-y-auto">
+                  {/* Header */}
+                  <div className="p-4 border-b border-gray-200 font-semibold text-gray-700 flex justify-between items-center">
+                    <div className="flex items-center gap-2 text-lg">
+                      <FiBell className="text-orange-500 text-xl" />
+                      <span>Notifications</span>
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={() => markAllAsRead()}
+                        className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-all"
+                      >
+                        <AiOutlineCheck className="text-lg" />
+                        Mark All
+                      </button>
+                    )}
+                  </div>
+
+                  {/* No notifications message */}
+                  {unreadCount === 0 && (
+                    <div className="p-4 text-gray-600 text-center">
+                      No unread notifications
+                    </div>
+                  )}
+
+                  {/* Notification Items - Only unread notifications */}
+                  {notifications
+                    .filter((notif) => notif.read === "0")
+                    .slice(0, 4)
+                    .map((notification) => (
+                      <div
+                        key={notification.id}
+                        className="p-3 text-sm flex justify-between items-center hover:bg-gray-100 cursor-pointer text-orange-600 border-b border-gray-200 rounded-lg transition-all duration-200"
+                        onClick={() =>
+                          markAsRead(
+                            notification.id,
+                            notification.message,
+                            notification.link
+                          )
+                        }
+                      >
+                        <span className="max-w-[90%] text-sm">
+                          {notification.message}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(notification.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+
+                  {/* See More Button */}
+                  {notifications.filter((notif) => notif.read === "0").length > 4 && (
+                    <div className="flex justify-center p-3">
+                      <Link
+                        href="/notifications"
+                        className="text-white text-sm font-medium px-6 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 transition-all duration-300"
+                      >
+                        See More
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </div>
           <button
@@ -370,57 +454,6 @@ const Sidebar = () => {
           </div>
         </ul>
       </div>
-
-      {dropdownOpen && (
-      <div
-        ref={dropdownRef}
-        className="absolute top-16 right-0 w-80 bg-white rounded-2xl shadow-xl z-50 border border-gray-200 p-3 mt-2"
-      >
-        <div className="max-h-72 overflow-y-auto">
-          {/* Header */}
-          <div className="p-4 border-b border-gray-200 font-semibold text-gray-700 flex justify-between items-center">
-            <div className="flex items-center gap-2 text-lg">
-              <FiBell className="text-orange-500 text-xl" />
-              <span>Notifications</span>
-            </div>
-            <button 
-              onClick={() => markAllAsRead()}
-            className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-all">
-              <AiOutlineCheck className="text-lg" />
-              Mark All
-            </button>
-          </div>
-
-          {/* No notifications message */}
-          {notifications.length === 0 && (
-            <div className="p-4 text-gray-600 text-center">No new notifications</div>
-          )}
-
-          {/* Notification Items */}
-          {notifications.slice(0, 4).map((notification) => (
-            <div
-              key={notification.id}
-              className="p-3 text-sm flex justify-between items-center hover:bg-gray-100 cursor-pointer text-orange-600 border-b border-gray-200 rounded-lg transition-all duration-200"
-              onClick={() => markAsRead(notification.id, notification.message, notification.link)}
-            >
-              <span className="truncate max-w-[70%]">{notification.message}</span>
-              <span className="text-xs text-gray-500">{new Date(notification.created_at).toLocaleString()}</span>
-            </div>
-          ))}
-
-          {/* See More Button */}
-          {notifications.length > 4 && (
-            <div className="flex justify-center p-3">
-              <Link
-                href="/notifications"
-                className="text-white text-sm font-medium px-6 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 transition-all duration-300"
-              >
-                See More
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>)}
     </>
   );
 };

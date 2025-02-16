@@ -10,6 +10,8 @@ import { IoIosArrowBack } from "react-icons/io";
 import { MdOutlineDeleteForever } from "react-icons/md";
 
 export default function ShowCustomer() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   const router = useRouter();
   const { id } = useParams();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -52,7 +54,7 @@ export default function ShowCustomer() {
       }
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/deletecustomer/${selectedCustomerId}`,
+        `${baseUrl}/deletecustomer/${selectedCustomerId}`,
         {
           method: "DELETE",
           headers: {
@@ -93,7 +95,7 @@ export default function ShowCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/customerslist/${id}`,
+        `${baseUrl}/customerslist/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

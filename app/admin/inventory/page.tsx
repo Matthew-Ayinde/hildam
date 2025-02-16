@@ -10,6 +10,8 @@ import Spinner from "../../../components/Spinner";
 import React from "react";
 
 export default function Table() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   interface InventoryItem {
     id: number;
     itemData: string;
@@ -39,7 +41,7 @@ export default function Table() {
       }
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/inventory/${selectedUserId}`,
+        `${baseUrl}/inventory/${selectedUserId}`,
         {
           method: "DELETE",
           headers: {
@@ -89,7 +91,7 @@ export default function Table() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        "https://hildam.insightpublicis.com/api/inventory",
+        `${baseUrl}/inventory`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

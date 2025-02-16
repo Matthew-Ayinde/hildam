@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 const Form = () => {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   const [formData, setFormData] = useState<{
     order_status: string | number | readonly string[] | undefined;
     priority: string | number | readonly string[] | undefined;
@@ -77,7 +79,7 @@ const Form = () => {
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
-          "https://hildam.insightpublicis.com/api/projectmanagerlist",
+          `${baseUrl}/projectmanagerlist`,
           {
             method: "GET",
             headers: {
@@ -167,7 +169,7 @@ const Form = () => {
 
     try {
       const response = await fetch(
-        "https://hildam.insightpublicis.com/api/createorder",
+        `${baseUrl}/createorder`,
         {
           method: "POST",
           headers: {

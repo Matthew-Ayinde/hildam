@@ -12,6 +12,8 @@ import { FaRegCircleXmark } from "react-icons/fa6";
 import { motion } from "framer-motion"; // Import Framer Motion
 
 export default function ShowCustomer() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -70,16 +72,13 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(
-        `https://hildam.insightpublicis.com/api/edittailorjob/${id}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch(`${baseUrl}/edittailorjob/${id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: formData,
+      });
 
       if (!response.ok) {
         throw new Error("Failed to upload image");
@@ -106,17 +105,14 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(
-        `https://hildam.insightpublicis.com/api/sendtoprojectmanager/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ image_path: imagePath }),
-        }
-      );
+      const response = await fetch(`${baseUrl}/sendtoprojectmanager/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ image_path: imagePath }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to send image to project manager");
@@ -159,6 +155,7 @@ export default function ShowCustomer() {
     project_manager_approval?: string;
     style_reference_images?: string;
     customer_approval: string;
+    customer_feedback: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -171,14 +168,11 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(
-        `https://hildam.insightpublicis.com/api/tailorjoblists/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${baseUrl}/tailorjoblists/${id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -208,9 +202,8 @@ export default function ShowCustomer() {
           clothing_description: result.data.clothing_description || "N/A",
           high_bust: result.data.high_bust || 0,
           tailor_image: result.data.tailor_image || null,
-          project_manager_approval:
-            result.data.project_manager_approval || null,
-          customer_feedback: result.data.customer_feedback || null,
+          project_manager_approval: result.data.project_manager_approval || null,
+          customer_feedback: result.data.customer_feedback,
           style_reference_images: result.data.style_reference_images || null,
           customer_approval: result.data.customer_approval,
         };
@@ -523,6 +516,23 @@ export default function ShowCustomer() {
             )}
           </motion.div>
         )}
+
+        {customer.customer_feedback !== null && customer.project_manager_approval === "Rejected" && (
+            <motion.div
+              className="mb-6"
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 1.1 }}
+            >
+              <div>
+                <div className="font-bold text-lg">Feedback</div>
+              <div>
+                {customer.customer_feedback}
+              </div>
+              </div>
+            </motion.div>
+          )}
 
         {/* Upload Image Section */}
         {customer.project_manager_approval !== "Approved" && (

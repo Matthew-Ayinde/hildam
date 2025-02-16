@@ -8,6 +8,8 @@ import { IoIosArrowBack } from "react-icons/io";
 import React from "react";
 
 export default function ShowCustomer() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   const router = useRouter();
   const { id } = useParams();
   interface Customer {
@@ -28,7 +30,7 @@ export default function ShowCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/inventory/${id}`,
+        `${baseUrl}}/inventory/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

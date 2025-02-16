@@ -9,6 +9,8 @@ import Link from "next/link";
 import { motion } from "framer-motion"; // Import Framer Motion
 
 export default function Table() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   interface Customer {
     fullName: string;
     age: number;
@@ -38,7 +40,7 @@ export default function Table() {
       }
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/deletecustomer/${selectedCustomerId}`,
+        `${baseUrl}/deletecustomer/${selectedCustomerId}`,
         {
           method: "DELETE",
           headers: {

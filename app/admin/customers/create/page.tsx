@@ -6,6 +6,8 @@ import { MdOutlineHideSource, MdOutlineRemoveRedEye } from "react-icons/md";
 import { motion } from "framer-motion";
 
 const Form = () => {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   const router = useRouter();
   const [passwordError, setPasswordError] = useState(false);
 
@@ -87,7 +89,7 @@ const Form = () => {
       );
 
       const response = await fetch(
-        "https://hildam.insightpublicis.com/api/addcustomer",
+        `${baseUrl}/addcustomer`,
         {
           method: "POST",
           headers: {

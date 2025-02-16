@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 
 
 const ManagerDropdown = () => {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
     //get id from the url
     const { id } = useParams();
 
@@ -32,7 +34,7 @@ const ManagerDropdown = () => {
       try {
         const accessToken = sessionStorage.getItem("access_token");
         const response = await fetch(
-          "https://hildam.insightpublicis.com/api/headoftailoringlist",
+          `${baseUrl}/headoftailoringlist`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -68,7 +70,7 @@ const ManagerDropdown = () => {
       const realTestdata = { manager_id: managerId };
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/editproject/${id}`,
+        `${baseUrl}/editproject/${id}`,
         {
           method: "PUT",
           headers: {

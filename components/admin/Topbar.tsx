@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Image from "next/image";
 import React, { useEffect, useState, useRef } from "react";
@@ -13,8 +13,10 @@ type Notification = {
   read: string;
   created_at: string;
 };
- 
-const Topbar = () => {  
+
+const Topbar = () => {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   const [userName, setUserName] = useState("CEO");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -46,7 +48,7 @@ const Topbar = () => {
       if (!token) throw new Error("No access token found");
 
       const response = await fetch(
-        "https://hildam.insightpublicis.com/api/allnotifications",
+        `${baseUrl}/allnotifications`,
         {
           method: "GET",
           headers: {
@@ -103,7 +105,7 @@ const Topbar = () => {
       if (!token) throw new Error("No access token found");
 
       await fetch(
-        `https://hildam.insightpublicis.com/api/readnotification/${id}`,
+        `${baseUrl}/readnotification/${id}`,
         {
           method: "PUT",
           headers: {
@@ -141,7 +143,7 @@ const Topbar = () => {
       if (!token) throw new Error("No access token found");
 
       await fetch(
-        `https://hildam.insightpublicis.com/api/readallnotification`,
+        `${baseUrl}/readallnotification`,
         {
           method: "PUT",
           headers: {
@@ -150,13 +152,11 @@ const Topbar = () => {
           },
         }
       );
-
     } catch (error) {
-      console.error("Error marking all notification as read:", error);
+      console.error("Error marking all notifications as read:", error);
     }
 
     setDropdownOpen(false);
-
   };
 
   return (
@@ -195,13 +195,13 @@ const Topbar = () => {
             <div className="absolute top-full right-0 w-80 bg-white rounded-lg shadow-lg z-50 border border-gray-200 p-2 mt-2">
               <div className="flex justify-between items-center p-4 border-b border-gray-200 font-semibold text-gray-700">
                 <span>Notifications</span>
-                {notifications.length > 0 && (
+                {unreadCount > 0 && (
                   <button
-                  className="text-white bg-orange-500 px-3 py-1 rounded hover:bg-orange-700 hover:cursor-pointer text-xs"
-                  onClick={() => markAllAsRead()}
-                >
-                  Mark All as Read
-                </button>
+                    className="text-white bg-orange-500 px-3 py-1 rounded hover:bg-orange-700 hover:cursor-pointer text-xs"
+                    onClick={() => markAllAsRead()}
+                  >
+                    Mark All as Read
+                  </button>
                 )}
               </div>
               <div className="max-h-72 overflow-y-auto">

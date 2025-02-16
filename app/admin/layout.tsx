@@ -6,7 +6,6 @@ import { Play } from "next/font/google";
 
 const play = Play({ subsets: ["latin"], weight: ["400", "700"] });
 
-
 export const metadata: Metadata = {
   title: "Hildam Couture",
   description: "A Fashion Stylist App",
@@ -27,11 +26,13 @@ export default function RootLayout({
               <div className=""> <Sidebar /> </div>
             </div>
             <div className="lg:mx-10 mx-0 px-5 lg:px-0 min-h-screen h-full flex flex-col justify-between  w-full lg:w-3/4">
-              <div className="mb-5 lg:mt-0 mt-20 h-1/6">
+              <div>
+              <div className="mb-5 lg:mt-0 mt-20">
                 <Topbar />
               </div>
-              <div className="pb-10 h-4/6">{children}</div>
-              <div className="1/6">
+              <div className="pb-10">{children}</div>
+              </div>
+              <div className="">
                 <Footer />
               </div>
             </div>

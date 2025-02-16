@@ -6,6 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import Image from "next/image";
 
 export default function LoginForm() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -65,7 +66,7 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const response = await fetch("https://hildam.insightpublicis.com/api/login", {
+      const response = await fetch(`${baseUrl}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

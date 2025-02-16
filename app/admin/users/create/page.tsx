@@ -6,6 +6,8 @@ import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { MdOutlineHideSource } from "react-icons/md";
 
 const Form = () => {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<{
@@ -57,7 +59,7 @@ const Form = () => {
 
     try {
       const response = await fetch(
-        "https://hildam.insightpublicis.com/api/users",
+        `${baseUrl}/users`,
         {
           method: "POST",
           headers: {

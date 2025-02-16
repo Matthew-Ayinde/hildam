@@ -9,6 +9,8 @@ import Spinner from "@/components/Spinner";
 import Link from "next/link";
 
 export default function Table() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   interface Order {
     payment_status: string;
     id: any;
@@ -41,7 +43,7 @@ export default function Table() {
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
-          "https://hildam.insightpublicis.com/api/allpayments",
+          `${baseUrl}/allpayments`,
           {
             method: "GET",
             headers: {
@@ -80,7 +82,7 @@ export default function Table() {
       if (!token) throw new Error("No access token found");
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/deleteorder/${selectedUserId}`,
+        `${baseUrl}/deleteorder/${selectedUserId}`,
         {
           method: "DELETE",
           headers: {

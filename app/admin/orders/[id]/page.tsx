@@ -8,6 +8,8 @@ import { IoIosArrowBack } from "react-icons/io";
 import { motion } from "framer-motion"; // Import motion from framer-motion
 
 export default function ShowCustomer() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 
   const handleCustomerImageClick = () => {
@@ -59,7 +61,7 @@ export default function ShowCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/orderslist/${id}`,
+        `${baseUrl}/orderslist/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

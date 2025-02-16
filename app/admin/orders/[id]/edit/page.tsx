@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 
 export default function EditCustomer() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   interface ProjectManager {
     user_id: string;
     name: string;
@@ -114,7 +116,7 @@ export default function EditCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/orderslist/${id}`,
+        `${baseUrl}/orderslist/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -181,7 +183,7 @@ export default function EditCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        "https://hildam.insightpublicis.com/api/projectmanagerlist",
+        `${baseUrl}/projectmanagerlist`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -217,7 +219,7 @@ export default function EditCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/editorder/${id}`,
+        `${baseUrl}/editorder/${id}`,
         {
           method: "POST",
           headers: {
@@ -346,16 +348,6 @@ export default function EditCustomer() {
                 </option>
               )}
             </select>
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Phone_number</label>
-            <input
-              type="text"
-              name="phone_number"
-              value={formData.phone_number || ""}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
           </div>
         </div>
 

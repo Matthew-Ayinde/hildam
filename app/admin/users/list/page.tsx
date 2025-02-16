@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
 
 export default function Table() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   interface User {
     id: string;
     name: string;
@@ -38,7 +40,7 @@ export default function Table() {
         }
 
         const response = await fetch(
-          "https://hildam.insightpublicis.com/api/users",
+          `${baseUrl}/users`,
           {
             method: "GET",
             headers: {
@@ -73,7 +75,7 @@ export default function Table() {
       }
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/users/${selectedUserId}`,
+        `${baseUrl}/users/${selectedUserId}`,
         {
           method: "DELETE",
           headers: {
