@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes } from "react-icons/fa";
+import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function Table() {
   interface Order {
@@ -28,7 +29,6 @@ export default function Table() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<"success" | "error" | null>(null);
   const rowsPerPage = 10;
-  const router = useRouter();
 
   const totalPages = Math.ceil(data.length / rowsPerPage);
 
@@ -74,7 +74,7 @@ export default function Table() {
     fetchOrders();
   }, []);
 
-  const handleDelete = async (id: any) => {
+  const handleDelete = async () => {
     try {
       const token = sessionStorage.getItem("access_token");
       if (!token) throw new Error("No access token found");
@@ -137,42 +137,38 @@ export default function Table() {
     currentPage * rowsPerPage
   );
 
+  const rowVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+  const tableVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.2, // Stagger rows by 0.2 seconds
+      },
+    },
+  };
+
   return (
-    <div className="w-full relative">
+    <div className="w-full relative p-4">
       {/* Toast */}
       {toastMessage && (
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
           className={`fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg text-white ${
             toastType === "success" ? "bg-green-500" : "bg-red-500"
           }`}
         >
           {toastMessage}
-        </div>
+        </motion.div>
       )}
-{/* 
-      <div className="flex flex-row gap-5">
-        {[
-          { label: "Total Orders", value: 120 },
-          { label: "Pending Orders", value: 30 },
-          { label: "Completed Orders", value: 90 },
-        ].map((stat, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-xl flex items-center p-5 mb-5"
-          >
-            <div className="text-[#81899d]">
-              <div className="font-bold text-gray-700">{stat.label}</div>
-              <div className="text-2xl text-[#5d7186]">{stat.value}</div>
-            </div>
-            <div className="p-4 rounded-lg bg-[#fff0ea] text-[#ff6c2f] ml-5">
-              <FaRegCalendarTimes size={30} />
-            </div>
-          </div>
-        ))}
-      </div> */}
 
-      <div className="overflow-x-auto bg-white py-3 rounded-2xl">
-        <div className="mx-2 font-bold text-gray-500 text-xl my-3">
+      <div className="overflow-x-auto bg-white shadow-lg rounded-2xl">
+        <div className="mx-2 font-bold text-gray-700 text-xl my-3">
           Order List
         </div>
 
@@ -191,7 +187,12 @@ export default function Table() {
             </button>
           </div>
         ) : (
-          <table className="min-w-full border-collapse border border-gray-200">
+          <motion.table
+            className="min-w-full border-collapse border border-gray-200"
+            initial="hidden"
+            animate="visible"
+            variants={tableVariants}
+          >
             <thead className="bg-[#f6f8fb] sticky top-0 z-10">
               <tr className="text-[#5d7186]">
                 {["Order ID", "Date", "Order Status", "Action"].map(
@@ -208,7 +209,11 @@ export default function Table() {
             </thead>
             <tbody>
               {paginatedData.map((row, index) => (
-                <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
+                <motion.tr
+                  key={index}
+                  variants={rowVariants}
+                  className="hover:bg-gray-100 transition-colors duration-200 text-[#5d7186]"
+                >
                   <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
                   <td className="px-4 py-2 text-sm border-b">
                     {formatDate(row.created_at)}
@@ -229,12 +234,11 @@ export default function Table() {
                   <td className="px-4 py-2 text-sm border-b">
                     <div className="flex flex-row">
                       <Link href={`/client/orders/${row.id}`}>
-                        <div className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg">
+                        <div className="me-4 px-3 bg-red-100 hover:text-white hover:bg-orange-500 text-orange-600 p-2 rounded-lg transition-transform transform hover:scale-105">
                           <IoEyeOutline size={20} />
                         </div>
                       </Link>
-                      <div
-                        className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg"
+                      <div className="me-4 px-3 bg-red-100 hover:text-white hover:bg-orange-500 text-orange-600 p-2 rounded-lg transition-transform transform hover:scale-105"
                         onClick={() => {
                           setSelectedUserId(row.id);
                           setIsPopupOpen(true);
@@ -244,16 +248,16 @@ export default function Table() {
                       </div>
                     </div>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
-          </table>
+          </motion.table>
         )}
       </div>
 
       {/* Pagination Bar */}
       {!loading && !error && (
-        <div className="bottom-0 flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200 text-[#A5A8AB]">
+        <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200 text-[#A5A8AB]">
           <div>
             Showing{" "}
             <span className="font-bold">
@@ -262,7 +266,7 @@ export default function Table() {
             -
             <span className="font-bold">
               {Math.min(currentPage * rowsPerPage, data.length)}
-            </span>{" "}
+              </span>{" "}
             of <span className="font-bold">{data.length}</span> Orders
           </div>
           <div className="flex items-center space-x-2">

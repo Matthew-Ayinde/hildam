@@ -26,12 +26,14 @@ export default function RootLayout({
             <div className="lg:max-w-[250px] max-w-full w-full lg:w-1/4">
               <div className=""> <Sidebar /> </div>
             </div>
-            <div className="lg:mx-10 mx-0 px-5 lg:px-0 h-full w-full lg:w-3/4">
-              <div className="mb-10 lg:mt-0 mt-20">
+            <div className="lg:mx-10 mx-0 px-5 lg:px-0 min-h-screen h-full flex flex-col justify-between  w-full lg:w-3/4">
+              <div>
+              <div className="mb-5 lg:mt-0 mt-20">
                 <Topbar />
               </div>
-              <div className="mb-40">{children}</div>
-              <div>
+              <div className="pb-10">{children}</div>
+              </div>
+              <div className="">
                 <Footer />
               </div>
             </div>

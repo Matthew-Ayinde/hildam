@@ -168,18 +168,16 @@ const Form = () => {
         className="w-full bg-white rounded-lg shadow-md p-6"
       >
         {/* Name and Gender */}
-        <div className="font-bold text-gray-500 text-xl my-3">
+        <div className="font-bold text-gray-700 text-2xl text-center my-3">
           Order Information
         </div>
-        <div className="flex space-x-4 mb-4"></div>
 
-        <div className="flex flex-row space-x-4 mb-5"></div>
 
-        <div className="w-full grid grid-cols-2 space-x-4">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 lg:space-x-4">
           <div className="mb-4">
             <label
               htmlFor="clothing_name"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-xl font-bold text-gray-700"
             >
               Cloth Name
             </label>
@@ -195,7 +193,7 @@ const Form = () => {
           <div className="mb-4">
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-xl font-bold text-gray-700"
             >
               Clothing Description
             </label>
@@ -211,7 +209,7 @@ const Form = () => {
           <div className="">
             <label
               htmlFor="style_reference_images"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-xl font-bold text-gray-700"
             >
               Style Reference Image
             </label>

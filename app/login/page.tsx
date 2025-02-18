@@ -47,7 +47,7 @@ export default function LoginForm() {
         router.push("/project-manager/joblists/projects");
         break;
       case "store manager":
-        router.push("/store-manager/inventory/list");
+        router.push("/store-manager/inventory/");
         break;
       case "client manager":
         router.push("/client-manager/orders");

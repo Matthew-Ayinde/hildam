@@ -10,6 +10,7 @@ import { FaCheckCircle, FaRegCircle } from "react-icons/fa";
 import Link from "next/link";
 import { FaRegCircleXmark } from "react-icons/fa6";
 import { motion } from "framer-motion"; // Import Framer Motion
+import { CgSearchLoading } from "react-icons/cg";
 
 export default function ShowCustomer() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
@@ -492,8 +493,11 @@ export default function ShowCustomer() {
             )}
             {customer.project_manager_approval === "In Review" && (
               <>
-                <FaCheckCircle className="text-green-500 text-3xl" />
-                <span className="ml-2 text-green-500 font-semibold">
+    <span className="text-gray-700 font-bold">
+    <CgSearchLoading size={20}/>
+
+    </span>
+                <span className="ml-2 text-gray-700 font-bold">
                   Style under review
                 </span>
               </>
