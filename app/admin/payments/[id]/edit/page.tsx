@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 
 export default function EditCustomer() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   const router = useRouter();
   const { id } = useParams();
@@ -42,7 +42,7 @@ export default function EditCustomer() {
       const result = await response.json();
       setFormData({
         order_id: result.data.order_id,
-        payment_status_id: result.data.payment_status_id,
+        payment_status_id: result.data.payment_status_id, // Use fetched payment_status_id
       });
     } catch (err) {
       setError(
@@ -127,10 +127,10 @@ export default function EditCustomer() {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
       {successMessage && (
-  <div className="fixed top-0 left-1/2 mt-5 -translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded shadow-md">
-    {successMessage}
-  </div>
-)}
+        <div className="fixed top-0 left-1/2 mt-5 -translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded shadow-md">
+          {successMessage}
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         <Link href={"/admin/payments"}
           className="hover:text-orange-700 text-orange-500 flex flex-row items-center mb-5"

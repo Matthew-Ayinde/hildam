@@ -304,7 +304,7 @@ export default function ShowCustomer() {
                 </div>
               )}
 
-              <div className="text-sm mt-3">
+              <div className="text-sm mt-3 font-bold">
                 Click next to change payment status
               </div>
             </div>

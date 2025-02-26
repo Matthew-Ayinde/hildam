@@ -152,7 +152,7 @@ export default function Table() {
   };
 
   return (
-    <div className="w-full relative p-4">
+    <div className="w-full relative">
       {/* Toast */}
       {toastMessage && (
         <motion.div
@@ -168,7 +168,7 @@ export default function Table() {
       )}
 
       <div className="overflow-x-auto bg-white shadow-lg rounded-2xl">
-        <div className="mx-2 font-bold text-gray-700 text-xl my-3">
+        <div className="mx-2 font-bold text-gray-700 text-xl my-5">
           Order List
         </div>
 

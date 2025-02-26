@@ -296,8 +296,10 @@ const Invoice = () => {
               </button>
             </div>
             {uploadMessage && (
-              <div className="text-center text-green-500">{uploadMessage}</div>
-            )}
+              <div className="flex justify-center">
+              <div className="text-center bg-green-500 w-fit px-3 py-1 rounded">{uploadMessage}</div>
+              </div>
+)}
           </div>
         </div>
       </div>

@@ -267,45 +267,52 @@ const Form = () => {
             />
           </div>
           <div className="">
-            <label
-              htmlFor="customer_email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email
-            </label>
-            <motion.input
-              whileFocus={{ scale: 1.02 }}
-              whileHover={{ scale: 1.01 }}
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              type="text"
-              id="customer_email"
-              name="customer_email"
-              value={formData.customer_email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              required
-            />
-          </div>
+  <label htmlFor="customer_email" className="block text-sm font-medium text-gray-700">
+    Email
+  </label>
+  <motion.input
+    whileFocus={{ scale: 1.02 }}
+    whileHover={{ scale: 1.01 }}
+    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+    type="email"
+    id="customer_email"
+    name="customer_email"
+    value={formData.customer_email}
+    onChange={(e) => {
+      const value = e.target.value;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
+      // Allow the user to type anything and validate later
+      handleChange(e);
+    }}
+    placeholder="Enter your email"
+    required
+  />
+</div>
+
           <div className="">
-            <label
-              htmlFor="phone"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Phone
-            </label>
-            <motion.input
-              whileFocus={{ scale: 1.02 }}
-              whileHover={{ scale: 1.01 }}
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              type="text"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="Enter your phone number"
-              required
-            />
-          </div>
+  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+    Phone
+  </label>
+  <motion.input
+    whileFocus={{ scale: 1.02 }}
+    whileHover={{ scale: 1.01 }}
+    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+    type="text"
+    id="phone"
+    name="phone"
+    value={formData.phone}
+    onChange={(e) => {
+      const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+      if (value.length <= 11) {
+        setFormData({ ...formData, phone: value });
+      }
+    }}
+    placeholder="Enter your phone number"
+    required
+  />
+</div>
+
           <div className="">
             <label
               htmlFor="priority"
@@ -627,7 +634,7 @@ const Form = () => {
           </motion.button>
         </div>
         {responseMessage && (
-          <div className="fixed top-10 left-1/2 transform -translate-x-1/2 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
+          <div className="fixed top-10 left-1/2 transform -translate-x-1/2 text-lg bg-green-500 text-white px-4 py-2 w-fit rounded-lg">
             {responseMessage}
           </div>
         )}

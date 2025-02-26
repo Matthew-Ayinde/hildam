@@ -529,7 +529,7 @@ export default function ShowCustomer() {
               variants={fadeInUp}
               transition={{ duration: 0.5, delay: 1.1 }}
             >
-              <div>
+              <div className="mt-5">
                 <div className="font-bold text-lg">Feedback</div>
               <div>
                 {customer.customer_feedback}
