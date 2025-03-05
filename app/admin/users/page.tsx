@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
 
 export default function Table() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   interface User {
     id: string;
@@ -40,7 +39,7 @@ export default function Table() {
         }
 
         const response = await fetch(
-            `${baseUrl}/users`,
+            `${process.env.NEXT_PUBLIC_BASE_URL}/users`,
           {
             method: "GET",
             headers: {
@@ -75,7 +74,7 @@ export default function Table() {
       }
 
       const response = await fetch(
-        `${baseUrl}/users/${selectedUserId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${selectedUserId}`,
         {
           method: "DELETE",
           headers: {

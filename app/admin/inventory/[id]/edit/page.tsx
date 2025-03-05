@@ -6,7 +6,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function EditCustomer() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   const router = useRouter();
   const { id } = useParams();
@@ -28,7 +27,7 @@ export default function EditCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `${baseUrl}/inventory/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -71,7 +70,7 @@ export default function EditCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `${baseUrl}/inventory/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${id}`,
         {
           method: "PUT",
           headers: {

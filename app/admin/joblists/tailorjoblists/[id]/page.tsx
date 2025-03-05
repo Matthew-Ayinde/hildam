@@ -13,7 +13,6 @@ import { motion } from "framer-motion"; // Import Framer Motion
 import { CgSearchLoading } from "react-icons/cg";
 
 export default function ShowCustomer() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -73,7 +72,7 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/edittailorjob/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/edittailorjob/${id}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -106,7 +105,7 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/sendtoprojectmanager/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/sendtoprojectmanager/${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -169,7 +168,7 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/tailorjoblists/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/tailorjoblists/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

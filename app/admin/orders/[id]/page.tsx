@@ -8,7 +8,6 @@ import { IoIosArrowBack } from "react-icons/io";
 import { motion } from "framer-motion"; // Import motion from framer-motion
 
 export default function ShowCustomer() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 
@@ -61,7 +60,7 @@ export default function ShowCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `${baseUrl}/orderslist/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/orderslist/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

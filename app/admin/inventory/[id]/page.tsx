@@ -8,7 +8,6 @@ import { IoIosArrowBack } from "react-icons/io";
 import React from "react";
 
 export default function ShowCustomer() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   const router = useRouter();
   const { id } = useParams();
@@ -30,7 +29,7 @@ export default function ShowCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `${baseUrl}}/inventory/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

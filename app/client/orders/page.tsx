@@ -41,7 +41,7 @@ export default function Table() {
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
-          "https://hildam.insightpublicis.com/api/myorders",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/myorders`,
           {
             method: "GET",
             headers: {
@@ -80,7 +80,7 @@ export default function Table() {
       if (!token) throw new Error("No access token found");
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/deletemyorder/${selectedUserId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/deletemyorder/${selectedUserId}`,
         {
           method: "DELETE",
           headers: {

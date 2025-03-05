@@ -10,7 +10,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 export default function ShowCustomer() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   const [price, setPrice] = useState(""); // State for price value
   // Add this state for error messages
@@ -79,7 +78,7 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/projectlists/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/projectlists/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -163,7 +162,7 @@ export default function ShowCustomer() {
     setLoadingManagers(true);
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/headoftailoringlist`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/headoftailoringlist`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -247,7 +246,7 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/rejecttailorstyle/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/rejecttailorstyle/${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -294,7 +293,7 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/sendtocustomer/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/sendtocustomer/${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -328,7 +327,7 @@ export default function ShowCustomer() {
   const handelSetPrice = async () => {
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/editproject/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/editproject/${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -393,7 +392,7 @@ export default function ShowCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/editproject/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/editproject/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -10,7 +10,6 @@ import { IoIosArrowBack } from "react-icons/io";
 import { MdOutlineDeleteForever } from "react-icons/md";
 
 export default function ShowCustomer() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   const router = useRouter();
   const { id } = useParams();
@@ -54,7 +53,7 @@ export default function ShowCustomer() {
       }
 
       const response = await fetch(
-        `${baseUrl}/deletecustomer/${selectedCustomerId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/deletecustomer/${selectedCustomerId}`,
         {
           method: "DELETE",
           headers: {
@@ -95,7 +94,7 @@ export default function ShowCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `${baseUrl}/customerslist/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/customerslist/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

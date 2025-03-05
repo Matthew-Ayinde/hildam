@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 
 export default function ShowCustomer() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [formData, setFormData] = useState({
@@ -79,7 +78,7 @@ export default function ShowCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `${baseUrl}/payment/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/payment/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

@@ -9,7 +9,6 @@ import Spinner from "@/components/Spinner";
 import Link from "next/link";
 
 export default function Table() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   interface Order {
     payment_status: string;
@@ -43,7 +42,7 @@ export default function Table() {
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
-          `${baseUrl}/allpayments`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/allpayments`,
           {
             method: "GET",
             headers: {
@@ -82,7 +81,7 @@ export default function Table() {
       if (!token) throw new Error("No access token found");
 
       const response = await fetch(
-        `${baseUrl}/deleteorder/${selectedUserId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/deleteorder/${selectedUserId}`,
         {
           method: "DELETE",
           headers: {

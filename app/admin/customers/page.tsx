@@ -9,7 +9,6 @@ import Link from "next/link";
 import { motion } from "framer-motion"; // Import Framer Motion
 
 export default function Table() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   interface Customer {
     fullName: string;
@@ -40,7 +39,7 @@ export default function Table() {
       }
 
       const response = await fetch(
-        `${baseUrl}/deletecustomer/${selectedCustomerId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/deletecustomer/${selectedCustomerId}`,
         {
           method: "DELETE",
           headers: {
@@ -85,7 +84,7 @@ export default function Table() {
       return;
     }
 
-    fetch("https://hildam.insightpublicis.com/api/customerslist", {
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/customerslist`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

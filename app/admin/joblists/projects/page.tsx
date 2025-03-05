@@ -10,7 +10,6 @@ import { motion } from "framer-motion"; // Import Framer Motion
 import React from "react";
 
 export default function Table() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   interface ProjectItem {
     manager_name: string;
@@ -56,7 +55,7 @@ export default function Table() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `${baseUrl}/projectlists`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/projectlists`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

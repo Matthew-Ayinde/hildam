@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const Form = () => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   const router = useRouter();
   const [formData, setFormData] = useState<{
@@ -69,7 +68,7 @@ const Form = () => {
       }
 
       const response = await fetch(
-        `${baseUrl}/inventory`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/inventory`,
         {
           method: "POST",
           headers: {

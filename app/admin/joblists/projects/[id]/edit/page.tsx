@@ -10,7 +10,6 @@ import React from "react";
 import Link from "next/link";
 
 export default function EditCustomer() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   const [loadingAssign, setLoadingAssign] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -55,7 +54,7 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/editproject/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/editproject/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -123,7 +122,7 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/projectlists/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/projectlists/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -180,7 +179,7 @@ export default function EditCustomer() {
     setLoadingManagers(true);
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/headoftailoringlist`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/headoftailoringlist`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -223,7 +222,7 @@ export default function EditCustomer() {
 
     try {
       const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(`${baseUrl}/editproject/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/editproject/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

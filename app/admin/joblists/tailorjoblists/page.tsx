@@ -16,7 +16,6 @@ import Link from "next/link";
 import { motion } from "framer-motion"; // Import Framer Motion
 
 export default function Table() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   const tableVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -70,7 +69,7 @@ export default function Table() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `${baseUrl}/tailorjoblists`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/tailorjoblists`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

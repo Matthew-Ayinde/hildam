@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 
 export default function EditCustomer() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   const router = useRouter();
   const { id } = useParams();
@@ -27,7 +26,7 @@ export default function EditCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `${baseUrl}/payment/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/payment/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -75,7 +74,7 @@ export default function EditCustomer() {
     try {
       const accessToken = sessionStorage.getItem("access_token");
       const response = await fetch(
-        `${baseUrl}/editpayment/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/editpayment/${id}`,
         {
           method: "POST",
           headers: {

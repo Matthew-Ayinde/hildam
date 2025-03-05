@@ -10,7 +10,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 export default function Table() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   interface Order {
     manager_name: string;
@@ -50,7 +49,7 @@ export default function Table() {
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
-          `${baseUrl}/orderslist`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/orderslist`,
           {
             method: "GET",
             headers: {
@@ -127,7 +126,7 @@ export default function Table() {
       if (!token) throw new Error("No access token found");
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/deleteorder/${selectedUserId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/deleteorder/${selectedUserId}`,
         {
           method: "DELETE",
           headers: {

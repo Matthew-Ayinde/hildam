@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 const Form = () => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
 
   const [formData, setFormData] = useState<{
     order_status: string | number | readonly string[] | undefined;
@@ -79,7 +78,7 @@ const Form = () => {
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
-          `${baseUrl}/projectmanagerlist`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/projectmanagerlist`,
           {
             method: "GET",
             headers: {
@@ -169,7 +168,7 @@ const Form = () => {
 
     try {
       const response = await fetch(
-        `${baseUrl}/createorder`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/createorder`,
         {
           method: "POST",
           headers: {
