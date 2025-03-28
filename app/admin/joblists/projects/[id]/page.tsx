@@ -8,6 +8,7 @@ import { IoIosArrowBack } from "react-icons/io";
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { getSession } from "next-auth/react";
 
 export default function ShowCustomer() {
 
@@ -71,13 +72,15 @@ export default function ShowCustomer() {
   const [imageLoading, setImageLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [imageError, setImageError] = useState(false);
+  
 
   const fetchCustomer = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/projectlists/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -161,7 +164,8 @@ export default function ShowCustomer() {
   const fetchManagers = async () => {
     setLoadingManagers(true);
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/headoftailoringlist`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -245,7 +249,8 @@ export default function ShowCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/rejecttailorstyle/${id}`, {
         method: "PUT",
         headers: {
@@ -292,7 +297,8 @@ export default function ShowCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/sendtocustomer/${id}`, {
         method: "PUT",
         headers: {
@@ -326,7 +332,8 @@ export default function ShowCustomer() {
 
   const handelSetPrice = async () => {
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/editproject/${id}`, {
         method: "PUT",
         headers: {
@@ -391,7 +398,8 @@ export default function ShowCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/editproject/${id}`, {
         method: "PUT",
         headers: {

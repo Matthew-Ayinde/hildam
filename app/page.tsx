@@ -1,47 +1,20 @@
 "use client";
 
-import Homepage from "@/components/Homepage";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import {jwtDecode} from "jwt-decode";
+import React from 'react'
+import { signOut } from "next-auth/react";
 
-export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const token = sessionStorage.getItem("access_token");
-    if (token) {
-      const decodedToken = jwtDecode<{ role: string }>(token);
-      switch (decodedToken.role) {
-        case "admin":
-          router.push("/admin");
-          break;
-        case "customer":
-          router.push("/client/orders");
-          break;
-        case "project manager":
-          router.push("/project-manager/joblists/projects");
-          break;
-        case "client manager":
-          router.push("/client-manager/orders");
-          break;
-        case "store manager":
-          router.push("/store-manager/joblists/projects");
-          break;
-        case "head of tailoring":
-          router.push("/head-of-tailoring/joblists/tailorjoblists");
-          break;
-        default:
-          sessionStorage.removeItem("access_token");
-          router.push("/login");
-      }
-    } else {
-      router.push("/login");
-    }
-  }, [router]);
-
+const page = () => {
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-100 w-full">
+    <div className='flex justify-center items-center w-screen flex-col h-screen'>
+      <div className='font-bold text-5xl'>Homepage</div>
+       <button
+      onClick={() => signOut({ callbackUrl: "/login" })} // Redirects to /login after logout
+      className="bg-red-500 text-white mt-5 px-4 py-2 rounded-md"
+    >
+      Logout 
+    </button>
     </div>
-  );
+  )
 }
+
+export default page

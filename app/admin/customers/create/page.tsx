@@ -4,48 +4,68 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { MdOutlineHideSource, MdOutlineRemoveRedEye } from "react-icons/md";
 import { motion } from "framer-motion";
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 
 const Form = () => {
-
   const router = useRouter();
   const [passwordError, setPasswordError] = useState(false);
-
   const [formData, setFormData] = useState<{
     name: string;
     gender: string;
     age: string;
-    phone: string;
+    phone_number: string;
     password: string;
     email: string;
     address: string;
-    description: string;
+    customer_description: string;
     bust: string;
     waist: string;
-    hips: string;
-    shoulderWidth: string;
-    neck: string;
-    armLength: string;
-    backLength: string;
-    frontLength: string;
-    highBust: string;
+    hip: string;
+    shoulder: string;
+    bustpoint: string;
+    shoulder_to_underbust: string;
+    round_under_bust: string;
+    sleeve_length: string;
+    half_length: string;
+    blouse_length: string;
+    round_sleeve: string;
+    dress_length: string;
+    chest: string;
+    round_shoulder: string;
+    skirt_length: string;
+    trousers_length: string;
+    round_thigh: string;
+    round_knee: string;
+    round_feet: string;
+
   }>({
     name: "",
     gender: "",
     age: "",
-    phone: "",
+    phone_number: "",
+    password: "",
     email: "",
     address: "",
-    description: "",
+    customer_description: "",
     bust: "",
     waist: "",
-    hips: "",
-    shoulderWidth: "",
-    neck: "",
-    armLength: "",
-    backLength: "",
-    frontLength: "",
-    highBust: "",
-    password: "",
+    hip: "",
+    shoulder: "",
+    bustpoint: "",
+    shoulder_to_underbust: "",
+    round_under_bust: "",
+    sleeve_length: "",
+    half_length: "",
+    blouse_length: "",
+    round_sleeve: "",
+    dress_length: "",
+    chest: "",
+    round_shoulder: "",
+    skirt_length: "",
+    trousers_length: "",
+    round_thigh: "",
+    round_knee: "",
+    round_feet: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -71,21 +91,11 @@ const Form = () => {
     setResponseMessage(null);
 
     try {
-      const token = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const token = session?.user?.token; // Access token from session
       if (!token) {
-        throw new Error("Access token not found in session storage.");
+        throw new Error("Access token not found.");
       }
-
-      console.log(
-        JSON.stringify({
-          name: formData.name,
-          gender: formData.gender,
-          email: formData.email,
-          phone_number: formData.phone,
-          password: formData.password,
-          age: formData.age,
-        })
-      );
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/addcustomer`,
@@ -98,10 +108,31 @@ const Form = () => {
           body: JSON.stringify({
             name: formData.name,
             gender: formData.gender,
-            email: formData.email,
-            phone_number: formData.phone,
-            password: formData.password,
             age: formData.age,
+            phone_number: formData.phone_number,
+            password: formData.password,
+            email: formData.email,
+            address: formData.address,
+            customer_description: formData.customer_description,
+            bust: formData.bust,
+            waist: formData.waist,
+            hip: formData.hip,
+            shoulder: formData.shoulder,
+            bustpoint: formData.bustpoint,
+            shoulder_to_underbust: formData.shoulder_to_underbust,
+            round_under_bust: formData.round_under_bust,
+            sleeve_length: formData.sleeve_length,
+            half_length: formData.half_length,
+            blouse_length: formData.blouse_length,
+            round_sleeve: formData.round_sleeve,
+            dress_length: formData.dress_length,
+            chest: formData.chest,
+            round_shoulder: formData.round_shoulder,
+            skirt_length: formData.skirt_length,
+            trousers_length: formData.trousers_length,
+            round_thigh: formData.round_thigh,
+            round_knee: formData.round_knee,
+            round_feet: formData.round_feet,
           }),
         }
       );
@@ -131,16 +162,155 @@ const Form = () => {
     router.push("/admin/customers");
   };
 
+
+    // Define measurements
+const measurements = [
+  { label: "Bust", id: "bust", name: "bust", placeholder: "Bust", delay: 0.8, value: formData.bust},
   {
-    console.log(responseMessage);
-  }
+    label: "Waist",
+    id: "waist",
+    name: "waist",
+    placeholder: "Waist",
+    delay: 0.9,
+    value: formData.waist,
+  },
+  { label: "Hip", id: "hip", name: "hip", placeholder: "Hip", delay: 1.0, value: formData.hip},
+  {
+    label: "Shoulder",
+    id: "shoulder",
+    name: "shoulder",
+    placeholder: "Shoulder",
+    delay: 1.1,
+    value: formData.shoulder,
+  },
+  {
+    label: "Bust Point",
+    id: "bustpoint",
+    name: "bustpoint",
+    placeholder: "Bust Point",
+    delay: 1.2,
+    value: formData.bustpoint,
+  },
+  {
+    label: "Shoulder to under Bust",
+    id: "shoulder_to_underbust",
+    name: "shoulder_to_underbust",
+    placeholder: "Shoulder to under Bust",
+    delay: 1.3,
+    value: formData.shoulder_to_underbust,
+  },
+  {
+    label: "Round under Bust",
+    id: "round_under_bust",
+    name: "round_under_bust",
+    placeholder: "Round under Bust",
+    delay: 1.4,
+    value: formData.round_under_bust
+  },
+  {
+    label: "Sleeve Length",
+    id: "sleeve_length",
+    name: "sleeve_length",
+    placeholder: "Sleeve Length",
+    delay: 1.5,
+    value: formData.sleeve_length
+  },
+  {
+    label: "Half Length",
+    id: "halfLength",
+    name: "half_length",
+    placeholder: "Half Length",
+    delay: 1.6,
+    value: formData.half_length
+  },
+  {
+    label: "Blouse Length",
+    id: "blouseLength",
+    name: "blouse_length",
+    placeholder: "Blouse Length",
+    delay: 1.7,
+    value: formData.blouse_length
+  },
+  {
+    label: "Round Sleeve",
+    id: "roundSleeve",
+    name: "round_sleeve",
+    placeholder: "Round Sleeve",
+    delay: 1.8,
+    value: formData.round_sleeve
+  },
+  {
+    label: "Dress Length",
+    id: "dressLength",
+    name: "dress_length",
+    placeholder: "Dress Length",
+    delay: 1.9,
+    value: formData.dress_length
+  },
+  {
+    label: "Chest",
+    id: "chest",
+    name: "chest",
+    placeholder: "Chest",
+    delay: 2.0,
+    value: formData.chest
+  },
+  {
+    label: "Round Shoulder",
+    id: "roundShoulder",
+    name: "round_shoulder",
+    placeholder: "Round Shoulder",
+    delay: 2.1,
+    value: formData.round_shoulder
+  },
+  {
+    label: "Skirt Length",
+    id: "skirtLength",
+    name: "skirt_length",
+    placeholder: "Skirt Length",
+    delay: 2.2,
+    value: formData.skirt_length
+  },
+  {
+    label: "Trousers Length",
+    id: "trousersLength",
+    name: "trousers_length",
+    placeholder: "Trousers Length",
+    delay: 2.3,
+    value: formData.trousers_length
+  },
+  {
+    label: "Round Thigh",
+    id: "roundThigh",
+    name: "round_thigh",
+    placeholder: "Round Thigh",
+    delay: 2.4,
+    value: formData.round_thigh
+  },
+  {
+    label: "Round Knee",
+    id: "roundKnee",
+    name: "round_knee",
+    placeholder: "Round Knee",
+    delay: 2.5,
+    value: formData.round_knee
+  },
+  {
+    label: "Round Feet",
+    id: "roundFeet",
+    name: "round_feet",
+    placeholder: "Round Feet",
+    delay: 2.6,
+    value: formData.round_feet
+  },
+];
 
   return (
     <motion.div
       initial={{ opacity: 0, x: -50 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className=" bg-gray-100 flex justify-center"
+      className="bg-gray-100 flex justify-center"
     >
       <motion.form
         initial={{ opacity: 0, y: 20 }}
@@ -149,13 +319,12 @@ const Form = () => {
         onSubmit={handleSubmit}
         className="w-full bg-white rounded-lg shadow-md p-6"
       >
-        <div className="font-bold text-gray-500 text-xl my-3">
-          Customer Information
+        <div className="font-bold text-gray-700 text-xl my-3">
+          Add Customer Information
         </div>
 
-        {/* Name & Email */}
-        <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
-          <div className="w-full md:w-1/2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
+          <div className="w-full">
             <label
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
@@ -173,7 +342,7 @@ const Form = () => {
               required
             />
           </div>
-          <div className="w-full md:w-1/2 mt-4 md:mt-0">
+          <div className="w-full">
             <label
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
@@ -191,22 +360,18 @@ const Form = () => {
               required
             />
           </div>
-        </div>
-
-        {/* Phone & Gender */}
-        <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
-          <div className="w-full md:w-1/2">
+          <div className="w-full">
             <label
-              htmlFor="phone"
+              htmlFor="phone_number"
               className="block text-sm font-medium text-gray-700"
             >
               Phone Number
             </label>
             <input
               type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
+              id="phone_number"
+              name="phone_number"
+              value={formData.phone_number}
               onChange={(e) => {
                 let value = e.target.value.replace(/\D/g, "");
                 if (value.length <= 11) {
@@ -219,7 +384,7 @@ const Form = () => {
                     )} ${value.slice(7)}`;
                   }
                   handleChange({
-                    target: { name: "phone", value },
+                    target: { name: "phone_number", value },
                   } as React.ChangeEvent<HTMLInputElement>);
                 }
               }}
@@ -228,7 +393,7 @@ const Form = () => {
               required
             />
           </div>
-          <div className="w-full md:w-1/2 mt-4 md:mt-0">
+          <div className="w-full">
             <label
               htmlFor="gender"
               className="block text-sm font-medium text-gray-700"
@@ -249,11 +414,7 @@ const Form = () => {
               <option value="other">Other</option>
             </select>
           </div>
-        </div>
-
-        {/* Age & Password */}
-        <div className="flex flex-col md:flex-row md:space-x-4 mb-4">
-          <div className="w-full md:w-1/2">
+          <div className="w-full">
             <label
               htmlFor="age"
               className="block text-sm font-medium text-gray-700"
@@ -278,7 +439,7 @@ const Form = () => {
               required
             />
           </div>
-          <div className="w-full md:w-1/2 relative mt-4 md:mt-0">
+          <div className="w-full">
             <label
               htmlFor="password"
               className="block text-sm font-medium text-gray-700"
@@ -316,6 +477,41 @@ const Form = () => {
                 Password must be at least 6 characters long.
               </p>
             )}
+          </div>
+        </div>
+
+        <div className="w-full">
+          <div className="block text-xl font-bold text-gray-700 mt-10 mb-1">
+            Measurements
+          </div>
+          <div className="mb-4">
+            <div className="flex flex-wrap -mx-2">
+              {measurements.map((measurement, index) => (
+                <motion.div
+                  key={measurement.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: measurement.delay }}
+                  className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4"
+                >
+                  <label
+                    htmlFor={measurement.id}
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    {measurement.label}
+                  </label>
+                  <input
+                    type="number"
+                    id={measurement.id}
+                    name={measurement.name}
+                    placeholder={measurement.placeholder}
+                  onChange={handleChange}
+                  value={formData[measurement.name]}
+                    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                  />
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
 

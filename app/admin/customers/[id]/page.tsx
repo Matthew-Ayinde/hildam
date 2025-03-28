@@ -2,19 +2,18 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import Spinner from "../../../../components/Spinner";
+import Spinner from "@/components/Spinner";
 import { useRouter, useParams } from "next/navigation";
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import { MdOutlineDeleteForever } from "react-icons/md";
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+import SkeletonLoader from "@/components/SkeletonLoader"
 
 export default function ShowCustomer() {
-
   const router = useRouter();
   const { id } = useParams();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
     null
   );
@@ -26,17 +25,29 @@ export default function ShowCustomer() {
     age: number;
     gender: string;
     phone: string;
-    date: string;
     email: string;
     address: string;
     bust: number;
     waist: number;
     hip: number;
-    shoulderWidth: number;
-    neck: number;
-    armLength: number;
-    backLength: number;
-    frontLength: number;
+    shoulder: number;
+    bustpoint: number;
+    shoulder_to_underbust: number;
+    round_under_bust: number;
+    sleeve_length: number;
+    half_length: number;
+    blouse_length: number;
+    trousers_length: number;
+    trouser_waist: number;
+    round_sleeve: number;
+    round_thigh: number;
+    round_knee: number;
+    round_feet: number;
+    skirt_length: number;
+    round_shoulder: number;
+    chest: number;
+    dress_length: number;
+    create_date: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -47,7 +58,8 @@ export default function ShowCustomer() {
     if (!selectedCustomerId) return;
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       if (!accessToken) {
         throw new Error("Authentication token not found");
       }
@@ -82,9 +94,8 @@ export default function ShowCustomer() {
       setTimeout(() => setPopupMessage(null), 5000);
     } finally {
       setIsPopupOpen(false);
+      router.push("/admin/customers");
     }
-
-    router.push("/admin/customers");
   };
 
   const fetchCustomer = async () => {
@@ -92,7 +103,10 @@ export default function ShowCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
+      if (!accessToken) throw new Error("No access token found");
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/customerslist/${id}`,
         {
@@ -114,18 +128,31 @@ export default function ShowCustomer() {
           fullName: result.data.name,
           age: result.data.age,
           gender: result.data.gender,
-          phone: result.data.phone_number || "N/A",
-          date: new Date().toLocaleDateString(), // Placeholder date if not provided
+          phone_number: result.data.phone_number || "N/A",
           email: result.data.email || "N/A",
-          address: result.data.address || "N/A",
           bust: result.data.bust || 0,
           waist: result.data.waist || 0,
           hip: result.data.hip || 0,
-          shoulderWidth: result.data.shoulderWidth || 0,
-          neck: result.data.neck || 0,
-          armLength: result.data.armLength || 0,
-          backLength: result.data.backLength || 0,
-          frontLength: result.data.frontLength || 0,
+          shoulder: result.data.shoulder || 0,
+          bustpoint: result.data.bustpoint || 0,
+          shoulder_to_underbust: result.data.shoulder_to_underbust || 0,
+          round_under_bust: result.data.round_under_bust || 0,
+          sleeve_length: result.data.sleeve_length || 0,
+          half_length: result.data.half_length || 0,
+          blouse_length: result.data.blouse_length || 0,
+          trousers_length: result.data.trousers_length || 0,
+          trouser_waist: result.data.trouser_waist || 0,
+          round_sleeve: result.data.round_sleeve || 0,
+          round_thigh: result.data.round_thigh || 0,
+          round_knee: result.data.round_knee || 0,
+          round_feet: result.data.round_feet || 0,
+          skirt_length: result.data.skirt_length || 0,
+          round_shoulder: result.data.round_shoulder || 0,
+          chest: result.data.chest || 0,
+          dress_length: result.data.dress_length || 0,
+          create_date: result.data.created_at,
+          phone: "",
+          address: ""
         };
         setCustomer(mappedCustomer);
       } else {
@@ -149,7 +176,8 @@ export default function ShowCustomer() {
   if (loading) {
     return (
       <div className="text-center text-gray-500 py-10">
-        <Spinner />
+        <SkeletonLoader />
+        
       </div>
     );
   }
@@ -168,6 +196,28 @@ export default function ShowCustomer() {
   if (!customer) {
     return <div className="text-center text-gray-500 py-10">No data found</div>;
   }
+
+  const measurements = [
+    { label: "Bust", key: "bust" },
+    { label: "Waist", key: "waist" },
+    { label: "Hip", key: "hip" },
+    { label: "Shoulder", key: "shoulder" },
+    { label: "Bust Point", key: "bustpoint" },
+    { label: "Shoulder to Underbust", key: "shoulder_to_underbust" },
+    { label: "Round Under Bust", key: "round_under_bust" },
+    { label: "Sleeve Length", key: "sleeve_length" },
+    { label: "Half Length", key: "half_length" },
+    { label: "Blouse Length", key: "blouse_length" },
+    { label: "Round Sleeve", key: "round_sleeve" },
+    { label: "Dress Length", key: "dress_length" },
+    { label: "Chest", key: "chest" },
+    { label: "Round Shoulder", key: "round_shoulder" },
+    { label: "Skirt Length", key: "skirt_length" },
+    { label: "Trouser Length", key: "trousers_length" },
+    { label: "Round Thigh", key: "round_thigh" },
+    { label: "Round Knee", key: "round_knee" },
+    { label: "Round Feet", key: "round_feet" },
+  ];
 
   return (
     <motion.div
@@ -196,6 +246,9 @@ export default function ShowCustomer() {
           <div>Back to List</div>
         </Link>
       </div>
+      <div className="text-2xl font-bold text-gray-700 mb-3">
+        Customer Details
+        </div>
       <form>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -254,7 +307,7 @@ export default function ShowCustomer() {
             <label className="block text-gray-700 font-bold">Phone</label>
             <input
               type="text"
-              value={customer.phone}
+              value={customer.phone_number}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
@@ -268,7 +321,11 @@ export default function ShowCustomer() {
             <label className="block text-gray-700 font-bold">Create Date</label>
             <input
               type="text"
-              value={customer.date}
+              value={new Intl.DateTimeFormat("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }).format(new Date(customer.create_date))}
               readOnly
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
@@ -288,9 +345,53 @@ export default function ShowCustomer() {
             />
           </motion.div>
         </motion.div>
+
+        <div className="w-full">
+          <div className="block text-xl font-bold text-gray-700 mt-10 mb-1">
+            Measurements
+          </div>
+          <div className="mb-4">
+            <div className="flex flex-wrap -mx-2">
+              {measurements.map((measurement, index) => (
+                <motion.div
+                  key={measurement.key}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 + index * 0.1 }} // Adjust delay based on index
+                  className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4"
+                >
+                  <label
+                    htmlFor={measurement.key}
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    {measurement.label}
+                  </label>
+                  <input
+                    type="number"
+                    readOnly
+                    id={measurement.key}
+                    name={measurement.key}
+                    value={customer[measurement.key]}
+                    placeholder={measurement.label}
+                    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
       </form>
 
       <div className="mt-6 flex justify-end space-x-4">
+        <Link href={`/admin/customers/${id}/edit`}>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="mx-2 px-3 bg-orange-500 text-white p-2 rounded hover:cursor-pointer"
+          >
+            Edit Customer Details
+          </motion.div>
+        </Link>
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

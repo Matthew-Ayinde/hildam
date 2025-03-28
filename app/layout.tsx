@@ -1,13 +1,12 @@
-// Import and use it in /app/layout.tsx
-import Providers from '../components/providers';
-import AuthGuard from "@/components/AuthGuard";
+import Providers from "../components/providers";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Footer from "@/components/Footer";
-import Sidebar from "@/components/Sidebar";
-import Topbar from "@/components/Topbar";
 import { Play } from "next/font/google";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import SessionProvider from "@/components/SessionProvider";
+import { authOptions } from "@/lib/auth"; // Import NextAuth config
 
 const play = Play({ subsets: ["latin"], weight: ["400", "700"] });
 
@@ -27,21 +26,24 @@ export const metadata: Metadata = {
   description: "A Fashion Stylist Website",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Get the user's session on the server
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-black bg-[#f9f7f7]`}
       >
-        <AuthGuard>
-        <div className={`w-full flex flex-row bg-[#f9f7f7] ${play.className}`}>
-        <Providers>{children}</Providers>
-        </div>
-        </AuthGuard>
+        <SessionProvider session={session}>
+          <div className={`w-full flex flex-row bg-[#f9f7f7] ${play.className}`}>
+            <Providers>{children}</Providers>
+          </div>
+        </SessionProvider>
       </body>
     </html>
   );

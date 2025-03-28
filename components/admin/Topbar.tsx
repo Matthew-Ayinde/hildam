@@ -5,6 +5,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { IoNotifications } from "react-icons/io5";
 import LogoutButton from "./Logout";
 import { useRouter } from "next/navigation";
+import { getSession } from "next-auth/react";
 
 type Notification = {
   id: string;
@@ -26,7 +27,12 @@ const Topbar = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const token = sessionStorage.getItem("access_token");
+   const fetchNotifications = async () => {
+    const session = await getSession(); // Get session from NextAuth
+    const token = session?.user?.token; // Access token from session
+    if (!token) {
+      throw new Error("No token found, please log in.");
+    }
     if (token) {
       try {
         const base64Url = token.split(".")[1];
@@ -39,13 +45,19 @@ const Topbar = () => {
         console.error("Error decoding token:", error);
       }
     }
-  }, []);
+  }
+  
+  fetchNotifications();
+}, []);
 
   const fetchNotifications = async () => {
     try {
       setError(null);
-      const token = sessionStorage.getItem("access_token");
-      if (!token) throw new Error("No access token found");
+      const session = await getSession(); // Get session from NextAuth
+      const token = session?.user?.token; // Access token from session
+      if (!token) {
+        throw new Error("No token found, please log in.");
+      }
 
       const response = await fetch(
         `${baseUrl}/allnotifications`,
@@ -101,7 +113,11 @@ const Topbar = () => {
 
   const markAsRead = async (id: string, message: string, link: string) => {
     try {
-      const token = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const token = session?.user?.token; // Access token from session
+      if (!token) {
+        throw new Error("No token found, please log in.");
+      }
       if (!token) throw new Error("No access token found");
 
       await fetch(
@@ -139,7 +155,11 @@ const Topbar = () => {
 
   const markAllAsRead = async () => {
     try {
-      const token = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const token = session?.user?.token; // Access token from session
+      if (!token) {
+        throw new Error("No token found, please log in.");
+      }
       if (!token) throw new Error("No access token found");
 
       await fetch(

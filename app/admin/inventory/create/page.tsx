@@ -2,46 +2,22 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { getSession } from "next-auth/react";
 
 const Form = () => {
-
   const router = useRouter();
   const [formData, setFormData] = useState<{
-    name: string;
-    gender: string;
-    quantity: string;
-    phone: string;
-    email: string;
-    address: string;
-    description: string;
-    photo: File | null;
-    bust: string;
-    waist: string;
-    hips: string;
-    shoulderWidth: string;
-    neck: string;
-    armLength: string;
-    backLength: string;
-    frontLength: string;
-    highBust: string;
+    item_name: string;
+    item_quantity: string;
+    price_purchased: string;
+    unit: string;
+    color: string;
   }>({
-    name: "",
-    gender: "",
-    quantity: "",
-    phone: "",
-    email: "",
-    address: "",
-    description: "",
-    photo: null,
-    bust: "",
-    waist: "",
-    hips: "",
-    shoulderWidth: "",
-    neck: "",
-    armLength: "",
-    backLength: "",
-    frontLength: "",
-    highBust: "",
+    item_name: "",
+    item_quantity: "",
+    price_purchased: "",
+    unit: "",
+    color: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -62,7 +38,9 @@ const Form = () => {
     setResponseMessage(null);
 
     try {
-      const token = sessionStorage.getItem("access_token");
+      const session = await getSession();
+      const token = session?.user?.token;
+
       if (!token) {
         throw new Error("Access token not found in session storage.");
       }
@@ -76,8 +54,11 @@ const Form = () => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            item_name: formData.name,
-            item_quantity: formData.quantity,
+            item_name: formData.item_name,
+            item_quantity: formData.item_quantity,
+            price_purchased: formData.price_purchased,
+            unit: formData.unit,
+            color: formData.color,
           }),
         }
       );
@@ -113,9 +94,8 @@ const Form = () => {
         onSubmit={handleSubmit}
         className="w-full bg-white rounded-lg shadow-md p-6"
       >
-        {/* Name and Gender */}
         <div className="font-bold text-gray-500 text-xl my-3">
-          Add Inventory
+          Add Inventory Item
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-6 gap-5 mb-5">
           <div className="">
@@ -123,13 +103,13 @@ const Form = () => {
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
             >
-              Name
+              Item Name
             </label>
             <input
               type="text"
               id="name"
-              name="name"
-              value={formData.name}
+              name="item_name"
+              value={formData.item_name}
               onChange={handleChange}
               placeholder="Enter item name"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -146,10 +126,64 @@ const Form = () => {
             <input
               type="text"
               id="quantity"
-              name="quantity"
-              value={formData.quantity}
+              name="item_quantity"
+              value={formData.item_quantity}
               onChange={handleChange}
               placeholder="Enter item quantity"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+          </div>
+          <div className="">
+            <label
+              htmlFor="price"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Price Purchased
+            </label>
+            <input
+              type="text"
+              id="price"
+              name="price_purchased"
+              value={formData.price_purchased}
+              onChange={handleChange}
+              placeholder="Enter price purchased"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+          </div>
+          <div className="">
+            <label
+              htmlFor="unit"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Unit
+            </label>
+            <input
+              type="text"
+              id="unit"
+              name="unit"
+              value={formData.unit}
+              onChange={handleChange}
+              placeholder="Enter unit"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+          </div>
+          <div className="">
+            <label
+              htmlFor="color"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Color
+            </label>
+            <input
+              type="text"
+              id="color"
+              name="color"
+              value={formData.color}
+              onChange={handleChange}
+              placeholder="Enter color"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />

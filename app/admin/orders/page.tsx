@@ -8,9 +8,9 @@ import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 
 export default function Table() {
-
   interface Order {
     manager_name: string;
     id: any;
@@ -45,7 +45,8 @@ export default function Table() {
       try {
         setLoading(true);
         setError(null);
-        const token = sessionStorage.getItem("access_token");
+        const session = await getSession(); // Get session from NextAuth
+        const token = session?.user?.token; // Access token from session
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
@@ -122,7 +123,8 @@ export default function Table() {
 
   const handleDelete = async (id: any) => {
     try {
-      const token = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const token = session?.user?.token; // Access token from session
       if (!token) throw new Error("No access token found");
 
       const response = await fetch(
@@ -483,8 +485,7 @@ export default function Table() {
                 onClick={handleDelete}
               >
                 Confirm
-              </button>
-              <button
+              </button>              <button
                 className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-100 transition duration-200"
                 onClick={() => setIsPopupOpen(false)}
               >

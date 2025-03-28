@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+
 
 const Form = () => {
 
@@ -74,11 +76,15 @@ const Form = () => {
     const fetchProjectManagers = async () => {
       try {
         setLoadingManagers(true);
-        const token = sessionStorage.getItem("access_token");
-        if (!token) throw new Error("No access token found");
+
+        const session = await getSession(); // Get session from NextAuth
+        const token = session?.user?.token; // Access token from session
+        if (!token) {
+          throw new Error("No token found, please log in.");
+        }
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/projectmanagerlist`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/headoftailoringlist`,
           {
             method: "GET",
             headers: {
@@ -93,7 +99,7 @@ const Form = () => {
 
         const result = await response.json();
         if (!result.data) {
-          throw new Error("Failed to fetch project managers");
+          throw new Error("Failed to fetch head of tailoring list");
         }
 
         setManagers(result.data);
@@ -133,7 +139,12 @@ const Form = () => {
     setIsSubmitting(true);
     setResponseMessage(null);
 
-    const accessToken = sessionStorage.getItem("access_token");
+    const session = await getSession(); // Get session from NextAuth
+    const accessToken = session?.user?.token; // Access token from session
+    if (!accessToken) {
+      throw new Error("No token found, please log in.");
+    }
+
 
     if (!accessToken) {
       alert("No access token found! Please login first.");
@@ -418,7 +429,7 @@ const Form = () => {
               htmlFor="manager_id"
               className="block text-sm font-medium text-gray-700"
             >
-              Select Project Manager
+              Select Head of tailoring
             </label>
             {loadingManagers ? (
               <div className="text-center text-gray-500 mt-2">Loading...</div>
@@ -431,7 +442,7 @@ const Form = () => {
                 required
                 className="mt-1 text-gray-500 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2 bg-white"
               >
-                <option value="">Select project manager</option>
+                <option value="">Select head of tailoring</option>
                 {managers.map((manager) => (
                   <option key={manager.id} value={manager.user_id}>
                     {manager.name}

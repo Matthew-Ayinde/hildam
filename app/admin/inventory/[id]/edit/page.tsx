@@ -1,9 +1,11 @@
 "use client";
 
-import Spinner from "../../../../../components/Spinner";
+import Spinner from "@/components/Spinner";
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function EditCustomer() {
 
@@ -15,6 +17,9 @@ export default function EditCustomer() {
   const [formData, setFormData] = useState({
     item_name: "",
     item_quantity: "",
+    price_purchased: "",
+    unit: "",
+    color: "",
   });
   const [confirmationMessage, setConfirmationMessage] = useState<string | null>(
     null
@@ -25,12 +30,17 @@ export default function EditCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const token = session?.user?.token;
+
+      if (!token) {
+        throw new Error("Unauthorized");
+      }
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${id}`,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -44,6 +54,9 @@ export default function EditCustomer() {
       setFormData({
         item_name: result.data.item_name,
         item_quantity: result.data.item_quantity,
+        price_purchased: result.data.price_purchased,
+        unit: result.data.unit,
+        color: result.data.color,
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -68,14 +81,19 @@ export default function EditCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession();
+      const token = session?.user?.token;
+
+      if (!token) {
+        throw new Error("Unauthorized");
+      }
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${id}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(formData),
         }
@@ -153,20 +171,49 @@ export default function EditCustomer() {
               className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
             />
           </div>
-          <div className="col-span-2">
+          <div>
+            <label className="block text-gray-700 font-bold">Price purchased</label>
+            <input
+              type="text"
+              name="price_purchased"
+              value={formData.price_purchased}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Unit</label>
+            <input
+              type="text"
+              name="unit"
+              value={formData.unit}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold">Color</label>
+            <input
+              type="text"
+              name="color"
+              value={formData.color}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+            />
+          </div>
+          <div className="col-span-2 flex justify-end">
             <button
               type="submit"
               className="px-4 py-2 bg-orange-500 text-white rounded"
             >
               Save Changes
             </button>
-            <button
-              type="button"
-              onClick={() => router.push(`/admin/inventory/${id}`)}
+            <Link
+              href={`/admin/inventory/${id}`}
               className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
             >
               Cancel
-            </button>
+            </Link>
           </div>
         </form>
       </div>

@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 
 export default function EditCustomer() {
-
   interface ProjectManager {
     user_id: string;
     name: string;
@@ -31,6 +31,7 @@ export default function EditCustomer() {
 
   const router = useRouter();
   const { id } = useParams();
+  
   interface Customer {
     name: string;
     age: string;
@@ -63,13 +64,11 @@ export default function EditCustomer() {
     bust: "",
     address: "",
     waist: "",
-    hip: "",
-    neck: "",
-    style_reference_images: "",
     hips: "",
+    neck: "",
     gender: "",
-    order_status: "",
-    date: "",
+    style_reference_images: "",
+    created_at: "",
     shoulder_width: "",
     arm_length: "",
     back_length: "",
@@ -113,7 +112,10 @@ export default function EditCustomer() {
     setError("");
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
+      if (!accessToken) throw new Error("No access token found");
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/orderslist/${id}`,
         {
@@ -137,11 +139,10 @@ export default function EditCustomer() {
         bust: result.data.bust,
         address: result.data.address,
         waist: result.data.waist,
-        hip: result.data.hip,
         neck: result.data.neck,
         gender: result.data.gender,
         style_reference_images: result.data.style_reference_images,
-        date: result.data.created_at,
+        created_at: result.data.created_at,
         shoulder_width: result.data.shoulder_width,
         arm_length: result.data.arm_length,
         back_length: result.data.back_length,
@@ -180,7 +181,10 @@ export default function EditCustomer() {
     setErrorManagers("");
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
+      if (!accessToken) throw new Error("No access token found");
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/projectmanagerlist`,
         {
@@ -216,7 +220,10 @@ export default function EditCustomer() {
     setSuccessMessage("");
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
+      if (!accessToken) throw new Error("No access token found");
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/editorder/${id}`,
         {
@@ -292,7 +299,7 @@ export default function EditCustomer() {
               name="order_id"
               value={formData.order_id}
               disabled
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
             />
           </div>
           <div>

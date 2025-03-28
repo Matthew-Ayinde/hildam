@@ -1,6 +1,6 @@
 "use client";
 
-import Spinner from "../../../../../../components/Spinner";
+import Spinner from "@/components/Spinner";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
@@ -8,6 +8,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { IoIosArrowBack } from "react-icons/io";
 import React from "react";
 import Link from "next/link";
+import { getSession } from "next-auth/react";
 
 export default function EditCustomer() {
 
@@ -53,7 +54,8 @@ export default function EditCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/editproject/${id}`, {
         method: "PUT",
         headers: {
@@ -121,7 +123,8 @@ export default function EditCustomer() {
     setError("");
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/projectlists/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -178,7 +181,8 @@ export default function EditCustomer() {
   const fetchManagers = async () => {
     setLoadingManagers(true);
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/headoftailoringlist`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -221,7 +225,8 @@ export default function EditCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/editproject/${id}`, {
         method: "PUT",
         headers: {

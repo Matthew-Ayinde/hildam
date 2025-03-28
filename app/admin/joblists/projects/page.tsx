@@ -4,10 +4,11 @@ import { SetStateAction, useEffect, useState } from "react";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { useRouter } from "next/navigation";
-import Spinner from "../../../../components/Spinner";
+import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { motion } from "framer-motion"; // Import Framer Motion
 import React from "react";
+import { getSession } from "next-auth/react";
 
 export default function Table() {
 
@@ -53,7 +54,8 @@ export default function Table() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/projectlists`,
         {

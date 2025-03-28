@@ -1,21 +1,26 @@
 "use client";
 
-import Spinner from "../../../../components/Spinner";
+import SkeletonLoader from "@/components/SkeletonLoader";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import React from "react";
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+
 
 export default function ShowCustomer() {
 
   const router = useRouter();
   const { id } = useParams();
   interface Customer {
-    id: string;
     item_name: string;
     item_quantity: number;
     created_at: string;
+    price_purchased: number;
+    unit: string;
+    color: string;
+    
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -27,12 +32,17 @@ export default function ShowCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const token = session?.user?.token;
+
+      if (!token) {
+        throw new Error("Unauthorized");
+      }
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${id}`,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -61,7 +71,7 @@ export default function ShowCustomer() {
   if (loading) {
     return (
       <div className="text-center text-gray-500 py-10">
-        <Spinner />
+        <SkeletonLoader />
       </div>
     );
   }
@@ -86,13 +96,13 @@ export default function ShowCustomer() {
       <div className="flex items-center justify-between mb-6">
         <Link
           href={`/admin/inventory`}
-          className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
+          className="hover:text-orange-700 text-orange-500 flex flex-row items-center"
         >
           <IoIosArrowBack size={30} />
           <div className="mx-2">Back to List</div>
         </Link>
       </div>
-      <form className="grid grid-cols-2 gap-6">
+      <form className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
           <label className="block text-gray-700 font-bold">Item Name</label>
           <input
@@ -111,15 +121,55 @@ export default function ShowCustomer() {
             className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
           />
         </div>
+        <div>
+          <label className="block text-gray-700 font-bold">Price purchased</label>
+          <input
+            type="text"
+            value={customer.price_purchased}
+            readOnly
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-bold">Unit</label>
+          <input
+            type="text"
+            value={customer.unit}
+            readOnly
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-bold">Color</label>
+          <input
+            type="text"
+            value={customer.color}
+            readOnly
+            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
+          />
+        </div>
+        <div>
+  <label className="block text-gray-700 font-bold">Created on</label>
+  <input
+    type="text"
+    value={new Date(customer.created_at).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })}
+    readOnly
+    className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
+  />
+</div>
+
         {/* Additional fields */}
       </form>
       <div className="mt-6 flex justify-end space-x-4">
-        <button
+        <Link href={`/admin/inventory/${id}/edit`}
           className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/admin/inventory/${id}/edit`)}
         >
           Edit
-        </button>
+        </Link>
       </div>
     </div>
   );
