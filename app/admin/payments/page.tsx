@@ -7,6 +7,7 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
 import Link from "next/link";
+import {getSession} from "next-auth/react";
 
 export default function Table() {
 
@@ -38,7 +39,8 @@ export default function Table() {
       try {
         setLoading(true);
         setError(null);
-        const token = sessionStorage.getItem("access_token");
+        const session = await getSession();
+        const token = session?.user?.token;
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
