@@ -3,36 +3,28 @@
 import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { IoIosArrowBack } from "react-icons/io";
-import { motion } from "framer-motion"; // Import motion from framer-motion
-import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+import { motion } from "framer-motion";
+import { getSession } from "next-auth/react";
 import SkeletonLoader from "@/components/SkeletonLoader";
 
 export default function ShowCustomer() {
-  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
-
-  const handleCustomerImageClick = () => {
-    setIsCustomerModalOpen(true);
-  };
-
-  const handleCustomerCloseModal = () => {
-    setIsCustomerModalOpen(false);
-  };
-
+  const targetRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const { id } = useParams();
 
   interface Customer {
     [x: string]: string | number | readonly string[] | undefined;
     gender: string;
-    phone: string;
-    date: string;
+    phone_number: string;
+    created_at: string;
     customer_email: string;
     address: string;
     bust: number;
     waist: number;
     hip: number;
+    shoulder: number;
     shoulder_to_underbust: number;
     bustpoint: number;
     round_under_bust: number;
@@ -51,6 +43,7 @@ export default function ShowCustomer() {
     clothing_description: string;
     clothing_name: string;
     style_reference_images: string;
+    tailor_job_image: string;
     order_id: string;
     priority: string;
     order_status: string;
@@ -58,20 +51,40 @@ export default function ShowCustomer() {
     first_fitting_date: string;
     second_fitting_date: string;
     customer_name: string;
-
+    manager_name: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+  const [rejectFeedback, setRejectFeedback] = useState("");
+  const [approvePrice, setApprovePrice] = useState("");
+
+  const handleScroll = () => {
+    targetRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleCustomerImageClick = () => {
+    // Only open the tailor job modal if no other modal is open.
+    if (!isRejectModalOpen && !isApproveModalOpen) {
+      setIsCustomerModalOpen(true);
+    }
+  };
+
+  const handleCustomerCloseModal = () => {
+    setIsCustomerModalOpen(false);
+  };
 
   const fetchCustomer = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const session = await getSession(); // Get session from NextAuth
-      const accessToken = session?.user?.token; // Access token from session
+      const session = await getSession();
+      const accessToken = session?.user?.token;
       if (!accessToken) throw new Error("No access token found");
 
       const response = await fetch(
@@ -94,7 +107,7 @@ export default function ShowCustomer() {
           hip: result.data.hip,
           waist: result.data.waist,
           bust: result.data.bust,
-          shoulder: result.data.shoulder,
+          shoulder: result.data.shoulder, // Added shoulder field
           bustpoint: result.data.bustpoint,
           shoulder_to_underbust: result.data.shoulder_to_underbust,
           round_under_bust: result.data.round_under_bust,
@@ -113,18 +126,20 @@ export default function ShowCustomer() {
           clothing_description: result.data.clothing_description,
           clothing_name: result.data.clothing_name,
           style_reference_images: result.data.style_reference_images,
+          tailor_job_image: result.data.tailor_job_image,
           order_id: result.data.order_id,
           priority: result.data.priority,
           order_status: result.data.order_status,
           customer_description: result.data.customer_description,
-          date: result.data.date,
+          created_at: result.data.created_at,
           first_fitting_date: result.data.first_fitting_date,
           second_fitting_date: result.data.second_fitting_date,
           customer_name: result.data.customer_name,
           customer_email: result.data.customer_email,
-          gender: "",
-          phone: "",
-          address: ""
+          gender: result.data.gender,
+          phone_number: result.data.phone_number,
+          address: result.data.address,
+          manager_name: result.data.manager_name,
         };
         setCustomer(mappedCustomer);
       } else {
@@ -144,6 +159,93 @@ export default function ShowCustomer() {
   useEffect(() => {
     fetchCustomer();
   }, [id]);
+
+  // ----- New Handlers for Reject Modal -----
+  const handleOpenRejectModal = () => {
+    // Close the underlying tailor job modal if open
+    setIsCustomerModalOpen(false);
+    setIsApproveModalOpen(false);
+    setIsRejectModalOpen(true);
+  };
+
+  const handleRejectConfirm = async () => {
+    try {
+      const session = await getSession();
+      const accessToken = session?.user?.token;
+      if (!accessToken) throw new Error("No access token found");
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/rejecttailorstyle/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ feedback: rejectFeedback }),
+      });
+
+      console.log("Response:", response); // Debugging line
+      console.log("Reject Feedback:", rejectFeedback); // Debugging line
+
+      if (!response.ok) {
+        throw new Error("Failed to send rejection feedback");
+      }
+      // Optionally handle the response here
+
+      setIsRejectModalOpen(false);
+      setRejectFeedback("");
+    } catch (err) {
+      console.error(err);
+      // Optionally show error to user
+    }
+  };
+
+  // ----- New Handlers for Approve Modal -----
+  const handleOpenApproveModal = () => {
+    // Close the underlying tailor job modal if open
+    setIsCustomerModalOpen(false);
+    setIsRejectModalOpen(false);
+    setIsApproveModalOpen(true);
+  };
+
+  const handleApproveConfirm = async () => {
+    try {
+      const session = await getSession();
+      const accessToken = session?.user?.token;
+      if (!accessToken) throw new Error("No access token found");
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/accepttailorstyle`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ enter_price: approvePrice }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send approval price");
+      }
+      // Optionally handle the response here
+
+      setIsApproveModalOpen(false);
+      setApprovePrice("");
+      // Navigate to invoice route
+      router.push("/invoice");
+    } catch (err) {
+      console.error(err);
+      // Optionally show error to user
+    }
+  };
+
+  const formatDate = (dateString: string | number | Date) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   if (loading) {
     return (
@@ -170,36 +272,54 @@ export default function ShowCustomer() {
 
   return (
     <motion.div
-      className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md"
+      className="w-full mx-auto p-8 bg-white rounded-2xl shadow-xl relative"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="flex items-center justify-between mb-6">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row justify-between items-center mb-6">
         <Link
           href="/admin/customers"
-          className="hover:text-orange-700 text-orange-500 flex flex-row items-center"
+          className="flex items-center text-orange-500 hover:text-orange-700 transition-colors"
         >
-          <IoIosArrowBack />
-          <div className="mx-2">Back to List</div>
+          <IoIosArrowBack size={28} />
+          <span className="ml-2 font-semibold">Back to List</span>
         </Link>
-      </div>
-      <form>
-        <div className="block text-2xl my-2 font-bold text-gray-700">
-          Order Information
+        <div className="mt-4 lg:mt-0 flex items-center space-x-2">
+          <h1 className="text-xl font-bold text-gray-800">
+            Head of Tailoring:
+          </h1>
+          <span className="text-xl font-medium text-gray-700">
+            {customer.manager_name}
+          </span>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
+      </div>
+
+      <button
+        onClick={handleScroll}
+        className="mt-2 px-4 py-2 bg-white text-blue-600 rounded hover:bg-gray-200 transition"
+      >
+        Go to Section
+      </button>
+
+      {/* Order Information */}
+      <form>
+        <h2 className="block text-2xl font-bold text-gray-800 mb-4">
+          Order Information
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {[
             { label: "Order ID", value: customer.order_id },
             { label: "Cloth Name", value: customer.clothing_name },
             { label: "Priority", value: customer.priority },
             { label: "Order Status", value: customer.order_status },
-            { label: "Customer Name", value: customer.fullName },
+            { label: "Customer Name", value: customer.customer_name },
             { label: "Gender", value: customer.gender },
-            { label: "Phone", value: customer.phone },
-            { label: "Create Date", value: customer.date },
-            { label: "Customer Email", value: customer.email },
+            { label: "Phone Number", value: customer.phone_number },
+            { label: "Create Date", value: formatDate(customer.created_at) },
+            { label: "Customer Email", value: customer.customer_email },
           ].map((field, index) => (
             <motion.div
               key={index}
@@ -208,70 +328,69 @@ export default function ShowCustomer() {
               exit={{ opacity: 0, y: 10 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
-              <label className="block text-gray-700 font-bold">
+              <label className="block text-sm font-bold text-gray-700 mb-1">
                 {field.label}
               </label>
               <input
                 type="text"
                 value={field.value}
                 readOnly
-                className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+                className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
               />
             </motion.div>
           ))}
-          <div className="">
-            <div className="block text-gray-700 font-bold">
+          <div className="lg:col-span-2">
+            <label className="block text-sm font-bold text-gray-700 mb-1">
               Customer Description
-            </div>
+            </label>
             <textarea
-              rows={1}
+              rows={2}
               value={customer.customer_description}
               readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+              className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
             />
           </div>
-          <div className="">
-            <div className="block text-gray-700 font-bold">
+          <div className="lg:col-span-2">
+            <label className="block text-sm font-bold text-gray-700 mb-1">
               Clothing Description
-            </div>
+            </label>
             <textarea
-              rows={1}
+              rows={2}
               value={customer.clothing_description}
               readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+              className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
             />
           </div>
         </div>
 
+        {/* Style Reference */}
         {customer.style_reference_images && (
           <motion.div
-            className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md"
+            ref={targetRef}
+            className="w-full mb-8 p-6 bg-gray-50 rounded-2xl shadow-md"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="">
-              <label className="block text-gray-700 font-bold">
-                Customer Style
-              </label>
-              {customer.style_reference_images === "" ? (
-                <div>No image selected</div>
-              ) : (
-                <div>
-                  <img
-                    src={customer.style_reference_images}
-                    alt="style_reference_images"
-                    className="border w-24 h-24 border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50 cursor-pointer"
-                    onClick={handleCustomerImageClick}
-                  />
-                </div>
-              )}
-            </div>
-
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Style reference images
+            </label>
+            {customer.style_reference_images === "" ? (
+              <div className="text-gray-500">No image selected</div>
+            ) : (
+              <div>
+                <img
+                  src={customer.style_reference_images}
+                  alt="Customer Style Reference"
+                  className="w-24 h-24 object-cover rounded-md border border-gray-300 cursor-pointer transition hover:shadow-lg"
+                  onClick={handleCustomerImageClick}
+                />
+              </div>
+            )}
             {isCustomerModalOpen && (
               <motion.div
-                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40"
                 onClick={handleCustomerCloseModal}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -285,24 +404,39 @@ export default function ShowCustomer() {
                   <img
                     src={customer.style_reference_images}
                     alt="Style Reference"
-                    className="lg:w-[400px] lg:h-[400px] w-80 h-80 object-cover"
+                    className="w-80 h-80 object-cover rounded-lg"
                     onError={(e) => {
                       e.currentTarget.src = "";
                       e.currentTarget.alt = "Image failed to load";
                     }}
                   />
+                  {/* Tailor Job Image Action Buttons */}
+                  <div className="mt-4 flex justify-between">
+                    <button
+                      onClick={handleOpenApproveModal}
+                      className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                    >
+                      Approve Style
+                    </button>
+                    <button
+                      onClick={handleOpenRejectModal}
+                      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                    >
+                      Reject Style
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}
           </motion.div>
         )}
 
+        {/* Measurements */}
         <div className="w-full">
-          <div className="block text-xl font-bold text-gray-700 mt-10 mb-1">
+          <h3 className="block text-xl font-bold text-gray-700 mt-10 mb-4">
             Measurements
-          </div>
-
-          <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { label: "Bust", value: customer.bust },
               { label: "Waist", value: customer.waist },
@@ -335,36 +469,191 @@ export default function ShowCustomer() {
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
                 <label
-                  htmlFor={measurement.label.toLowerCase().replace(" ", "")}
-                  className="block text-sm font-medium text-gray-700"
+                  htmlFor={measurement.label.toLowerCase().replace(/\s/g, "")}
+                  className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   {measurement.label}
                 </label>
                 <input
                   type="number"
                   readOnly
-                  id={measurement.label.toLowerCase().replace(" ", "")}
-                  name={measurement.label.toLowerCase().replace(" ", "")}
+                  id={measurement.label.toLowerCase().replace(/\s/g, "")}
+                  name={measurement.label.toLowerCase().replace(/\s/g, "")}
                   value={measurement.value}
                   placeholder={measurement.label}
-                  className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                  className="w-full rounded-md border border-gray-300 shadow-sm p-2 bg-gray-50 text-gray-600 focus:border-orange-500 focus:ring focus:ring-orange-500 transition"
                 />
               </motion.div>
             ))}
           </div>
         </div>
       </form>
-      <div className="mt-6 flex justify-end space-x-4">
+
+      {/* Edit Action */}
+      <div className="mt-6 flex flex-col items-end">
         <Link
           href={`/admin/orders/${id}/edit`}
-          className="px-4 py-2 bg-orange-500 text-white rounded"
+          className="px-6 py-3 bg-orange-500 text-white rounded-md font-semibold hover:bg-orange-600 transition duration-200"
         >
           Edit
         </Link>
+        <div className="mt-2 text-sm text-gray-600">
+          Click edit to make changes
+        </div>
       </div>
-      <div className="text-sm text-gray-700 text-center">
-        Click edit to make changes
-      </div>
+
+      {/* Other Details - Tailor Job Image */}
+      {customer.tailor_job_image && (
+        <div className="w-full mb-8 p-6 bg-gray-50 rounded-2xl shadow-md">
+          <div className="font-bold text-2xl">Other Details</div>
+          <motion.div
+            className="w-full mb-8 p-6 bg-gray-50 rounded-2xl shadow-md"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.5 }}
+          >
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Tailor Style
+            </label>
+            {customer.tailor_job_image === "" ? (
+              <div className="text-gray-500">No image selected</div>
+            ) : (
+              <div>
+                <img
+                  src={customer.tailor_job_image}
+                  alt="Tailor Job Style"
+                  className="w-24 h-24 object-cover rounded-md border border-gray-300 cursor-pointer transition hover:shadow-lg"
+                  onClick={handleCustomerImageClick}
+                />
+              </div>
+            )}
+            {isCustomerModalOpen && (
+              <motion.div
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40"
+                onClick={handleCustomerCloseModal}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div
+                  className="bg-white rounded-lg p-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img
+                    src={customer.tailor_job_image}
+                    alt="Tailor Job Style"
+                    className="w-80 h-80 object-cover rounded-lg"
+                    onError={(e) => {
+                      e.currentTarget.src = "";
+                      e.currentTarget.alt = "Image failed to load";
+                    }}
+                  />
+                  {/* Action Buttons */}
+                  <div className="mt-4 flex justify-between">
+                    <button
+                      onClick={handleOpenApproveModal}
+                      className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                    >
+                      Approve Style
+                    </button>
+                    <button
+                      onClick={handleOpenRejectModal}
+                      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                    >
+                      Reject Style
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        </div>
+      )}
+
+      {/* ---------- New Reject Modal ---------- */}
+      {isRejectModalOpen && (
+        <motion.div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={() => {
+            setIsRejectModalOpen(false);
+            setRejectFeedback("");
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            className="bg-white rounded-lg p-6 w-96"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+          >
+            <h2 className="text-xl font-bold mb-4 text-gray-800">
+              Reject Style
+            </h2>
+            <input
+              type="text"
+              placeholder="feedback"
+              name="rejectFeedback"
+              value={rejectFeedback}
+              onChange={(e) => setRejectFeedback(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:border-orange-500"
+            />
+            <button
+              onClick={handleRejectConfirm}
+              className="w-full py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+            >
+              Confirm
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* ---------- New Approve Modal ---------- */}
+      {isApproveModalOpen && (
+        <motion.div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          onClick={() => {
+            setIsApproveModalOpen(false);
+            setApprovePrice("");
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            className="bg-white rounded-lg p-6 w-96"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+          >
+            <h2 className="text-xl font-bold mb-4 text-gray-800">
+              Approve Style
+            </h2>
+            <input
+              type="text"
+              placeholder="enter_price"
+              value={approvePrice}
+              onChange={(e) => setApprovePrice(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:border-orange-500"
+            />
+            <button
+              onClick={handleApproveConfirm}
+              className="w-full py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+            >
+              Generate Invoice
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

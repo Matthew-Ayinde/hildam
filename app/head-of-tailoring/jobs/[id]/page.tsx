@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Spinner from "../../../../../components/Spinner";
+import Spinner from "@/components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image"; // Import Next.js Image component
@@ -10,6 +10,7 @@ import { FaCheckCircle, FaRegCircle } from "react-icons/fa";
 import Link from "next/link";
 import { FaRegCircleXmark } from "react-icons/fa6";
 import { motion } from "framer-motion"; // Import Framer Motion
+import { getSession } from "next-auth/react";
 
 export default function ShowCustomer() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -69,7 +70,8 @@ export default function ShowCustomer() {
     setUploadError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(
         `https://hildam.insightpublicis.com/api/edittailorjob/${id}`,
         {
@@ -105,9 +107,10 @@ export default function ShowCustomer() {
     setUploadError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/sendtoprojectmanager/${id}`,
+        `https://hildam.insightpublicis.com/api/sendtoorder/${id}`,
         {
           method: "PUT",
           headers: {
@@ -132,7 +135,7 @@ export default function ShowCustomer() {
       setIsSending(false);
     }
 
-    router.push("/head-of-tailoring/joblists/tailorjoblists");
+    router.push("/head-of-tailoring/jobs");
   };
 
   interface Customer {
@@ -170,7 +173,8 @@ export default function ShowCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(
         `https://hildam.insightpublicis.com/api/tailorjoblists/${id}`,
         {
@@ -286,7 +290,7 @@ export default function ShowCustomer() {
         transition={{ duration: 0.5 }}
       >
         <Link
-          href="/head-of-tailoring/joblists/tailorjoblists"
+          href="/head-of-tailoring/jobs"
           className="hover:text-orange-700 text-orange-500 flex flex-row items-center mb-2"
         >
           <IoIosArrowBack size={30} />
@@ -467,25 +471,162 @@ export default function ShowCustomer() {
         </motion.div>
       </form>
 
-      <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">
-        <motion.div
-          className="font-bold text-xl mt-5 text-gray-700"
-          initial="hidden"
-          animate="visible"
-          variants={fadeInUp}
-          transition={{ duration: 0.5, delay: 0.9 }}
-        >
-          Image Style
-        </motion.div>
-
-        {customer.project_manager_approval && (
+      {customer.tailor_image === null && (
+        <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">
           <motion.div
-            className="flex items-center mt-4"
+            className="font-bold text-xl mt-5 text-gray-700"
             initial="hidden"
             animate="visible"
             variants={fadeInUp}
-            transition={{ duration: 0.5, delay: 1 }}
+            transition={{ duration: 0.5, delay: 0.9 }}
           >
+            Image Style
+          </motion.div>
+
+          {customer.project_manager_approval && (
+            <motion.div
+              className="flex items-center mt-4"
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 1 }}
+            >
+              {customer.tailor_image && (
+                <div className="mr-4">
+                  <Image
+                    src={customer.tailor_image}
+                    alt="Tailor"
+                    width={100}
+                    height={100}
+                    className="rounded"
+                  />
+                </div>
+              )}
+              {customer.project_manager_approval === "In Review" && (
+                <>
+                  <FaCheckCircle className="text-green-500 text-3xl" />
+                  <span className="ml-2 text-green-500 font-semibold">
+                    Style under review
+                  </span>
+                </>
+              )}
+              {customer.project_manager_approval === "Approved" && (
+                <>
+                  <FaCheckCircle className="text-green-500 text-3xl" />
+                  <span className="ml-2 text-green-500 font-semibold">
+                    Style accepted
+                  </span>
+                </>
+              )}
+              {customer.project_manager_approval === "Rejected" && (
+                <>
+                  <FaRegCircleXmark className="text-red-500 text-3xl" />
+                  <span className="ml-2 text-red-500 font-semibold">
+                    Style rejected
+                  </span>
+                </>
+              )}
+            </motion.div>
+          )}
+
+          {/* Upload Image Section */}
+          {customer.project_manager_approval !== "Approved" && (
+            <motion.div
+              className="mb-6"
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 1.1 }}
+            >
+              <label className="block text-gray-700 font-normal mb-2">
+                {customer.tailor_image === null ? (
+                  <div>Please upload an Image</div>
+                ) : (
+                  <div className="mt-2 font-bold">Edit Image</div>
+                )}
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="border p-2 rounded w-full"
+              />
+            </motion.div>
+          )}
+
+          {imagePreview && (
+            <motion.div
+              className="mb-4 flex flex-col items-center"
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 1.2 }}
+            >
+              <img
+                src={imagePreview}
+                alt="Selected"
+                className="w-[200px] h-[200px] object-cover rounded border"
+              />
+              <button
+                onClick={handleRemoveImage}
+                className="mt-2 text-red-500 hover:text-red-700 text-sm font-semibold"
+              >
+                Remove Image
+              </button>
+            </motion.div>
+          )}
+
+          {/* Upload Button */}
+          {selectedImage && !imagePath && (
+            <motion.button
+              onClick={handleUploadImage}
+              disabled={isUploading}
+              className={`w-full py-2 rounded text-white font-semibold transition ${
+                isUploading
+                  ? "bg-gray-100"
+                  : "bg-orange-500 hover:bg-orange-600"
+              }`}
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 1.3 }}
+            >
+              {isUploading ? <Spinner /> : "Upload Image"}
+            </motion.button>
+          )}
+
+          {/* Send to Project Manager Button */}
+          {imagePath && !sentSuccess && (
+            <motion.button
+              onClick={handleSendToProjectManager}
+              disabled={isSending}
+              className={`w-full py-2 rounded text-white font-semibold transition mt-4 ${
+                isSending ? "bg-gray-100" : "bg-green-500 hover:bg-green-600"
+              }`}
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 1.4 }}
+            >
+              {isSending ? <Spinner /> : "Send to Project Manager"}
+            </motion.button>
+          )}
+        </div>
+      )}
+
+      {customer.tailor_image !== null && (
+        <>
+          <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">
+          <motion.div
+            className="font-bold text-xl mt-5 text-gray-700"
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+            transition={{ duration: 0.5, delay: 0.9 }}
+          >
+            Image Style
+          </motion.div>
+          <div className="flex items-center mt-4">
             {customer.tailor_image && (
               <div className="mr-4">
                 <Image
@@ -497,15 +638,7 @@ export default function ShowCustomer() {
                 />
               </div>
             )}
-            {customer.project_manager_approval === "In Review" && (
-              <>
-                <FaCheckCircle className="text-green-500 text-3xl" />
-                <span className="ml-2 text-green-500 font-semibold">
-                  Style under review
-                </span>
-              </>
-            )}
-            {customer.project_manager_approval === "Approved" && (
+            {customer.customer_approval === "Approved" && (
               <>
                 <FaCheckCircle className="text-green-500 text-3xl" />
                 <span className="ml-2 text-green-500 font-semibold">
@@ -513,7 +646,7 @@ export default function ShowCustomer() {
                 </span>
               </>
             )}
-            {customer.project_manager_approval === "Rejected" && (
+            {customer.customer_approval === "Rejected" && (
               <>
                 <FaRegCircleXmark className="text-red-500 text-3xl" />
                 <span className="ml-2 text-red-500 font-semibold">
@@ -521,90 +654,12 @@ export default function ShowCustomer() {
                 </span>
               </>
             )}
-          </motion.div>
-        )}
+          </div>
+        </div>
+        </>
+      )}
 
-        {/* Upload Image Section */}
-        {customer.project_manager_approval !== "Approved" && (
-          <motion.div
-            className="mb-6"
-            initial="hidden"
-            animate="visible"
-            variants={fadeInUp}
-            transition={{ duration: 0.5, delay: 1.1 }}
-          >
-            <label className="block text-gray-700 font-normal mb-2">
-              {customer.tailor_image === null ? (
-                <div>Please upload an Image</div>
-              ) : (
-                <div className="mt-2 font-bold">Edit Image</div>
-              )}
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="border p-2 rounded w-full"
-            />
-          </motion.div>
-        )}
-
-        {imagePreview && (
-          <motion.div
-            className="mb-4 flex flex-col items-center"
-            initial="hidden"
-            animate="visible"
-            variants={fadeInUp}
-            transition={{ duration: 0.5, delay: 1.2 }}
-          >
-            <img
-              src={imagePreview}
-              alt="Selected"
-              className="w-[200px] h-[200px] object-cover rounded border"
-            />
-            <button
-              onClick={handleRemoveImage}
-              className="mt-2 text-red-500 hover:text-red-700 text-sm font-semibold"
-            >
-              Remove Image
-            </button>
-          </motion.div>
-        )}
-
-        {/* Upload Button */}
-        {selectedImage && !imagePath && (
-          <motion.button
-            onClick={handleUploadImage}
-            disabled={isUploading}
-            className={`w-full py-2 rounded text-white font-semibold transition ${
-              isUploading ? "bg-gray-100" : "bg-orange-500 hover:bg-orange-600"
-            }`}
-            initial="hidden"
-            animate="visible"
-            variants={fadeInUp}
-            transition={{ duration: 0.5, delay: 1.3 }}
-          >
-            {isUploading ? <Spinner /> : "Upload Image"}
-          </motion.button>
-        )}
-
-        {/* Send to Project Manager Button */}
-        {imagePath && !sentSuccess && (
-          <motion.button
-            onClick={handleSendToProjectManager}
-            disabled={isSending}
-            className={`w-full py-2 rounded text-white font-semibold transition mt-4 ${
-              isSending ? "bg-gray-100" : "bg-green-500 hover:bg-green-600"
-            }`}
-            initial="hidden"
-            animate="visible"
-            variants={fadeInUp}
-            transition={{ duration: 0.5, delay: 1.4 }}
-          >
-            {isSending ? <Spinner /> : "Send to Project Manager"}
-          </motion.button>
-        )}
-      </div>
+      
     </div>
   );
 }

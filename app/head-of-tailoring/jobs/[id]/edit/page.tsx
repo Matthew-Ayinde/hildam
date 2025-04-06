@@ -1,9 +1,11 @@
 "use client";
 
-import Spinner from "../../../../../../components/Spinner";
+import Spinner from "@/components/Spinner";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import React from "react";
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+
 
 export default function EditCustomer() {
   const router = useRouter();
@@ -54,7 +56,8 @@ export default function EditCustomer() {
     setError("");
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token;
       const response = await fetch(
         `https://hildam.insightpublicis.com/api/customerslist/${id}`,
         {
@@ -110,7 +113,8 @@ export default function EditCustomer() {
     e.preventDefault();
     setError("");
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token;
       const response = await fetch(
         `https://hildam.insightpublicis.com/api/customerslist/${id}`,
         {

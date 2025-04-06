@@ -218,117 +218,142 @@ export default function EditCustomer() {
   ];
 
   return (
-    <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-      <div className="text-2xl font-bold text-gray-700 mb-6">Edit Customer Information</div>
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block text-gray-700 font-bold">Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Age</label>
-            <input
-              type="text"
-              name="age"
-              value={formData.age}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Gender</label>
-            <select
-              name="gender"
-              onChange={handleInputChange}
-              value={formData.gender || ""}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            >
-              <option value="" disabled>
-                Select Gender
-              </option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-bold">phone number</label>
-            <input
-              type="text"
-              name="phone_number"
-              value={formData?.phone_number || ""}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Email</label>
-            <input
-              type="text"
-              name="email"
-              value={formData.email}
-              readOnly
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
+    <motion.div
+    initial={{ opacity: 0, x: -50 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ duration: 0.5, ease: "easeOut" }}
+    className="w-full mx-auto p-8 bg-white rounded-2xl shadow-lg"
+  >
+    <h2 className="text-2xl font-bold text-gray-800 mb-6">
+      Edit Customer Information
+    </h2>
+    <form onSubmit={handleSubmit}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Full Name */}
+        <div>
+          <label className="block text-gray-700 font-bold mb-1">
+            Full Name
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder="Enter full name"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 focus:border-orange-500 focus:ring focus:ring-orange-200 transition duration-200"
+          />
         </div>
-
-        <div className="w-full">
-          <div className="block text-xl font-bold text-gray-700 mt-10 mb-1">
-            Measurements
-          </div>
-          <div className="mb-4">
-            <div className="flex flex-wrap -mx-2">
-              {measurements.map((measurement) => (
-                <motion.div
-                  key={measurement.key}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4"
-                >
-                  <label className="block text-gray-700 font-bold">
-                    {measurement.label}
-                  </label>
-                  <input
-                    type="text"
-                    name={measurement.key} // Correctly set the name attribute
-                    value={
-                      formData[measurement.key as keyof typeof formData] || ""
-                    } // Ensure it maps correctly
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </div>
+        {/* Age */}
+        <div>
+          <label className="block text-gray-700 font-bold mb-1">
+            Age
+          </label>
+          <input
+            type="text"
+            name="age"
+            value={formData.age}
+            onChange={handleInputChange}
+            placeholder="Enter age"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 focus:border-orange-500 focus:ring focus:ring-orange-200 transition duration-200"
+          />
         </div>
-
-        <div className="col-span-2 mt-5 flex justify-end">
-          <button
-            type="submit"
-            className="px-4 py-2 bg-orange-500 text-white rounded"
+        {/* Gender */}
+        <div>
+          <label className="block text-gray-700 font-bold mb-1">
+            Gender
+          </label>
+          <select
+            name="gender"
+            onChange={handleInputChange}
+            value={formData.gender || ""}
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 focus:border-orange-500 focus:ring focus:ring-orange-200 transition duration-200"
           >
-            Save Changes
-          </button>
-          <Link
-            href={`/admin/customers/${id}`}
-            className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
-          >
-            Back
-          </Link>
+            <option value="" disabled>
+              Select Gender
+            </option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
         </div>
-      </form>
-    </div>
+        {/* Phone Number */}
+        <div>
+          <label className="block text-gray-700 font-bold mb-1">
+            Phone Number
+          </label>
+          <input
+            type="text"
+            name="phone_number"
+            value={formData?.phone_number || ""}
+            onChange={handleInputChange}
+            placeholder="Enter phone number"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 focus:border-orange-500 focus:ring focus:ring-orange-200 transition duration-200"
+          />
+        </div>
+        {/* Email */}
+        <div>
+          <label className="block text-gray-700 font-bold mb-1">
+            Email
+          </label>
+          <input
+            type="text"
+            name="email"
+            value={formData.email}
+            readOnly
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 bg-gray-50"
+          />
+        </div>
+      </div>
+
+      {/* Measurements Section */}
+      <div className="mt-10">
+        <h3 className="block text-xl font-bold text-gray-800 mb-3">
+          Measurements
+        </h3>
+        <div className="mb-4">
+          <div className="flex flex-wrap -mx-2">
+            {measurements.map((measurement) => (
+              <motion.div
+                key={measurement.key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4"
+              >
+                <label className="block text-gray-700 font-bold mb-1">
+                  {measurement.label}
+                </label>
+                <input
+                  type="text"
+                  name={measurement.key}
+                  value={formData[measurement.key as keyof typeof formData] || ""}
+                  onChange={handleInputChange}
+                  placeholder={measurement.label}
+                  className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 focus:border-orange-500 focus:ring focus:ring-orange-200 transition duration-200"
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="mt-8 flex justify-end space-x-4">
+        <button
+          type="submit"
+          className="px-6 py-3 bg-orange-500 text-white font-bold rounded-lg transition duration-200 hover:bg-orange-600"
+        >
+          Save Changes
+        </button>
+        <Link
+          href={`/admin/customers/${id}`}
+          className="px-6 py-3 bg-gray-500 text-white font-bold rounded-lg transition duration-200 hover:bg-gray-600"
+        >
+          Back
+        </Link>
+      </div>
+    </form>
+  </motion.div>
   );
 }

@@ -224,101 +224,114 @@ export default function ShowCustomer() {
       initial={{ opacity: 0, x: -50 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md"
+      className="w-full mx-auto p-8 bg-white rounded-2xl shadow-lg"
     >
+      {/* Popup Message */}
       {popupMessage && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
-          className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50"
+          className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50"
         >
           {popupMessage}
         </motion.div>
       )}
+
+      {/* Header & Back Link */}
       <div className="flex items-center justify-between mb-6">
         <Link
           href="/admin/customers"
-          className="text-orange-500 hover:text-orange-700 flex flex-row space-x-2 items-center"
+          className="flex items-center space-x-2 text-orange-500 hover:text-orange-700 transition duration-200"
         >
-          <IoIosArrowBack />
-          <div>Back to List</div>
+          <IoIosArrowBack size={30} />
+          <span className="font-semibold">Back to List</span>
         </Link>
       </div>
-      <div className="text-2xl font-bold text-gray-700 mb-3">
-        Customer Details
-        </div>
+
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">Customer Details</h2>
+
+      {/* Customer Details Form */}
       <form>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
         >
+          {/* Full Name */}
           <motion.div
             key={1}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 1 * 0.1 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <label className="block text-gray-700 font-bold">Full Name</label>
+            <label className="block text-gray-700 font-bold mb-2">
+              Full Name
+            </label>
             <input
               type="text"
               value={customer.fullName}
               readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+              className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
             />
           </motion.div>
+          {/* Age */}
           <motion.div
             key={2}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 2 * 0.1 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
           >
-            <label className="block text-gray-700 font-bold">Age</label>
+            <label className="block text-gray-700 font-bold mb-2">Age</label>
             <input
               type="text"
               value={customer.age}
               readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+              className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
             />
           </motion.div>
+          {/* Gender */}
           <motion.div
             key={3}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 3 * 0.1 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
           >
-            <label className="block text-gray-700 font-bold">Gender</label>
+            <label className="block text-gray-700 font-bold mb-2">Gender</label>
             <input
               type="text"
               value={customer.gender}
               readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+              className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
             />
           </motion.div>
+          {/* Phone */}
           <motion.div
             key={4}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 4 * 0.1 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
           >
-            <label className="block text-gray-700 font-bold">Phone</label>
+            <label className="block text-gray-700 font-bold mb-2">Phone</label>
             <input
               type="text"
               value={customer.phone_number}
               readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+              className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
             />
           </motion.div>
+          {/* Create Date */}
           <motion.div
             key={5}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 5 * 0.1 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
           >
-            <label className="block text-gray-700 font-bold">Create Date</label>
+            <label className="block text-gray-700 font-bold mb-2">
+              Create Date
+            </label>
             <input
               type="text"
               value={new Intl.DateTimeFormat("en-US", {
@@ -327,67 +340,71 @@ export default function ShowCustomer() {
                 day: "numeric",
               }).format(new Date(customer.create_date))}
               readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+              className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
             />
           </motion.div>
+          {/* Email */}
           <motion.div
             key={6}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 6 * 0.1 }}
+            transition={{ duration: 0.4, delay: 0.6 }}
           >
-            <label className="block text-gray-700 font-bold">Email</label>
+            <label className="block text-gray-700 font-bold mb-2">Email</label>
             <input
               type="text"
               value={customer.email}
               readOnly
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+              className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
             />
           </motion.div>
         </motion.div>
 
+        {/* Measurements Section */}
         <div className="w-full">
-          <div className="block text-xl font-bold text-gray-700 mt-10 mb-1">
-            Measurements
-          </div>
-          <div className="mb-4">
-            <div className="flex flex-wrap -mx-2">
-              {measurements.map((measurement, index) => (
-                <motion.div
-                  key={measurement.key}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + index * 0.1 }} // Adjust delay based on index
-                  className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4"
-                >
-                  <label
-                    htmlFor={measurement.key}
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    {measurement.label}
-                  </label>
-                  <input
-                    type="number"
-                    readOnly
-                    id={measurement.key}
-                    name={measurement.key}
-                    value={customer[measurement.key]}
-                    placeholder={measurement.label}
-                    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
+  <h3 className="block text-xl font-bold text-gray-800 mb-3">
+    Measurements
+  </h3>
+  <div className="mb-6">
+    <div className="flex flex-wrap -mx-2">
+      {measurements.map((measurement, index) => (
+        <motion.div
+          key={measurement.key}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 + index * 0.1 }}
+          className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4"
+        >
+          <label
+            htmlFor={measurement.key}
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            {measurement.label}
+          </label>
+          <input
+            type="number"
+            readOnly
+            id={measurement.key}
+            name={measurement.key}
+            value={customer[measurement.key]}
+            placeholder={measurement.label}
+            className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm bg-gray-50 text-gray-600 sm:text-sm p-3 focus:border-orange-500 focus:ring-orange-500 transition duration-200"
+          />
+        </motion.div>
+      ))}
+    </div>
+  </div>
+</div>
+
       </form>
 
-      <div className="mt-6 flex justify-end space-x-4">
+      {/* Action Buttons */}
+      <div className="mt-8 flex justify-end space-x-4">
         <Link href={`/admin/customers/${id}/edit`}>
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="mx-2 px-3 bg-orange-500 text-white p-2 rounded hover:cursor-pointer"
+            className="px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold transition duration-200 hover:bg-orange-600"
           >
             Edit Customer Details
           </motion.div>
@@ -395,13 +412,13 @@ export default function ShowCustomer() {
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="mx-2 px-3 bg-red-500 text-white p-2 rounded hover:cursor-pointer"
           onClick={() => {
             if (typeof id === "string") {
               setSelectedCustomerId(id);
             }
             setIsPopupOpen(true);
           }}
+          className="px-6 py-3 bg-red-500 text-white rounded-lg font-semibold transition duration-200 hover:bg-red-600 cursor-pointer"
         >
           Delete
         </motion.div>
@@ -422,12 +439,12 @@ export default function ShowCustomer() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="bg-white rounded-lg shadow-lg w-96 p-6 text-center"
+            className="bg-white rounded-lg shadow-lg w-96 p-8 text-center"
             onClick={(e) => e.stopPropagation()}
             aria-modal="true"
             role="dialog"
           >
-            <h3 className="text-lg font-bold text-gray-700 mb-4">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">
               Confirm Deletion
             </h3>
             <p className="text-sm text-gray-600 mb-6">
@@ -438,16 +455,16 @@ export default function ShowCustomer() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg"
                 onClick={handleDelete}
+                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg transition duration-200 hover:bg-red-700"
               >
                 Confirm
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg"
                 onClick={() => setIsPopupOpen(false)}
+                className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg transition duration-200 hover:bg-orange-100"
               >
                 Cancel
               </motion.button>

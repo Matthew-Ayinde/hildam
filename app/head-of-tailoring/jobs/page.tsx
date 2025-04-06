@@ -10,10 +10,11 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { FaRegCalendarTimes } from "react-icons/fa";
 import { GoClock } from "react-icons/go";
 import { useRouter } from "next/navigation";
-import Spinner from "../../../../components/Spinner";
+import Spinner from "@/components/Spinner";
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion"; // Import Framer Motion
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 
 export default function Table() {
 
@@ -67,7 +68,8 @@ export default function Table() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token;
       const response = await fetch(
         "https://hildam.insightpublicis.com/api/tailorjoblists",
         {
@@ -166,7 +168,7 @@ export default function Table() {
                 <td className="px-4 py-2 text-sm border-b">{row.date}</td>
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
-                    <Link href={`/head-of-tailoring/joblists/tailorjoblists/${row.id}`} className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2">
+                    <Link href={`/head-of-tailoring/jobs/${row.id}`} className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2">
                       <IoEyeOutline size={20} />
                       <div>View</div>
                     </Link>

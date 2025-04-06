@@ -4,48 +4,22 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { MdOutlineHideSource, MdOutlineRemoveRedEye } from "react-icons/md";
 import { motion } from "framer-motion";
+import { getSession } from "next-auth/react";
 
 const Form = () => {
-
   const router = useRouter();
   const [passwordError, setPasswordError] = useState(false);
 
   const [formData, setFormData] = useState<{
-    name: string;
-    gender: string;
-    age: string;
-    phone: string;
-    password: string;
-    email: string;
-    address: string;
-    description: string;
-    bust: string;
-    waist: string;
-    hips: string;
-    shoulderWidth: string;
-    neck: string;
-    armLength: string;
-    backLength: string;
-    frontLength: string;
-    highBust: string;
+    order_id: string;
+    going_rate: string;
+    VAT: string;
+    discount?: string;
   }>({
-    name: "",
-    gender: "",
-    age: "",
-    phone: "",
-    email: "",
-    address: "",
-    description: "",
-    bust: "",
-    waist: "",
-    hips: "",
-    shoulderWidth: "",
-    neck: "",
-    armLength: "",
-    backLength: "",
-    frontLength: "",
-    highBust: "",
-    password: "",
+    order_id: "",
+    going_rate: "",
+    VAT: "",
+    discount: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -71,24 +45,14 @@ const Form = () => {
     setResponseMessage(null);
 
     try {
-      const token = sessionStorage.getItem("access_token");
+      const session = await getSession();
+      const token = session?.user?.token;
       if (!token) {
         throw new Error("Access token not found in session storage.");
       }
 
-      console.log(
-        JSON.stringify({
-          name: formData.name,
-          gender: formData.gender,
-          email: formData.email,
-          phone_number: formData.phone,
-          password: formData.password,
-          age: formData.age,
-        })
-      );
-
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/addcustomer`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/addpayment`,
         {
           method: "POST",
           headers: {
@@ -96,12 +60,10 @@ const Form = () => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            name: formData.name,
-            gender: formData.gender,
-            email: formData.email,
-            phone_number: formData.phone,
-            password: formData.password,
-            age: formData.age,
+            order_id: formData.order_id,
+            going_rate: formData.going_rate,
+            VAT: formData.VAT,
+            discount: formData.discount,
           }),
         }
       );
@@ -128,7 +90,7 @@ const Form = () => {
       setLoading(false);
     }
 
-    router.push("/admin/customers");
+    router.push("/admin/payments");
   };
 
   {
@@ -143,130 +105,117 @@ const Form = () => {
       className=" bg-gray-100 flex justify-center"
     >
       <motion.form
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.5, ease: "easeOut" }}
-  onSubmit={handleSubmit}
-  className="w-full bg-white rounded-lg shadow-md p-6"
->
-  <div className="font-bold text-gray-500 text-xl my-3">Create Payment</div>
-
-  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-    {/* Order ID */}
-    <div className="w-full">
-      <label htmlFor="orderId" className="block text-sm font-medium text-gray-700">
-        Order ID
-      </label>
-      <input
-        type="text"
-        id="orderId"
-        name="orderId"
-        // value={formData.order_id}
-        onChange={handleChange}
-        placeholder="Enter Order ID"
-        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-        required
-      />
-    </div>
-  
-    <div className="w-full">
-      <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
-        Payment Method
-      </label>
-      <select
-        id="gender"
-        name="gender"
-        value={formData.gender}
-        onChange={handleChange}
-        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-        required
-        disabled
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        onSubmit={handleSubmit}
+        className="w-full bg-white rounded-lg shadow-md p-6"
       >
-        <option value="">Transfer</option>
-        <option value="male">Cash</option>
-        <option value="female">Transfer</option>
-      </select>
-    </div>
-  
-    <div className="w-full">
-      <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
-        Payment Status
-      </label>
-      <select
-        id="gender"
-        name="gender"
-        value={formData.gender}
-        onChange={handleChange}
-        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-        required
-      >
-        <option value="">Select payment status</option>
-        <option value="other">In Review</option>
-        <option value="male">Paid</option>
-        <option value="female">Not Paid</option>
-      </select>
-    </div>
-  
-    <div className="w-full">
-      <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
-        Gender
-      </label>
-      <select
-        id="gender"
-        name="gender"
-        value={formData.gender}
-        onChange={handleChange}
-        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-        required
-      >
-        <option value="">Select your gender</option>
-        <option value="male">Male</option>
-        <option value="female">Female</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
+        <div className="font-bold text-gray-500 text-3xl my-3">
+          Create Invoice
+        </div>
 
-    <div className="w-full">
-      <label
-        htmlFor="file"
-        className="block text-sm font-medium text-gray-700"
-      >
-        Payment Receipt
-      </label>
-      <input
-        type="file"
-        id="file"
-        name="file"
-        // value={formData.file}
-        onChange={handleChange}
-        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-        required
-      />
-      </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          {/* Order ID */}
+          <div className="w-full">
+            <label
+              htmlFor="orderId"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Order ID
+            </label>
+            <input
+              type="text"
+              id="order_id"
+              name="order_id"
+              value={formData.order_id}
+              onChange={handleChange}
+              placeholder="Enter Order ID"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+          </div>
 
-  </div>
+          {/* Going Rate */}
+          <div className="w-full">
+            <label
+              htmlFor="goingRate"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Going Rate
+            </label>
+            <input
+              type="text"
+              id="going_rate"
+              name="going_rate"
+              value={formData.going_rate}
+              onChange={handleChange}
+              placeholder="Enter Going Rate"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+            </div>
 
-  {/* Submit Button */}
-  <div className="mt-6 text-right">
-    <button
-      type="submit"
-      className={`px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium ${
-        loading ? "cursor-not-allowed opacity-50" : "hover:bg-orange-600"
-      } focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2`}
-      disabled={loading}
-    >
-      {loading ? "Loading..." : "Create Customer"}
-    </button>
-  </div>
+          {/* VAT */}
+          <div className="w-full">
+            <label
+              htmlFor="vat"
+              className="block text-sm font-medium text-gray-700"
+            >
+              VAT
+            </label>
+            <input
+              type="text"
+              id="VAT"
+              name="VAT"
+              value={formData.VAT}
+              onChange={handleChange}
+              placeholder="Enter VAT"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            />
+            </div>
 
-  {/* Response Message */}
-  {responseMessage && (
-    <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
-      {responseMessage}
-    </div>
-  )}
-</motion.form>
+          {/* Discount */}
+          <div className="w-full">
+            <label
+              htmlFor="discount"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Discount (optional)
+            </label>
+            <input
+              type="text"
+              id="discount"
+              name="discount"
+              value={formData.discount}
+              onChange={handleChange}
+              placeholder="Enter Discount (optional)"
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+            />
+            </div>
+        </div>
 
+        {/* Submit Button */}
+        <div className="mt-6 text-right">
+          <button
+            type="submit"
+            className={`px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium ${
+              loading ? "cursor-not-allowed opacity-50" : "hover:bg-orange-600"
+            } focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2`}
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Create Customer"}
+          </button>
+        </div>
+
+        {/* Response Message */}
+        {responseMessage && (
+          <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
+            {responseMessage}
+          </div>
+        )}
+      </motion.form>
     </motion.div>
   );
 };
