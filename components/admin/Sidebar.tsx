@@ -73,6 +73,7 @@ const sidebarItems = [
     links: [
       { name: "List", href: "/admin/inventory" },
       { name: "Create", href: "/admin/inventory/create" },
+      { name: "View Requests", href: "/admin/inventory/requests" }
     ],
   },
   {

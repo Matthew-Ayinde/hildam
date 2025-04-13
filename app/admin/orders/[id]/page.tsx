@@ -213,13 +213,13 @@ export default function ShowCustomer() {
       const accessToken = session?.user?.token;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/accepttailorstyle`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/accepttailorstyle/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ enter_price: approvePrice }),
+        // body: JSON.stringify({ enter_price: approvePrice }),
       });
 
       if (!response.ok) {
@@ -230,7 +230,7 @@ export default function ShowCustomer() {
       setIsApproveModalOpen(false);
       setApprovePrice("");
       // Navigate to invoice route
-      router.push("/invoice");
+      router.push(`/admin/payments/${id}/invoice`);
     } catch (err) {
       console.error(err);
       // Optionally show error to user

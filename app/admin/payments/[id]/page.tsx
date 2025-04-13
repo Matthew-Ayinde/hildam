@@ -185,7 +185,7 @@ export default function ShowCustomer() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="max-w-5xl mx-auto p-8 bg-white rounded-2xl shadow-xl space-y-8 border-t-4 border-orange-500"
+      className="w-full mx-auto p-8 bg-white rounded-2xl shadow-xl space-y-8 border-t-4 border-orange-500"
     >
       {/* Header */}
       <div className="flex items-center justify-between border-b pb-4">

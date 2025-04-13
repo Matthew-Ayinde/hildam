@@ -569,7 +569,7 @@ payload.append("round_feet", formData.round_feet); // Handles 'tread' case
         </motion.button>
       </div>
       {responseMessage && (
-        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+        <div className="fixed top-1 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
           {responseMessage}
         </div>
       )}

@@ -27,14 +27,18 @@ type Notification = {
 const sidebarItems = [
   {
     id: 3,
-    text: "Job Lists",
+    text: "Inventory Requests",
     icon: <FaBoxes />,
     prefix: "/head-of-tailoring/joblists/",
     links: [
       {
-        name: "Tailor Jobs",
-        href: "/head-of-tailoring/joblists/tailorjoblists",
+        name: "Lists",
+        href: "/head-of-tailoring/inventory",
       },
+      {
+        name: "Create",
+        href: "/head-of-tailoring/inventory/create",
+      }
     ],
   },
 ];
@@ -362,7 +366,7 @@ const Sidebar = () => {
               </Link>
             </div>
 
-            {/* <div className="">
+            <div className="">
               <ul className="space-y-1 mt-3 mb-10 px-4">
                 {sidebarItems.map((item) => {
                   const isMenuOpen =
@@ -417,7 +421,7 @@ const Sidebar = () => {
                   );
                 })}
               </ul>
-            </div> */}
+            </div>
           </div>
         </div>
 
