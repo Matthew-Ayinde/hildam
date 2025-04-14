@@ -1,10 +1,10 @@
+
 // app/inventory/page.tsx
 "use client";
 
-import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { motion } from "framer-motion";
-import { getSession } from "next-auth/react";
-import { useParams } from "next/navigation";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { motion } from 'framer-motion';
+import { getSession } from 'next-auth/react';
 
 interface InventoryItem {
   id: string;
@@ -32,7 +32,6 @@ type Errors = {
 };
 
 export default function InventoryPage() {
-  const { id } = useParams(); // Get the ID from the URL parameters
   // State to hold the fetched inventory data
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   // Loading state for data fetch
@@ -45,15 +44,6 @@ export default function InventoryPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // Success message state
   const [successMsg, setSuccessMsg] = useState<string>("");
-
-  useEffect(() => {
-    if (successMsg) {
-      const timer = setTimeout(() => {
-        setSuccessMsg("");
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMsg]);
 
   // Fetch inventory data on component mount with access token from NextAuth
   useEffect(() => {
@@ -70,14 +60,11 @@ export default function InventoryPage() {
           return;
         }
 
-        const res = await fetch(
-          "https://hildam.insightpublicis.com/api/inventory",
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
+        const res = await fetch('https://hildam.insightpublicis.com/api/inventory', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
         const data: InventoryResponse = await res.json();
 
         // Convert item_quantity from string to number for each item
@@ -88,23 +75,19 @@ export default function InventoryPage() {
 
         setInventoryData(items);
         // Initialize the request state for each item
-        const initialRequests: Requests = items.reduce(
-          (acc: Requests, item) => {
-            acc[item.id] = 0;
-            return acc;
-          },
-          {}
-        );
+        const initialRequests: Requests = items.reduce((acc: Requests, item) => {
+          acc[item.id] = 0;
+          return acc;
+        }, {});
         setRequests(initialRequests);
       } catch (error) {
-        console.error("Error fetching inventory data:", error);
+        console.error('Error fetching inventory data:', error);
       } finally {
         setDataLoading(false);
       }
     }
     fetchInventory();
   }, []);
-  
 
   const handleIncrement = (id: string, available: number) => {
     setErrors((prev) => ({ ...prev, [id]: "" }));
@@ -142,9 +125,8 @@ export default function InventoryPage() {
     setRequests((prev) => ({ ...prev, [id]: numericValue }));
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     let hasError = false;
     inventoryData.forEach((item) => {
       if (requests[item.id] > item.item_quantity) {
@@ -160,76 +142,21 @@ export default function InventoryPage() {
     setIsLoading(true);
     setSuccessMsg("");
 
-    try {
-      const session = await getSession();
-      const accessToken = session?.user?.token;
-
-      if (!accessToken) {
-        console.error("Access token not found. Please sign in.");
-        setIsLoading(false);
-        return;
-      }
-
-      const promises = inventoryData.map(async (item) => {
-        const quantity = requests[item.id];
-        if (quantity === 0) return null; // skip zero requests
-
-        const res = await fetch(
-          `https://hildam.insightpublicis.com/api/requestinventory/${id}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({
-              items: [
-                {
-                  name: item.item_name,
-                  quantity,
-                },
-              ],
-            }),
-          }
-        );
-
-        if (!res.ok) {
-          throw new Error(`Failed to request item: ${item.item_name}`);
-        }
-
-        return res.json();
-      });
-
-      const results = await Promise.all(promises);
-
-      // Filter out nulls (skipped zero-quantity items)
-      const successfulRequests = results.filter(Boolean);
-
-      setSuccessMsg("Inventory request submitted successfully!");
-
-      // Reset request quantities
-      const resetRequests: Requests = inventoryData.reduce((acc, item) => {
-        acc[item.id] = 0;
-        return acc;
-      }, {});
-      setRequests(resetRequests);
-    } catch (error) {
-      console.error("Error submitting inventory request:", error);
-    } finally {
+    // Simulate a backend call with a delay
+    setTimeout(() => {
       setIsLoading(false);
-    }
+      setSuccessMsg("Inventory request submitted successfully!");
+      console.log("Submitted inventory request:", requests);
+    }, 2000);
   };
 
   if (dataLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-orange-200 to-orange-100">
-        <p className="text-xl font-semibold text-orange-600">
-          Loading inventory...
-        </p>
+        <p className="text-xl font-semibold text-orange-600">Loading inventory...</p>
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-orange-200 to-orange-100 p-8">
@@ -266,11 +193,7 @@ export default function InventoryPage() {
                       type="number"
                       value={requests[item.id]}
                       onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        handleChange(
-                          item.id,
-                          item.item_quantity,
-                          e.target.value
-                        )
+                        handleChange(item.id, item.item_quantity, e.target.value)
                       }
                       className="w-20 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-300"
                       min="0"
@@ -278,18 +201,14 @@ export default function InventoryPage() {
                     <motion.button
                       whileTap={{ scale: 0.9 }}
                       type="button"
-                      onClick={() =>
-                        handleIncrement(item.id, item.item_quantity)
-                      }
+                      onClick={() => handleIncrement(item.id, item.item_quantity)}
                       className="px-3 py-1 bg-orange-500 text-white rounded-full focus:outline-none"
                     >
                       +
                     </motion.button>
                   </div>
                   {errors[item.id] && (
-                    <p className="mt-2 text-sm text-red-500">
-                      {errors[item.id]}
-                    </p>
+                    <p className="mt-2 text-sm text-red-500">{errors[item.id]}</p>
                   )}
                 </div>
               </div>
@@ -305,11 +224,9 @@ export default function InventoryPage() {
         </form>
         {successMsg && (
           <motion.div
-            initial={{ opacity: 0, y: -50 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-green-100 border border-green-400 text-green-800 px-6 py-3 rounded-lg shadow-lg text-sm sm:text-base"
+            className="mt-6 p-4 bg-green-100 border border-green-400 text-green-800 rounded-md text-center"
           >
             {successMsg}
           </motion.div>
