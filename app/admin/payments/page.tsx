@@ -16,9 +16,9 @@ export default function Table() {
     id: any;
     order_id: string;
     created_at: string;
-    name: string;
+    customer_name: string;
     priority: string;
-    amount: string;
+    cumulative_total_amount: string;
   }
 
   const [data, setData] = useState<Order[]>([]);
@@ -196,7 +196,7 @@ export default function Table() {
           <table className="min-w-full border-collapse border border-gray-200">
             <thead className="bg-[#f6f8fb] sticky top-0 z-10">
               <tr className="text-[#5d7186]">
-                {["Order ID", "name", "Amount", "Payment Status", "Action"].map(
+                {["Order ID", "Customer Name", "Total Amount", "Payment Status", "Action"].map(
                   (header) => (
                     <th
                       key={header}
@@ -213,20 +213,20 @@ export default function Table() {
                 <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
                   <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
                   <td className="px-4 py-2 text-sm border-b text-[#da6d35]">
-                    {row.name}
+                    {row.customer_name}
                   </td>
-                  <td className="px-4 py-2 text-sm border-b">{row.amount}</td>
+                  <td className="px-4 py-2 text-sm border-b">{row.cumulative_total_amount}</td>
                   {/* <td className="px-4 py-2 text-sm border-b">
                     <span
                       className={`px-3 py-1 text-sm font-medium rounded ${
-                        row.amount === "completed"
+                        row.cumulative_total_amount === "completed"
                           ? "bg-white text-green-800 border border-green-800"
-                          : row.amount === "processing"
+                          : row.cumulative_total_amount === "processing"
                           ? "text-yellow-600 bg-white border border-yellow-600"
                           : "text-red-600 bg-white border border-red-600"
                       }`}
                     >
-                      {row.amount}
+                      {row.cumulative_total_amount}
                     </span>
                   </td> */}
                   <td className="px-4 py-2 text-sm border-b">

@@ -69,11 +69,11 @@ const Form = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to create customer.");
+        throw new Error("Failed to create payment.");
       }
 
       const result = await response.json();
-      setResponseMessage("Customer created successfully!");
+      setResponseMessage("Payment created successfully!");
 
       // Automatically clear the response message after 5 seconds
       setTimeout(() => {
@@ -205,7 +205,7 @@ const Form = () => {
             } focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2`}
             disabled={loading}
           >
-            {loading ? "Loading..." : "Create Customer"}
+            {loading ? "Loading..." : "Create Payment"}
           </button>
         </div>
 

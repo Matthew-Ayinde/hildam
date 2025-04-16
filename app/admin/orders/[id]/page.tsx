@@ -202,9 +202,10 @@ export default function ShowCustomer() {
   // ----- New Handlers for Approve Modal -----
   const handleOpenApproveModal = () => {
     // Close the underlying tailor job modal if open
-    setIsCustomerModalOpen(false);
-    setIsRejectModalOpen(false);
-    setIsApproveModalOpen(true);
+    // setIsCustomerModalOpen(false);
+    // setIsRejectModalOpen(false);
+    // setIsApproveModalOpen(true);
+    router.push(`/admin/payments/create`);
   };
 
   const handleApproveConfirm = async () => {
@@ -645,12 +646,12 @@ export default function ShowCustomer() {
               onChange={(e) => setApprovePrice(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:border-orange-500"
             />
-            <button
+            {/* <button
               onClick={handleApproveConfirm}
               className="w-full py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
             >
               Generate Invoice
-            </button>
+            </button> */}
           </motion.div>
         </motion.div>
       )}
