@@ -204,7 +204,12 @@ export default function Table() {
         </div>
       )}
 
-      {/* Filter controls - placed at the top right */}
+      
+
+      <div className="overflow-x-auto bg-white rounded-2xl py-3">
+        <div className="mx-2 ml-5 flex justify-between">
+          <div className="font-bold text-gray-500 text-xl my-3">Inventory Requests</div>
+          {/* Filter controls - placed at the top right */}
       <div className="flex justify-end space-x-2 my-4 mx-2">
         {(["pending", "approved", "rejected", "all"] as const).map((filterStatus) => (
           <button
@@ -219,10 +224,6 @@ export default function Table() {
           </button>
         ))}
       </div>
-
-      <div className="overflow-x-auto bg-white rounded-2xl py-3">
-        <div className="mx-2 ml-5 font-bold text-gray-500 text-xl my-3">
-          Inventory Requests
         </div>
         <table className="min-w-full border-collapse border border-gray-200">
           <thead className="bg-[#f6f8fb] sticky top-0 z-10">
