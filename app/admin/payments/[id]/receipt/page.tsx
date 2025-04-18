@@ -90,7 +90,7 @@ export default function Receipt() {
           // Billing information
           name: result.data.name || 'N/A',
           email: result.data.email || 'N/A',
-          phone_number: result.data.phone_number || 'N/A',
+          phone_number: result.data.customer_phone_number || 'N/A',
           address: result.data.address || 'No address provided',
         }
         setReceiptData(data)
@@ -164,8 +164,8 @@ export default function Receipt() {
                   <p>Phone:</p>
                 </div>
                 <div>
-                  <p>{receiptData.name}</p>
-                  <p>{receiptData.email}</p>
+                  <p>{receiptData.customer_name}</p>
+                  <p>{receiptData.customer_email}</p>
                   <p>{receiptData.phone_number}</p>
                 </div>
               </div>

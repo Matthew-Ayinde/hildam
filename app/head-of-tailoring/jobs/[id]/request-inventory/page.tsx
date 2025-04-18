@@ -5,6 +5,7 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { getSession } from 'next-auth/react';
+import { useParams } from 'next/navigation';
 
 interface InventoryItem {
   id: string;
@@ -12,6 +13,8 @@ interface InventoryItem {
   item_quantity: number;
   created_at: string;
 }
+
+
 
 interface InventoryResponse {
   message: string;
@@ -32,6 +35,8 @@ type Errors = {
 };
 
 export default function InventoryPage() {
+  const params = useParams();
+  const id = params.id as string; // Extracting the ID from the URL parameters
   // State to hold the fetched inventory data
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   // Loading state for data fetch
@@ -125,9 +130,11 @@ export default function InventoryPage() {
     setRequests((prev) => ({ ...prev, [id]: numericValue }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     let hasError = false;
+  
+    // Validation
     inventoryData.forEach((item) => {
       if (requests[item.id] > item.item_quantity) {
         setErrors((prev) => ({
@@ -137,18 +144,80 @@ export default function InventoryPage() {
         hasError = true;
       }
     });
+  
     if (hasError) return;
-
+  
     setIsLoading(true);
     setSuccessMsg("");
+  
+    try {
+      const session = await getSession();
+      const accessToken = session?.user?.token;
+  
+      if (!accessToken) {
+        setErrors((prev) => ({
+          ...prev,
+          general: "Authentication failed. Please sign in again.",
+        }));
+        setIsLoading(false);
+        return;
+      }
+  
+      // Prepare payload
+      const itemsToRequest = inventoryData
+        .filter((item) => requests[item.id] > 0)
+        .map((item) => ({
+          name: item.item_name,
+          quantity: requests[item.id],
+        }));
+  
+      if (itemsToRequest.length === 0) {
+        setErrors((prev) => ({
+          ...prev,
+          general: "You must request at least one item.",
+        }));
+        setIsLoading(false);
+        return;
+      }
+  
 
-    // Simulate a backend call with a delay
-    setTimeout(() => {
-      setIsLoading(false);
+      const payload = { items: itemsToRequest };
+  
+      // Make POST request (assuming one common ID for request, otherwise loop over multiple IDs)
+      const response = await fetch(`https://hildam.insightpublicis.com/api/requestinventory/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server error: ${errorText}`);
+      }
+  
+      // Clear after success
       setSuccessMsg("Inventory request submitted successfully!");
-      console.log("Submitted inventory request:", requests);
-    }, 2000);
+      setRequests((prev) =>
+        Object.keys(prev).reduce((acc, key) => {
+          acc[key] = 0;
+          return acc;
+        }, {} as Requests)
+      );
+      setErrors({});
+    } catch (err) {
+      console.error(err);
+      setErrors((prev) => ({
+        ...prev,
+        general: "Something went wrong during submission. Please try again.",
+      }));
+    } finally {
+      setIsLoading(false);
+    }
   };
+  
 
   if (dataLoading) {
     return (
@@ -160,6 +229,22 @@ export default function InventoryPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-orange-200 to-orange-100 p-8">
+    {errors.general && (
+      <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-center">
+        {errors.general}
+      </div>
+    )}
+    
+    {successMsg && (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-md text-center"
+      >
+        {successMsg}
+      </motion.div>
+    )}
+    
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-xl p-8">
         <h1 className="text-3xl font-bold text-center text-orange-600 mb-8">
           List of Inventory Items

@@ -15,6 +15,7 @@ import {
 import { motion } from "framer-motion";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { FaChartBar, FaCalendarAlt } from "react-icons/fa";
 
 // Register Chart.js components
 ChartJS.register(
@@ -28,52 +29,52 @@ ChartJS.register(
 );
 
 export default function Last7Days() {
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
-  const [chartData, setChartData] = useState(null);
+  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [endDate, setEndDate] = useState<Date>(new Date());
+  const [chartData, setChartData] = useState<any>(null);
 
-  // Function to generate and filter data based on selected date range
   const fetchChartData = () => {
-    let currentDate = new Date(startDate);
-    let datesArray = [];
-
-    while (currentDate <= endDate) {
-      datesArray.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
+    let cursor = new Date(startDate);
+    const dates: Date[] = [];
+    while (cursor <= endDate) {
+      dates.push(new Date(cursor));
+      cursor.setDate(cursor.getDate() + 1);
     }
 
-    const simulatedData = datesArray.map((date) => {
-      return {
-        date: date.toISOString().split("T")[0],
-        formattedDate: date.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        }),
-        orders: Math.floor(Math.random() * 200) + 50,
-        completedOrders: Math.floor(Math.random() * 150) + 30,
-      };
-    });
+    const data = dates.map((d) => ({
+      label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      orders: Math.floor(Math.random() * 200) + 50,
+      completed: Math.floor(Math.random() * 150) + 30,
+    }));
 
     setChartData({
-      labels: simulatedData.map((item) => item.formattedDate),
+      labels: data.map((d) => d.label),
       datasets: [
         {
           label: "Total Orders",
-          data: simulatedData.map((item) => item.orders),
-          borderColor: "rgba(75, 192, 192, 1)",
-          backgroundColor: "rgba(75, 192, 192, 0.2)",
-          borderWidth: 2,
-          pointRadius: 5,
+          data: data.map((d) => d.orders),
+          borderColor: "#34D399",           // Tailwind green-400
+          backgroundColor: "rgba(52, 211, 153, 0.3)",
+          pointBackgroundColor: "#34D399",
+          pointBorderColor: "#FFFFFF",
+          pointHoverBackgroundColor: "#FFFFFF",
+          pointHoverBorderColor: "#34D399",
+          borderWidth: 3,
+          pointRadius: 6,
           tension: 0.4,
           fill: true,
         },
         {
-          label: "Completed Orders",
-          data: simulatedData.map((item) => item.completedOrders),
-          borderColor: "rgba(255, 99, 132, 1)",
-          backgroundColor: "rgba(255, 99, 132, 0.2)",
-          borderWidth: 2,
-          pointRadius: 5,
+          label: "Completed",
+          data: data.map((d) => d.completed),
+          borderColor: "#60A5FA",           // Tailwind blue-400
+          backgroundColor: "rgba(96, 165, 250, 0.3)",
+          pointBackgroundColor: "#60A5FA",
+          pointBorderColor: "#FFFFFF",
+          pointHoverBackgroundColor: "#FFFFFF",
+          pointHoverBorderColor: "#60A5FA",
+          borderWidth: 3,
+          pointRadius: 6,
           tension: 0.4,
           fill: true,
         },
@@ -81,62 +82,70 @@ export default function Last7Days() {
     });
   };
 
-  // Fetch initial data on mount
   useEffect(() => {
     fetchChartData();
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4">
-      <motion.h1
-        className="text-4xl font-bold mb-8 text-gray-800"
+    <div className="w-full flex flex-col items-center py-10 px-4">
+      <motion.div
+        className="flex items-center space-x-3 mb-8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.6 }}
       >
-        Order Analytics
-      </motion.h1>
+        <FaChartBar className="text-3xl text-green-500" />
+        <h1 className="text-2xl font-bold text-gray-800">Orders Overview</h1>
+      </motion.div>
 
-      <div className="flex justify-between items-center w-full px-32 mb-5">
-        <div className="flex flex-row">
-          <div className="flex items-center gap-2 me-5">
-            <label className="font-semibold text-gray-700">Start Date:</label>
-            <DatePicker
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              selectsStart
-              startDate={startDate}
-              endDate={endDate}
-              className="border border-gray-300 p-2 rounded-md shadow-md text-gray-700"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="font-semibold text-gray-700">End Date:</label>
-            <DatePicker
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
-              selectsEnd
-              startDate={startDate}
-              endDate={endDate}
-              className="border border-gray-300 p-2 rounded-md shadow-md text-gray-700"
-            />
-          </div>
+      <div className="flex flex-wrap justify-center items-end gap-6 mb-6 max-w-4xl w-full">
+        <div className="relative flex flex-col">
+          <label htmlFor="start" className="mb-1 font-medium text-gray-700 flex items-center">
+            <FaCalendarAlt className="mr-2 text-gray-500" />Start
+          </label>
+          <DatePicker
+            id="start"
+            selected={startDate}
+            onChange={(date: Date) => setStartDate(date)}
+            selectsStart
+            startDate={startDate}
+            endDate={endDate}
+            className="pl-10 pr-4 py-2 border-2 border-transparent rounded-lg focus:border-green-400 focus:ring-2 focus:ring-green-100 transition"
+          />
+          <FaCalendarAlt className="absolute left-3 top-9 text-gray-400 pointer-events-none" />
         </div>
 
-        {/* Apply Filter Button */}
-        <button
+        <div className="relative flex flex-col">
+          <label htmlFor="end" className="mb-1 font-medium text-gray-700 flex items-center">
+            <FaCalendarAlt className="mr-2 text-gray-500" />End
+          </label>
+          <DatePicker
+            id="end"
+            selected={endDate}
+            onChange={(date: Date) => setEndDate(date)}
+            selectsEnd
+            startDate={startDate}
+            endDate={endDate}
+            className="pl-10 pr-4 py-2 border-2 border-transparent rounded-lg focus:border-green-400 focus:ring-2 focus:ring-green-100 transition"
+          />
+          <FaCalendarAlt className="absolute left-3 top-9 text-gray-400 pointer-events-none" />
+        </div>
+
+        <motion.button
           onClick={fetchChartData}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-600"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="bg-green-500 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-green-600 transition"
         >
-          Apply Filter
-        </button>
+          Apply
+        </motion.button>
       </div>
 
       <motion.div
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl"
-        initial={{ opacity: 0, y: 50 }}
+        className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-6"
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
       >
         {chartData ? (
           <Line
@@ -146,44 +155,24 @@ export default function Last7Days() {
               plugins: {
                 legend: {
                   position: "top",
-                  labels: { font: { size: 16 }, color: "#333" },
-                },
-                title: {
-                  display: true,
-                  text: "Orders & Completed Orders Per Day",
-                  font: { size: 20 },
-                  color: "#333",
+                  labels: { font: { size: 14 }, color: "#374151" },
                 },
               },
               scales: {
                 x: {
-                  title: {
-                    display: true,
-                    text: "Date",
-                    font: { size: 16 },
-                    color: "#333",
-                  },
-                  ticks: {
-                    color: "#555",
-                    font: { size: 14 },
-                  },
+                  ticks: { color: "#6B7280", font: { size: 12 } },
+                  grid: { display: false },
                 },
                 y: {
                   beginAtZero: true,
-                  title: {
-                    display: true,
-                    text: "Number of Orders",
-                    font: { size: 16 },
-                    color: "#333",
-                  },
-                  ticks: { color: "#555", font: { size: 14 } },
-                  grid: { color: "rgba(200,200,200,0.2)" },
+                  ticks: { color: "#6B7280", font: { size: 12 } },
+                  grid: { color: "rgba(156, 163, 175, 0.2)" },
                 },
               },
             }}
           />
         ) : (
-          <p className="text-center text-gray-500">Loading chart data...</p>
+          <p className="text-center text-gray-500">Loading chart...</p>
         )}
       </motion.div>
     </div>

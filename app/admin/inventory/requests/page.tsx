@@ -112,7 +112,7 @@ export default function Table() {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/rejectrequestfororderid/${id}`,
         {
-          method: "DELETE",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,

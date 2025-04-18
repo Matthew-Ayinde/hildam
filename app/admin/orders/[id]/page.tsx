@@ -52,6 +52,7 @@ export default function ShowCustomer() {
     second_fitting_date: string;
     customer_name: string;
     manager_name: string;
+    duration: number;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -140,6 +141,7 @@ export default function ShowCustomer() {
           phone_number: result.data.phone_number,
           address: result.data.address,
           manager_name: result.data.manager_name,
+          duration: result.data.duration,
         };
         setCustomer(mappedCustomer);
       } else {
@@ -174,14 +176,17 @@ export default function ShowCustomer() {
       const accessToken = session?.user?.token;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/rejecttailorstyle/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ feedback: rejectFeedback }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/rejecttailorstyle/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ feedback: rejectFeedback }),
+        }
+      );
 
       console.log("Response:", response); // Debugging line
       console.log("Reject Feedback:", rejectFeedback); // Debugging line
@@ -214,14 +219,17 @@ export default function ShowCustomer() {
       const accessToken = session?.user?.token;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/accepttailorstyle/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        // body: JSON.stringify({ enter_price: approvePrice }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/accepttailorstyle/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          // body: JSON.stringify({ enter_price: approvePrice }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to send approval price");
@@ -298,18 +306,28 @@ export default function ShowCustomer() {
         </div>
       </div>
 
-      <button
+      {/* <button
         onClick={handleScroll}
         className="mt-2 px-4 py-2 bg-white text-blue-600 rounded hover:bg-gray-200 transition"
       >
         Go to Section
-      </button>
+      </button> */}
 
       {/* Order Information */}
       <form>
-        <h2 className="block text-2xl font-bold text-gray-800 mb-4">
-          Order Information
-        </h2>
+        <div className="flex justify-between">
+          <h2 className="block text-2xl font-bold text-gray-800 mb-4">
+            Order Information
+          </h2>
+
+          <div className="flex items-center space-x-2">
+            {customer.order_status === "completed" && (
+              <div className="text-sm text-green-500">
+                *order has been completed
+              </div>
+            )}
+          </div>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {[
             { label: "Order ID", value: customer.order_id },
@@ -488,6 +506,51 @@ export default function ShowCustomer() {
             ))}
           </div>
         </div>
+
+        <div>
+          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">
+            <div className="text-2xl font-bold text-gray-700 mb-4">
+              Other details
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  First Fitting Date
+                </label>
+
+                <input
+                  type="text"
+                  value={customer.first_fitting_date}
+                  readOnly
+                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Second Fitting Date
+                </label>
+                <input
+                  type="text"
+                  value={customer.second_fitting_date}
+                  readOnly
+                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Duration (days)
+                </label>
+                <input
+                  type="number"
+                  name="duration"
+                  placeholder="Enter number of days"
+                  value={customer.duration}
+                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </form>
 
       {/* Edit Action */}
@@ -559,6 +622,13 @@ export default function ShowCustomer() {
                     >
                       Approve Style
                     </button>
+                    <button
+                      // onClick={handleOpenApproveModal}
+                      className="px-4 py-2 bg-orange-500 mx-5 text-white rounded hover:bg-green-600 transition"
+                    >
+                      Download Image
+                    </button>
+
                     <button
                       onClick={handleOpenRejectModal}
                       className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"

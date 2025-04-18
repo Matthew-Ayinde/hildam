@@ -15,6 +15,7 @@ import LogoutButton from "../LogoutMobile";
 import { useRouter } from "next/navigation";
 import { AiOutlineCheck } from "react-icons/ai";
 import { FiBell } from "react-icons/fi";
+import { MdOutlineDashboard } from "react-icons/md";
 
 type Notification = {
   id: string;
@@ -51,7 +52,7 @@ const sidebarItems = [
     icon: <FaBoxes />,
     prefix: "/admin/joblists/",
     links: [
-      { name: "Projects", href: "/admin/joblists/projects" },
+      // { name: "Projects", href: "/admin/joblists/projects" },
       { name: "Tailor Jobs", href: "/admin/joblists/tailorjoblists" },
     ],
   },
@@ -78,6 +79,16 @@ const sidebarItems = [
   },
   {
     id: 5,
+    text: "Analytics",
+    icon: <MdOutlineDashboard />,
+    prefix: "/admin/analytics",
+    links: [
+      { name: "List", href: "/admin/analytics" },
+      { name: "Create", href: "/admin/users/create" },
+    ],
+  },
+  {
+    id: 6,
     text: "Users",
     icon: <FaUser  />,
     prefix: "/admin/users",

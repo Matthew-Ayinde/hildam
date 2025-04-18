@@ -202,24 +202,41 @@ export default function ShowCustomer() {
         </div>
       </div>
 
-      {/* Order Details Section */}
       <motion.div
         variants={containerVariants}
-        className="p-6 bg-gradient-to-r from-orange-100 to-white rounded-lg shadow-md border border-orange-200"
+        className="p-6 bg-gradient-to-r from-white to-orange-50 rounded-lg shadow-md border border-orange-200"
       >
         <div className="flex items-center space-x-2 mb-4">
-          <AiOutlineCalendar size={24} className="text-orange-600" />
-          <h2 className="text-2xl font-bold text-orange-600">Order Details</h2>
+          <FaRegCreditCard size={24} className="text-orange-600" />
+          <h2 className="text-2xl font-bold text-orange-600">Payment & Order Details</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border-b pb-2">
-            <p className="text-sm text-gray-600">Created At</p>
-            <p className="mt-1 text-gray-800">{formatDate(customer.created_at)}</p>
+        <div className="border-b pb-2">
+            <p className="text-sm text-gray-600">Customer Name</p>
+            <p className="mt-1 text-gray-800">
+              <FaUserCircle className="inline mr-1 text-orange-500" />
+              {customer.customer_name}
+            </p>
           </div>
           <div className="border-b pb-2">
-            <p className="text-sm text-gray-600">Updated At</p>
-            <p className="mt-1 text-gray-800">{formatDate(customer.updated_at)}</p>
+            <p className="text-sm text-gray-600">Customer Email</p>
+            <p className="mt-1 text-gray-800">{customer.customer_email}</p>
           </div>
+          <div className="border-b pb-2">
+            <p className="text-sm text-gray-600">Payment Status</p>
+            <p className="mt-1 text-gray-800">{customer.payment_status}</p>
+          </div>
+          
+          
+          <div className="border-b pb-2">
+            <p className="text-sm text-gray-600">Clothing Name</p>
+            <p className="mt-1 text-gray-800">{customer.clothing_name}</p>
+          </div>
+          <div className="md:col-span-2 border-b pb-2">
+            <p className="text-sm text-gray-600">Clothing Description</p>
+            <p className="mt-1 text-gray-800">{customer.clothing_description}</p>
+          </div>
+
           <div className="border-b pb-2">
             <p className="text-sm text-gray-600">VAT</p>
             <p className="mt-1 text-gray-800">{customer.VAT}</p>
@@ -274,41 +291,6 @@ export default function ShowCustomer() {
         </div>
       </motion.div>
 
-      {/* Payment & Customer Details Section */}
-      <motion.div
-        variants={containerVariants}
-        className="p-6 bg-gradient-to-r from-white to-orange-50 rounded-lg shadow-md border border-orange-200"
-      >
-        <div className="flex items-center space-x-2 mb-4">
-          <FaRegCreditCard size={24} className="text-orange-600" />
-          <h2 className="text-2xl font-bold text-orange-600">Payment & Customer Details</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border-b pb-2">
-            <p className="text-sm text-gray-600">Payment Status</p>
-            <p className="mt-1 text-gray-800">{customer.payment_status}</p>
-          </div>
-          <div className="border-b pb-2">
-            <p className="text-sm text-gray-600">Customer Name</p>
-            <p className="mt-1 text-gray-800">
-              <FaUserCircle className="inline mr-1 text-orange-500" />
-              {customer.customer_name}
-            </p>
-          </div>
-          <div className="border-b pb-2">
-            <p className="text-sm text-gray-600">Customer Email</p>
-            <p className="mt-1 text-gray-800">{customer.customer_email}</p>
-          </div>
-          <div className="border-b pb-2">
-            <p className="text-sm text-gray-600">Clothing Name</p>
-            <p className="mt-1 text-gray-800">{customer.clothing_name}</p>
-          </div>
-          <div className="md:col-span-2 border-b pb-2">
-            <p className="text-sm text-gray-600">Clothing Description</p>
-            <p className="mt-1 text-gray-800">{customer.clothing_description}</p>
-          </div>
-        </div>
-      </motion.div>
 
       {/* Action Buttons */}
       <div className="flex justify-end space-x-4">

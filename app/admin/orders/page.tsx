@@ -97,7 +97,21 @@ export default function Table() {
       );
     } else if (filterCategory === "Priority" && filterValue) {
       filtered = filtered.filter((order) => order.priority === filterValue);
-    } else if (filterCategory === "Date" && startDate && endDate) {
+    }
+    else if (filterCategory === "Order Status" && filterValue) {
+      filtered = filtered.filter((order) => order.order_status === filterValue);
+    } else if (filterCategory === "Date" && startDate && !endDate) {
+      filtered = filtered.filter((order) => {
+        const orderDate = new Date(order.created_at);
+        return orderDate >= new Date(startDate);
+      });
+    } else if (filterCategory === "Date" && !startDate && endDate) {
+      filtered = filtered.filter((order) => {
+        const orderDate = new Date(order.created_at);
+        return orderDate <= new Date(endDate);
+      });
+    }
+    else if (filterCategory === "Date" && startDate && endDate) {
       filtered = filtered.filter((order) => {
         const orderDate = new Date(order.created_at);
         return (
@@ -206,7 +220,8 @@ export default function Table() {
           {toastMessage}
         </div>
       )}
-
+ 
+      {/* Stats Section */}
       <div className="flex flex-row gap-5">
         {[
           { label: "Total Orders", value: filteredData.length },
@@ -264,6 +279,7 @@ export default function Table() {
                   <option value="Customer">Customer</option>
                   <option value="Cloth Name">Cloth Name</option>
                   <option value="Priority">Priority</option>
+                  <option value="Order Status">Order Status</option>
                   <option value="Date">Date</option>
                 </select>
 
@@ -278,7 +294,18 @@ export default function Table() {
                     <option value="medium">Medium</option>
                     <option value="low">Low</option>
                   </select>
-                ) : filterCategory === "Date" ? (
+                ) : filterCategory === "Order Status" ? (
+                  <select
+                    value={filterValue}
+                    onChange={(e) => setFilterValue(e.target.value)}
+                    className="border rounded p-2 mr-2"
+                  >
+                    <option value="">Select Status</option>
+                    <option value="completed">Completed</option>
+                    <option value="processing">Processing</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                 ) : filterCategory === "Date" ? (
                   <>
                     <input
                       type="date"

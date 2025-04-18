@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
 import { motion } from "framer-motion"; // Import Framer Motion
 import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+import Last7Days from "../charts/Last7Days";
 
 // Extend the NextAuth session type
 declare module "next-auth" {
@@ -133,6 +134,8 @@ export default function Table() {
         ))}
       </div>
 
+      <Last7Days />
+
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
         <div className="mx-2 font-bold text-gray-500 text-xl my-3 flex flex-row justify-between items-center">
           <div>Recent Orders</div>
@@ -240,7 +243,13 @@ export default function Table() {
             </span>{" "}
             of <span className="font-bold">{data.length}</span> Orders
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-5">
+            <div>
+              <Link href={'/admin/orders'} className="text-sm text-white bg-orange-500 hover:bg-orange-700 py-2 px-3 rounded">
+                View All Orders
+              </Link>
+            </div>
+            <div className="flex items-center space-x-2">
             <button
               className="p-3 text-sm text-gray-600 bg-gray-200 rounded disabled:opacity-50"
               disabled={currentPage === 1}
@@ -255,6 +264,7 @@ export default function Table() {
             >
               <FaArrowRight />
             </button>
+          </div>
           </div>
         </div>
       )}

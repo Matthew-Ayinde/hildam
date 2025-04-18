@@ -8,6 +8,8 @@ import { useParams, useRouter } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
 import { getSession } from "next-auth/react";
 import { motion } from "framer-motion";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface ProjectManager {
   user_id: string;
@@ -50,10 +52,12 @@ interface Customer {
   created_at: string;
   manager_id: string;
   manager_name: string;
+  first_fitting_date: string | null;
+  second_fitting_date: string | null;
+  duration: string;
 }
 
 export default function EditCustomer() {
-  
   const [projectManagers, setProjectManagers] = useState<ProjectManager[]>([]);
   const [loadingManagers, setLoadingManagers] = useState(true);
   const [errorManagers, setErrorManagers] = useState("");
@@ -69,6 +73,9 @@ export default function EditCustomer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
+
+  const [firstFittingDate, setFirstFittingDate] = useState<Date | null>(null);
+  const [secondFittingDate, setSecondFittingDate] = useState<Date | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -106,6 +113,9 @@ export default function EditCustomer() {
     clothing_description: "",
     priority: "",
     order_id: "",
+    first_fitting_date: "",
+    second_fitting_date: "",
+    duration: "",
   });
 
   // --- Helper Functions ---
@@ -139,10 +149,14 @@ export default function EditCustomer() {
   };
 
   // Inside your component state declarations:
-const [selectedFile, setSelectedFile] = useState<File | null>(null);
-const [previewUrl, setPreviewUrl] = useState(formData.style_reference_images);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState(formData.style_reference_images);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
     const parsedValue = parseInputValue(name, value);
     setFormData((prev) => ({
@@ -163,22 +177,22 @@ const [previewUrl, setPreviewUrl] = useState(formData.style_reference_images);
   };
 
   // Function to keep the selected image
-const handleKeepImage = () => {
-  // Update the formData with the new preview URL
-  setFormData((prev) => ({
-    ...prev,
-    style_reference_images: previewUrl,
-  }));
-  setIsCustomerModalOpen(false);
-};
+  const handleKeepImage = () => {
+    // Update the formData with the new preview URL
+    setFormData((prev) => ({
+      ...prev,
+      style_reference_images: previewUrl,
+    }));
+    setIsCustomerModalOpen(false);
+  };
 
-// Function to cancel image selection and revert to the previous image
-const handleCancelImage = () => {
-  // Reset preview URL and clear selected file
-  setPreviewUrl(formData.style_reference_images);
-  setSelectedFile(null);
-  setIsCustomerModalOpen(false);
-};
+  // Function to cancel image selection and revert to the previous image
+  const handleCancelImage = () => {
+    // Reset preview URL and clear selected file
+    setPreviewUrl(formData.style_reference_images);
+    setSelectedFile(null);
+    setIsCustomerModalOpen(false);
+  };
 
   const handleCustomerImageClick = () => {
     setIsCustomerModalOpen(true);
@@ -198,11 +212,14 @@ const handleCancelImage = () => {
       const accessToken = session?.user?.token;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/orderslist/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/orderslist/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch customer data");
@@ -246,9 +263,25 @@ const handleCancelImage = () => {
         clothing_description: result.data.clothing_description,
         priority: result.data.priority,
         order_id: result.data.order_id,
+        first_fitting_date: result.data.first_fitting_date || "",
+        second_fitting_date: result.data.second_fitting_date || "",
+        duration: result.data.duration || "",
       });
+
+      setFirstFittingDate(
+        result.data.first_fitting_date
+          ? new Date(result.data.first_fitting_date)
+          : null
+      );
+      setSecondFittingDate(
+        result.data.second_fitting_date
+          ? new Date(result.data.second_fitting_date)
+          : null
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
     } finally {
       setLoading(false);
     }
@@ -262,11 +295,14 @@ const handleCancelImage = () => {
       const accessToken = session?.user?.token;
       if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/headoftailoringlist`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/headoftailoringlist`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch project managers");
@@ -275,7 +311,9 @@ const handleCancelImage = () => {
       const result = await response.json();
       setProjectManagers(result.data);
     } catch (err) {
-      setErrorManagers(err instanceof Error ? err.message : "An unknown error occurred");
+      setErrorManagers(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
     } finally {
       setLoadingManagers(false);
     }
@@ -290,52 +328,66 @@ const handleCancelImage = () => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
-  
+
     try {
       const session = await getSession();
       const accessToken = session?.user?.token;
       if (!accessToken) throw new Error("No access token found");
-  
+
       const formDataToSend = new FormData();
-  
-      // Append all fields from formData into FormData object.
-      // For style_reference_images, only append if a new file was selected.
+
+      // Sync date fields into formData
+      if (firstFittingDate) {
+        formDataToSend.append(
+          "first_fitting_date",
+          firstFittingDate.toISOString().split("T")[0]
+        );
+      }
+      if (secondFittingDate) {
+        formDataToSend.append(
+          "second_fitting_date",
+          secondFittingDate.toISOString().split("T")[0]
+        );
+      }
+      formDataToSend.append("duration", formData.duration + "");
+
+      // Append remaining fields
       Object.keys(formData).forEach((key) => {
         if (key === "style_reference_images") {
           if (selectedFile) {
             formDataToSend.append("style_reference_images", selectedFile);
           }
-        } else {
-          // Convert non-string values to strings (if needed)
-          formDataToSend.append(key, formData[key as keyof typeof formData] + "");
+        } else if (
+          !["first_fitting_date", "second_fitting_date", "duration"].includes(
+            key
+          )
+        ) {
+          formDataToSend.append(
+            key,
+            formData[key as keyof typeof formData] + ""
+          );
         }
       });
-  
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/editorder/${id}`,
         {
           method: "POST",
-          // Do not set Content-Type header; the browser will add the correct boundary.
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: { Authorization: `Bearer ${accessToken}` },
           body: formDataToSend,
         }
       );
-  
-      if (!response.ok) {
-        throw new Error("Failed to update order");
-      }
-  
+
+      if (!response.ok) throw new Error("Failed to update order");
+
       setSuccessMessage("Order updated successfully!");
-      setTimeout(() => {
-        router.push("/admin/orders");
-      }, 2000);
+      setTimeout(() => router.push("/admin/orders"), 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
     }
   };
-  
 
   if (loading) {
     return (
@@ -366,7 +418,10 @@ const handleCancelImage = () => {
             </div>
           </div>
         )}
-        <Link href="/admin/orders" className="hover:text-orange-700 text-orange-500 flex flex-row items-center mb-5">
+        <Link
+          href="/admin/orders"
+          className="hover:text-orange-700 text-orange-500 flex flex-row items-center mb-5"
+        >
           <IoIosArrowBack size={30} />
           <div className="mx-2">Back to List</div>
         </Link>
@@ -383,7 +438,9 @@ const handleCancelImage = () => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 font-bold">Cloth Name</label>
+              <label className="block text-gray-700 font-bold">
+                Cloth Name
+              </label>
               <input
                 type="text"
                 name="clothing_name"
@@ -409,7 +466,9 @@ const handleCancelImage = () => {
               </select>
             </div>
             <div>
-              <label className="block text-gray-700 font-bold">Phone Number</label>
+              <label className="block text-gray-700 font-bold">
+                Phone Number
+              </label>
               <input
                 type="text"
                 name="phone_number"
@@ -419,7 +478,9 @@ const handleCancelImage = () => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 font-bold">Clothing Description</label>
+              <label className="block text-gray-700 font-bold">
+                Clothing Description
+              </label>
               <textarea
                 name="clothing_description"
                 rows={1}
@@ -429,7 +490,9 @@ const handleCancelImage = () => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 font-bold">Order Status</label>
+              <label className="block text-gray-700 font-bold">
+                Order Status
+              </label>
               <select
                 name="order_status"
                 value={formData.order_status}
@@ -440,12 +503,14 @@ const handleCancelImage = () => {
                   Select Order Status
                 </option>
                 <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
+                <option value="processing">Processing</option>
                 <option value="completed">Completed</option>
               </select>
             </div>
             <div>
-              <label className="block text-gray-700 font-bold">Head of Tailoring</label>
+              <label className="block text-gray-700 font-bold">
+                Head of Tailoring
+              </label>
               <select
                 name="manager_id"
                 value={formData.manager_id || ""}
@@ -454,7 +519,11 @@ const handleCancelImage = () => {
                 disabled={loadingManagers}
               >
                 <option value="" disabled>
-                  {loadingManagers ? "Loading..." : errorManagers ? "Error loading" : "Select Manager"}
+                  {loadingManagers
+                    ? "Loading..."
+                    : errorManagers
+                    ? "Error loading"
+                    : "Select Manager"}
                 </option>
                 {projectManagers.length > 0 ? (
                   projectManagers.map((manager) => (
@@ -474,7 +543,9 @@ const handleCancelImage = () => {
           {formData.style_reference_images && (
             <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">
               <div>
-                <label className="block text-gray-700 font-bold">Customer Style</label>
+                <label className="block text-gray-700 font-bold">
+                  Customer Style
+                </label>
                 <img
                   src={formData.style_reference_images}
                   alt="Customer style reference"
@@ -485,50 +556,52 @@ const handleCancelImage = () => {
               </div>
 
               {isCustomerModalOpen && (
-  <div
-    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-    onClick={handleCustomerCloseModal}
-  >
-    <div className="bg-white rounded-lg p-4 flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
-      {loadingImage ? (
-        <Spinner />
-      ) : (
-        <>
-          <img
-            src={formData.style_reference_images}
-            alt="Style Reference"
-            className="lg:w-[400px] lg:h-[400px] w-80 h-80 object-cover"
-            onError={(e) => {
-              e.currentTarget.src = "";
-              e.currentTarget.alt = "Image failed to load";
-            }}
-          />
-          <div className="flex gap-4 mt-4">
-            <button
-              onClick={handleKeepImage}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              Keep
-            </button>
-            <button
-              onClick={handleCancelImage}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Cancel
-            </button>
-          </div>
-          <input
-            type="file"
-            accept="image/*"
-            className="lg:mt-4 mt-1 border border-gray-300 p-2 rounded-md cursor-pointer"
-            onChange={handleImageChange}
-          />
-        </>
-      )}
-    </div>
-  </div>
-)}
-
+                <div
+                  className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+                  onClick={handleCustomerCloseModal}
+                >
+                  <div
+                    className="bg-white rounded-lg p-4 flex flex-col items-center"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {loadingImage ? (
+                      <Spinner />
+                    ) : (
+                      <>
+                        <img
+                          src={formData.style_reference_images}
+                          alt="Style Reference"
+                          className="lg:w-[400px] lg:h-[400px] w-80 h-80 object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = "";
+                            e.currentTarget.alt = "Image failed to load";
+                          }}
+                        />
+                        <div className="flex gap-4 mt-4">
+                          <button
+                            onClick={handleKeepImage}
+                            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                          >
+                            Keep
+                          </button>
+                          <button
+                            onClick={handleCancelImage}
+                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="lg:mt-4 mt-1 border border-gray-300 p-2 rounded-md cursor-pointer"
+                          onChange={handleImageChange}
+                        />
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -542,7 +615,10 @@ const handleCancelImage = () => {
                 { label: "Waist", name: "waist" },
                 { label: "Hip", name: "hip" },
                 { label: "Bust Point", name: "bustpoint" },
-                { label: "Shoulder to Underbust", name: "shoulder_to_underbust" },
+                {
+                  label: "Shoulder to Underbust",
+                  name: "shoulder_to_underbust",
+                },
                 { label: "Round Under Bust", name: "round_under_bust" },
                 { label: "Half Length", name: "half_length" },
                 { label: "Blouse Length", name: "blouse_length" },
@@ -564,7 +640,10 @@ const handleCancelImage = () => {
                   exit={{ opacity: 0, y: 10 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
-                  <label htmlFor={measurement.name} className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor={measurement.name}
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     {measurement.label}
                   </label>
                   <input
@@ -581,8 +660,85 @@ const handleCancelImage = () => {
             </div>
           </div>
 
+          {/* Fitting Section */}
+          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">
+            <div className="text-2xl font-bold text-gray-700 mb-4">
+              Add other details
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  First Fitting Date
+                </label>
+                <DatePicker
+                  selected={firstFittingDate}
+                  onChange={(date) => {
+                    setFirstFittingDate(date);
+                    setFormData((prev) => ({
+                      ...prev,
+                      first_fitting_date: date
+                        ? date.toISOString().split("T")[0]
+                        : "",
+                    }));
+                  }}
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="Select first fitting date"
+                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Second Fitting Date
+                </label>
+                <DatePicker
+                  selected={secondFittingDate}
+                  onChange={(date) => {
+                    setSecondFittingDate(date);
+                    setFormData((prev) => ({
+                      ...prev,
+                      second_fitting_date: date
+                        ? date.toISOString().split("T")[0]
+                        : "",
+                    }));
+                  }}
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="Select second fitting date"
+                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+                />
+                {secondFittingDate &&
+                  firstFittingDate &&
+                  secondFittingDate < firstFittingDate && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Second fitting date must be after the first.
+                    </p>
+                  )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Duration (days)
+                </label>
+                <input
+                  type="number"
+                  name="duration"
+                  placeholder="Enter number of days"
+                  value={formData.duration}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      duration: e.target.value,
+                    }))
+                  }
+                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="flex justify-end mt-6">
-            <button type="submit" className="px-4 py-2 hover:bg-orange-700 bg-orange-500 text-white rounded">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-700"
+            >
               Save
             </button>
           </div>

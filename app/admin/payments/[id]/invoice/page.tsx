@@ -90,8 +90,8 @@ export default function Invoice() {
           // Billing information
           name: result.data.name || 'N/A',
           email: result.data.email || 'N/A',
-          phone_number: result.data.phone_number || 'N/A',
-          address: result.data.address || 'N/A',
+          phone_number: result.data.customer_phone_number || 'N/A',
+          address: result.data.address || 'No Address Provided',  
         }
         setInvoiceData(data)
       } else {
@@ -164,8 +164,8 @@ export default function Invoice() {
                   <p>Phone:</p>
                 </div>
                 <div>
-                  <p>{invoiceData.name}</p>
-                  <p>{invoiceData.email}</p>
+                  <p>{invoiceData.customer_name}</p>
+                  <p>{invoiceData.customer_email}</p>
                   <p>{invoiceData.phone_number}</p>
                 </div>
               </div>

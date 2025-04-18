@@ -14,6 +14,7 @@ import Spinner from "../../../../components/Spinner";
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion"; // Import Framer Motion
+import { getSession } from "next-auth/react";
 
 export default function Table() {
 
@@ -67,7 +68,8 @@ export default function Table() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession();
+      const accessToken = session?.user?.token;
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/tailorjoblists`,
         {
