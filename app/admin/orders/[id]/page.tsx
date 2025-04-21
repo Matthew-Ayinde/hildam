@@ -8,11 +8,13 @@ import { IoIosArrowBack } from "react-icons/io";
 import { motion } from "framer-motion";
 import { getSession } from "next-auth/react";
 import SkeletonLoader from "@/components/SkeletonLoader";
+import Image from "next/image";
 
 export default function ShowCustomer() {
   const targetRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const { id } = useParams();
+  const [isTailorJobModalOpen, setIsTailorJobModalOpen] = useState(false);
 
   interface Customer {
     [x: string]: string | number | readonly string[] | undefined;
@@ -69,9 +71,14 @@ export default function ShowCustomer() {
   };
 
   const handleCustomerImageClick = () => {
-    // Only open the tailor job modal if no other modal is open.
     if (!isRejectModalOpen && !isApproveModalOpen) {
       setIsCustomerModalOpen(true);
+    }
+  };
+
+  const handleTailorJobImageClick = () => {
+    if (!isRejectModalOpen && !isApproveModalOpen) {
+      setIsTailorJobModalOpen(true);
     }
   };
 
@@ -409,7 +416,7 @@ export default function ShowCustomer() {
             )}
             {isCustomerModalOpen && (
               <motion.div
-                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40"
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
                 onClick={handleCustomerCloseModal}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -417,33 +424,18 @@ export default function ShowCustomer() {
                 transition={{ duration: 0.3 }}
               >
                 <div
-                  className="bg-white rounded-lg p-4"
+                  className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <img
                     src={customer.style_reference_images}
                     alt="Style Reference"
-                    className="w-80 h-80 object-cover rounded-lg"
+                    className="w-full h-[80vh] object-contain rounded-lg"
                     onError={(e) => {
                       e.currentTarget.src = "";
                       e.currentTarget.alt = "Image failed to load";
                     }}
                   />
-                  {/* Tailor Job Image Action Buttons */}
-                  <div className="mt-4 flex justify-between">
-                    <button
-                      onClick={handleOpenApproveModal}
-                      className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
-                    >
-                      Approve Style
-                    </button>
-                    <button
-                      onClick={handleOpenRejectModal}
-                      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                    >
-                      Reject Style
-                    </button>
-                  </div>
                 </div>
               </motion.div>
             )}
@@ -507,69 +499,9 @@ export default function ShowCustomer() {
           </div>
         </div>
 
-        <div>
-          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">
-            <div className="text-2xl font-bold text-gray-700 mb-4">
-              Other details
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  First Fitting Date
-                </label>
-
-                <input
-                  type="text"
-                  value={customer.first_fitting_date}
-                  readOnly
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Second Fitting Date
-                </label>
-                <input
-                  type="text"
-                  value={customer.second_fitting_date}
-                  readOnly
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Duration (days)
-                </label>
-                <input
-                  type="number"
-                  name="duration"
-                  placeholder="Enter number of days"
-                  value={customer.duration}
-                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
-
-      {/* Edit Action */}
-      <div className="mt-6 flex flex-col items-end">
-        <Link
-          href={`/admin/orders/${id}/edit`}
-          className="px-6 py-3 bg-orange-500 text-white rounded-md font-semibold hover:bg-orange-600 transition duration-200"
-        >
-          Edit
-        </Link>
-        <div className="mt-2 text-sm text-gray-600">
-          Click edit to make changes
-        </div>
-      </div>
-
-      {/* Other Details - Tailor Job Image */}
-      {customer.tailor_job_image && (
-        <div className="w-full mb-8 p-6 bg-gray-50 rounded-2xl shadow-md">
-          <div className="font-bold text-2xl">Other Details</div>
+        {/* Other Details - Tailor Job Image */}
+      {customer.tailor_job_image !== null ? (
+        <div className="w-full mb-8 p-6 rounded-2xl shadow-md">
           <motion.div
             className="w-full mb-8 p-6 bg-gray-50 rounded-2xl shadow-md"
             initial={{ opacity: 0, y: 20 }}
@@ -577,7 +509,7 @@ export default function ShowCustomer() {
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.5 }}
           >
-            <label className="block text-sm font-bold text-gray-700 mb-2">
+            <label className="block text-xl font-bold text-gray-700 mb-2">
               Tailor Style
             </label>
             {customer.tailor_job_image === "" ? (
@@ -588,58 +520,70 @@ export default function ShowCustomer() {
                   src={customer.tailor_job_image}
                   alt="Tailor Job Style"
                   className="w-24 h-24 object-cover rounded-md border border-gray-300 cursor-pointer transition hover:shadow-lg"
-                  onClick={handleCustomerImageClick}
+                  onClick={handleTailorJobImageClick}
                 />
               </div>
             )}
-            {isCustomerModalOpen && (
+
+            {isTailorJobModalOpen && (
               <motion.div
-                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40"
-                onClick={handleCustomerCloseModal}
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+                onClick={() => setIsTailorJobModalOpen(false)}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
               >
                 <div
-                  className="bg-white rounded-lg p-4"
+                  className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <img
-                    src={customer.tailor_job_image}
-                    alt="Tailor Job Style"
-                    className="w-80 h-80 object-cover rounded-lg"
-                    onError={(e) => {
-                      e.currentTarget.src = "";
-                      e.currentTarget.alt = "Image failed to load";
-                    }}
-                  />
+                  <div className="relative w-full h-[80vh]">
+                    <Image
+                      src={customer.tailor_job_image || "/fallback.jpg"} // fallback optional
+                      alt="Tailor Job Style"
+                      fill
+                      className="object-contain rounded-lg"
+                      onError={(e) => {
+                        // Optional: log or handle fallback differently
+                      }}
+                    />
+                  </div>
+
                   {/* Action Buttons */}
-                  <div className="mt-4 flex justify-between">
+                  <div className="mt-6 flex justify-between">
                     <button
                       onClick={handleOpenApproveModal}
-                      className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                      className="px-6 py-3 bg-green-500 text-white rounded hover:bg-green-600 transition"
                     >
                       Approve Style
                     </button>
                     <button
-                      // onClick={handleOpenApproveModal}
-                      className="px-4 py-2 bg-orange-500 mx-5 text-white rounded hover:bg-green-600 transition"
-                    >
-                      Download Image
-                    </button>
-
-                    <button
                       onClick={handleOpenRejectModal}
-                      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                      className="px-6 py-3 bg-red-500 text-white rounded hover:bg-red-600 transition"
                     >
                       Reject Style
                     </button>
+                    {/* Download Button */}
+                    <a
+                      href={customer.tailor_job_image}
+                      download="tailor_job_image.jpg" // Specify a filename if desired
+                      className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    >
+                      Download Image
+                    </a>
                   </div>
                 </div>
               </motion.div>
             )}
           </motion.div>
+        </div>
+      ) : (
+        <div>
+          <h3 className="block text-xl font-bold text-gray-700 mt-10 mb-4">
+            Tailor Job Image
+          </h3>
+          <div className="text-gray-500">No image yet</div>
         </div>
       )}
 
@@ -716,15 +660,70 @@ export default function ShowCustomer() {
               onChange={(e) => setApprovePrice(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:border-orange-500"
             />
-            {/* <button
-              onClick={handleApproveConfirm}
-              className="w-full py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
-            >
-              Generate Invoice
-            </button> */}
           </motion.div>
         </motion.div>
       )}
+
+        <div>
+          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">
+            <div className="text-2xl font-bold text-gray-700 mb-4">
+              Other details
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  First Fitting Date
+                </label>
+
+                <input
+                  type="text"
+                  value={customer.first_fitting_date}
+                  readOnly
+                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Second Fitting Date
+                </label>
+                <input
+                  type="text"
+                  value={customer.second_fitting_date}
+                  readOnly
+                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Duration (days)
+                </label>
+                <input
+                  type="number"
+                  name="duration"
+                  placeholder="Enter number of days"
+                  value={customer.duration}
+                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      
+
+      {/* Edit Action */}
+      <div className="mt-6 flex flex-col items-end">
+        <Link
+          href={`/admin/orders/${id}/edit`}
+          className="px-6 py-3 bg-orange-500 text-white rounded-md font-semibold hover:bg-orange-600 transition duration-200"
+        >
+          Edit
+        </Link>
+        <div className="mt-2 text-sm text-gray-600">
+          Click edit to make changes
+        </div>
+      </div>
     </motion.div>
   );
 }
