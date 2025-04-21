@@ -38,7 +38,9 @@ export default function Table() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
   // New state for filtering - default to "pending"
-  const [statusFilter, setStatusFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
+  const [statusFilter, setStatusFilter] = useState<
+    "pending" | "approved" | "rejected" | "all"
+  >("pending");
 
   const rowsPerPage = 10;
 
@@ -183,7 +185,10 @@ export default function Table() {
   };
 
   // Filter data based on selected status
-  const filteredData = statusFilter === "all" ? data : data.filter((item) => item.status === statusFilter);
+  const filteredData =
+    statusFilter === "all"
+      ? data
+      : data.filter((item) => item.status === statusFilter);
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const paginatedData = filteredData.slice(
     (currentPage - 1) * rowsPerPage,
@@ -204,27 +209,34 @@ export default function Table() {
         </div>
       )}
 
-      
-
       <div className="overflow-x-auto bg-white rounded-2xl py-3">
-        <div className="mx-2 ml-5 flex justify-between">
-          <div className="font-bold text-gray-500 text-xl my-3">Inventory Requests</div>
+        <div className="mx-2 ml-5 flex justify-between items-center">
+          <div className="font-bold text-gray-500 text-xl my-3">
+            Inventory Requests
+          </div>
           {/* Filter controls - placed at the top right */}
-      <div className="flex justify-end space-x-2 my-4 mx-2">
-        {(["pending", "approved", "rejected", "all"] as const).map((filterStatus) => (
-          <button
-            key={filterStatus}
-            onClick={() => {
-              setStatusFilter(filterStatus);
-              setCurrentPage(1); // Reset to first page when filter changes
-            }}
-            className={`px-4 py-2 text-sm rounded ${statusFilter === filterStatus ? "bg-[#ff6c2f] text-white" : "bg-gray-200 text-gray-700"}`}
-          >
-            {filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
-          </button>
-        ))}
-      </div>
+          <div className="flex justify-end space-x-2 my-4 mx-2">
+            {(["pending", "approved", "rejected", "all"] as const).map(
+              (filterStatus) => (
+                <button
+                  key={filterStatus}
+                  onClick={() => {
+                    setStatusFilter(filterStatus);
+                    setCurrentPage(1); // Reset to first page when filter changes
+                  }}
+                  className={`px-4 py-2 text-sm rounded ${
+                    statusFilter === filterStatus
+                      ? "bg-[#ff6c2f] text-white"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
+                >
+                  {filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
+                </button>
+              )
+            )}
+          </div>
         </div>
+        <div className="my-2 text-gray-500 mx-5">Attention required: Review inventory requests awaiting your approval.</div>
         <table className="min-w-full border-collapse border border-gray-200">
           <thead className="bg-[#f6f8fb] sticky top-0 z-10">
             <tr className="text-[#5d7186]">
@@ -236,7 +248,7 @@ export default function Table() {
                 "Head of Tailoring",
                 "Status",
                 "Date",
-                "Action"
+                "Action",
               ].map((header) => (
                 <th
                   key={header}
@@ -256,11 +268,12 @@ export default function Table() {
               </tr>
             ) : filteredData.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center py-10 text-gray-700 font-bold">
+                <td
+                  colSpan={8}
+                  className="text-center py-10 text-gray-700 font-bold"
+                >
                   <div>No requests found</div>
-                  <div className="flex justify-center">
-                    
-                  </div>
+                  <div className="flex justify-center"></div>
                 </td>
               </tr>
             ) : (
@@ -276,8 +289,12 @@ export default function Table() {
                   <td className="px-4 py-2 text-sm border-b">{row.orderId}</td>
                   <td className="px-4 py-2 text-sm border-b">{row.id}</td>
                   <td className="px-4 py-2 text-sm border-b">{row.itemName}</td>
-                  <td className="px-4 py-2 text-sm border-b">{row.requestedQty}</td>
-                  <td className="px-4 py-2 text-sm border-b">{row.headOfTailoring}</td>
+                  <td className="px-4 py-2 text-sm border-b">
+                    {row.requestedQty}
+                  </td>
+                  <td className="px-4 py-2 text-sm border-b">
+                    {row.headOfTailoring}
+                  </td>
                   <td className="px-4 py-2 text-sm border-b">{row.status}</td>
                   <td className="px-4 py-2 text-sm border-b">{row.date}</td>
                   <td className="px-4 py-2 text-sm border-b">
@@ -328,12 +345,19 @@ export default function Table() {
           >
             <FaArrowLeft />
           </button>
-          {Array.from({ length: Math.min(3, totalPages) }, (_, i) => currentPage + i - 1)
+          {Array.from(
+            { length: Math.min(3, totalPages) },
+            (_, i) => currentPage + i - 1
+          )
             .filter((page) => page > 0 && page <= totalPages)
             .map((page) => (
               <button
                 key={page}
-                className={`px-4 py-2 text-sm ${page === currentPage ? "bg-[#ff6c2f] text-white rounded" : "text-gray-600"}`}
+                className={`px-4 py-2 text-sm ${
+                  page === currentPage
+                    ? "bg-[#ff6c2f] text-white rounded"
+                    : "text-gray-600"
+                }`}
                 onClick={() => handlePageChange(page)}
               >
                 {page}
@@ -368,7 +392,8 @@ export default function Table() {
               Confirm Deletion
             </h3>
             <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to delete this request? This action cannot be undone.
+              Are you sure you want to delete this request? This action cannot
+              be undone.
             </p>
             <div className="flex justify-center space-x-4">
               <button

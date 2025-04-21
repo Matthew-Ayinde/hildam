@@ -617,49 +617,56 @@ export default function ShowCustomer() {
       {customer.tailor_image !== null && (
         <>
           <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">
-          <motion.div
-            className="font-bold text-xl mt-5 text-gray-700"
-            initial="hidden"
-            animate="visible"
-            variants={fadeInUp}
-            transition={{ duration: 0.5, delay: 0.9 }}
-          >
-            Image Style
-          </motion.div>
-          <div className="flex items-center mt-4">
-            {customer.tailor_image && (
-              <div className="mr-4">
-                <Image
-                  src={customer.tailor_image}
-                  alt="Tailor"
-                  width={100}
-                  height={100}
-                  className="rounded"
-                />
-              </div>
-            )}
-            {customer.customer_approval === "Approved" && (
-              <>
-                <FaCheckCircle className="text-green-500 text-3xl" />
-                <span className="ml-2 text-green-500 font-semibold">
-                  Style accepted
-                </span>
-              </>
-            )}
-            {customer.customer_approval === "Rejected" && (
-              <>
-                <FaRegCircleXmark className="text-red-500 text-3xl" />
-                <span className="ml-2 text-red-500 font-semibold">
-                  Style rejected
-                </span>
-              </>
-            )}
+            <motion.div
+              className="font-bold text-xl mt-5 text-gray-700"
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 0.9 }}
+            >
+              Image Style
+            </motion.div>
+            <div className="flex items-center mt-4">
+              {customer.tailor_image && (
+                <div className="mr-4">
+                  <Image
+                    src={customer.tailor_image}
+                    alt="Tailor"
+                    width={100}
+                    height={100}
+                    className="rounded"
+                  />
+                </div>
+              )}
+              {customer.customer_approval === "Approved" && (
+                <>
+                  <FaCheckCircle className="text-green-500 text-3xl" />
+                  <span className="ml-2 text-green-500 font-semibold">
+                    Style accepted
+                  </span>
+                </>
+              )}
+              {customer.customer_approval === "Rejected" && (
+                <>
+                  <FaRegCircleXmark className="text-red-500 text-3xl" />
+                  <span className="ml-2 text-red-500 font-semibold">
+                    Style rejected
+                  </span>
+                </>
+              )}
+            </div>
           </div>
-        </div>
         </>
       )}
 
-      
+      <div className="mt-5 flex justify-end">
+      <Link
+        href={`/head-of-tailoring/jobs/${id}/request-inventory`}
+        className="w-fit px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition duration-200"
+      >
+        Request Inventory
+      </Link>
+      </div>
     </div>
   );
 }

@@ -210,7 +210,7 @@ export default function ShowCustomer() {
     // setIsCustomerModalOpen(false);
     // setIsRejectModalOpen(false);
     // setIsApproveModalOpen(true);
-    router.push(`/admin/payments/create`);
+    router.push(`/admin/orders/${id}/create-payment`);
   };
 
   const handleApproveConfirm = async () => {

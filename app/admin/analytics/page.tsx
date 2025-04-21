@@ -1,6 +1,9 @@
+"use client"
+
 import ExpertAnalytics from '@/components/charts/ExpenseAnalytics'
 import Last7Days from '@/components/charts/Last7Days'
 import React from 'react'
+import RevenueAnalytics from '@/components/charts/RevenueAnalytics'
 
 const page = () => {
   return (
@@ -13,6 +16,9 @@ const page = () => {
     <ExpertAnalytics />
 
         {/* Add more charts or components as needed */}
+        <RevenueAnalytics />
+
+        {/* Footer or additional content */}
     </div>
   )
 }

@@ -506,7 +506,7 @@ const measurements = [
                     name={measurement.name}
                     placeholder={measurement.placeholder}
                   onChange={handleChange}
-                  value={formData[measurement.name]}
+                  value={formData[measurement.name as keyof typeof formData]}
                     className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                   />
                 </motion.div>

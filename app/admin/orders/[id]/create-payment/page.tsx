@@ -1,14 +1,18 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import React, { useState, useEffect } from "react";
 import { MdOutlineHideSource, MdOutlineRemoveRedEye } from "react-icons/md";
 import { motion } from "framer-motion";
 import { getSession } from "next-auth/react";
+import Spinner from "@/components/Spinner"; // adjust the path as needed
 
 const Form = () => {
   const router = useRouter();
+  const { id } = useParams();
+
   const [passwordError, setPasswordError] = useState(false);
+  const [orderLoading, setOrderLoading] = useState(true);
 
   const [formData, setFormData] = useState<{
     order_id: string;
@@ -25,6 +29,41 @@ const Form = () => {
   const [loading, setLoading] = useState(false);
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Fetch order_id on mount
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchOrder = async () => {
+      try {
+        setOrderLoading(true);
+        const session = await getSession();
+        const token = session?.user?.token;
+        if (!token) throw new Error("Access token not found.");
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/orderslist/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!res.ok) throw new Error("Failed to fetch order.");
+        const json = await res.json();
+        setFormData((f) => ({
+          ...f,
+          order_id: json.data.order_id,
+        }));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setOrderLoading(false);
+      }
+    };
+
+    fetchOrder();
+  }, [id]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -72,37 +111,36 @@ const Form = () => {
         throw new Error("Failed to create payment.");
       }
 
-      const result = await response.json();
-      setResponseMessage("Payment created successfully!");
+      const result = await response.json() as {
+        status: string;
+        data: { id: number };
+      };
 
-      // Automatically clear the response message after 5 seconds
-      setTimeout(() => {
-        setResponseMessage(null);
-      }, 5000);
+      if (result.status === 'success') {
+        // Redirect to /admin/payments/{id}
+        router.push(`/admin/payments/${result.data.id}`);
+      } else {
+        // handle error‐status case
+        console.error('Server error:', result);
+      }
+
+
+      setResponseMessage("Payment created successfully!");
+      setTimeout(() => setResponseMessage(null), 5000);
     } catch (error: any) {
       setResponseMessage(`Error: ${error.message}`);
-
-      // Automatically clear the error message after 5 seconds
-      setTimeout(() => {
-        setResponseMessage(null);
-      }, 5000);
+      setTimeout(() => setResponseMessage(null), 5000);
     } finally {
       setLoading(false);
     }
-
-    router.push("/admin/payments");
   };
-
-  {
-    console.log(responseMessage);
-  }
 
   return (
     <motion.div
       initial={{ opacity: 0, x: -50 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className=" bg-gray-100 flex justify-center"
+      className="bg-gray-100 flex justify-center"
     >
       <motion.form
         initial={{ opacity: 0, y: 20 }}
@@ -116,10 +154,10 @@ const Form = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          {/* Order ID */}
-          <div className="w-full">
+          {/* Order ID with spinner */}
+          <div className="w-full relative">
             <label
-              htmlFor="orderId"
+              htmlFor="order_id"
               className="block text-sm font-medium text-gray-700"
             >
               Order ID
@@ -130,19 +168,25 @@ const Form = () => {
               name="order_id"
               value={formData.order_id}
               onChange={handleChange}
-              placeholder="Enter Order ID"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              placeholder="Order ID"
+              disabled
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm bg-gray-100 p-2 pr-10 sm:text-sm"
               required
             />
+            {orderLoading && (
+              <div className="">
+                loading...
+              </div>
+            )}
           </div>
 
           {/* Going Rate */}
           <div className="w-full">
             <label
-              htmlFor="goingRate"
+              htmlFor="going_rate"
               className="block text-sm font-medium text-gray-700"
             >
-              Going Rate
+              Going Rate (₦)
             </label>
             <input
               type="text"
@@ -150,19 +194,19 @@ const Form = () => {
               name="going_rate"
               value={formData.going_rate}
               onChange={handleChange}
-              placeholder="Enter Going Rate"
+              placeholder="Actual Price"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
-            </div>
+          </div>
 
           {/* VAT */}
           <div className="w-full">
             <label
-              htmlFor="vat"
+              htmlFor="VAT"
               className="block text-sm font-medium text-gray-700"
             >
-              VAT
+              VAT (%)
             </label>
             <input
               type="text"
@@ -174,7 +218,7 @@ const Form = () => {
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />
-            </div>
+          </div>
 
           {/* Discount */}
           <div className="w-full">
@@ -182,7 +226,7 @@ const Form = () => {
               htmlFor="discount"
               className="block text-sm font-medium text-gray-700"
             >
-              Discount (optional)
+              Discount (%)
             </label>
             <input
               type="text"
@@ -193,7 +237,7 @@ const Form = () => {
               placeholder="Enter Discount (optional)"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
             />
-            </div>
+          </div>
         </div>
 
         {/* Submit Button */}
@@ -205,17 +249,16 @@ const Form = () => {
             } focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2`}
             disabled={loading}
           >
-            {loading ? "Loading..." : "Create Payment"}   
-            
+            {loading ? "Loading..." : "Create Payment"}
           </button>
         </div>
 
-        {/* Response Message */}
         {responseMessage && (
-          <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
-            {responseMessage}
-          </div>
-        )}
+  <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 text-sm">
+    {responseMessage}
+  </div>
+)}
+
       </motion.form>
     </motion.div>
   );

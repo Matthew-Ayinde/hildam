@@ -7,7 +7,7 @@ import LogoutButton from "@/components/Logout";
 import { useRouter } from "next/navigation";
 
 const Topbar = () => {
-  const [userName, setUserName] = useState("CEO");
+  const [userName, setUserName] = useState("USER");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   interface Notification {
     id: string;
