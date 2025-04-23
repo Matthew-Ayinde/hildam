@@ -11,6 +11,7 @@ import Link from "next/link";
 import { FaRegCircleXmark } from "react-icons/fa6";
 import { motion } from "framer-motion"; // Import Framer Motion
 import { getSession } from "next-auth/react";
+import { FaRegClock } from "react-icons/fa";
 
 export default function ShowCustomer() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -161,7 +162,7 @@ export default function ShowCustomer() {
     tailor_image?: string;
     project_manager_approval?: string;
     style_reference_images?: string;
-    customer_approval: string;
+    client_manager_approval: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -216,7 +217,7 @@ export default function ShowCustomer() {
             result.data.project_manager_approval || null,
           customer_feedback: result.data.customer_feedback || null,
           style_reference_images: result.data.style_reference_images || null,
-          customer_approval: result.data.customer_approval,
+          client_manager_approval: result.data.client_manager_approval,
         };
         setCustomer(mappedCustomer);
       } else {
@@ -617,45 +618,67 @@ export default function ShowCustomer() {
       {customer.tailor_image !== null && (
         <>
           <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">
-            <motion.div
-              className="font-bold text-xl mt-5 text-gray-700"
-              initial="hidden"
-              animate="visible"
-              variants={fadeInUp}
-              transition={{ duration: 0.5, delay: 0.9 }}
-            >
-              Image Style
-            </motion.div>
-            <div className="flex items-center mt-4">
-              {customer.tailor_image && (
-                <div className="mr-4">
-                  <Image
-                    src={customer.tailor_image}
-                    alt="Tailor"
-                    width={100}
-                    height={100}
-                    className="rounded"
-                  />
-                </div>
-              )}
-              {customer.customer_approval === "Approved" && (
-                <>
-                  <FaCheckCircle className="text-green-500 text-3xl" />
-                  <span className="ml-2 text-green-500 font-semibold">
-                    Style accepted
-                  </span>
-                </>
-              )}
-              {customer.customer_approval === "Rejected" && (
-                <>
-                  <FaRegCircleXmark className="text-red-500 text-3xl" />
-                  <span className="ml-2 text-red-500 font-semibold">
-                    Style rejected
-                  </span>
-                </>
-              )}
-            </div>
+          <motion.div
+            className="font-bold text-xl mt-5 text-gray-700"
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+            transition={{ duration: 0.5, delay: 0.9 }}
+          >
+            Image Style
+          </motion.div>
+          <div className="flex items-center mt-4">
+            {customer.tailor_image && (
+              <div className="mr-4">
+                <Image
+                  src={customer.tailor_image}
+                  alt="Tailor"
+                  width={100}
+                  height={100}
+                  className="rounded"
+                />
+              </div>
+            )}
+            {customer.client_manager_approval === "pending" && (
+              <>
+                <FaRegClock className="text-yellow-500 text-3xl" />
+                <span className="ml-2 text-yellow-500 font-semibold">
+                  Style under review
+                </span>
+              </>
+            )}
+            {customer.client_manager_approval === "approved" && (
+              <>
+                <FaCheckCircle className="text-green-500 text-3xl" />
+                <span className="ml-2 text-green-500 font-semibold">
+                  Style approved
+                </span>
+              </>
+            )}
+            {customer.client_manager_approval === "rejected" && (
+              <>
+                <FaRegCircleXmark className="text-red-500 text-3xl" />
+                <span className="ml-2 text-red-500 font-semibold">
+                  Style rejected
+                </span>
+              </>
+            )}
           </div>
+        </div>
+
+        {customer.client_manager_approval === "pending" && (
+              <div className="mt-5">
+                <div className="text-3xl font-bold text-gray-700">Inventory Request</div>
+                <h1 className=" font-normal my-3 text-gray-700">
+                  Your style has been approved, youmay now request inventory items necessary to complete your job
+                </h1>
+                  <Link href={`/head-of-tailoring/jobs/${id}/request-inventory`} className="">
+                      <button className="bg-orange-500 text-white px-4 py-2 rounded">
+                          Request Inventory
+                      </button>
+                  </Link>
+              </div>
+            )}
         </>
       )}
 

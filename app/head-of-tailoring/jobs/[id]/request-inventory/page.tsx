@@ -3,8 +3,10 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getSession } from 'next-auth/react';
+import { HiCheckCircle } from "react-icons/hi";
+import Spinner from '@/components/Spinner';
 import { useParams } from 'next/navigation';
 
 interface InventoryItem {
@@ -217,38 +219,82 @@ export default function InventoryPage() {
       setIsLoading(false);
     }
   };
-  
+
+  const [showToast, setShowToast] = useState(false);
+
+  // Auto-hide toast after 5 seconds when successMsg updates
+  useEffect(() => {
+    if (successMsg) {
+      setShowToast(true);
+      const timer = setTimeout(() => setShowToast(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMsg]);
+
 
   if (dataLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-orange-200 to-orange-100">
-        <p className="text-xl font-semibold text-orange-600">Loading inventory...</p>
+      <div className="min-h-40 flex items-center justify-center bg-gradient-to-r from-orange-200 to-orange-100 space-x-2">
+        <p className="text-xl font-semibold text-orange-600">Loading items...</p>
+        <Spinner />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-orange-200 to-orange-100 p-8">
-    {errors.general && (
-      <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-center">
-        {errors.general}
-      </div>
-    )}
-    
-    {successMsg && (
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-md text-center"
-      >
-        {successMsg}
-      </motion.div>
-    )}
-    
-      <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-xl p-8">
-        <h1 className="text-3xl font-bold text-center text-orange-600 mb-8">
-          List of Inventory Items
+    <div className="min-h-screen bg-gradient-to-r from-orange-200 to-orange-100 rounded-xl">
+
+ {/* Success Toast */}
+ <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+            className="fixed top-8 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-xl flex items-center space-x-2 z-50"
+          >
+            <HiCheckCircle size={24} />
+            <span className="font-medium">{successMsg}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="bg-white shadow-xl rounded-xl p-8">
+        <h1 className="text-3xl font-bold text-center text-orange-600 mb-6">
+          Available Inventory Items
         </h1>
+
+        {/* System Process Description */}
+        <div className="mb-8 p-6 bg-orange-50 rounded-lg border border-orange-200">
+          <h2 className="text-2xl font-semibold text-orange-600 mb-2 text-center">
+            How Our Inventory Request System Works
+          </h2>
+          <p className="text-center text-gray-700 mb-4">
+            Welcome to our streamlined inventory management portal! Below you can
+            view real-time stock levels and easily submit requests to adjust
+            quantities. Our process ensures accuracy, transparency, and speed
+            every step of the way.
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-gray-600 px-4">
+            <li>
+              <strong>Review Stock:</strong> See the current availability for
+              each item to make informed decisions.
+            </li>
+            <li>
+              <strong>Adjust Quantity:</strong> Use the plus/minus buttons or
+              type directly to specify the number you wish to request.
+            </li>
+            <li>
+              <strong>Submit Request:</strong> Click "Submit Request" to send
+              your updated quantities to our inventory team instantly.
+            </li>
+            <li>
+              <strong>Confirmation:</strong> Receive immediate feedback and a
+              confirmation message once your request is processed.
+            </li>
+          </ol>
+        </div>
+
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
             {inventoryData.map((item) => (
@@ -281,7 +327,7 @@ export default function InventoryPage() {
                         handleChange(item.id, item.item_quantity, e.target.value)
                       }
                       className="w-20 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-300"
-                      min="0"
+                      min={0}
                     />
                     <motion.button
                       whileTap={{ scale: 0.9 }}
@@ -293,7 +339,9 @@ export default function InventoryPage() {
                     </motion.button>
                   </div>
                   {errors[item.id] && (
-                    <p className="mt-2 text-sm text-red-500">{errors[item.id]}</p>
+                    <p className="mt-2 text-sm text-red-500">
+                      {errors[item.id]}
+                    </p>
                   )}
                 </div>
               </div>
@@ -307,15 +355,12 @@ export default function InventoryPage() {
             {isLoading ? "Submitting..." : "Submit Request"}
           </button>
         </form>
-        {successMsg && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-6 p-4 bg-green-100 border border-green-400 text-green-800 rounded-md text-center"
-          >
-            {successMsg}
-          </motion.div>
-        )}
+
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-500">
+            If you have any questions, please contact your client manager.
+          </p>
+          </div>
       </div>
     </div>
   );
