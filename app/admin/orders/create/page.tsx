@@ -5,77 +5,78 @@ import { motion } from "framer-motion";
 import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 import { FaRegSmile } from "react-icons/fa";
 
+type FormDataType = {
+  order_status: string;
+  priority: string;
+  clothing_description: string;
+  clothing_name: string;
+  customer_name: string;
+  customer_email: string;
+  customer_description: string;
+  manager_id: string;
+  bust: string;
+  waist: string;
+  hip: string;
+  neck: string;
+  shoulder: string;
+  bustpoint: string;
+  shoulder_to_underbust: string;
+  round_under_bust: string;
+  half_length: string;
+  blouse_length: string;
+  sleeve_length: string;
+  round_sleeve: string;
+  dress_length: string;
+  chest: string;
+  round_shoulder: string;
+  skirt_length: string;
+  trousers_length: string;
+  round_thigh: string;
+  round_knee: string;
+  round_feet: string;
+  style_reference_images: File | null;
+  phone_number: string;
+  gender: string;
+};
+
+const initialFormData: FormDataType = {
+  order_status: "",
+  priority: "",
+  clothing_description: "",
+  clothing_name: "",
+  customer_name: "",
+  customer_email: "",
+  customer_description: "",
+  manager_id: "",
+  bust: "",
+  waist: "",
+  hip: "",
+  neck: "",
+  shoulder: "",
+  bustpoint: "",
+  shoulder_to_underbust: "",
+  round_under_bust: "",
+  half_length: "",
+  blouse_length: "",
+  sleeve_length: "",
+  round_sleeve: "",
+  dress_length: "",
+  chest: "",
+  round_shoulder: "",
+  skirt_length: "",
+  trousers_length: "",
+  round_thigh: "",
+  round_knee: "",
+  round_feet: "",
+  style_reference_images: null,
+  phone_number: "",
+  gender: "",
+};
+
+
 const Form = () => {
 
-  const [formData, setFormData] = useState<{
-    order_status: string;
-    priority: string;
-    clothing_description: string;
-    clothing_name: string;
-    customer_name: string;
-    customer_email: string;
-    customer_description: string;
-    manager_id: string; // New field for selected project manager
-    bust: string;
-    waist: string;
-    hip: string;
-    neck: string;   
-    shoulder: string;
-    bustpoint: string;
-    shoulder_to_underbust: string;
-    round_under_bust: string;
-    half_length: string;
-    blouse_length: string;
-    sleeve_length: string;
-    round_sleeve: string;
-    dress_length: string;
-    chest: string;
-    round_shoulder: string;
-    skirt_length: string;
-    trousers_length: string;
-    round_thigh: string;
-    round_knee: string;
-    round_feet: string;
-    style_reference_images: File | null; // New field for style reference images
-    phone_number: string;
-    gender: string;
-    
-
-  }>({
-    order_status: "",
-    priority: "",
-    clothing_description: "",
-    clothing_name: "",
-    customer_name: "",
-    customer_description: "",
-    customer_email: "",
-    manager_id: "", // Initialize with empty string
-    bust: "",
-    waist: "",
-    hip: "",
-    neck: "",
-    shoulder: "",
-    bustpoint: "",
-    shoulder_to_underbust: "",
-    round_under_bust: "",
-    half_length: "",
-    blouse_length: "",
-    sleeve_length: "",
-    round_sleeve: "",
-    dress_length: "",
-    chest: "",
-    round_shoulder: "",
-    skirt_length: "",
-    trousers_length: "",
-    round_thigh: "",
-    round_knee: "",
-    round_feet: "",
-    style_reference_images: null,
-    phone_number: "", // Initialize with empty string
-   // Initialize with empty string
-   gender: ""
-  });
-
+  const [formData, setFormData] = useState<FormDataType>(initialFormData);
   const [managers, setManagers] = useState<
     {
       id: string;
@@ -234,32 +235,7 @@ payload.append("round_feet", formData.round_feet); // Handles 'tread' case
 
       if (response.ok) {
         setResponseMessage("Order created successfully");
-        setFormData({
-          order_status: "",
-          customer_description: "",
-          priority: "",
-          clothing_description: "",
-          clothing_name: "",
-          customer_name: "",
-          gender: "",
-          
-          phone_number: "",
-          customer_email: "",
-        
-          
-          
-          bust: "",
-          waist: "",
-          style_reference_images: null,
-          
-        
-          neck: "",
-        
-          
-          
-        
-          manager_id: "", // Reset manager ID
-        });
+        setFormData(initialFormData);
         setImagePreview(null); // Reset image preview
 
         // Automatically hide response message after 5 seconds
@@ -514,6 +490,7 @@ payload.append("round_feet", formData.round_feet); // Handles 'tread' case
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
+            
             { id: "bust", label: "Bust" },
             { id: "waist", label: "Waist" },
             { id: "hips", label: "Hips" },
@@ -549,7 +526,7 @@ payload.append("round_feet", formData.round_feet); // Handles 'tread' case
                 id={id}
                 name={id}
                 type={id === "round_feet" ? "text" : "number"}
-                value={formData[id]}
+                value={(formData[id as keyof FormDataType] ?? "").toString()}
                 onChange={handleChange}
                 placeholder={label}
                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:border-orange-500 focus:ring focus:ring-orange-200 transition"

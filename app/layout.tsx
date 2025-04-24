@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import SessionProvider from "@/components/SessionProvider";
 import { authOptions } from "@/lib/auth"; // Import NextAuth config
+import { Session } from "next-auth";
 
 const play = Play({ subsets: ["latin"], weight: ["400", "700"] });
 

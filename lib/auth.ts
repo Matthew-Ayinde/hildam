@@ -37,9 +37,9 @@ export const authOptions = {
 
           // Return user details along with access token
           return {
-            id: decodedToken.user_id, // Required by NextAuth
-            name: decodedToken.name,
-            role: decodedToken.role,
+            id: typeof decodedToken === "object" && decodedToken !== null && "user_id" in decodedToken ? decodedToken.user_id : undefined, // Required by NextAuth
+            name: typeof decodedToken === "object" && decodedToken !== null && "name" in decodedToken ? decodedToken.name : undefined,
+            role: typeof decodedToken === "object" && decodedToken !== null && "role" in decodedToken ? decodedToken.role : undefined,
             token: data.access_token, // Store encoded JWT
           };
         } catch (error) {
@@ -50,7 +50,7 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any; user?: any }) {
       // If user logs in, store token & details
       if (user) {
         token.name = user.name;
@@ -59,7 +59,7 @@ export const authOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       // Pass user details & access token to session
       session.user = {
         name: token.name,
