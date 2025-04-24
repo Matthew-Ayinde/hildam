@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import { getSession } from "next-auth/react";
 import Spinner from "@/components/Spinner";
 
-export default function ExpenseTable({ projectId }: { projectId: string }) {
+export default function ExpenseTable() {
   interface Expense {
     id: string;
     total_amount: string;
@@ -78,7 +78,7 @@ export default function ExpenseTable({ projectId }: { projectId: string }) {
 
   useEffect(() => {
     fetchData();
-  }, [projectId]);
+  }, []);
 
   const totalPages = Math.ceil(data.length / rowsPerPage);
 

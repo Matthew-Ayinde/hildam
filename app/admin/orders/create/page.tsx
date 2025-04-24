@@ -38,6 +38,8 @@ const Form = () => {
     round_feet: string;
     style_reference_images: File | null; // New field for style reference images
     phone_number: string;
+    gender: string;
+    
 
   }>({
     order_status: "",
@@ -71,6 +73,7 @@ const Form = () => {
     style_reference_images: null,
     phone_number: "", // Initialize with empty string
    // Initialize with empty string
+   gender: ""
   });
 
   const [managers, setManagers] = useState<
@@ -239,22 +242,22 @@ payload.append("round_feet", formData.round_feet); // Handles 'tread' case
           clothing_name: "",
           customer_name: "",
           gender: "",
-          age: "",
+          
           phone_number: "",
           customer_email: "",
-          address: "",
-          description: "",
-          photo: null,
+        
+          
+          
           bust: "",
           waist: "",
           style_reference_images: null,
-          hips: "",
-          shoulderWidth: "",
+          
+        
           neck: "",
-          armLength: "",
-          backLength: "",
-          frontLength: "",
-          highBust: "",
+        
+          
+          
+        
           manager_id: "", // Reset manager ID
         });
         setImagePreview(null); // Reset image preview

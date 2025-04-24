@@ -4,99 +4,81 @@ import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { IoIosArrowBack } from "react-icons/io";
+import { IoIosArrowBack, IoIosArrowDown } from "react-icons/io";
+import { FiDollarSign } from "react-icons/fi";
+import { AiOutlineBarChart } from "react-icons/ai";
+import { motion } from "framer-motion";
+import { getSession } from "next-auth/react";
 
 export default function EditCustomer() {
-
   const router = useRouter();
   const { id } = useParams();
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
-  const [successMessage, setSuccessMessage] = useState<string>("");
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [formData, setFormData] = useState({
-    payment_status_id: "",
     order_id: "",
+    payment_status_id: "",
+    total_paid: "",
+    cumulative: "",
   });
 
   const fetchCustomer = async () => {
     setLoading(true);
     setError("");
-
     try {
-      const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(
+      const session = await getSession();
+      const token = session?.user?.token;
+      const res = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/payment/${id}`,
         {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch payment data");
-      }
-
-      const result = await response.json();
+      if (!res.ok) throw new Error("Failed to fetch payment data");
+      const { data } = await res.json();
       setFormData({
-        order_id: result.data.order_id,
-        payment_status_id: result.data.payment_status_id, // Use fetched payment_status_id
+        order_id: data.order_id,
+        payment_status_id: data.payment_status_id,
+        total_paid: data.total_paid,
+        cumulative: data.cumulative,
       });
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e: { target: { name: any; value: any } }) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handlePaymentStatusChange = (statusId: string) => {
-    setFormData({
-      ...formData,
-      payment_status_id: statusId,
-    });
-  };
-
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
-
     try {
-      const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(
+      const session = await getSession();
+      const token = session?.user?.token;
+      const res = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/editpayment/${id}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(formData),
         }
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to update payment data");
-      }
-
-      setSuccessMessage("Payment status updated successfully!");
-      setTimeout(() => {
-        router.push("/admin/payments");
-      }, 2000); // Redirect after 2 seconds
+      if (!res.ok) throw new Error("Failed to update payment data");
+      setSuccessMessage("Payment updated successfully!");
+      setTimeout(() => router.push("/admin/payments"), 2000);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
+      setError(err instanceof Error ? err.message : "Unknown error");
     }
   };
 
@@ -104,95 +86,133 @@ export default function EditCustomer() {
     fetchCustomer();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="text-center text-gray-500 py-10">
-        <Spinner />
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="flex justify-center items-center h-full py-20">
+      <Spinner />
+    </div>
+  );
 
-  if (error) {
-    return (
-      <div className="text-center text-red-500 py-10">
-        Error: {error}
-        <button onClick={fetchCustomer} className="text-blue-500 underline">
-          Retry
-        </button>
-      </div>
-    );
-  }
+  if (error) return (
+    <div className="text-center text-red-600 py-10">
+      <p>Error: {error}</p>
+      <button onClick={fetchCustomer} className="mt-4 text-blue-600 underline">
+        Retry
+      </button>
+    </div>
+  );
 
   return (
-    <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="mx-auto p-8 bg-white rounded-3xl shadow-lg"
+    >
       {successMessage && (
-        <div className="fixed top-0 left-1/2 mt-5 -translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded shadow-md">
-          {successMessage}
-        </div>
-      )}
-      <form onSubmit={handleSubmit}>
-        <Link href={"/admin/payments"}
-          className="hover:text-orange-700 text-orange-500 flex flex-row items-center mb-5"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white py-2 px-6 rounded-full shadow-md flex items-center"
         >
-          <IoIosArrowBack size={30} />
-          <div className="mx-2">Back to List</div>
+          <FiDollarSign className="mr-2" />
+          {successMessage}
+        </motion.div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <Link
+          href="/admin/payments"
+          className="flex items-center text-orange-500 hover:text-orange-700"
+        >
+          <IoIosArrowBack size={24} />
+          <span className="ml-2">Back to List</span>
         </Link>
-        <div className="grid grid-cols-2 gap-6">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-gray-700 font-bold">Order ID</label>
+            <label className="block text-gray-700 font-semibold mb-1">
+              Order ID
+            </label>
             <input
               type="text"
               name="order_id"
               value={formData.order_id}
-              onChange={handleInputChange}
               disabled
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
+              className="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 text-gray-600"
             />
           </div>
+
+          <div className="relative">
+            <label className="block text-gray-700 font-semibold mb-1">
+              Payment Status
+            </label>
+            <select
+              name="payment_status_id"
+              value={formData.payment_status_id}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 rounded-lg p-3 appearance-none bg-white"
+            >
+              <option value="">Select status</option>
+              <option value="1">Not Paid</option>
+              <option value="2">In Review</option>
+              <option value="3">Paid</option>
+            </select>
+            <IoIosArrowDown className="absolute right-3 top-10 pointer-events-none text-gray-500" />
+          </div>
+
           <div>
-            <label className="block text-gray-700 font-bold">Payment Status</label>
-            <div className="flex space-x-4">
-              <button
-                type="button"
-                onClick={() => handlePaymentStatusChange("2")}
-                className={`px-4 py-2 rounded ${formData.payment_status_id === "2" ? "bg-orange-500 text-white" : "bg-gray-200 text-black"}`}
-              >
-                In Review
-              </button>
-              <button
-                type="button"
-                onClick={() => handlePaymentStatusChange("3")}
-                className={`px-4 py-2 rounded ${formData.payment_status_id === "3" ? "bg-orange-500 text-white" : "bg-gray-200 text-black"}`}
-              >
-                Paid
-              </button>
-              <button
-                type="button"
-                onClick={() => handlePaymentStatusChange("1")}
-                className={`px-4 py-2 rounded ${formData.payment_status_id === "1" ? "bg-orange-500 text-white" : "bg-gray-200 text-black"}`}
-              >
-                Not Paid
-              </button>
-            </div>
+            <label className="block text-gray-700 font-semibold mb-1">
+              <span className="text-xl inline mr-1">₦</span> Total Paid
+            </label>
+            <input
+              type="number"
+              name="total_paid"
+              value={formData.total_paid}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 rounded-lg p-3"
+              placeholder="0.00"
+              step="0.01"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">
+              <AiOutlineBarChart className="inline mr-1" /> Cumulative
+            </label>
+            <input
+              type="number"
+              name="cumulative"
+              value={formData.cumulative}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 rounded-lg p-3"
+              placeholder="0.00"
+              step="0.01"
+            />
           </div>
         </div>
 
-        <div className="col-span-2 mt-10 flex justify-end">
-          <button
-            type="submit"
-            className="px-4 py-2 bg-orange-500 text-white rounded"
-          >
-            Save Changes
-          </button>
-          <button
+        <div className="flex justify-end space-x-4 pt-4">
+          <motion.button
             type="button"
             onClick={() => router.push(`/admin/payments/${id}`)}
-            className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-6 py-3 bg-gray-500 text-white rounded-lg"
           >
             Cancel
-          </button>
+          </motion.button>
+
+          <motion.button
+            type="submit"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-6 py-3 bg-orange-500 text-white rounded-lg"
+          >
+            Save Changes
+          </motion.button>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 }

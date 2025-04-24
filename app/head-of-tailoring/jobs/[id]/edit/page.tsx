@@ -15,7 +15,7 @@ export default function EditCustomer() {
     age: string;
     phone_number: string;
     email: string;
-    bust: number;
+    bust: number; 
     address: string;
     waist: number;
     hip: number;

@@ -163,6 +163,23 @@ export default function ShowCustomer() {
     project_manager_approval?: string;
     style_reference_images?: string;
     client_manager_approval: string;
+    hip: number;
+    shoulder: number;
+    bustpoint: number;
+    shoulder_to_underbust: number;
+    round_under_bust: number;
+    half_length: number;
+    blouse_length: number;
+    sleeve_length: number;
+    round_sleeve: number;
+    dress_length: number;
+    chest: number;
+    round_shoulder: number;
+    skirt_length: number;
+    trousers_length: number;
+    round_thigh: number;
+    round_knee: number;
+    round_feet: number;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -215,9 +232,26 @@ export default function ShowCustomer() {
           tailor_image: result.data.tailor_image || null,
           project_manager_approval:
             result.data.project_manager_approval || null,
-          customer_feedback: result.data.customer_feedback || null,
+          client_manager_feedback: result.data.client_manager_feedback || null,
           style_reference_images: result.data.style_reference_images || null,
           client_manager_approval: result.data.client_manager_approval,
+          hip: result.data.hip || 0,
+          shoulder: result.data.shoulder || 0,
+          bustpoint: result.data.bustpoint || 0,
+          shoulder_to_underbust: result.data.shoulder_to_underbust || 0,
+          round_under_bust: result.data.round_under_bust || 0,
+          half_length: result.data.half_length || 0,
+          blouse_length: result.data.blouse_length || 0,
+          sleeve_length: result.data.sleeve_length || 0,
+          round_sleeve: result.data.round_sleeve || 0,
+          dress_length: result.data.dress_length || 0,
+          chest: result.data.chest || 0,
+          round_shoulder: result.data.round_shoulder || 0,
+          skirt_length: result.data.skirt_length || 0,
+          trousers_length: result.data.trousers_length || 0,
+          round_thigh: result.data.round_thigh || 0,
+          round_knee: result.data.round_knee || 0,
+          round_feet: result.data.round_feet || 0,
         };
         setCustomer(mappedCustomer);
       } else {
@@ -443,6 +477,79 @@ export default function ShowCustomer() {
                 id: "front_length",
               },
               { label: "High Bust", value: customer.high_bust, id: "highBust" },
+              { label: "Hip", value: customer.hip, id: "hip" },
+              { label: "Shoulder", value: customer.shoulder, id: "shoulder" },
+              {
+                label: "Bust Point",
+                value: customer.bustpoint,
+                id: "bustpoint",
+              },
+              {
+                label: "Shoulder to Underbust",
+                value: customer.shoulder_to_underbust,
+                id: "shoulder_to_underbust",
+              },
+              {
+                label: "Round Under Bust",
+                value: customer.round_under_bust,
+                id: "round_under_bust",
+              },
+              {
+                label: "Half Length",
+                value: customer.half_length,
+                id: "half_length",
+              },
+              {
+                label: "Blouse Length",
+                value: customer.blouse_length,
+                id: "blouse_length",
+              },
+              {
+                label: "Sleeve Length",
+                value: customer.sleeve_length,
+                id: "sleeve_length",
+              },
+              {
+                label: "Round Sleeve",
+                value: customer.round_sleeve,
+                id: "round_sleeve",
+              },
+              {
+                label: "Dress Length",
+                value: customer.dress_length,
+                id: "dress_length",
+              },
+              { label: "Chest", value: customer.chest, id: "chest" },
+              {
+                label: "Round Shoulder",
+                value: customer.round_shoulder,
+                id: "round_shoulder",
+              },
+              {
+                label: "Skirt Length",
+                value: customer.skirt_length,
+                id: "skirt_length",
+              },
+              {
+                label: "Trousers Length",
+                value: customer.trousers_length,
+                id: "trousers_length",
+              },
+              {
+                label: "Round Thigh",
+                value: customer.round_thigh,
+                id: "round_thigh",
+              },
+              {
+                label: "Round Knee",
+                value: customer.round_knee,
+                id: "round_knee",
+              },
+              {
+                label: "Round Feet",
+                value: customer.round_feet,
+                id: "round_feet",
+              },
             ].map((measurement, index) => (
               <motion.div
                 key={index}
@@ -503,35 +610,11 @@ export default function ShowCustomer() {
                   />
                 </div>
               )}
-              {customer.project_manager_approval === "In Review" && (
-                <>
-                  <FaCheckCircle className="text-green-500 text-3xl" />
-                  <span className="ml-2 text-green-500 font-semibold">
-                    Style under review
-                  </span>
-                </>
-              )}
-              {customer.project_manager_approval === "Approved" && (
-                <>
-                  <FaCheckCircle className="text-green-500 text-3xl" />
-                  <span className="ml-2 text-green-500 font-semibold">
-                    Style accepted
-                  </span>
-                </>
-              )}
-              {customer.project_manager_approval === "Rejected" && (
-                <>
-                  <FaRegCircleXmark className="text-red-500 text-3xl" />
-                  <span className="ml-2 text-red-500 font-semibold">
-                    Style rejected
-                  </span>
-                </>
-              )}
             </motion.div>
           )}
 
           {/* Upload Image Section */}
-          {customer.project_manager_approval !== "Approved" && (
+          {customer.client_manager_approval !== "accepted" && (
             <motion.div
               className="mb-6"
               initial="hidden"
@@ -618,78 +701,196 @@ export default function ShowCustomer() {
       {customer.tailor_image !== null && (
         <>
           <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">
-          <motion.div
-            className="font-bold text-xl mt-5 text-gray-700"
-            initial="hidden"
-            animate="visible"
-            variants={fadeInUp}
-            transition={{ duration: 0.5, delay: 0.9 }}
-          >
-            Image Style
-          </motion.div>
-          <div className="flex items-center mt-4">
-            {customer.tailor_image && (
-              <div className="mr-4">
-                <Image
-                  src={customer.tailor_image}
-                  alt="Tailor"
-                  width={100}
-                  height={100}
-                  className="rounded"
-                />
-              </div>
-            )}
-            {customer.client_manager_approval === "pending" && (
-              <>
-                <FaRegClock className="text-yellow-500 text-3xl" />
-                <span className="ml-2 text-yellow-500 font-semibold">
-                  Style under review
-                </span>
-              </>
-            )}
-            {customer.client_manager_approval === "approved" && (
-              <>
-                <FaCheckCircle className="text-green-500 text-3xl" />
-                <span className="ml-2 text-green-500 font-semibold">
-                  Style approved
-                </span>
-              </>
-            )}
+            <motion.div
+              className="font-bold text-xl mt-5 text-gray-700"
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 0.9 }}
+            >
+              Image Style
+            </motion.div>
+            <div className="flex items-center mt-4">
+              {customer.tailor_image && (
+                <div className="mr-4">
+                  <Image
+                    src={customer.tailor_image}
+                    alt="Tailor"
+                    width={100}
+                    height={100}
+                    className="rounded"
+                  />
+                </div>
+              )}
+              {customer.client_manager_approval === "pending" && (
+                <>
+                  <FaRegClock className="text-yellow-500 text-3xl" />
+                  <span className="ml-2 text-yellow-500 font-semibold">
+                    Style under review
+                  </span>
+                </>
+              )}
+              {customer.client_manager_approval === "accepted" && (
+                <>
+                  <FaCheckCircle className="text-green-500 text-3xl" />
+                  <span className="ml-2 text-green-500 font-semibold">
+                    Style approved
+                  </span>
+                </>
+              )}
+              {customer.client_manager_approval === "rejected" && (
+                <>
+                  <FaRegCircleXmark className="text-red-500 text-3xl" />
+                  <span className="ml-2 text-red-500 font-semibold">
+                    Style rejected
+                  </span>
+                </>
+              )}
+            </div>
+
             {customer.client_manager_approval === "rejected" && (
-              <>
-                <FaRegCircleXmark className="text-red-500 text-3xl" />
-                <span className="ml-2 text-red-500 font-semibold">
-                  Style rejected
-                </span>
-              </>
+              <div className="mt-5">
+                <div className="font-bold text-gray-700 text-2xl">Feedback</div>
+                <div className="text-gray-500">
+                  {customer.client_manager_feedback}
+                </div>
+              </div>
             )}
           </div>
-        </div>
 
-        {customer.client_manager_approval === "pending" && (
-              <div className="mt-5">
-                <div className="text-3xl font-bold text-gray-700">Inventory Request</div>
-                <h1 className=" font-normal my-3 text-gray-700">
-                  Your style has been approved, youmay now request inventory items necessary to complete your job
-                </h1>
-                  <Link href={`/head-of-tailoring/jobs/${id}/request-inventory`} className="">
-                      <button className="bg-orange-500 text-white px-4 py-2 rounded">
-                          Request Inventory
-                      </button>
-                  </Link>
+          {customer.client_manager_approval === "accepted" && (
+            <div className="mt-5 flex flex-col items-center justify-center">
+              <div className="text-3xl font-bold text-gray-700">
+                Inventory Request
               </div>
-            )}
+              <h1 className=" font-normal my-3 text-gray-700">
+                Your style has been approved, you may now request inventory
+                items necessary to complete your job
+              </h1>
+              <Link
+                href={`/head-of-tailoring/jobs/${id}/request-inventory`}
+                className=""
+              >
+                <button className="bg-orange-500 text-white px-4 py-2 rounded">
+                  Request Inventory
+                </button>
+              </Link>
+            </div>
+          )}
         </>
       )}
 
-      <div className="mt-5 flex justify-end">
-      <Link
-        href={`/head-of-tailoring/jobs/${id}/request-inventory`}
-        className="w-fit px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition duration-200"
-      >
-        Request Inventory
-      </Link>
-      </div>
+     {/* Upload Image Section */}
+     {customer.client_manager_approval === "rejected" && (
+        <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">
+
+          {customer.project_manager_approval && (
+            <motion.div
+              className="flex items-center mt-4"
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 1 }}
+            >
+              {customer.tailor_image && (
+                <div className="mr-4">
+                  <Image
+                    src={customer.tailor_image}
+                    alt="Tailor"
+                    width={100}
+                    height={100}
+                    className="rounded"
+                  />
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* Upload Image Section */}
+          
+            <motion.div
+              className="mb-6"
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 1.1 }}
+            >
+              <label className="block text-gray-700 font-normal mb-2">
+                
+                  <div className="mt-5 text-2xl font-bold">Edit Image</div>
+                  <h1 className=" font-normal my-3 text-gray-700">
+                    Your style has been rejected, please upload a new image
+                    that meets the requirements
+                  </h1>
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="border p-2 rounded w-full"
+              />
+            </motion.div>
+          
+
+          {imagePreview && (
+            <motion.div
+              className="mb-4 flex flex-col items-center"
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 1.2 }}
+            >
+              <img
+                src={imagePreview}
+                alt="Selected"
+                className="w-[200px] h-[200px] object-cover rounded border"
+              />
+              <button
+                onClick={handleRemoveImage}
+                className="mt-2 text-red-500 hover:text-red-700 text-sm font-semibold"
+              >
+                Remove Image
+              </button>
+            </motion.div>
+          )}
+
+          {/* Upload Button */}
+          {selectedImage && !imagePath && (
+            <motion.button
+              onClick={handleUploadImage}
+              disabled={isUploading}
+              className={`w-full py-2 rounded text-white font-semibold transition ${
+                isUploading
+                  ? "bg-gray-100"
+                  : "bg-orange-500 hover:bg-orange-600"
+              }`}
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 1.3 }}
+            >
+              {isUploading ? <Spinner /> : "Upload Image"}
+            </motion.button>
+          )}
+
+          {/* Send to Project Manager Button */}
+          {imagePath && !sentSuccess && (
+            <motion.button
+              onClick={handleSendToProjectManager}
+              disabled={isSending}
+              className={`w-full py-2 rounded text-white font-semibold transition mt-4 ${
+                isSending ? "bg-gray-100" : "bg-green-500 hover:bg-green-600"
+              }`}
+              initial="hidden"
+              animate="visible"
+              variants={fadeInUp}
+              transition={{ duration: 0.5, delay: 1.4 }}
+            >
+              {isSending ? <Spinner /> : "Send to Project Manager"}
+            </motion.button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

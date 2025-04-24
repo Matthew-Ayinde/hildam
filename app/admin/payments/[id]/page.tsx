@@ -208,10 +208,12 @@ export default function ShowCustomer() {
       >
         <div className="flex items-center space-x-2 mb-4">
           <FaRegCreditCard size={24} className="text-orange-600" />
-          <h2 className="text-2xl font-bold text-orange-600">Payment & Order Details</h2>
+          <h2 className="text-2xl font-bold text-orange-600">
+            Payment & Order Details
+          </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="border-b pb-2">
+          <div className="border-b pb-2">
             <p className="text-sm text-gray-600">Customer Name</p>
             <p className="mt-1 text-gray-800">
               <FaUserCircle className="inline mr-1 text-orange-500" />
@@ -226,15 +228,16 @@ export default function ShowCustomer() {
             <p className="text-sm text-gray-600">Payment Status</p>
             <p className="mt-1 text-gray-800">{customer.payment_status}</p>
           </div>
-          
-          
+
           <div className="border-b pb-2">
             <p className="text-sm text-gray-600">Clothing Name</p>
             <p className="mt-1 text-gray-800">{customer.clothing_name}</p>
           </div>
           <div className="md:col-span-2 border-b pb-2">
             <p className="text-sm text-gray-600">Clothing Description</p>
-            <p className="mt-1 text-gray-800">{customer.clothing_description}</p>
+            <p className="mt-1 text-gray-800">
+              {customer.clothing_description}
+            </p>
           </div>
 
           <div className="border-b pb-2">
@@ -284,28 +287,34 @@ export default function ShowCustomer() {
             <p className="text-sm text-gray-600">Order Status</p>
             <p className="mt-1 text-gray-800">{customer.order_status}</p>
           </div>
-          <div className="border-b pb-2">
-            <p className="text-sm text-gray-600">Priority</p>
-            <p className="mt-1 text-gray-800">{customer.priority}</p>
-          </div>
         </div>
       </motion.div>
 
+      <div className="flex justify-between">
+        <div className="flex">
+          <Link
+            href={`/admin/payments/${id}/edit`}
+            className="px-6 py-2 bg-gray-500 text-white font-semibold rounded hover:bg-orange-600 transition"
+          >
+            Edit Payment
+          </Link>
+        </div>
 
-      {/* Action Buttons */}
-      <div className="flex justify-end space-x-4">
-        <Link
-          href={`/admin/payments/${id}/invoice`}
-          className="px-6 py-2 bg-orange-500 text-white font-semibold rounded hover:bg-orange-600 transition"
-        >
-          Generate Invoice
-        </Link>
-        <Link
-          href={`/admin/payments/${id}/receipt`}
-          className="px-6 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600 transition"
-        >
-          Generate Receipt
-        </Link>
+        {/* Action Buttons */}
+        <div className="flex justify-end space-x-4">
+          <Link
+            href={`/admin/payments/${id}/invoice`}
+            className="px-6 py-2 bg-orange-500 text-white font-semibold rounded hover:bg-orange-600 transition"
+          >
+            Generate Invoice
+          </Link>
+          <Link
+            href={`/admin/payments/${id}/receipt`}
+            className="px-6 py-2 bg-green-500 text-white font-semibold rounded hover:bg-green-600 transition"
+          >
+            Generate Receipt
+          </Link>
+        </div>
       </div>
     </motion.div>
   );

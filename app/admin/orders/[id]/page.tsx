@@ -4,8 +4,8 @@ import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { IoIosArrowBack } from "react-icons/io";
-import { motion } from "framer-motion";
+import { IoIosArrowBack, IoIosCheckmarkCircleOutline, IoIosClose } from "react-icons/io";
+import { motion, AnimatePresence } from "framer-motion";
 import { getSession } from "next-auth/react";
 import SkeletonLoader from "@/components/SkeletonLoader";
 import Image from "next/image";
@@ -15,6 +15,9 @@ export default function ShowCustomer() {
   const router = useRouter();
   const { id } = useParams();
   const [isTailorJobModalOpen, setIsTailorJobModalOpen] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState(false);
 
   interface Customer {
     [x: string]: string | number | readonly string[] | undefined;
@@ -55,6 +58,7 @@ export default function ShowCustomer() {
     customer_name: string;
     manager_name: string;
     duration: number;
+    style_approval: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -85,6 +89,8 @@ export default function ShowCustomer() {
   const handleCustomerCloseModal = () => {
     setIsCustomerModalOpen(false);
   };
+
+
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -149,6 +155,7 @@ export default function ShowCustomer() {
           address: result.data.address,
           manager_name: result.data.manager_name,
           duration: result.data.duration,
+          style_approval: result.data.style_approval,
         };
         setCustomer(mappedCustomer);
       } else {
@@ -209,6 +216,14 @@ export default function ShowCustomer() {
       console.error(err);
       // Optionally show error to user
     }
+
+    setIsTailorJobModalOpen(false);
+
+    // Optionally show success message to user
+    setToast(true);
+    setTimeout(() => {
+      setToast(false);
+    }, 3000); // Hide toast after 3 seconds
   };
 
   // ----- New Handlers for Approve Modal -----
@@ -216,8 +231,8 @@ export default function ShowCustomer() {
     // Close the underlying tailor job modal if open
     // setIsCustomerModalOpen(false);
     // setIsRejectModalOpen(false);
-    // setIsApproveModalOpen(true);
-    router.push(`/admin/orders/${id}/create-payment`);
+    setIsApproveModalOpen(true);
+    // router.push(`/admin/orders/${id}/create-payment`);
   };
 
   const handleApproveConfirm = async () => {
@@ -246,7 +261,7 @@ export default function ShowCustomer() {
       setIsApproveModalOpen(false);
       setApprovePrice("");
       // Navigate to invoice route
-      router.push(`/admin/payments/${id}/invoice`);
+      router.push(`/admin/orders/${id}/create-payment`);
     } catch (err) {
       console.error(err);
       // Optionally show error to user
@@ -297,7 +312,7 @@ export default function ShowCustomer() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-center mb-6">
         <Link
-          href="/admin/customers"
+          href="/admin/orders"
           className="flex items-center text-orange-500 hover:text-orange-700 transition-colors"
         >
           <IoIosArrowBack size={28} />
@@ -312,6 +327,20 @@ export default function ShowCustomer() {
           </span>
         </div>
       </div>
+
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-4 rounded-lg shadow-lg"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+          >
+            Style Rejected Successfully!
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* <button
         onClick={handleScroll}
@@ -500,169 +529,222 @@ export default function ShowCustomer() {
         </div>
 
         {/* Other Details - Tailor Job Image */}
-      {customer.tailor_job_image !== null ? (
-        <div className="w-full mb-8 p-6 rounded-2xl shadow-md">
-          <motion.div
-            className="w-full mb-8 p-6 bg-gray-50 rounded-2xl shadow-md"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.5 }}
-          >
-            <label className="block text-xl font-bold text-gray-700 mb-2">
-              Tailor Style
-            </label>
-            {customer.tailor_job_image === "" ? (
-              <div className="text-gray-500">No image selected</div>
-            ) : (
-              <div>
-                <img
-                  src={customer.tailor_job_image}
-                  alt="Tailor Job Style"
-                  className="w-24 h-24 object-cover rounded-md border border-gray-300 cursor-pointer transition hover:shadow-lg"
-                  onClick={handleTailorJobImageClick}
-                />
-              </div>
-            )}
-
-            {isTailorJobModalOpen && (
-              <motion.div
-                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-                onClick={() => setIsTailorJobModalOpen(false)}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div
-                  className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="relative w-full h-[80vh]">
-                    <Image
-                      src={customer.tailor_job_image || "/fallback.jpg"} // fallback optional
-                      alt="Tailor Job Style"
-                      fill
-                      className="object-contain rounded-lg"
-                      onError={(e) => {
-                        // Optional: log or handle fallback differently
-                      }}
-                    />
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="mt-6 flex justify-between">
-                    <button
-                      onClick={handleOpenApproveModal}
-                      className="px-6 py-3 bg-green-500 text-white rounded hover:bg-green-600 transition"
-                    >
-                      Approve Style
-                    </button>
-                    <button
-                      onClick={handleOpenRejectModal}
-                      className="px-6 py-3 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                    >
-                      Reject Style
-                    </button>
-                    {/* Download Button */}
-                    <a
-                      href={customer.tailor_job_image}
-                      download="tailor_job_image.jpg" // Specify a filename if desired
-                      className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                    >
-                      Download Image
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </motion.div>
-        </div>
-      ) : (
-        <div>
-          <h3 className="block text-xl font-bold text-gray-700 mt-10 mb-4">
-            Tailor Job Image
-          </h3>
-          <div className="text-gray-500">No image yet</div>
-        </div>
-      )}
-
-      {/* ---------- New Reject Modal ---------- */}
-      {isRejectModalOpen && (
-        <motion.div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-          onClick={() => {
-            setIsRejectModalOpen(false);
-            setRejectFeedback("");
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <motion.div
-            className="bg-white rounded-lg p-6 w-96"
-            onClick={(e) => e.stopPropagation()}
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0.8 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h2 className="text-xl font-bold mb-4 text-gray-800">
-              Reject Style
-            </h2>
-            <input
-              type="text"
-              placeholder="feedback"
-              name="rejectFeedback"
-              value={rejectFeedback}
-              onChange={(e) => setRejectFeedback(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:border-orange-500"
-            />
-            <button
-              onClick={handleRejectConfirm}
-              className="w-full py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+        {customer.tailor_job_image !== null ? (
+          <div className="w-full mb-8 p-6 rounded-2xl shadow-md">
+            <motion.div
+              className="w-full mb-8 p-6 bg-gray-50 rounded-2xl shadow-md"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.5 }}
             >
-              Confirm
-            </button>
-          </motion.div>
-        </motion.div>
-      )}
+              <label className="block text-xl font-bold text-gray-700 mb-2">
+                Tailor Style
+              </label>
+              {customer.tailor_job_image === "" ? (
+                <div className="text-gray-500">No image selected</div>
+              ) : (
+                <div>
+                  <img
+                    src={customer.tailor_job_image}
+                    alt="Tailor Job Style"
+                    className="w-24 h-24 object-cover rounded-md border border-gray-300 cursor-pointer transition hover:shadow-lg"
+                    onClick={handleTailorJobImageClick}
+                  />
+                </div>
+              )}
 
-      {/* ---------- New Approve Modal ---------- */}
-      {isApproveModalOpen && (
-        <motion.div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-          onClick={() => {
-            setIsApproveModalOpen(false);
-            setApprovePrice("");
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+              {isTailorJobModalOpen && (
+                <AnimatePresence>
+                  <motion.div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    onClick={() => setIsTailorJobModalOpen(false)}
+                  >
+                    <motion.div
+                      className="relative bg-white rounded-2xl shadow-xl max-w-3xl w-full mx-4 p-6 overflow-hidden"
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0.8 }}
+                      transition={{ duration: 0.25 }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Close Icon */}
+                      <button
+                        type="button"
+                        onClick={() => setIsTailorJobModalOpen(false)}
+                        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition"
+                      >
+                        <IoIosClose size={24} />
+                      </button>
+
+                      {/* Image Container */}
+                      <div className="relative w-full h-[70vh] mb-6 rounded-lg bg-gray-100">
+                        <Image
+                          src={customer.tailor_job_image || "/fallback.jpg"}
+                          alt="Tailor Job Style"
+                          fill
+                          className="object-contain rounded-lg"
+                        />
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-wrap items-center justify-between gap-4">
+                        {customer.style_approval === "pending" && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleOpenApproveModal}
+                              className="flex-1 px-5 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                            >
+                              Approve Style
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleOpenRejectModal}
+                              className="flex-1 px-5 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                            >
+                              Reject Style
+                            </button>
+                          </>
+                        )}
+
+                        {customer.style_approval === "accepted" && (
+                          <div className="flex-1 text-center text-green-600 font-semibold">
+                            Style Approved ✔
+                          </div>
+                        )}
+
+                        {customer.style_approval === "rejected" && (
+                          <div className="flex-1 text-center text-red-600 font-semibold">
+                            Style Rejected ✖
+                          </div>
+                        )}
+
+                        <a
+                          href={customer.tailor_job_image}
+                          download="tailor_job_image.jpg"
+                          className="px-5 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                        >
+                          Download Image
+                        </a>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                </AnimatePresence>
+              )}
+            </motion.div>
+          </div>
+        ) : (
+          <div>
+            <h3 className="block text-xl font-bold text-gray-700 mt-10 mb-4">
+              Tailor Job Image
+            </h3>
+            <div className="text-gray-500">No image yet</div>
+          </div>
+        )}
+
+        {/* ---------- New Reject Modal ---------- */}
+        {isRejectModalOpen && (
           <motion.div
-            className="bg-white rounded-lg p-6 w-96"
-            onClick={(e) => e.stopPropagation()}
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0.8 }}
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            onClick={() => {
+              setIsRejectModalOpen(false);
+              setRejectFeedback("");
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <h2 className="text-xl font-bold mb-4 text-gray-800">
-              Approve Style
-            </h2>
-            <input
-              type="text"
-              placeholder="enter_price"
-              value={approvePrice}
-              onChange={(e) => setApprovePrice(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:border-orange-500"
-            />
+            <motion.div
+              className="bg-white rounded-lg p-6 w-96"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2 className="text-xl font-bold mb-4 text-gray-800">
+                Reject Style
+              </h2>
+              <input
+                type="text"
+                placeholder="feedback"
+                name="rejectFeedback"
+                value={rejectFeedback}
+                onChange={(e) => setRejectFeedback(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:border-orange-500"
+              />
+              <button
+                type="button"
+                onClick={handleRejectConfirm}
+                className="w-full py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+              >
+                Confirm
+              </button>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+
+<AnimatePresence>
+  {isApproveModalOpen && (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      onClick={() => {
+        setIsApproveModalOpen(false);
+      }}
+    >
+      <motion.div
+        className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.8, opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={() => setIsApproveModalOpen(false)}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+        >
+          <IoIosClose size={24} />
+        </button>
+
+        {/* Success Icon & Text */}
+        <div className="flex flex-col items-center space-y-4 mb-6">
+          <IoIosCheckmarkCircleOutline
+            size={64}
+            className="text-green-500"
+          />
+          <h2 className="text-2xl font-bold text-gray-800">
+            Order Approved!
+          </h2>
+          <p className="text-gray-600">
+            You’ve successfully approved this style.
+          </p>
+        </div>
+
+        {/* Add Payment Button */}
+        <button
+          type="button"
+          onClick={handleApproveConfirm}
+          className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+        >
+          Generate Invoice
+        </button>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
         <div>
           <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">
@@ -709,8 +791,6 @@ export default function ShowCustomer() {
           </div>
         </div>
       </form>
-
-      
 
       {/* Edit Action */}
       <div className="mt-6 flex flex-col items-end">
