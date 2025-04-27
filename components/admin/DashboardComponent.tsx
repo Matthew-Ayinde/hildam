@@ -1,7 +1,7 @@
 "use client";
 
 import { SetStateAction, useEffect, useRef, useState } from "react";
-import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes } from "react-icons/fa";
+import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes, FaUsers } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,8 @@ import Spinner from "@/components/Spinner";
 import { motion } from "framer-motion"; // Import Framer Motion
 import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 import Last7Days from "../charts/Last7Days";
+import { FaClipboardList, FaClock, FaCheckCircle } from "react-icons/fa";
+import { FaUser } from "react-icons/fa6";
 
 // Extend the NextAuth session type
 declare module "next-auth" {
@@ -109,17 +111,29 @@ export default function Table() {
     <div className="w-full">
       <div ref={statsRef} className="flex flex-row gap-5 overflow-x-auto">
         {[
-          { label: "Total Orders", value: data.length },
-          { label: "Total Customers", value: data.length },
-          { label: "Total Users", value: data.length },
-          // Add more stats as needed
+          {
+            label: "Total Orders",
+            value: data.length,
+            icon: <FaClipboardList size={30} className="text-[#ff6c2f]" />,
+          },
+          {
+            label: "Total Customers",
+            value: data.length,
+            icon: <FaUser size={30} className="text-[#ff6c2f]" />,
+          },
+          {
+            label: "Total Users",
+            value: data.length,
+            icon: <FaUsers size={30} className="text-[#ff6c2f]" />,
+          },
+          // Add more stats if needed
         ].map((stat, index) => (
           <motion.div
             key={index}
-            className="bg-white rounded-xl flex items-center p-5 mb-5"
-            initial={{ opacity: 0, x: 50 }} // Start from opacity 0 and x position 50 (off-screen right)
-            animate={{ opacity: 1, x: 0 }} // Animate to opacity 1 and x position 0
-            transition={{ duration: 0.6, delay: index * 0.2 }} // Animation duration and stagger
+            className="bg-white rounded-xl flex items-center p-5 mb-5 min-w-[200px]" // min-w helps for scrollable layout
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: index * 0.2 }}
           >
             <div className="text-[#81899d]">
               <div className="font-bold text-gray-700 whitespace-nowrap">
@@ -127,9 +141,7 @@ export default function Table() {
               </div>
               <div className="text-2xl text-[#5d7186]">{stat.value}</div>
             </div>
-            <div className="p-4 rounded-lg bg-[#fff0ea] text-[#ff6c2f] ml-5">
-              <FaRegCalendarTimes size={30} />
-            </div>
+            <div className="p-4 rounded-lg bg-[#fff0ea] ml-5">{stat.icon}</div>
           </motion.div>
         ))}
       </div>

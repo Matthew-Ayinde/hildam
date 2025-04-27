@@ -6,7 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image"; // Import Next.js Image component
 import { IoIosArrowBack } from "react-icons/io";
-import { FaCheckCircle, FaRegCircle } from "react-icons/fa";
+import { FaCheckCircle, FaRegCircle, FaUserTie, FaSearch } from "react-icons/fa";
 import Link from "next/link";
 import { FaRegCircleXmark } from "react-icons/fa6";
 import { motion } from "framer-motion"; // Import Framer Motion
@@ -24,6 +24,65 @@ export default function ShowCustomer() {
   const [isUploading, setIsUploading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [sentSuccess, setSentSuccess] = useState(false);
+
+  const tailorOptions = [
+    { id: 1, name: "James Carter", email: "james.carter@example.com" },
+    { id: 2, name: "Sophia Bennett", email: "sophia.bennett@example.com" },
+    { id: 3, name: "Michael Owens", email: "michael.owens@example.com" },
+    { id: 4, name: "Olivia Sanders", email: "olivia.sanders@example.com" },
+    { id: 5, name: "William Foster", email: "william.foster@example.com" },
+    { id: 6, name: "Emma Sullivan", email: "emma.sullivan@example.com" },
+    { id: 7, name: "Daniel Hughes", email: "daniel.hughes@example.com" },
+    { id: 8, name: "Isabella Coleman", email: "isabella.coleman@example.com" },
+    { id: 9, name: "Benjamin Porter", email: "benjamin.porter@example.com" },
+    { id: 10, name: "Amelia Dawson", email: "amelia.dawson@example.com" }
+  ];
+  
+    
+  const [selectedTailors, setSelectedTailors] = useState<number[]>([]);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+   // Filtered tailor list based on search
+  const filteredTailors = tailorOptions.filter(t =>
+    t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Toggle tailor selection
+  const toggleTailor = (tailorId: number) => {
+    setSelectedTailors(prev =>
+      prev.includes(tailorId) ? prev.filter(id => id !== tailorId) : [...prev, tailorId]
+    );
+  };
+
+  // Assign tailors to order
+  const handleAssignTailors = async () => {
+    if (selectedTailors.length === 0) return;
+    setIsAssigning(true);
+    try {
+      const session = await getSession();
+      const accessToken = session?.user?.token;
+      // Dummy endpoint for assigning tailors
+      const res = await fetch(
+        `https://hildam.insightpublicis.com/api/assigntailors/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({ tailors: selectedTailors })
+        }
+      );
+      if (!res.ok) throw new Error("Failed to assign tailors");
+      setUploadMessage("Tailors assigned successfully");
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setIsAssigning(false);
+    }
+  };
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -577,7 +636,77 @@ export default function ShowCustomer() {
             ))}
           </div>
         </motion.div>
+
       </form>
+
+
+      
+      {/* Assign Tailors Section */}
+      <motion.div
+        className="mt-8 p-6 bg-white rounded-3xl shadow-lg"
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        transition={{ duration: 0.5, delay: 1 }}
+      >
+        <div className="flex items-center mb-6">
+          <div className="p-3 bg-orange-100 rounded-full">
+            <FaUserTie className="text-orange-500 text-2xl" />
+          </div>
+          <h2 className="ml-4 text-2xl font-bold text-gray-700">
+            Assigned Tailors
+          </h2>
+        </div>
+
+        <div className="relative mb-6">
+          <FaSearch className="absolute top-3 left-3 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search tailors..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="pl-10 w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-300"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+          {filteredTailors.map(t => {
+            const isSelected = selectedTailors.includes(t.id);
+            return (
+              <motion.button
+                key={t.id}
+                onClick={() => toggleTailor(t.id)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                whileHover={{ scale: 1.02 }}
+                className={`flex items-center justify-between p-5 border rounded-2xl transition-all focus:outline-none \
+                  ${isSelected ? 'bg-orange-50 border-orange-300' : 'bg-white hover:shadow-md'}`}
+              >
+                <div>
+                  <h3 className="text-gray-800 font-semibold">{t.name}</h3>
+                  <p className="text-gray-500 text-sm">{t.email}</p>
+                </div>
+                {isSelected ? (
+                  <FaCheckCircle className="text-orange-500 text-xl" />
+                ) : (
+                  <FaRegCircle className="text-gray-300 text-xl" />
+                )}
+              </motion.button>
+            );
+          })}
+        </div>
+
+        <motion.button
+          onClick={handleAssignTailors}
+          disabled={isAssigning}
+          whileTap={{ scale: 0.97 }}
+          className={`w-full py-3 rounded-2xl text-white font-semibold transition-all \
+            ${isAssigning ? 'bg-gray-300' : 'bg-orange-500 hover:bg-orange-600'}`}
+        >
+          {isAssigning ? <Spinner /> : 'Assign Tailors'}
+        </motion.button>
+      </motion.div>
+
 
       {customer.tailor_image === null && (
         <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">
@@ -692,7 +821,7 @@ export default function ShowCustomer() {
               variants={fadeInUp}
               transition={{ duration: 0.5, delay: 1.4 }}
             >
-              {isSending ? <Spinner /> : "Send to Project Manager"}
+              {isSending ? <Spinner /> : "Send to Client Manager"}
             </motion.button>
           )}
         </div>
@@ -886,7 +1015,7 @@ export default function ShowCustomer() {
               variants={fadeInUp}
               transition={{ duration: 0.5, delay: 1.4 }}
             >
-              {isSending ? <Spinner /> : "Send to Project Manager"}
+              {isSending ? <Spinner /> : "Send to Client Manager"}
             </motion.button>
           )}
         </div>

@@ -283,10 +283,7 @@ export default function ShowCustomer() {
               {customer.balance_remaining}
             </p>
           </div>
-          <div className="border-b pb-2">
-            <p className="text-sm text-gray-600">Order Status</p>
-            <p className="mt-1 text-gray-800">{customer.order_status}</p>
-          </div>
+          
         </div>
       </motion.div>
 

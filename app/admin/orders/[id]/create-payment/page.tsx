@@ -245,7 +245,7 @@ const Form = () => {
             name="VAT"
             value={formData.VAT}
             onChange={handleChange}
-            placeholder="Current VAT rate as a percentage, e.g., 7.5"
+            placeholder="Default VAT rate is 7.5"
             className="mt-1 block w-full rounded-lg border border-gray-300 p-3 focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm shadow-sm"
             aria-describedby="vat-help"
             required
