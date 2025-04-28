@@ -19,9 +19,10 @@ export default function EditCustomer() {
   const [successMessage, setSuccessMessage] = useState("");
   const [formData, setFormData] = useState({
     order_id: "",
-    payment_status_id: "",
-    total_paid: "",
-    cumulative: "",
+    payment_status: "",
+    total_amount_due: "",
+    amount_paid: "",
+    balance_remaining: "",
   });
 
   const fetchCustomer = async () => {
@@ -40,9 +41,10 @@ export default function EditCustomer() {
       const { data } = await res.json();
       setFormData({
         order_id: data.order_id,
-        payment_status_id: data.payment_status_id,
-        total_paid: data.total_paid,
-        cumulative: data.cumulative,
+        payment_status: data.payment_status,
+        total_amount_due: data.total_amount_due,
+        amount_paid: data.amount_paid,
+        balance_remaining: data.balance_remaining,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -66,7 +68,7 @@ export default function EditCustomer() {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/editpayment/${id}`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -115,7 +117,7 @@ export default function EditCustomer() {
           transition={{ duration: 0.3 }}
           className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white py-2 px-6 rounded-full shadow-md flex items-center"
         >
-          <FiDollarSign className="mr-2" />
+          <div className="mr-2">₦</div>
           {successMessage}
         </motion.div>
       )}
@@ -132,43 +134,39 @@ export default function EditCustomer() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-gray-700 font-semibold mb-1">
-              Order ID
+              Payment Status
             </label>
             <input
               type="text"
-              name="order_id"
-              value={formData.order_id}
+              name="payment_status"
+              value={formData.payment_status}
               disabled
               className="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 text-gray-600"
             />
           </div>
 
+
           <div className="relative">
             <label className="block text-gray-700 font-semibold mb-1">
               Payment Status
             </label>
-            <select
-              name="payment_status_id"
-              value={formData.payment_status_id}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 rounded-lg p-3 appearance-none bg-white"
-            >
-              <option value="">Select status</option>
-              <option value="1">Not Paid</option>
-              <option value="2">In Review</option>
-              <option value="3">Paid</option>
-            </select>
-            <IoIosArrowDown className="absolute right-3 top-10 pointer-events-none text-gray-500" />
-          </div>
+            <input
+              type="text"
+              name="payment_status"
+              value={formData.payment_status}
+              disabled
+              className="w-full border border-gray-300 rounded-lg p-3"
+            />
+                   </div>
 
           <div>
             <label className="block text-gray-700 font-semibold mb-1">
-              <span className="text-xl inline mr-1">₦</span> Total Paid
+              <span className="text-xl inline mr-1">₦</span> Total Amount
             </label>
             <input
               type="number"
-              name="total_paid"
-              value={formData.total_paid}
+              name="total_amount_due"
+              value={formData.total_amount_due}
               onChange={handleInputChange}
               className="w-full border border-gray-300 rounded-lg p-3"
               placeholder="0.00"
@@ -178,12 +176,27 @@ export default function EditCustomer() {
 
           <div>
             <label className="block text-gray-700 font-semibold mb-1">
-              <AiOutlineBarChart className="inline mr-1" /> Cumulative
+              <span className="text-xl inline mr-1">₦</span> Balance Remaining
             </label>
             <input
               type="number"
-              name="cumulative"
-              value={formData.cumulative}
+              name="balance_remaining"
+              value={formData.balance_remaining}
+              disabled
+              className="w-full border border-gray-300 rounded-lg p-3"
+            />
+          </div>
+
+
+
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">
+              <AiOutlineBarChart className="inline mr-1" /> Amount Paid
+            </label>
+            <input
+              type="number"
+              name="amount_paid"
+              value={formData.amount_paid}
               onChange={handleInputChange}
               className="w-full border border-gray-300 rounded-lg p-3"
               placeholder="0.00"

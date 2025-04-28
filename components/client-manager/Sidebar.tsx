@@ -11,10 +11,11 @@ import { HiMenuAlt3, HiX } from "react-icons/hi";
 import { IoNotifications } from "react-icons/io5";
 import { MdOutlinePayment } from "react-icons/md";
 import { MdOutlineInventory2 } from "react-icons/md";
-import LogoutButton from "@/components/LogoutMobile";
+import LogoutButton from "../LogoutMobile";
 import { useRouter } from "next/navigation";
 import { AiOutlineCheck } from "react-icons/ai";
 import { FiBell } from "react-icons/fi";
+import { MdOutlineDashboard } from "react-icons/md";
 
 type Notification = {
   id: string;
@@ -51,8 +52,18 @@ const sidebarItems = [
     icon: <FaBoxes />,
     prefix: "/client-manager/joblists/",
     links: [
-      { name: "Projects", href: "/client-manager/joblists/projects" },
+      // { name: "Projects", href: "/client-manager/joblists/projects" },
       { name: "Tailor Jobs", href: "/client-manager/joblists/tailorjoblists" },
+    ],
+  },
+  {
+    id: 6,
+    text: "Payments",
+    icon: <MdOutlinePayment />,
+    prefix: "/client-manager/payments",
+    links: [
+      { name: "List", href: "/client-manager/payments" },
+      { name: "Create", href: "/client-manager/payments/create" },
     ],
   },
   {
@@ -63,9 +74,19 @@ const sidebarItems = [
     links: [
       { name: "List", href: "/client-manager/inventory" },
       { name: "Create", href: "/client-manager/inventory/create" },
+      { name: "View Requests", href: "/client-manager/inventory/requests" }
     ],
-  }
-  
+  },
+  {
+    id: 5,
+    text: "Expense",
+    icon: <MdOutlineInventory2 />,
+    prefix: "/client-manager/expense",
+    links: [
+      { name: "List", href: "/client-manager/expense" },
+      { name: "Create", href: "/client-manager/expense/create" },
+    ],
+  },
 ];
 
 const Sidebar = () => {
@@ -429,11 +450,11 @@ const Sidebar = () => {
               </li>
             );
           })}
-        </ul>
 
-        <div className="relative lg:hidden mb-10 flex justify-center">
+          <div className="relative lg:hidden flex justify-center">
             <LogoutButton />
           </div>
+        </ul>
       </div>
     </>
   );

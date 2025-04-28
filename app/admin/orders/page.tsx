@@ -377,7 +377,7 @@ export default function Table() {
                       <div className="my-5">
                       <Link
                         href="/admin/orders/create"
-                        className="bg-orange-500 rounded-lg px-4 py-2 text-white"
+                        className="bg-orange-500 rounded px-4 py-2 text-white"
                       >
                         Create Order
                       </Link>

@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdOutlineHideSource, MdOutlineRemoveRedEye } from "react-icons/md";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 
 const Form = () => {
@@ -37,7 +37,6 @@ const Form = () => {
     round_thigh: string;
     round_knee: string;
     round_feet: string;
-
   }>({
     name: "",
     gender: "",
@@ -159,151 +158,176 @@ const Form = () => {
       setLoading(false);
     }
 
-    router.push("/admin/customers");
+    setTimeout(() => {
+      router.push("/admin/customers");
+    }, 2000); // Redirect after 2 seconds
   };
 
+  // Define measurements
+  const measurements = [
+    {
+      label: "Bust",
+      id: "bust",
+      name: "bust",
+      placeholder: "Bust",
+      delay: 0.8,
+      value: formData.bust,
+    },
+    {
+      label: "Waist",
+      id: "waist",
+      name: "waist",
+      placeholder: "Waist",
+      delay: 0.9,
+      value: formData.waist,
+    },
+    {
+      label: "Hip",
+      id: "hip",
+      name: "hip",
+      placeholder: "Hip",
+      delay: 1.0,
+      value: formData.hip,
+    },
+    {
+      label: "Shoulder",
+      id: "shoulder",
+      name: "shoulder",
+      placeholder: "Shoulder",
+      delay: 1.1,
+      value: formData.shoulder,
+    },
+    {
+      label: "Bust Point",
+      id: "bustpoint",
+      name: "bustpoint",
+      placeholder: "Bust Point",
+      delay: 1.2,
+      value: formData.bustpoint,
+    },
+    {
+      label: "Shoulder to under Bust",
+      id: "shoulder_to_underbust",
+      name: "shoulder_to_underbust",
+      placeholder: "Shoulder to under Bust",
+      delay: 1.3,
+      value: formData.shoulder_to_underbust,
+    },
+    {
+      label: "Round under Bust",
+      id: "round_under_bust",
+      name: "round_under_bust",
+      placeholder: "Round under Bust",
+      delay: 1.4,
+      value: formData.round_under_bust,
+    },
+    {
+      label: "Sleeve Length",
+      id: "sleeve_length",
+      name: "sleeve_length",
+      placeholder: "Sleeve Length",
+      delay: 1.5,
+      value: formData.sleeve_length,
+    },
+    {
+      label: "Half Length",
+      id: "halfLength",
+      name: "half_length",
+      placeholder: "Half Length",
+      delay: 1.6,
+      value: formData.half_length,
+    },
+    {
+      label: "Blouse Length",
+      id: "blouseLength",
+      name: "blouse_length",
+      placeholder: "Blouse Length",
+      delay: 1.7,
+      value: formData.blouse_length,
+    },
+    {
+      label: "Round Sleeve",
+      id: "roundSleeve",
+      name: "round_sleeve",
+      placeholder: "Round Sleeve",
+      delay: 1.8,
+      value: formData.round_sleeve,
+    },
+    {
+      label: "Dress Length",
+      id: "dressLength",
+      name: "dress_length",
+      placeholder: "Dress Length",
+      delay: 1.9,
+      value: formData.dress_length,
+    },
+    {
+      label: "Chest",
+      id: "chest",
+      name: "chest",
+      placeholder: "Chest",
+      delay: 2.0,
+      value: formData.chest,
+    },
+    {
+      label: "Round Shoulder",
+      id: "roundShoulder",
+      name: "round_shoulder",
+      placeholder: "Round Shoulder",
+      delay: 2.1,
+      value: formData.round_shoulder,
+    },
+    {
+      label: "Skirt Length",
+      id: "skirtLength",
+      name: "skirt_length",
+      placeholder: "Skirt Length",
+      delay: 2.2,
+      value: formData.skirt_length,
+    },
+    {
+      label: "Trousers Length",
+      id: "trousersLength",
+      name: "trousers_length",
+      placeholder: "Trousers Length",
+      delay: 2.3,
+      value: formData.trousers_length,
+    },
+    {
+      label: "Round Thigh",
+      id: "roundThigh",
+      name: "round_thigh",
+      placeholder: "Round Thigh",
+      delay: 2.4,
+      value: formData.round_thigh,
+    },
+    {
+      label: "Round Knee",
+      id: "roundKnee",
+      name: "round_knee",
+      placeholder: "Round Knee",
+      delay: 2.5,
+      value: formData.round_knee,
+    },
+    {
+      label: "Round Feet",
+      id: "roundFeet",
+      name: "round_feet",
+      placeholder: "Round Feet",
+      delay: 2.6,
+      value: formData.round_feet,
+    },
+  ];
 
-    // Define measurements
-const measurements = [
-  { label: "Bust", id: "bust", name: "bust", placeholder: "Bust", delay: 0.8, value: formData.bust},
-  {
-    label: "Waist",
-    id: "waist",
-    name: "waist",
-    placeholder: "Waist",
-    delay: 0.9,
-    value: formData.waist,
-  },
-  { label: "Hip", id: "hip", name: "hip", placeholder: "Hip", delay: 1.0, value: formData.hip},
-  {
-    label: "Shoulder",
-    id: "shoulder",
-    name: "shoulder",
-    placeholder: "Shoulder",
-    delay: 1.1,
-    value: formData.shoulder,
-  },
-  {
-    label: "Bust Point",
-    id: "bustpoint",
-    name: "bustpoint",
-    placeholder: "Bust Point",
-    delay: 1.2,
-    value: formData.bustpoint,
-  },
-  {
-    label: "Shoulder to under Bust",
-    id: "shoulder_to_underbust",
-    name: "shoulder_to_underbust",
-    placeholder: "Shoulder to under Bust",
-    delay: 1.3,
-    value: formData.shoulder_to_underbust,
-  },
-  {
-    label: "Round under Bust",
-    id: "round_under_bust",
-    name: "round_under_bust",
-    placeholder: "Round under Bust",
-    delay: 1.4,
-    value: formData.round_under_bust
-  },
-  {
-    label: "Sleeve Length",
-    id: "sleeve_length",
-    name: "sleeve_length",
-    placeholder: "Sleeve Length",
-    delay: 1.5,
-    value: formData.sleeve_length
-  },
-  {
-    label: "Half Length",
-    id: "halfLength",
-    name: "half_length",
-    placeholder: "Half Length",
-    delay: 1.6,
-    value: formData.half_length
-  },
-  {
-    label: "Blouse Length",
-    id: "blouseLength",
-    name: "blouse_length",
-    placeholder: "Blouse Length",
-    delay: 1.7,
-    value: formData.blouse_length
-  },
-  {
-    label: "Round Sleeve",
-    id: "roundSleeve",
-    name: "round_sleeve",
-    placeholder: "Round Sleeve",
-    delay: 1.8,
-    value: formData.round_sleeve
-  },
-  {
-    label: "Dress Length",
-    id: "dressLength",
-    name: "dress_length",
-    placeholder: "Dress Length",
-    delay: 1.9,
-    value: formData.dress_length
-  },
-  {
-    label: "Chest",
-    id: "chest",
-    name: "chest",
-    placeholder: "Chest",
-    delay: 2.0,
-    value: formData.chest
-  },
-  {
-    label: "Round Shoulder",
-    id: "roundShoulder",
-    name: "round_shoulder",
-    placeholder: "Round Shoulder",
-    delay: 2.1,
-    value: formData.round_shoulder
-  },
-  {
-    label: "Skirt Length",
-    id: "skirtLength",
-    name: "skirt_length",
-    placeholder: "Skirt Length",
-    delay: 2.2,
-    value: formData.skirt_length
-  },
-  {
-    label: "Trousers Length",
-    id: "trousersLength",
-    name: "trousers_length",
-    placeholder: "Trousers Length",
-    delay: 2.3,
-    value: formData.trousers_length
-  },
-  {
-    label: "Round Thigh",
-    id: "roundThigh",
-    name: "round_thigh",
-    placeholder: "Round Thigh",
-    delay: 2.4,
-    value: formData.round_thigh
-  },
-  {
-    label: "Round Knee",
-    id: "roundKnee",
-    name: "round_knee",
-    placeholder: "Round Knee",
-    delay: 2.5,
-    value: formData.round_knee
-  },
-  {
-    label: "Round Feet",
-    id: "roundFeet",
-    name: "round_feet",
-    placeholder: "Round Feet",
-    delay: 2.6,
-    value: formData.round_feet
-  },
-];
+  useEffect(() => {
+    if (responseMessage) {
+      const timer = setTimeout(() => {
+        setResponseMessage(""); // or however you clear it
+      }, 3000); // 3 seconds
+
+      return () => clearTimeout(timer); // Cleanup if component unmounts early
+    }
+  }, [responseMessage]);
 
   return (
     <motion.div
@@ -373,16 +397,8 @@ const measurements = [
               name="phone_number"
               value={formData.phone_number}
               onChange={(e) => {
-                let value = e.target.value.replace(/\D/g, "");
+                let value = e.target.value.replace(/\D/g, ""); // remove non-digits
                 if (value.length <= 11) {
-                  if (value.length > 4 && value.length <= 7) {
-                    value = `${value.slice(0, 4)} ${value.slice(4)}`;
-                  } else if (value.length > 7) {
-                    value = `${value.slice(0, 4)} ${value.slice(
-                      4,
-                      7
-                    )} ${value.slice(7)}`;
-                  }
                   handleChange({
                     target: { name: "phone_number", value },
                   } as React.ChangeEvent<HTMLInputElement>);
@@ -440,43 +456,15 @@ const measurements = [
             />
           </div>
           <div className="w-full">
-            <label
-              htmlFor="password"
+          <label
+              htmlFor="address"
               className="block text-sm font-medium text-gray-700"
             >
-              Password
+              Address
             </label>
-            <input
-              type={showPassword ? "text" : "password"}
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={(e) => {
-                handleChange(e);
-                setPasswordError(e.target.value.length < 6);
-              }}
-              placeholder="Enter your password"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            />
-            <button
-              type="button"
-              onClick={togglePasswordVisibility}
-              className="absolute right-3 top-9 text-gray-500 hover:text-[#ff6c2f]"
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? (
-                <MdOutlineHideSource size={30} className="h-5 w-5" />
-              ) : (
-                <MdOutlineRemoveRedEye size={30} className="h-5 w-5" />
-              )}
-            </button>
-
-            {passwordError && (
-              <p className="mt-2 text-sm text-red-600">
-                Password must be at least 6 characters long.
-              </p>
-            )}
+            <textarea name="address" id="address" value={formData.gender}
+              onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required placeholder="Please enter your address"></textarea>
           </div>
         </div>
 
@@ -505,8 +493,8 @@ const measurements = [
                     id={measurement.id}
                     name={measurement.name}
                     placeholder={measurement.placeholder}
-                  onChange={handleChange}
-                  value={formData[measurement.name as keyof typeof formData]}
+                    onChange={handleChange}
+                    value={formData[measurement.name as keyof typeof formData]}
                     className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
                   />
                 </motion.div>
@@ -529,11 +517,20 @@ const measurements = [
         </div>
 
         {/* Response Message */}
-        {responseMessage && (
-          <div className="mt-4 text-sm bg-green-500 text-white px-3 py-1 w-fit rounded-lg">
-            {responseMessage}
-          </div>
-        )}
+        {/* Response Message */}
+        <AnimatePresence>
+          {responseMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="fixed top-6 left-1/2 -translate-x-1/2 text-sm bg-green-500 text-white px-4 py-2 rounded-lg shadow-md z-50"
+            >
+              {responseMessage}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.form>
     </motion.div>
   );
