@@ -10,7 +10,7 @@ import { getSession } from "next-auth/react";
 type Notification = {
   id: string;
   message: string;
-  link: string;
+  link: string;   
   read: string;
   created_at: string;
 };

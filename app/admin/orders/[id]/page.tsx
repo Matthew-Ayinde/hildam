@@ -38,7 +38,7 @@ export default function ShowCustomer() {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/closeorder/${id}`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,

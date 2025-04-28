@@ -462,7 +462,7 @@ const Form = () => {
             >
               Address
             </label>
-            <textarea name="address" id="address" value={formData.gender}
+            <textarea name="address" id="address" value={formData.address}
               onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required placeholder="Please enter your address"></textarea>
           </div>

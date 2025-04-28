@@ -153,7 +153,6 @@ const Form = () => {
               <option value="1">Admin</option>
               <option value="2">Client Manager</option>
               <option value="3">Head of Tailoring</option>
-              <option value="4">Store Manager</option>
               <option value="5">Tailor</option>
             </select>
           </div>

@@ -132,20 +132,6 @@ export default function EditCustomer() {
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-gray-700 font-semibold mb-1">
-              Payment Status
-            </label>
-            <input
-              type="text"
-              name="payment_status"
-              value={formData.payment_status}
-              disabled
-              className="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 text-gray-600"
-            />
-          </div>
-
-
           <div className="relative">
             <label className="block text-gray-700 font-semibold mb-1">
               Payment Status

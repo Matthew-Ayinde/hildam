@@ -117,12 +117,12 @@ export default function Table() {
           },
           {
             label: "Pending Jobs",
-            value: data.length,
+            value: '-',
             icon: <FaClock size={30} className="text-[#ff6c2f]" />,
           },
           {
             label: "Completed Jobs",
-            value: data.length,
+            value: '-',
             icon: <FaCheckCircle size={30} className="text-[#ff6c2f]" />,
           },
           // Add more stats if needed
