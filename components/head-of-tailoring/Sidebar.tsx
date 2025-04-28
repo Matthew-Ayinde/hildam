@@ -361,12 +361,12 @@ const Sidebar = () => {
                 }`}
                 onClick={closeSidebar}
               >
-                <MdDashboard />
+                <FaBoxes />
                 <span>My Jobs</span>
               </Link>
             </div>
 
-            <div className="">
+            {/* <div className="">
               <ul className="space-y-1 mt-3 mb-10 px-4">
                 {sidebarItems.map((item) => {
                   const isMenuOpen =
@@ -421,7 +421,7 @@ const Sidebar = () => {
                   );
                 })}
               </ul>
-            </div>
+            </div> */}
           </div>
         </div>
 

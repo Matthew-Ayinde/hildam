@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes } from "react-icons/fa";
+import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes, FaClipboardList } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
@@ -236,7 +236,7 @@ export default function Table() {
               <div className="text-2xl text-[#5d7186]">{stat.value}</div>
             </div>
             <div className="p-4 rounded-lg bg-[#fff0ea] text-[#ff6c2f] ml-5">
-              <FaRegCalendarTimes size={30} />
+              <FaClipboardList size={30} />
             </div>
           </div>
         ))}
@@ -377,7 +377,7 @@ export default function Table() {
                       <div className="my-5">
                       <Link
                         href="/admin/orders/create"
-                        className="bg-orange-500 rounded-lg px-4 py-2 text-white"
+                        className="bg-orange-500 rounded px-4 py-2 text-white"
                       >
                         Create Order
                       </Link>
@@ -415,7 +415,7 @@ export default function Table() {
                       <td className="px-4 py-2 text-sm border-b">
                         <span
                           className={`px-3 py-1 text-sm font-medium rounded ${
-                            row.order_status === "completed"
+                            row.order_status === "closed"
                               ? "bg-white text-green-800 border border-green-800"
                               : row.order_status === "processing"
                               ? "text-yellow-600 bg-white border border-yellow-600"

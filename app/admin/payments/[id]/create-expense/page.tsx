@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { getSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import Spinner from "@/components/Spinner";
@@ -33,8 +33,8 @@ interface ExpenseForm {
 }
 
 const SUMMARY_FIELDS: FieldConfig[] = [
-  { name: 'order_id', label: 'Order ID', type: 'text', icon: <FiHash size={20} /> },
-  { name: 'total_amount', label: 'Total Amount (₦)', type: 'number', icon: <TbCurrencyNaira size={20} /> },
+  { name: 'order_id', label: 'Order ID', type: 'text', icon: <FiHash size={20} />, readOnly: true },
+  { name: 'total_amount', label: 'Total Amount (₦)', type: 'number', icon: <TbCurrencyNaira size={20} />, readOnly: true },
 ];
 
 const BREAKDOWN_FIELDS: FieldConfig[] = [
@@ -44,10 +44,10 @@ const BREAKDOWN_FIELDS: FieldConfig[] = [
   { name: 'labour', label: 'Labour (₦)', type: 'number', icon: <FiUsers size={18} /> },
   { name: 'rent', label: 'Rent (₦)', type: 'number', icon: <FiHome size={18} /> },
   { name: 'total_tailor_commission_percentage', label: 'Commission (%)', type: 'number', icon: <FiPercent size={18} /> },
-{ name: 'total_tailor_commission_amount', label: 'Commission Amount (₦)', type: 'number', icon: <TbCurrencyNaira size={18} />, readOnly: true },
+  { name: 'total_tailor_commission_amount', label: 'Commission Amount (₦)', type: 'number', icon: <TbCurrencyNaira size={18} />, readOnly: true },
 ];
 
-// Reusable input component (always input for cleaner design)
+// Reusable input component
 function Field({ config, value, onChange }: { config: FieldConfig; value: string; onChange: (name: keyof ExpenseForm, value: string) => void; }) {
   return (
     <div className="flex flex-col space-y-1">
@@ -61,9 +61,10 @@ function Field({ config, value, onChange }: { config: FieldConfig; value: string
         value={value}
         onChange={e => onChange(config.name, e.target.value)}
         readOnly={config.readOnly}
+        disabled={config.readOnly}
         className={
           `border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-300 ` +
-          (config.readOnly ? 'bg-gray-100' : '')
+          (config.readOnly ? 'bg-gray-100 cursor-not-allowed' : '')
         }
       />
     </div>
@@ -96,6 +97,7 @@ function FormSection({ title, fields, form, onChange }: { title: string; fields:
 
 export default function AddExpensePage() {
   const router = useRouter();
+  const { id } = useParams();
   const [form, setForm] = useState<ExpenseForm>({
     order_id: '', total_amount: '', balance_remaining: '',
     utilities: '', services: '', purchase_costs: '', labour: '', rent: '',
@@ -103,6 +105,39 @@ export default function AddExpensePage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
+
+  // Autofill order ID and total amount from API
+  useEffect(() => {
+    if (!id) return;
+    const fetchPayment = async () => {
+      try {
+        const session = await getSession();
+        const accessToken = session?.user?.token;
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/payment/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        if (!res.ok) {
+            throw new Error("Failed to fetch customer data");
+          }
+        const json = await res.json();
+        if (json.status === 'success' && json.data) {
+          setForm(prev => ({
+            ...prev,
+            order_id: json.data.order_id,
+            total_amount: json.data.cumulative_total_amount,
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to fetch payment data:', err);
+      }
+    };
+    fetchPayment();
+  }, [id]);
 
   // Auto-calculate commission amount
   useEffect(() => {
@@ -142,6 +177,8 @@ export default function AddExpensePage() {
     } finally {
       setIsSubmitting(false);
     }
+
+    router.push('/admin/expenses');
   };
 
   return (

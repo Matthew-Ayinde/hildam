@@ -4,7 +4,13 @@ import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { IoIosArrowBack, IoIosCheckmarkCircleOutline, IoIosClose } from "react-icons/io";
+import {
+  IoIosArrowBack,
+  IoIosCheckmark,
+  IoIosCheckmarkCircleOutline,
+  IoIosClose,
+  IoIosWarning,
+} from "react-icons/io";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSession } from "next-auth/react";
 import SkeletonLoader from "@/components/SkeletonLoader";
@@ -18,6 +24,38 @@ export default function ShowCustomer() {
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState(false);
+    // New State for Close Order confirmation modal
+    const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+
+    const handleOpenCloseModal = () => setIsCloseModalOpen(true);
+  const handleCancelClose = () => setIsCloseModalOpen(false);
+  const handleConfirmClose = async () => {
+    try {
+      const session = await getSession();
+      const token = session?.user?.token;
+      if (!token) throw new Error("No access token");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/closeorder/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Failed to close order");
+
+      // Refresh or navigate after close
+      router.push("/admin/orders");
+    } catch (err) {
+      console.error(err);
+      // Optionally show toast or error state
+    } finally {
+      setIsCloseModalOpen(false);
+    }
+  };
 
   interface Customer {
     [x: string]: string | number | readonly string[] | undefined;
@@ -89,8 +127,6 @@ export default function ShowCustomer() {
   const handleCustomerCloseModal = () => {
     setIsCustomerModalOpen(false);
   };
-
-
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -318,13 +354,25 @@ export default function ShowCustomer() {
           <IoIosArrowBack size={28} />
           <span className="ml-2 font-semibold">Back to List</span>
         </Link>
-        <div className="mt-4 lg:mt-0 flex items-center space-x-2">
-          <h1 className="text-xl font-bold text-gray-800">
-            Head of Tailoring:
-          </h1>
-          <span className="text-xl font-medium text-gray-700">
-            {customer.manager_name}
-          </span>
+        <div className="flex space-x-5 items-center justify-between">
+          <div>
+            {/* Close Order Button */}
+          <button
+            onClick={handleOpenCloseModal}
+            className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+          >
+            <span className="font-medium">Close Order</span>
+          </button>
+
+          </div>
+          <div className="mt-4 lg:mt-0 flex items-center space-x-2">
+            <h1 className="text-xl font-bold text-gray-800">
+              Head of Tailoring:
+            </h1>
+            <span className="text-xl font-medium text-gray-700">
+              {customer.manager_name}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -341,6 +389,64 @@ export default function ShowCustomer() {
           </motion.div>
         )}
       </AnimatePresence>
+
+       {/* Close Order Confirmation Modal */}
+       <AnimatePresence>
+        {isCloseModalOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={handleCancelClose}
+          >
+            <motion.div
+              className="bg-white rounded-2xl shadow-xl p-6 w-96 relative"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Icon */}
+              <button
+                onClick={handleCancelClose}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+              >
+                <IoIosClose size={24} />
+              </button>
+
+              <div className="flex flex-col items-center space-y-4 mt-4">
+                <IoIosWarning size={48} className="text-red-500" />
+                <h2 className="text-2xl font-bold text-gray-800">
+                  Confirm Close Order
+                </h2>
+                <p className="text-gray-600 text-center">
+                  Are you sure you want to close this order? This action cannot be undone.
+                </p>
+              </div>
+
+              <div className="mt-6 flex justify-between">
+                <button
+                  onClick={handleCancelClose}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmClose}
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+                >
+                  <IoIosCheckmark size={20} />
+                  <span>Confirm</span>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
 
       {/* <button
         onClick={handleScroll}
@@ -690,61 +796,61 @@ export default function ShowCustomer() {
           </motion.div>
         )}
 
-<AnimatePresence>
-  {isApproveModalOpen && (
-    <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.25 }}
-      onClick={() => {
-        setIsApproveModalOpen(false);
-      }}
-    >
-      <motion.div
-        className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.8, opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close Button */}
-        <button
-          type="button"
-          onClick={() => setIsApproveModalOpen(false)}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
-        >
-          <IoIosClose size={24} />
-        </button>
+        <AnimatePresence>
+          {isApproveModalOpen && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => {
+                setIsApproveModalOpen(false);
+              }}
+            >
+              <motion.div
+                className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Close Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsApproveModalOpen(false)}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+                >
+                  <IoIosClose size={24} />
+                </button>
 
-        {/* Success Icon & Text */}
-        <div className="flex flex-col items-center space-y-4 mb-6">
-          <IoIosCheckmarkCircleOutline
-            size={64}
-            className="text-green-500"
-          />
-          <h2 className="text-2xl font-bold text-gray-800">
-            Order Approved!
-          </h2>
-          <p className="text-gray-600">
-            You’ve successfully approved this style.
-          </p>
-        </div>
+                {/* Success Icon & Text */}
+                <div className="flex flex-col items-center space-y-4 mb-6">
+                  <IoIosCheckmarkCircleOutline
+                    size={64}
+                    className="text-green-500"
+                  />
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    Order Approved!
+                  </h2>
+                  <p className="text-gray-600">
+                    You’ve successfully approved this style.
+                  </p>
+                </div>
 
-        {/* Add Payment Button */}
-        <button
-          type="button"
-          onClick={handleApproveConfirm}
-          className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-        >
-          Generate Invoice
-        </button>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
+                {/* Add Payment Button */}
+                <button
+                  type="button"
+                  onClick={handleApproveConfirm}
+                  className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                >
+                  Generate Invoice
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div>
           <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">

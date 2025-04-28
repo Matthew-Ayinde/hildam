@@ -504,7 +504,6 @@ export default function EditCustomer() {
                 </option>
                 <option value="pending">Pending</option>
                 <option value="processing">Processing</option>
-                <option value="completed">Completed</option>
               </select>
             </div>
             <div>

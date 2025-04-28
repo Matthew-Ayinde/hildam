@@ -283,10 +283,7 @@ export default function ShowCustomer() {
               {customer.balance_remaining}
             </p>
           </div>
-          <div className="border-b pb-2">
-            <p className="text-sm text-gray-600">Order Status</p>
-            <p className="mt-1 text-gray-800">{customer.order_status}</p>
-          </div>
+          
         </div>
       </motion.div>
 
@@ -302,6 +299,12 @@ export default function ShowCustomer() {
 
         {/* Action Buttons */}
         <div className="flex justify-end space-x-4">
+        <Link
+            href={`/admin/payments/${id}/create-expense`}
+            className="px-6 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 transition"
+          >
+            Add Expense
+          </Link>
           <Link
             href={`/admin/payments/${id}/invoice`}
             className="px-6 py-2 bg-orange-500 text-white font-semibold rounded hover:bg-orange-600 transition"

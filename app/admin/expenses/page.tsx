@@ -23,6 +23,7 @@ export default function ExpenseTable() {
     services_description: string;
     utilities_description: string;
     purchase_costs_description: string;
+    total_tailor_commission_amount: string;
   }
 
   const [data, setData] = useState<Expense[]>([]);
@@ -140,10 +141,9 @@ export default function ExpenseTable() {
           <thead className="bg-[#f6f8fb] sticky top-0 z-10">
             <tr className="text-[#5d7186]">
               {[
-                "Description",
                 "Total Amount",
                 "Utilities",
-                "Balance Remaining",
+                "Tailor Commission",
                 "Created On",
                 "Action",
               ].map((h) => (
@@ -179,10 +179,9 @@ export default function ExpenseTable() {
                   whileHover={{ scale: 1.02 }}
                   className="text-[#5d7186] hover:bg-gray-100"
                 >
-                    <td className="px-4 py-2 text-sm border-b">{row.services_description}</td>
                   <td className="px-4 py-2 text-sm border-b">{row.total_amount}</td>
                   <td className="px-4 py-2 text-sm border-b">{row.utilities}</td>
-                  <td className="px-4 py-2 text-sm border-b">{row.balance_remaining}</td>
+                  <td className="px-4 py-2 text-sm border-b">{row.total_tailor_commission_amount}</td>
                   <td className="px-4 py-2 text-sm border-b">
                     {formatDate(row.created_at)}
                   </td>

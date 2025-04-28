@@ -79,6 +79,16 @@ const sidebarItems = [
   },
   {
     id: 5,
+    text: "Expense",
+    icon: <MdOutlineInventory2 />,
+    prefix: "/admin/expense",
+    links: [
+      { name: "List", href: "/admin/expenses" },
+      { name: "Create", href: "/admin/expenses/create" },
+    ],
+  },
+  {
+    id: 6,
     text: "Analytics",
     icon: <MdOutlineDashboard />,
     prefix: "/admin/analytics",
@@ -88,7 +98,7 @@ const sidebarItems = [
     ],
   },
   {
-    id: 6,
+    id: 7,
     text: "Users",
     icon: <FaUser  />,
     prefix: "/admin/users",
