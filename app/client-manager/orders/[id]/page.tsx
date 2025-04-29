@@ -721,9 +721,17 @@ export default function ShowCustomer() {
                         )}
 
                         {customer.style_approval === "accepted" && (
-                          <div className="flex-1 text-center text-green-600 font-semibold">
+                         <div>
+                           <div className="flex-1 text-center text-green-600 font-semibold">
                             Style Approved ✔
                           </div>
+
+                          <div className="flex justify-center items-center mt-2">
+                              <Link href={`/client-manager/orders/${id}/create-payment`} className="bg-orange-500 px-4 py-1 text-white rounded hover:bg-orange-600 w-fit transition">
+                                Generate Invoice
+                              </Link>
+                          </div>
+                         </div>
                         )}
 
                         {customer.style_approval === "rejected" && (

@@ -182,7 +182,7 @@ export default function AddExpensePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-1 px-1 ">
       {notification && (
         <motion.div
           className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-5 py-3 rounded-lg shadow-xl z-50"
@@ -197,7 +197,7 @@ export default function AddExpensePage() {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden"
+        className="mx-auto bg-white rounded-xl shadow-2xl overflow-hidden"
       >
         <header className="flex items-center justify-between bg-orange-500 text-white px-6 py-4">
           <div className="flex items-center space-x-4">
@@ -206,7 +206,7 @@ export default function AddExpensePage() {
           </div>
         </header>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="lg:p-8 p-2 space-y-6">
           <FormSection title="Summary" fields={SUMMARY_FIELDS} form={form} onChange={handleChange} />
           <FormSection title="Expense Breakdown" fields={BREAKDOWN_FIELDS} form={form} onChange={handleChange} />
           <div className="flex justify-end">

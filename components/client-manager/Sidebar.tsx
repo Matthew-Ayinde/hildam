@@ -63,7 +63,7 @@ const sidebarItems = [
     prefix: "/client-manager/payments",
     links: [
       { name: "List", href: "/client-manager/payments" },
-      { name: "Create", href: "/client-manager/payments/create" },
+      // { name: "Create", href: "/client-manager/payments/create" },
     ],
   },
   {
@@ -84,7 +84,7 @@ const sidebarItems = [
     prefix: "/client-manager/expense",
     links: [
       { name: "List", href: "/client-manager/expenses" },
-      { name: "Create", href: "/client-manager/expenses/create" },
+      // { name: "Create", href: "/client-manager/expenses/create" },
     ],
   },
 ];
