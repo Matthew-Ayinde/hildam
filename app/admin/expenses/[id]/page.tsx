@@ -137,7 +137,7 @@ export default function ShowExpensePage() {
               </div>
             </div>
 
-            <div className="flex items-center bg-orange-50 p-4 rounded-lg shadow-sm">
+            {/* <div className="flex items-center bg-orange-50 p-4 rounded-lg shadow-sm">
               <GiTakeMyMoney size={24} className="text-orange-500 mr-3" />
               <div>
                 <p className="text-gray-700 font-medium">Balance Remaining</p>
@@ -145,7 +145,7 @@ export default function ShowExpensePage() {
                   ₦{expense.balance_remaining}
                 </p>
               </div>
-            </div>
+            </div> */}
 
             <div className="flex items-center bg-orange-50 p-4 rounded-lg shadow-sm">
               <div className="text-orange-500 mr-3 text-3xl">₦</div>

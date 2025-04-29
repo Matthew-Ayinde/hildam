@@ -1,22 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes } from "react-icons/fa";
+import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes, FaMoneyBill } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
 import Link from "next/link";
+import {getSession} from "next-auth/react";
 
 export default function Table() {
+
   interface Order {
     payment_status: string;
     id: any;
     order_id: string;
     created_at: string;
-    name: string;
+    customer_name: string;
     priority: string;
-    amount: string;
+    cumulative_total_amount: string;
   }
 
   const [data, setData] = useState<Order[]>([]);
@@ -37,11 +39,12 @@ export default function Table() {
       try {
         setLoading(true);
         setError(null);
-        const token = sessionStorage.getItem("access_token");
+        const session = await getSession();
+        const token = session?.user?.token;
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
-          "https://hildam.insightpublicis.com/api/allpayments",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/allpayments`,
           {
             method: "GET",
             headers: {
@@ -80,7 +83,7 @@ export default function Table() {
       if (!token) throw new Error("No access token found");
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/deleteorder/${selectedUserId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/deleteorder/${selectedUserId}`,
         {
           method: "DELETE",
           headers: {
@@ -164,7 +167,7 @@ export default function Table() {
               <div className="text-2xl text-[#5d7186]">{stat.value}</div>
             </div>
             <div className="p-4 rounded-lg bg-[#fff0ea] text-[#ff6c2f] ml-5">
-              <FaRegCalendarTimes size={30} />
+              <FaMoneyBill size={30} />
             </div>
           </div>
         ))}
@@ -193,7 +196,7 @@ export default function Table() {
           <table className="min-w-full border-collapse border border-gray-200">
             <thead className="bg-[#f6f8fb] sticky top-0 z-10">
               <tr className="text-[#5d7186]">
-                {["Order ID", "name", "Amount", "Payment Status", "Action"].map(
+                {["Order ID", "Customer Name", "Total Amount", "Payment Status", "Action"].map(
                   (header) => (
                     <th
                       key={header}
@@ -210,20 +213,20 @@ export default function Table() {
                 <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
                   <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
                   <td className="px-4 py-2 text-sm border-b text-[#da6d35]">
-                    {row.name}
+                    {row.customer_name}
                   </td>
-                  <td className="px-4 py-2 text-sm border-b">{row.amount}</td>
+                  <td className="px-4 py-2 text-sm border-b">{row.cumulative_total_amount}</td>
                   {/* <td className="px-4 py-2 text-sm border-b">
                     <span
                       className={`px-3 py-1 text-sm font-medium rounded ${
-                        row.amount === "completed"
+                        row.cumulative_total_amount === "completed"
                           ? "bg-white text-green-800 border border-green-800"
-                          : row.amount === "processing"
+                          : row.cumulative_total_amount === "processing"
                           ? "text-yellow-600 bg-white border border-yellow-600"
                           : "text-red-600 bg-white border border-red-600"
                       }`}
                     >
-                      {row.amount}
+                      {row.cumulative_total_amount}
                     </span>
                   </td> */}
                   <td className="px-4 py-2 text-sm border-b">
@@ -231,7 +234,7 @@ export default function Table() {
                   </td>
                   <td className="px-4 py-2 text-sm border-b">
                     <div className="flex flex-row">
-                      <Link href={`/admin/payments/${row.id}`}
+                      <Link href={`/client-manager/payments/${row.id}`}
                         className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2"
                       >
                         <IoEyeOutline size={20} />

@@ -753,12 +753,12 @@ const handleAssignTailors = async () => {
       Tailors
     </h2>
   </div>
-  <div className="flex space-x-3 whitespace-nowrap">
+  {/* <div className="flex space-x-3 whitespace-nowrap">
       <div className="font-bold text-xl text-gray-700">Tailor Commission:</div>
       <div className="flex space-x-2 font-normal items-center text-xl text-gray-700">
         <span>₦</span><span>commission_amount</span>
       </div>
-  </div>
+  </div> */}
   </div>
 
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 my-5 gap-6">

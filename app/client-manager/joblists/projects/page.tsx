@@ -4,12 +4,14 @@ import { SetStateAction, useEffect, useState } from "react";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { useRouter } from "next/navigation";
-import Spinner from "../../../../components/Spinner";
+import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { motion } from "framer-motion"; // Import Framer Motion
 import React from "react";
+import { getSession } from "next-auth/react";
 
 export default function Table() {
+
   interface ProjectItem {
     manager_name: string;
     items: string;
@@ -52,9 +54,10 @@ export default function Table() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       const response = await fetch(
-        "https://hildam.insightpublicis.com/api/projectlists",
+        `${process.env.NEXT_PUBLIC_BASE_URL}/projectlists`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -186,7 +189,7 @@ export default function Table() {
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
                     <Link
-                      href={`/client-manager/joblists/projects/${row.id}`}
+                      href={`/admin/joblists/projects/${row.id}`}
                       className="me-4 px-3 bg-red-100 hover:bg-orange-600 hover:text-white text-orange-600 p-2 rounded-lg flex space-x-2"
                     >
                       <IoEyeOutline size={20} />

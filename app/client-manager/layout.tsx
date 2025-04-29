@@ -9,7 +9,7 @@ const play = Play({ subsets: ["latin"], weight: ["400", "700"] });
 export const metadata: Metadata = {
   title: "Hildam Couture",
   description: "A Fashion Stylist App",
-}; 
+};
 
 export default function RootLayout({
   children,

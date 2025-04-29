@@ -1,20 +1,27 @@
 "use client";
 
-import Spinner from "../../../../components/Spinner";
+import SkeletonLoader from "@/components/SkeletonLoader";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import React from "react";
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+import {motion} from "framer-motion";
+
 
 export default function ShowCustomer() {
+
   const router = useRouter();
   const { id } = useParams();
   interface Customer {
-    id: string;
     item_name: string;
     item_quantity: number;
     created_at: string;
+    price_purchased: number;
+    unit: string;
+    color: string;
+    
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -26,12 +33,17 @@ export default function ShowCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const token = session?.user?.token;
+
+      if (!token) {
+        throw new Error("Unauthorized");
+      }
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/inventory/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${id}`,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -60,7 +72,7 @@ export default function ShowCustomer() {
   if (loading) {
     return (
       <div className="text-center text-gray-500 py-10">
-        <Spinner />
+        <SkeletonLoader />
       </div>
     );
   }
@@ -81,45 +93,110 @@ export default function ShowCustomer() {
   }
 
   return (
-    <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-      <div className="flex items-center justify-between mb-6">
-        <Link
-          href={`/client-manager/inventory`}
-          className="hover:text-blue-500 text-orange-500 flex flex-row items-center"
-        >
-          <IoIosArrowBack size={30} />
-          <div className="mx-2">Back to List</div>
-        </Link>
+    <motion.div
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.5 }}
+    className="w-full mx-auto p-8 bg-white rounded-2xl shadow-2xl"
+  >
+    <div className="flex items-center justify-between mb-8">
+      <Link
+        href="/client-manager/inventory"
+        className="flex items-center text-orange-500 hover:text-orange-700 transition duration-200"
+      >
+        <IoIosArrowBack size={30} />
+        <span className="ml-2 font-semibold">Back to List</span>
+      </Link>
+    </div>
+    <form className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Item Name */}
+      <div>
+        <label className="block text-gray-800 font-bold mb-2">
+          Item Name
+        </label>
+        <input
+          type="text"
+          value={customer.item_name}
+          readOnly
+          className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-2 bg-gray-100"
+        />
       </div>
-      <form className="grid grid-cols-2 gap-6">
-        <div>
-          <label className="block text-gray-700 font-bold">Item Name</label>
-          <input
-            type="text"
-            value={customer.item_name}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700 font-bold">Quantity</label>
-          <input
-            type="text"
-            value={customer.item_quantity}
-            readOnly
-            className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-100"
-          />
-        </div>
-        {/* Additional fields */}
-      </form>
-      <div className="mt-6 flex justify-end space-x-4">
-        <button
-          className="px-4 py-2 bg-orange-500 text-white rounded"
-          onClick={() => router.push(`/client-manager/inventory/${id}/edit`)}
+      {/* Quantity */}
+      <div>
+        <label className="block text-gray-800 font-bold mb-2">
+          Quantity
+        </label>
+        <input
+          type="text"
+          value={customer.item_quantity}
+          readOnly
+          className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-2 bg-gray-100"
+        />
+      </div>
+      {/* Price Purchased */}
+      <div>
+        <label className="block text-gray-800 font-bold mb-2">
+          Price Purchased
+        </label>
+        <input
+          type="text"
+          value={customer.price_purchased}
+          readOnly
+          className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-2 bg-gray-100"
+        />
+      </div>
+      {/* Unit */}
+      <div>
+        <label className="block text-gray-800 font-bold mb-2">
+          Unit
+        </label>
+        <input
+          type="text"
+          value={customer.unit}
+          readOnly
+          className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-2 bg-gray-100"
+        />
+      </div>
+      {/* Color */}
+      <div>
+        <label className="block text-gray-800 font-bold mb-2">
+          Color
+        </label>
+        <input
+          type="text"
+          value={customer.color}
+          readOnly
+          className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-2 bg-gray-100"
+        />
+      </div>
+      {/* Created On */}
+      <div>
+        <label className="block text-gray-800 font-bold mb-2">
+          Created On
+        </label>
+        <input
+          type="text"
+          value={new Date(customer.created_at).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+          readOnly
+          className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-2 bg-gray-100"
+        />
+      </div>
+      {/* Additional fields can be added here */}
+    </form>
+    <div className="mt-8 flex justify-end">
+      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <Link
+          href={`/client-manager/inventory/${id}/edit`}
+          className="px-6 py-2 bg-orange-500 text-white rounded-lg font-semibold transition duration-200 hover:bg-orange-600"
         >
           Edit
-        </button>
-      </div>
+        </Link>
+      </motion.div>
     </div>
+  </motion.div>
   );
 }

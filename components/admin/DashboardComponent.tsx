@@ -150,7 +150,7 @@ export default function Table() {
 
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
         <div className="mx-2 font-bold text-gray-500 text-xl my-3 flex flex-row justify-between items-center">
-          <div>Completed orders this week</div>
+          <div>Recent Orders</div>
           <Link href="/admin/orders/create">
             <div className="w-fit bg-red-100 px-4 py-2 text-base text-orange-500 rounded-lg">
               + Create Order

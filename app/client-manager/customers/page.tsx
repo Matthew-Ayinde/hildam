@@ -4,9 +4,22 @@ import { SetStateAction, useEffect, useState } from "react";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion"; // Import Framer Motion
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+import Spinner from "@/components/Spinner";
+
+// Extend the NextAuth session type
+declare module "next-auth" {
+  interface Session {
+    user: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      token?: string; // Add the token property here
+    };
+  }
+}
 
 export default function Table() {
   interface Customer {
@@ -19,6 +32,7 @@ export default function Table() {
   }
 
   const [data, setData] = useState<Customer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [popupMessage, setPopupMessage] = useState<string | null>(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -26,19 +40,19 @@ export default function Table() {
     null
   );
   const rowsPerPage = 10;
-  const router = useRouter();
 
   const handleDelete = async () => {
     if (!selectedCustomerId) return;
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
       if (!accessToken) {
         throw new Error("Authentication token not found");
       }
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/deletecustomer/${selectedCustomerId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/deletecustomer/${selectedCustomerId}`,
         {
           method: "DELETE",
           headers: {
@@ -76,27 +90,31 @@ export default function Table() {
   };
 
   useEffect(() => {
-    const token = sessionStorage.getItem("access_token");
-
-    if (!token) {
-      console.error("No access token found in sessionStorage");
-      return;
-    }
-
-    fetch("https://hildam.insightpublicis.com/api/customerslist", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const session = await getSession(); // Get session from NextAuth
+        const accessToken = session?.user?.token; // Access token from session
+        if (!accessToken) {
+          throw new Error("No token found, please log in.");
         }
-        return response.json();
-      })
-      .then((result) => {
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/customerslist`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`, // Attach JWT token
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const result = await response.json();
         if (result.data && Array.isArray(result.data)) {
           const filteredData = result.data.map(
             (item: {
@@ -116,10 +134,18 @@ export default function Table() {
           );
           setData(filteredData);
         } else {
-          console.error("Invalid data format received");
+          setData([]);
         }
-      })
-      .catch((error) => console.error("Error fetching data:", error));
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setPopupMessage("Error fetching data");
+        setTimeout(() => setPopupMessage(null), 5000);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const totalPages = Math.ceil(data.length / rowsPerPage);
@@ -143,9 +169,17 @@ export default function Table() {
         </div>
       )}
       <div className="overflow-x-auto bg-white rounded-2xl py-3">
-        <div className="mx-2 font-bold text-gray-500 text-xl my-3">
+       <div className="flex justify-between items-center">
+       <div className="mx-2 ml-5 font-bold text-gray-500 text-xl my-3">
           Customers List
         </div>
+          <Link
+            href="/client-manager/customers/create"
+            className="bg-[#ff6c2f] text-white py-1 px-3 rounded me-4"
+          >
+            Add new customer
+          </Link>
+       </div>
         <table className="min-w-full border-collapse border border-gray-200">
           <thead className="bg-[#f6f8fb] sticky top-0 z-10">
             <tr className="text-[#5d7186]">
@@ -167,41 +201,63 @@ export default function Table() {
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((row, index) => (
-              <motion.tr
-                key={index}
-                initial={{ opacity: 0, y: 20 }} // Initial state for animation
-                animate={{ opacity: 1, y: 0 }} // Final state for animation
-                transition={{ duration: 0.2, delay: index * 0.1 }} // Staggered animation with delay
-                className="text-[#5d7186]"
-              >
-                <td className="px-4 py-2 text-sm border-b">{row.fullName}</td>
-                <td className="px-4 py-2 text-sm border-b">{row.age}</td>
-                <td className="px-4 py-2 text-sm border-b">{row.gender}</td>
-                <td className="px-4 py-2 text-sm border-b">{row.phone}</td>
-                <td className="px-4 py-2 text-sm border-b">{row.date}</td>
-
-                <td className="px-4 py-2 text-sm border-b">
-                  <div className="flex flex-row">
-                    <Link
-                      href={`/admin/customers/${row.id}`}
-                      className="ml-0 me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:cursor-pointer"
-                    >
-                      <IoEyeOutline size={20} />
+            {isLoading ? (
+              // Show Spinner while loading
+              <tr>
+                <td colSpan={6} className="text-center py-10">  
+                  <Spinner />
+                </td>
+              </tr>
+            ) : data.length === 0 ? (
+              // Show "No data found" when the API returns an empty array
+              <tr>
+                <td colSpan={6} className="text-center py-10 text-gray-700 font-bold">
+                  <div>No customers found</div>
+                  <div className="flex justify-center">
+                    <Link href="/client-manager/customers/create" className="bg-[#ff6c2f] text-white py-1 px-2 mt-2 rounded-lg">
+                      <div className="">Add new customer</div>
                     </Link>
-                    <div
-                      className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg hover:cursor-pointer"
-                      onClick={() => {
-                        setSelectedCustomerId(row.id);
-                        setIsPopupOpen(true);
-                      }}
-                    >
-                      <MdOutlineDeleteForever size={20} />
-                    </div>
                   </div>
                 </td>
-              </motion.tr>
-            ))}
+              </tr>
+            ) : (
+              paginatedData.map((row, index) => (
+                <motion.tr
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="text-[#5d7186] hover:bg-gray-100"
+                >
+                  <td className="px-4 py-2 text-sm border-b">{row.fullName}</td>
+                  <td className="px-4 py-2 text-sm border-b">{row.age}</td>
+                  <td className="px-4 py-2 text-sm border-b">{row.gender}</td>
+                  <td className="px-4 py-2 text-sm border-b">{row.phone}</td>
+                  <td className="px-4 py-2 text-sm border-b">{row.date}</td>
+                  <td className="px-4 py-2 text-sm border-b">
+                    <div className="flex flex-row">
+                      <Link
+                        href={`/client-manager/customers/${row.id}`}
+                        className="ml-0 me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:cursor-pointer hover:bg-red-200"
+                      >
+                        <IoEyeOutline size={20} />
+                      </Link>
+                      <div
+                        className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg hover:cursor-pointer hover:bg-red-200"
+                        onClick={() => {
+                          setSelectedCustomerId(row.id);
+                          setIsPopupOpen(true);
+                        }}
+                      >
+                        <MdOutlineDeleteForever size={20} />
+                      </div>
+                    </div>
+                  </td>
+                </motion.tr>
+              ))
+              
+            )}
           </tbody>
         </table>
       </div>
