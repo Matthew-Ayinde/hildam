@@ -32,7 +32,7 @@ export default function ProjectManagerDropdown() {
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
-          "https://hildam.insightpublicis.com/api/projectmanagerlist",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/projectmanagerlist`,
           {
             method: "GET",
             headers: {
@@ -83,7 +83,7 @@ export default function ProjectManagerDropdown() {
 
     try {
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/assignprojectmanager/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/assignprojectmanager/${id}`,
         {
           method: "POST",
           headers: {

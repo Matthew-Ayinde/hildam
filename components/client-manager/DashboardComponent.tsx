@@ -1,12 +1,28 @@
 "use client";
 
 import { SetStateAction, useEffect, useRef, useState } from "react";
-import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes } from "react-icons/fa";
+import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes, FaUsers } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
-import gsap from "gsap";
+import { motion } from "framer-motion"; // Import Framer Motion
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+import Last7Days from "../charts/Last7Days";
+import { FaClipboardList, FaClock, FaCheckCircle } from "react-icons/fa";
+import { FaUser } from "react-icons/fa6";
+
+// Extend the NextAuth session type
+declare module "next-auth" {
+  interface Session {
+    user: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      token?: string; // Add the token property here
+    };
+  }
+}
 
 export default function Table() {
   interface Order {
@@ -26,7 +42,6 @@ export default function Table() {
   const totalPages = Math.ceil(data.length / rowsPerPage);
   const router = useRouter();
   const tableRef = useRef<HTMLTableSectionElement>(null);
-
   const statsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,11 +49,12 @@ export default function Table() {
       try {
         setLoading(true);
         setError(null);
-        const token = sessionStorage.getItem("access_token");
+        const session = await getSession(); // Get session from NextAuth
+        const token = session?.user?.token; // Access token from session
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
-          "https://hildam.insightpublicis.com/api/orderslist",
+          `https://hildam.insightpublicis.com/api/orderslist`,
           {
             method: "GET",
             headers: {
@@ -71,30 +87,6 @@ export default function Table() {
     fetchOrders();
   }, []);
 
-  useEffect(() => {
-    if (tableRef.current && !loading && !error) {
-      const rows = tableRef.current.querySelectorAll("tr");
-      gsap.fromTo(
-        rows,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, stagger: 0.1, duration: 0.6 }
-      );
-    }
-  }, [loading, error, currentPage]);
-
-  useEffect(() => {
-    if (statsRef.current) {
-      const items = statsRef.current.children; // Get all child elements
-      gsap.fromTo(
-        items,
-        { opacity: 0, x: 50 }, // Start from opacity 0 and x position 50 (off-screen right)
-        { opacity: 1, x: 0, stagger: 0.2, duration: 0.6 } // Animate to opacity 1 and x position 0 with stagger
-      );
-    }
-  }, []); // Empty dependency array to run only on mount
-  
-  
-
   const handlePageChange = (newPage: SetStateAction<number>) => {
     if (typeof newPage === "number" && newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -117,34 +109,49 @@ export default function Table() {
 
   return (
     <div className="w-full">
-        <div ref={statsRef} className="flex flex-row gap-5 overflow-x-auto">
-      {[
-        { label: "Total Orders", value: data.length },
-        { label: "Total Customers", value: data.length },
-        { label: "Total Users", value: data.length },
-        // Add more stats as needed
-      ].map((stat, index) => (
-        <div
-          key={index}
-          className="bg-white rounded-xl flex items-center p-5 mb-5"
-        >
-          <div className="text-[#81899d]">
-            <div className="font-bold text-gray-700 whitespace-nowrap">
-              {stat.label}
+      <div ref={statsRef} className="flex flex-row gap-5 overflow-x-auto">
+        {[
+          {
+            label: "Total Orders",
+            value: data.length,
+            icon: <FaClipboardList size={30} className="text-[#ff6c2f]" />,
+          },
+          {
+            label: "Total Customers",
+            value: data.length,
+            icon: <FaUser size={30} className="text-[#ff6c2f]" />,
+          },
+          {
+            label: "Total Users",
+            value: data.length,
+            icon: <FaUsers size={30} className="text-[#ff6c2f]" />,
+          },
+          // Add more stats if needed
+        ].map((stat, index) => (
+          <motion.div
+            key={index}
+            className="bg-white rounded-xl flex items-center p-5 mb-5 min-w-[200px]" // min-w helps for scrollable layout
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: index * 0.2 }}
+          >
+            <div className="text-[#81899d]">
+              <div className="font-bold text-gray-700 whitespace-nowrap">
+                {stat.label}
+              </div>
+              <div className="text-2xl text-[#5d7186]">{stat.value}</div>
             </div>
-            <div className="text-2xl text-[#5d7186]">{stat.value}</div>
-          </div>
-          <div className="p-4 rounded-lg bg-[#fff0ea] text-[#ff6c2f] ml-5">
-            <FaRegCalendarTimes size={30} />
-          </div>
-        </div>
-      ))}
-    </div>
+            <div className="p-4 rounded-lg bg-[#fff0ea] ml-5">{stat.icon}</div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* <Last7Days /> */}
 
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
         <div className="mx-2 font-bold text-gray-500 text-xl my-3 flex flex-row justify-between items-center">
           <div>Recent Orders</div>
-          <Link href="/admin/orders/create">
+          <Link href="/client-manager/orders/create">
             <div className="w-fit bg-red-100 px-4 py-2 text-base text-orange-500 rounded-lg">
               + Create Order
             </div>
@@ -186,9 +193,15 @@ export default function Table() {
                 ))}
               </tr>
             </thead>
-            <tbody ref={tableRef}>
+            <tbody>
               {paginatedData.map((row, index) => (
-                <tr key={index} className="hover:cursor-pointer text-[#5d7186]">
+                <motion.tr
+                  key={index}
+                  className="hover:cursor-pointer text-[#5d7186]"
+                  initial={{ opacity: 0, y: 20 }} // Initial state for animation
+                  animate={{ opacity: 1, y: 0 }} // Final state for animation
+                  transition={{ duration: 0.6, delay: index * 0.1 }} // Staggered animation with delay
+                >
                   <td className="px-4 py-2 text-sm border-b">{row.order_id}</td>
                   <td className="px-4 py-2 text-sm border-b">
                     {formatDate(row.created_at)}
@@ -213,14 +226,15 @@ export default function Table() {
                     </span>
                   </td>
                   <td className="px-4 py-2 text-sm border-b">
-                    <Link href={`/admin/orders/${row.id}`}
+                    <Link
+                      href={`/client-manager/orders/${row.id}`}
                       className="me-4 px-3 bg-red-100 text-orange-600 w-fit p-2 rounded-lg flex flex-row space-x-2"
                     >
                       <IoEyeOutline size={20} />
                       <div>View</div>
                     </Link>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
           </table>
@@ -241,7 +255,13 @@ export default function Table() {
             </span>{" "}
             of <span className="font-bold">{data.length}</span> Orders
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-5">
+            <div>
+              <Link href={'/client-manager/orders'} className="text-sm text-white bg-orange-500 hover:bg-orange-700 py-2 px-3 rounded">
+                View All Orders
+              </Link>
+            </div>
+            <div className="flex items-center space-x-2">
             <button
               className="p-3 text-sm text-gray-600 bg-gray-200 rounded disabled:opacity-50"
               disabled={currentPage === 1}
@@ -256,6 +276,7 @@ export default function Table() {
             >
               <FaArrowRight />
             </button>
+          </div>
           </div>
         </div>
       )}

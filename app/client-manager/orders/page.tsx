@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes } from "react-icons/fa";
+import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes, FaClipboardList } from "react-icons/fa";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 
 export default function Table() {
   interface Order {
@@ -44,11 +45,12 @@ export default function Table() {
       try {
         setLoading(true);
         setError(null);
-        const token = sessionStorage.getItem("access_token");
+        const session = await getSession(); // Get session from NextAuth
+        const token = session?.user?.token; // Access token from session
         if (!token) throw new Error("No access token found");
 
         const response = await fetch(
-          "https://hildam.insightpublicis.com/api/orderslist",
+          `${process.env.NEXT_PUBLIC_BASE_URL}/orderslist`,
           {
             method: "GET",
             headers: {
@@ -95,7 +97,21 @@ export default function Table() {
       );
     } else if (filterCategory === "Priority" && filterValue) {
       filtered = filtered.filter((order) => order.priority === filterValue);
-    } else if (filterCategory === "Date" && startDate && endDate) {
+    }
+    else if (filterCategory === "Order Status" && filterValue) {
+      filtered = filtered.filter((order) => order.order_status === filterValue);
+    } else if (filterCategory === "Date" && startDate && !endDate) {
+      filtered = filtered.filter((order) => {
+        const orderDate = new Date(order.created_at);
+        return orderDate >= new Date(startDate);
+      });
+    } else if (filterCategory === "Date" && !startDate && endDate) {
+      filtered = filtered.filter((order) => {
+        const orderDate = new Date(order.created_at);
+        return orderDate <= new Date(endDate);
+      });
+    }
+    else if (filterCategory === "Date" && startDate && endDate) {
       filtered = filtered.filter((order) => {
         const orderDate = new Date(order.created_at);
         return (
@@ -121,11 +137,12 @@ export default function Table() {
 
   const handleDelete = async (id: any) => {
     try {
-      const token = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const token = session?.user?.token; // Access token from session
       if (!token) throw new Error("No access token found");
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/deleteorder/${selectedUserId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/deleteorder/${selectedUserId}`,
         {
           method: "DELETE",
           headers: {
@@ -139,10 +156,14 @@ export default function Table() {
         throw new Error(result.message || "Failed to delete order");
       }
 
-      // Update state
+      // Update state for both data and filteredData to immediately reflect deletion
       setData((prevData) =>
         prevData.filter((order) => order.id !== selectedUserId)
       );
+      setFilteredData((prevData) =>
+        prevData.filter((order) => order.id !== selectedUserId)
+      );
+
       setIsPopupOpen(false);
       setToastMessage("Order deleted successfully");
       setToastType("success");
@@ -199,7 +220,8 @@ export default function Table() {
           {toastMessage}
         </div>
       )}
-
+ 
+      {/* Stats Section */}
       <div className="flex flex-row gap-5">
         {[
           { label: "Total Orders", value: filteredData.length },
@@ -214,7 +236,7 @@ export default function Table() {
               <div className="text-2xl text-[#5d7186]">{stat.value}</div>
             </div>
             <div className="p-4 rounded-lg bg-[#fff0ea] text-[#ff6c2f] ml-5">
-              <FaRegCalendarTimes size={30} />
+              <FaClipboardList size={30} />
             </div>
           </div>
         ))}
@@ -257,6 +279,7 @@ export default function Table() {
                   <option value="Customer">Customer</option>
                   <option value="Cloth Name">Cloth Name</option>
                   <option value="Priority">Priority</option>
+                  <option value="Order Status">Order Status</option>
                   <option value="Date">Date</option>
                 </select>
 
@@ -271,7 +294,18 @@ export default function Table() {
                     <option value="medium">Medium</option>
                     <option value="low">Low</option>
                   </select>
-                ) : filterCategory === "Date" ? (
+                ) : filterCategory === "Order Status" ? (
+                  <select
+                    value={filterValue}
+                    onChange={(e) => setFilterValue(e.target.value)}
+                    className="border rounded p-2 mr-2"
+                  >
+                    <option value="">Select Status</option>
+                    <option value="completed">Completed</option>
+                    <option value="processing">Processing</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                 ) : filterCategory === "Date" ? (
                   <>
                     <input
                       type="date"
@@ -320,7 +354,7 @@ export default function Table() {
                     "Cloth Name",
                     "Priority",
                     "Order Status",
-                    "Project Manager",
+                    "Head of Tailoring",
                     "Action",
                   ].map((header) => (
                     <th
@@ -333,70 +367,89 @@ export default function Table() {
                 </tr>
               </thead>
               <tbody>
-                {paginatedData.map((row, index) => (
-                  <motion.tr
-                    key={index}
-                    className="hover:cursor-pointer text-[#5d7186] hover:bg-gray-100 transition duration-200"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.2 }} // Sequential animation
-                  >
-                    <td className="px-4 py-2 text-sm border-b">
-                      {row.order_id}
-                    </td>
-                    <td className="px-4 py-2 text-sm border-b">
-                      {formatDate(row.created_at)}
-                    </td>
-                    <td className="px-4 py-2 text-sm border-b text-[#da6d35]">
-                      {row.customer_name}
-                    </td>
-                    <td className="px-4 py-2 text-sm border-b">
-                      {row.clothing_name}
-                    </td>
+                {paginatedData.length === 0 ? (
+                  <tr>
                     <td
-                      className={`px-4 py-2 text-sm border-b ${
-                        row.priority === "high" ? "text-red-500" : ""
-                      }`}
+                      colSpan={8}
+                      className="px-4 py-10 text-center text-gray-500"
                     >
-                      {row.priority || "medium"}
-                    </td>
-                    <td className="px-4 py-2 text-sm border-b">
-                      <span
-                        className={`px-3 py-1 text-sm font-medium rounded ${
-                          row.order_status === "completed"
-                            ? "bg-white text-green-800 border border-green-800"
-                            : row.order_status === "processing"
-                            ? "text-yellow-600 bg-white border border-yellow-600"
-                            : "text-red-600 bg-white border border-red-600"
-                        }`}
+                      <div className="mb-3">No Order found</div>
+                      <div className="my-5">
+                      <Link
+                        href="/client-manager/orders/create"
+                        className="bg-orange-500 rounded px-4 py-2 text-white"
                       >
-                        {row.order_status || "pending"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2 text-sm border-b">
-                      {row.manager_name || "Not Assigned"}
-                    </td>
-                    <td className="px-4 py-2 text-sm border-b">
-                      <div className="flex flex-row">
-                        <Link
-                          href={`/client-manager/orders/${row.id}`}
-                          className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:bg-red-200 transition duration-200"
-                        >
-                          <IoEyeOutline size={20} />
-                        </Link>
-                        <div
-                          className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg hover:bg-red-200 transition duration-200"
-                          onClick={() => {
-                            setSelectedUserId(row.id);
-                            setIsPopupOpen(true);
-                          }}
-                        >
-                          <MdOutlineDeleteForever size={20} />
-                        </div>
+                        Create Order
+                      </Link>
                       </div>
                     </td>
-                  </motion.tr>
-                ))}
+                  </tr>
+                ) : (
+                  paginatedData.map((row, index) => (
+                    <motion.tr
+                      key={index}
+                      className="hover:cursor-pointer text-[#5d7186] hover:bg-gray-100 transition duration-200"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: index * 0.2 }}
+                    >
+                      <td className="px-4 py-2 text-sm border-b">
+                        {row.order_id}
+                      </td>
+                      <td className="px-4 py-2 text-sm border-b">
+                        {formatDate(row.created_at)}
+                      </td>
+                      <td className="px-4 py-2 text-sm border-b text-[#da6d35]">
+                        {row.customer_name}
+                      </td>
+                      <td className="px-4 py-2 text-sm border-b">
+                        {row.clothing_name}
+                      </td>
+                      <td
+                        className={`px-4 py-2 text-sm border-b ${
+                          row.priority === "high" ? "text-red-500" : ""
+                        }`}
+                      >
+                        {row.priority || "medium"}
+                      </td>
+                      <td className="px-4 py-2 text-sm border-b">
+                        <span
+                          className={`px-3 py-1 text-sm font-medium rounded ${
+                            row.order_status === "closed"
+                              ? "bg-white text-green-800 border border-green-800"
+                              : row.order_status === "processing"
+                              ? "text-yellow-600 bg-white border border-yellow-600"
+                              : "text-red-600 bg-white border border-red-600"
+                          }`}
+                        >
+                          {row.order_status || "pending"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-sm border-b">
+                        {row.manager_name || "Not Assigned"}
+                      </td>
+                      <td className="px-4 py-2 text-sm border-b">
+                        <div className="flex flex-row">
+                          <Link
+                            href={`/client-manager/orders/${row.id}`}
+                            className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:bg-red-200 transition duration-200"
+                          >
+                            <IoEyeOutline size={20} />
+                          </Link>
+                          <div
+                            className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg hover:bg-red-200 transition duration-200"
+                            onClick={() => {
+                              setSelectedUserId(row.id);
+                              setIsPopupOpen(true);
+                            }}
+                          >
+                            <MdOutlineDeleteForever size={20} />
+                          </div>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  ))
+                )}
               </tbody>
             </table>
           </>
@@ -482,7 +535,7 @@ export default function Table() {
                 onClick={handleDelete}
               >
                 Confirm
-              </button>
+              </button>{" "}
               <button
                 className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-100 transition duration-200"
                 onClick={() => setIsPopupOpen(false)}

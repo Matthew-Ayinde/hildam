@@ -1,11 +1,15 @@
 "use client";
 
-import Spinner from "../../../../../components/Spinner";
+import Spinner from "@/components/Spinner";
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getSession } from "next-auth/react";
+import Link from "next/link";
+import {motion} from "framer-motion";
 
 export default function EditCustomer() {
+
   const router = useRouter();
   const { id } = useParams();
   const [customer, setCustomer] = useState(null);
@@ -14,6 +18,9 @@ export default function EditCustomer() {
   const [formData, setFormData] = useState({
     item_name: "",
     item_quantity: "",
+    price_purchased: "",
+    unit: "",
+    color: "",
   });
   const [confirmationMessage, setConfirmationMessage] = useState<string | null>(
     null
@@ -24,12 +31,17 @@ export default function EditCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const token = session?.user?.token;
+
+      if (!token) {
+        throw new Error("Unauthorized");
+      }
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/inventory/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${id}`,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -43,6 +55,9 @@ export default function EditCustomer() {
       setFormData({
         item_name: result.data.item_name,
         item_quantity: result.data.item_quantity,
+        price_purchased: result.data.price_purchased,
+        unit: result.data.unit,
+        color: result.data.color,
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -67,14 +82,19 @@ export default function EditCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession();
+      const token = session?.user?.token;
+
+      if (!token) {
+        throw new Error("Unauthorized");
+      }
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/inventory/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${id}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(formData),
         }
@@ -125,50 +145,112 @@ export default function EditCustomer() {
 
   return (
     <div className="relative">
-      {confirmationMessage && (
-        <div className="fixed top-5 rounded-lg left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-2 w-fit z-50">
-          {confirmationMessage}
+    {confirmationMessage && (
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg w-fit shadow-lg z-50"
+      >
+        {confirmationMessage}
+      </motion.div>
+    )}
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+      className="max-w-3xl mx-auto p-8 bg-white rounded-2xl shadow-2xl mt-12"
+    >
+      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
+        {/* Item Name */}
+        <div>
+          <label className="block text-gray-800 font-bold mb-2">
+            Item Name
+          </label>
+          <input
+            type="text"
+            name="item_name"
+            value={formData.item_name}
+            onChange={handleInputChange}
+            placeholder="Enter item name"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+          />
         </div>
-      )}
-      <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block text-gray-700 font-bold">Item Name</label>
-            <input
-              type="text"
-              name="item_name"
-              value={formData.item_name}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Quantity</label>
-            <input
-              type="text"
-              name="item_quantity"
-              value={formData.item_quantity}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div className="col-span-2">
-            <button
-              type="submit"
-              className="px-4 py-2 bg-orange-500 text-white rounded"
-            >
-              Save Changes
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push(`/client-manager/inventory/${id}`)}
-              className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        {/* Quantity */}
+        <div>
+          <label className="block text-gray-800 font-bold mb-2">
+            Quantity
+          </label>
+          <input
+            type="text"
+            name="item_quantity"
+            value={formData.item_quantity}
+            onChange={handleInputChange}
+            placeholder="Enter quantity"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+          />
+        </div>
+        {/* Price Purchased */}
+        <div>
+          <label className="block text-gray-800 font-bold mb-2">
+            Price Purchased
+          </label>
+          <input
+            type="text"
+            name="price_purchased"
+            value={formData.price_purchased}
+            onChange={handleInputChange}
+            placeholder="Enter price"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+          />
+        </div>
+        {/* Unit */}
+        <div>
+          <label className="block text-gray-800 font-bold mb-2">
+            Unit
+          </label>
+          <input
+            type="text"
+            name="unit"
+            value={formData.unit}
+            onChange={handleInputChange}
+            placeholder="Enter unit"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+          />
+        </div>
+        {/* Color */}
+        <div>
+          <label className="block text-gray-800 font-bold mb-2">
+            Color
+          </label>
+          <input
+            type="text"
+            name="color"
+            value={formData.color}
+            onChange={handleInputChange}
+            placeholder="Enter color"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+          />
+        </div>
+        {/* Form Actions */}
+        <div className="col-span-2 flex justify-end space-x-4">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="submit"
+            className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition duration-200"
+          >
+            Save Changes
+          </motion.button>
+          <Link
+            href={`/client-manager/inventory/${id}`}
+            className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-semibold transition duration-200"
+          >
+            Cancel
+          </Link>
+        </div>
+      </form>
+    </motion.div>
+  </div>
   );
 }

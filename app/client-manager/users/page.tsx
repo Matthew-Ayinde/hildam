@@ -6,8 +6,11 @@ import { IoEyeOutline } from "react-icons/io5";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
+import { useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 
 export default function Table() {
+
   interface User {
     id: string;
     name: string;
@@ -31,14 +34,15 @@ export default function Table() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const accessToken = sessionStorage.getItem("access_token");
+        const session = await getSession();
+        const accessToken = session?.user?.token; // Adjust this line based on how you store the access token
         if (!accessToken) {
           console.error("No access token found in sessionStorage.");
           return;
         }
 
         const response = await fetch(
-          "https://hildam.insightpublicis.com/api/users",
+            `${process.env.NEXT_PUBLIC_BASE_URL}/users`,
           {
             method: "GET",
             headers: {
@@ -66,14 +70,15 @@ export default function Table() {
 
   const handleDelete = async () => {
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession();
+      const accessToken = session?.user?.token; // Adjust this line based on how you store the access token
       if (!accessToken) {
         console.error("No access token found in sessionStorage.");
         return;
       }
 
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/users/${selectedUserId}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${selectedUserId}`,
         {
           method: "DELETE",
           headers: {

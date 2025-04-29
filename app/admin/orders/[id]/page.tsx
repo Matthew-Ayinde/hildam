@@ -355,16 +355,18 @@ export default function ShowCustomer() {
           <span className="ml-2 font-semibold">Back to List</span>
         </Link>
         <div className="flex space-x-5 items-center justify-between">
-          <div>
-            {/* Close Order Button */}
-          <button
-            onClick={handleOpenCloseModal}
-            className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
-          >
-            <span className="font-medium">Close Order</span>
-          </button>
+         {customer.order_status !== "closed" && (
+           <div>
+           {/* Close Order Button */}
+         <button
+           onClick={handleOpenCloseModal}
+           className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+         >
+           <span className="font-medium">Close Order</span>
+         </button>
 
-          </div>
+         </div>
+         )}
           <div className="mt-4 lg:mt-0 flex items-center space-x-2">
             <h1 className="text-xl font-bold text-gray-800">
               Head of Tailoring:

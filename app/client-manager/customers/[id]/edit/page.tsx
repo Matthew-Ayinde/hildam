@@ -1,30 +1,42 @@
 "use client";
 
-import Spinner from "../../../../../components/Spinner";
+import SkeletonLoader from "@/components/SkeletonLoader"
 import { useParams, useRouter } from "next/navigation";
-import React from "react";
-import { useEffect, useState } from "react";
- 
+import React, { useEffect, useState } from "react";
+import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+import { motion } from "framer-motion";
+import Link from "next/link";
+
 export default function EditCustomer() {
   const router = useRouter();
   const { id } = useParams();
+
   interface Customer {
     name: string;
     age: string;
     phone_number: string;
     email: string;
-    bust: number;
-    address: string;
-    waist: number;
-    hip: number;
-    neck: number;
     gender: string;
-    created_at: string;
+    bust: number;
+    shoulder_to_underbust: number;
+    round_under_bust: number;
+    sleeve_length: number;
+    half_length: number;
+    blouse_length: number;
+    round_sleeve: number;
+    dress_length: number;
+    chest: number;
+    round_shoulder: number;
+    skirt_length: number;
+    trousers_length: number;
+    round_thigh: number;
+    round_knee: number;
+    round_feet: number;
+    hip: number;
     shoulder_width: number;
-    arm_length: number;
-    back_length: number;
-    front_length: number;
-    high_bust: number;
+    bustpoint: number;
+    waist: number;
+    shoulder: number;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -33,20 +45,28 @@ export default function EditCustomer() {
   const [formData, setFormData] = useState({
     name: "",
     age: "",
-    phone: "",
+    phone_number: "",
     email: "",
     bust: "",
-    address: "",
-    waist: "",
-    hip: "",
-    neck: "",
     gender: "",
-    date: "",
-    shoulderWidth: "",
-    armLength: "",
-    backLength: "",
-    frontLength: "",
-    highBust: "",
+    shoulder_to_underbust: "",
+    round_under_bust: "",
+    sleeve_length: "",
+    half_length: "",
+    blouse_length: "",
+    round_sleeve: "",
+    dress_length: "",
+    chest: "",
+    round_shoulder: "",
+    skirt_length: "",
+    trousers_length: "",
+    round_thigh: "",
+    round_knee: "",
+    round_feet: "",
+    hip: "",
+    shoulder: "",
+    bustpoint: "",
+    waist: "",
   });
 
   const fetchCustomer = async () => {
@@ -54,9 +74,12 @@ export default function EditCustomer() {
     setError("");
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
+      if (!accessToken) throw new Error("No access token found");
+
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/customerslist/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/customerslist/${id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -73,20 +96,28 @@ export default function EditCustomer() {
       setFormData({
         name: result.data.name,
         age: result.data.age,
-        phone: result.data.phone_number,
+        phone_number: result.data.phone_number,
+        gender: result.data.gender,
         email: result.data.email,
         bust: result.data.bust,
-        address: result.data.address,
-        waist: result.data.waist,
+        shoulder_to_underbust: result.data.shoulder_to_underbust,
+        round_under_bust: result.data.round_under_bust,
+        sleeve_length: result.data.sleeve_length,
+        half_length: result.data.half_length,
+        blouse_length: result.data.blouse_length,
+        round_sleeve: result.data.round_sleeve,
+        dress_length: result.data.dress_length,
+        chest: result.data.chest,
+        round_shoulder: result.data.round_shoulder,
+        skirt_length: result.data.skirt_length,
+        trousers_length: result.data.trousers_length,
+        round_thigh: result.data.round_thigh,
+        round_knee: result.data.round_knee,
+        round_feet: result.data.round_feet,
         hip: result.data.hip,
-        neck: result.data.neck,
-        gender: result.data.gender,
-        date: result.data.created_at,
-        shoulderWidth: result.data.shoulder_width,
-        armLength: result.data.arm_length,
-        backLength: result.data.back_length,
-        frontLength: result.data.front_length,
-        highBust: result.data.high_bust,
+        shoulder: result.data.shoulder,
+        bustpoint: result.data.bust,
+        waist: result.data.waist,
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -111,9 +142,12 @@ export default function EditCustomer() {
     setError("");
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
+      if (!accessToken) throw new Error("No access token found");
+
       const response = await fetch(
-        `https://hildam.insightpublicis.com/api/customerslist/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/editcustomer/${id}`,
         {
           method: "PUT",
           headers: {
@@ -145,7 +179,7 @@ export default function EditCustomer() {
   if (loading) {
     return (
       <div className="text-center text-gray-500 py-10">
-        <Spinner />
+        <SkeletonLoader />
       </div>
     );
   }
@@ -161,220 +195,165 @@ export default function EditCustomer() {
     );
   }
 
-  return (
-    <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block text-gray-700 font-bold">Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Age</label>
-            <input
-              type="text"
-              name="age"
-              value={formData.age}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Gender</label>
-            <input
-              type="text"
-              name="gender"
-              onChange={handleInputChange}
-              value={formData.gender}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Phone</label>
-            <input
-              type="text"
-              name="phone"
-              value={formData?.phone || ""}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 font-bold">Email</label>
-            <input
-              type="text"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
-          </div>
-        </div>
+  const measurements = [
+    { label: "Bust", key: "bust" },
+    { label: "Waist", key: "waist" },
+    { label: "Hip", key: "hip" },
+    { label: "Shoulder", key: "shoulder" },
+    { label: "Bust Point", key: "bustpoint" },
+    { label: "Shoulder to Underbust", key: "shoulder_to_underbust" },
+    { label: "Round Under Bust", key: "round_under_bust" },
+    { label: "Sleeve Length", key: "sleeve_length" },
+    { label: "Half Length", key: "half_length" },
+    { label: "Blouse Length", key: "blouse_length" },
+    { label: "Round Sleeve", key: "round_sleeve" },
+    { label: "Dress Length", key: "dress_length" },
+    { label: "Chest", key: "chest" },
+    { label: "Round Shoulder", key: "round_shoulder" },
+    { label: "Skirt Length", key: "skirt_length" },
+    { label: "Trouser Length", key: "trousers_length" },
+    { label: "Round Thigh", key: "round_thigh" },
+    { label: "Round Knee", key: "round_knee" },
+    { label: "Round Feet", key: "round_feet" },
+  ];
 
-        <div className="col-span-2 mt-5">
-          <button
-            type="submit"
-            className="px-4 py-2 bg-orange-500 text-white rounded"
-          >
-            Save Changes
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push(`/client-manager/inventory/${id}`)}
-            className="ml-4 px-4 py-2 bg-gray-500 text-white rounded"
-          >
-            Cancel
-          </button>
+  return (
+    <motion.div
+    initial={{ opacity: 0, x: -50 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ duration: 0.5, ease: "easeOut" }}
+    className="w-full mx-auto p-8 bg-white rounded-2xl shadow-lg"
+  >
+    <h2 className="text-2xl font-bold text-gray-800 mb-6">
+      Edit Customer Information
+    </h2>
+    <form onSubmit={handleSubmit}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Full Name */}
+        <div>
+          <label className="block text-gray-700 font-bold mb-1">
+            Full Name
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder="Enter full name"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 focus:border-orange-500 focus:ring focus:ring-orange-200 transition duration-200"
+          />
         </div>
-      </form>
-    </div>
+        {/* Age */}
+        <div>
+          <label className="block text-gray-700 font-bold mb-1">
+            Age
+          </label>
+          <input
+            type="text"
+            name="age"
+            value={formData.age}
+            onChange={handleInputChange}
+            placeholder="Enter age"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 focus:border-orange-500 focus:ring focus:ring-orange-200 transition duration-200"
+          />
+        </div>
+        {/* Gender */}
+        <div>
+          <label className="block text-gray-700 font-bold mb-1">
+            Gender
+          </label>
+          <select
+            name="gender"
+            onChange={handleInputChange}
+            value={formData.gender || ""}
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 focus:border-orange-500 focus:ring focus:ring-orange-200 transition duration-200"
+          >
+            <option value="" disabled>
+              Select Gender
+            </option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        {/* Phone Number */}
+        <div>
+          <label className="block text-gray-700 font-bold mb-1">
+            Phone Number
+          </label>
+          <input
+            type="text"
+            name="phone_number"
+            value={formData?.phone_number || ""}
+            onChange={handleInputChange}
+            placeholder="Enter phone number"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 focus:border-orange-500 focus:ring focus:ring-orange-200 transition duration-200"
+          />
+        </div>
+        {/* Email */}
+        <div>
+          <label className="block text-gray-700 font-bold mb-1">
+            Email
+          </label>
+          <input
+            type="text"
+            name="email"
+            value={formData.email}
+            readOnly
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 bg-gray-50"
+          />
+        </div>
+      </div>
+
+      {/* Measurements Section */}
+      <div className="mt-10">
+        <h3 className="block text-xl font-bold text-gray-800 mb-3">
+          Measurements
+        </h3>
+        <div className="mb-4">
+          <div className="flex flex-wrap -mx-2">
+            {measurements.map((measurement) => (
+              <motion.div
+                key={measurement.key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4"
+              >
+                <label className="block text-gray-700 font-bold mb-1">
+                  {measurement.label}
+                </label>
+                <input
+                  type="text"
+                  name={measurement.key}
+                  value={formData[measurement.key as keyof typeof formData] || ""}
+                  onChange={handleInputChange}
+                  placeholder={measurement.label}
+                  className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 focus:border-orange-500 focus:ring focus:ring-orange-200 transition duration-200"
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="mt-8 flex justify-end space-x-4">
+        <button
+          type="submit"
+          className="px-6 py-3 bg-orange-500 text-white font-bold rounded-lg transition duration-200 hover:bg-orange-600"
+        >
+          Save Changes
+        </button>
+        <Link
+          href={`/client-manager/customers/${id}`}
+          className="px-6 py-3 bg-gray-500 text-white font-bold rounded-lg transition duration-200 hover:bg-gray-600"
+        >
+          Back
+        </Link>
+      </div>
+    </form>
+  </motion.div>
   );
 }
-
-// <div className="w-full">
-//           {/* Measurement Fields */}
-//         <div className="block text-xl font-medium text-gray-700 mt-10 mb-1">Measurements</div>
-//         <div className="mb-4">
-//           <div className="flex space-x-4 mb-4">
-//             <div className="w-1/3">
-//               <label htmlFor="bust" className="block text-sm font-medium text-gray-700">
-//                 Bust
-//               </label>
-//               <input
-//                 type="number"
-//                 id="bust"
-//                 name="bust"
-//                 onChange={handleInputChange}
-//                 value={formData?.bust || ""}
-//                 placeholder="Bust"
-//                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//               />
-//             </div>
-//             <div className="w-1/3">
-//               <label htmlFor="waist" className="block text-sm font-medium text-gray-700">
-//                 Waist
-//               </label>
-//               <input
-//                 type="number"
-//                 id="waist"
-//                 name="waist"
-//                 onChange={handleInputChange}
-//                 value={formData?.waist || ""}
-//                 placeholder="Waist"
-//                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//               />
-//             </div>
-//             <div className="w-1/3">
-//               <label htmlFor="hips" className="block text-sm font-medium text-gray-700">
-//                 Hips
-//               </label>
-//               <input
-//                 type="number"
-//                 id="hips"
-//                 name="hips"
-//                 value={customer?.hip || ""}
-//                 placeholder="Hips"
-//                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//               />
-//             </div>
-//           </div>
-//           <div className="flex space-x-4 mb-4">
-//             <div className="w-1/3">
-//               <label
-//                 htmlFor="shoulderWidth"
-//                 className="block text-sm font-medium text-gray-700"
-//               >
-//                 Shoulder Width
-//               </label>
-//               <input
-//                 type="number"
-//                 id="shoulderWidth"
-//                 name="shoulderWidth"
-//                 value={formData?.shoulderWidth || ""}
-//                 onChange={handleInputChange}
-//                 placeholder="Shoulder Width"
-//                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//               />
-//             </div>
-//             <div className="w-1/3">
-//               <label htmlFor="neck" className="block text-sm font-medium text-gray-700">
-//                 Neck
-//               </label>
-//               <input
-//                 type="number"
-//                 id="neck"
-//                 name="neck"
-//                 value={customer?.neck || ""}
-//                 placeholder="Neck"
-//                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//               />
-//             </div>
-//             <div className="w-1/3">
-//               <label htmlFor="armLength" className="block text-sm font-medium text-gray-700">
-//                 Arm Length
-//               </label>
-//               <input
-//                 type="number"
-//                 id="armLength"
-//                 name="armLength"
-//                 value={customer?.arm_length || ""}
-//                 placeholder="Arm Length"
-//                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//               />
-//             </div>
-//           </div>
-//           <div className="flex space-x-4 mb-4">
-//             <div className="w-1/3">
-//               <label
-//                 htmlFor="backLength"
-//                 className="block text-sm font-medium text-gray-700"
-//               >
-//                 Back Length
-//               </label>
-//               <input
-//                 type="number"
-//                 id="backLength"
-//                 name="backLength"
-//                 value={customer?.back_length || ""}
-//                 placeholder="Back Length"
-//                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//               />
-//             </div>
-//             <div className="w-1/3">
-//               <label
-//                 htmlFor="frontLength"
-//                 className="block text-sm font-medium text-gray-700"
-//               >
-//                 Front Length
-//               </label>
-//               <input
-//                 type="number"
-//                 id="frontLength"
-//                 name="frontLength"
-//                 value={customer?.front_length || ""}
-//                 placeholder="Front Length"
-//                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//               />
-//             </div>
-//             <div className="w-1/3">
-//               <label htmlFor="highBust" className="block text-sm font-medium text-gray-700">
-//                 High Bust
-//               </label>
-//               <input
-//                 type="number"
-//                 id="highBust"
-//                 name="highBust"
-//                 value={customer?.high_bust || ""}
-//                 placeholder="High Bust"
-//                 className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-//               />
-//             </div>
-//           </div>
-//         </div>
-//         </div>

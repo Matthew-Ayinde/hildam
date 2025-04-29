@@ -4,8 +4,11 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { MdOutlineHideSource } from "react-icons/md";
+import { getSession } from "next-auth/react";
 
 const Form = () => {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<{
@@ -39,8 +42,8 @@ const Form = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const accessToken = sessionStorage.getItem("access_token");
-
+    const session = await getSession();
+      const accessToken = session?.user?.token; // Adjust this line based on how you store the access token
     if (!accessToken) {
       alert("No access token found! Please login first.");
       setIsSubmitting(false);
@@ -57,7 +60,7 @@ const Form = () => {
 
     try {
       const response = await fetch(
-        "https://hildam.insightpublicis.com/api/users",
+        `${baseUrl}/users`,
         {
           method: "POST",
           headers: {
@@ -149,9 +152,8 @@ const Form = () => {
               <option value="">Select Role</option>
               <option value="1">Admin</option>
               <option value="2">Client Manager</option>
-              <option value="3">Project Manager</option>
-              <option value="4">Store Manager</option>
-              <option value="5">Head of Tailoring</option>
+              <option value="3">Head of Tailoring</option>
+              <option value="5">Tailor</option>
             </select>
           </div>
         </div>

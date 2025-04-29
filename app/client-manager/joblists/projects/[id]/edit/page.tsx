@@ -1,6 +1,6 @@
 "use client";
 
-import Spinner from "../../../../../../components/Spinner";
+import Spinner from "@/components/Spinner";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
@@ -8,8 +8,12 @@ import "react-datepicker/dist/react-datepicker.css";
 import { IoIosArrowBack } from "react-icons/io";
 import React from "react";
 import Link from "next/link";
+import { getSession } from "next-auth/react";
 
 export default function EditCustomer() {
+
+  const [loadingAssign, setLoadingAssign] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [isDisabled, setIsDisabled] = useState(false);
   const [realTestdata, setRealTestdata] = useState<{
     duration: string;
@@ -50,18 +54,16 @@ export default function EditCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(
-        `https://hildam.insightpublicis.com/api/editproject/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(realTestdata),
-        }
-      );
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/editproject/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(realTestdata),
+      });
 
       console.log(response);
 
@@ -69,7 +71,7 @@ export default function EditCustomer() {
         throw new Error("Failed to update customer data");
       }
 
-      router.push("/client-manager/joblists/projects");
+      router.push("/admin/joblists/projects");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -121,15 +123,13 @@ export default function EditCustomer() {
     setError("");
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(
-        `https://hildam.insightpublicis.com/api/projectlists/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/projectlists/${id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch project data");
@@ -181,15 +181,13 @@ export default function EditCustomer() {
   const fetchManagers = async () => {
     setLoadingManagers(true);
     try {
-      const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(
-        "https://hildam.insightpublicis.com/api/headoftailoringlist",
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/headoftailoringlist`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch managers");
@@ -223,21 +221,20 @@ export default function EditCustomer() {
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+    setLoadingAssign(true);
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
-      const response = await fetch(
-        `https://hildam.insightpublicis.com/api/editproject/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(realdata),
-        }
-      );
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token; // Access token from session
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/editproject/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(realdata),
+      });
 
       console.log(response);
 
@@ -245,13 +242,20 @@ export default function EditCustomer() {
         throw new Error("Failed to update customer data");
       }
 
-      router.push("/client-manager/joblists/projects");
+      setSuccessMessage("Order Assigned successfully");
+      setTimeout(() => {
+        router.push("/admin/joblists/projects");
+      }, 2000);
+
+      router.push("/admin/joblists/projects");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError("An unknown error occurred");
       }
+    } finally {
+      setLoadingAssign(false);
     }
   };
 
@@ -281,7 +285,13 @@ export default function EditCustomer() {
 
   return (
     <div className="w-full h-full mx-auto p-6 bg-white rounded-2xl shadow-md">
-      <Link href="/client-manager/joblists/projects"
+      {successMessage && (
+        <div className="fixed top-10 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg">
+          {successMessage}
+        </div>
+      )}
+      <Link
+        href="/admin/joblists/projects"
         className="hover:text-orange-700 text-orange-500 flex flex-row items-center mb-5"
       >
         <IoIosArrowBack size={30} />
@@ -289,59 +299,64 @@ export default function EditCustomer() {
       </Link>
       {formData.manager_name === null && (
         <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-gray-700 font-bold">Order ID</label>
-            <input
-              type="text"
-              name="order_id"
-              value={formData.order_id || ""}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-gray-700 font-bold">Order ID</label>
+              <input
+                type="text"
+                name="order_id"
+                value={formData.order_id || ""}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 font-bold">
+                Head of Tailoring
+              </label>
+              <select
+                name="manager_id"
+                value={realdata.manager_id}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
+              >
+                <option value="">Select Head of Tailoring</option>
+                {managers.map((manager) => (
+                  <option key={manager.id} value={manager.user_id}>
+                    {manager.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-gray-700 font-bold">
-              Head of Tailoring
-            </label>
-            <select
-              name="manager_id"
-              value={realdata.manager_id}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
-            >
-              <option value="">Select Head of Tailoring</option>
-              {managers.map((manager) => (
-                <option key={manager.id} value={manager.user_id}>
-                  {manager.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="col-span-2 mt-10 flex justify-end">
+          <div className="col-span-2 mt-10 flex justify-end">
           <button
-            type="submit"
-            className="px-4 py-2 bg-orange-500 text-white rounded"
-          >
-            Assign
-          </button>
-        </div>
-      </form>
+          type="submit"
+          className="px-4 py-2 bg-orange-500 text-white rounded"
+          disabled={loadingAssign}
+        >
+          {loadingAssign ? "Assigning" : "Assign"}
+        </button>
+          </div>
+        </form>
       )}
 
       {formData.customer_approval === null && (
         <div>
-        <div className="text-gray-700 text-xl font-bold">Other Details</div>
-        <div className="text-gray-700 font-thin text-sm">Order has not been approved by customer yet</div>
-      </div>
+          <div className="text-gray-700 text-xl font-bold">Other Details</div>
+          <div className="text-gray-700 font-thin text-sm">
+            Order has not been approved by customer yet
+          </div>
+        </div>
       )}
 
       {formData.customer_approval === "Approved" && (
-        <div className="my-10 mt-10 max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Add Other Details</h1>
+        <div className="my-10 mt-10 w-full mx-auto bg-white p-6 rounded-lg shadow-md">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">
+            Add Other Details
+          </h1>
 
           <form onSubmit={handleTestSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -371,9 +386,9 @@ export default function EditCustomer() {
                   onChange={handleInputTestChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-[#5d7186] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
                 >
-                  <option value="transfer">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="completed">Completed</option>
+                  <option value="transfer">pending</option>
+                  <option value="processing">processing</option>
+                  <option value="completed">completed</option>
                 </select>
               </div>
 

@@ -140,13 +140,22 @@ const Topbar = () => {
 
       const linking_id = link.split("/").pop();
       if (link.includes("orderslist")) {
-        router.push("/admin/orders/" + linking_id);
+        router.push("/client-manager/orders/" + linking_id);
       }
-      if (link.includes("projectlist")) {
-        router.push("/admin/joblists/projects/" + linking_id);
+      if (link.includes("payments")) {
+        router.push("/client-manager/payments/" + linking_id);
+      }
+      if (link.includes("inventory")) {
+        router.push("/client-manager/inventory/");
       }
       if (link.includes("tailorjoblist")) {
-        router.push("/admin/joblists/tailorjoblists/" + linking_id);
+        router.push("/client-manager/joblists/tailorjoblists/jobs/" + linking_id);
+      }
+      if (link.includes("storerequest")) {
+        router.push("/client-manager/inventory/requests/");
+      }
+      if (link.includes("expenses")) {
+        router.push("/client-manager/expenses/" + linking_id);
       }
     } catch (error) {
       console.error("Error marking notification as read:", error);
