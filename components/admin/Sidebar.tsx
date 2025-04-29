@@ -57,17 +57,17 @@ const sidebarItems = [
     ],
   },
   {
-    id: 6,
+    id: 4,
     text: "Payments",
     icon: <MdOutlinePayment />,
     prefix: "/admin/payments",
     links: [
       { name: "List", href: "/admin/payments" },
-      { name: "Create", href: "/admin/payments/create" },
+      // { name: "Create", href: "/admin/payments/create" },
     ],
   },
   {
-    id: 4,
+    id: 5,
     text: "Inventory",
     icon: <MdOutlineInventory2 />,
     prefix: "/admin/inventory",
@@ -78,17 +78,15 @@ const sidebarItems = [
     ],
   },
   {
-    id: 5,
+    id: 6,
     text: "Expense",
     icon: <MdOutlineInventory2 />,
     prefix: "/admin/expense",
     links: [
-      { name: "List", href: "/admin/expenses" },
-      { name: "Create", href: "/admin/expenses/create" },
-    ],
+      { name: "List", href: "/admin/expenses" },    ],
   },
   {
-    id: 6,
+    id: 7,
     text: "Analytics",
     icon: <MdOutlineDashboard />,
     prefix: "/admin/analytics",
@@ -98,7 +96,7 @@ const sidebarItems = [
     ],
   },
   {
-    id: 7,
+    id: 8,
     text: "Users",
     icon: <FaUser  />,
     prefix: "/admin/users",

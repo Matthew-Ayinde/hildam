@@ -24,10 +24,10 @@ export default function ShowCustomer() {
   const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState(false);
-    // New State for Close Order confirmation modal
-    const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+  // New State for Close Order confirmation modal
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
 
-    const handleOpenCloseModal = () => setIsCloseModalOpen(true);
+  const handleOpenCloseModal = () => setIsCloseModalOpen(true);
   const handleCancelClose = () => setIsCloseModalOpen(false);
   const handleConfirmClose = async () => {
     try {
@@ -355,18 +355,17 @@ export default function ShowCustomer() {
           <span className="ml-2 font-semibold">Back to List</span>
         </Link>
         <div className="flex space-x-5 items-center justify-between">
-         {customer.order_status !== "closed" && (
-           <div>
-           {/* Close Order Button */}
-         <button
-           onClick={handleOpenCloseModal}
-           className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
-         >
-           <span className="font-medium">Close Order</span>
-         </button>
-
-         </div>
-         )}
+          {customer.order_status !== "closed" && (
+            <div>
+              {/* Close Order Button */}
+              <button
+                onClick={handleOpenCloseModal}
+                className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+              >
+                <span className="font-medium">Close Order</span>
+              </button>
+            </div>
+          )}
           <div className="mt-4 lg:mt-0 flex items-center space-x-2">
             <h1 className="text-xl font-bold text-gray-800">
               Head of Tailoring:
@@ -392,8 +391,8 @@ export default function ShowCustomer() {
         )}
       </AnimatePresence>
 
-       {/* Close Order Confirmation Modal */}
-       <AnimatePresence>
+      {/* Close Order Confirmation Modal */}
+      <AnimatePresence>
         {isCloseModalOpen && (
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
@@ -425,7 +424,8 @@ export default function ShowCustomer() {
                   Confirm Close Order
                 </h2>
                 <p className="text-gray-600 text-center">
-                  Are you sure you want to close this order? This action cannot be undone.
+                  Are you sure you want to close this order? This action cannot
+                  be undone.
                 </p>
               </div>
 
@@ -448,7 +448,6 @@ export default function ShowCustomer() {
           </motion.div>
         )}
       </AnimatePresence>
-
 
       {/* <button
         onClick={handleScroll}
@@ -721,8 +720,18 @@ export default function ShowCustomer() {
                         )}
 
                         {customer.style_approval === "accepted" && (
-                          <div className="flex-1 text-center text-green-600 font-semibold">
-                            Style Approved ✔
+                          <div>
+                            <div className="flex-1 text-center text-green-600 font-semibold">
+                              Style Approved ✔
+                            </div>
+                            <div className="flex justify-center items-center mt-2">
+                              <Link
+                                href={`/admin/orders/${id}/create-payment`}
+                                className="bg-orange-500 px-4 py-1 text-white rounded hover:bg-orange-600 w-fit transition"
+                              >
+                                Generate Invoice
+                              </Link>
+                            </div>
                           </div>
                         )}
 
