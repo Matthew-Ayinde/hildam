@@ -157,7 +157,7 @@ const Form = () => {
               htmlFor="unit"
               className="block text-sm font-medium text-gray-700"
             >
-              Unit
+              Description
             </label>
             <input
               type="text"
@@ -165,7 +165,7 @@ const Form = () => {
               name="unit"
               value={formData.unit}
               onChange={handleChange}
-              placeholder="Enter unit"
+              placeholder="Enter description"
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
             />

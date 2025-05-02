@@ -588,7 +588,7 @@ export default function ShowCustomer() {
               { label: "Bust", value: customer.bust },
               { label: "Waist", value: customer.waist },
               { label: "Hips", value: customer.hip },
-              { label: "Shoulder Width", value: customer.shoulder },
+              { label: "Shoulder", value: customer.shoulder },
               { label: "Bust Point", value: customer.bustpoint },
               {
                 label: "Shoulder to Underbust",
