@@ -166,36 +166,20 @@ const Form = () => {
   // Define measurements
   const measurements = [
     {
+      label: "Blouse Length",
+      id: "blouseLength",
+      name: "blouse_length",
+      placeholder: "Blouse Length",
+      delay: 1.7,
+      value: formData.blouse_length,
+    },
+    {
       label: "Bust",
       id: "bust",
       name: "bust",
       placeholder: "Bust",
       delay: 0.8,
       value: formData.bust,
-    },
-    {
-      label: "Waist",
-      id: "waist",
-      name: "waist",
-      placeholder: "Waist",
-      delay: 0.9,
-      value: formData.waist,
-    },
-    {
-      label: "Hip",
-      id: "hip",
-      name: "hip",
-      placeholder: "Hip",
-      delay: 1.0,
-      value: formData.hip,
-    },
-    {
-      label: "Shoulder",
-      id: "shoulder",
-      name: "shoulder",
-      placeholder: "Shoulder",
-      delay: 1.1,
-      value: formData.shoulder,
     },
     {
       label: "Bust Point",
@@ -206,28 +190,20 @@ const Form = () => {
       value: formData.bustpoint,
     },
     {
-      label: "Shoulder to under Bust",
-      id: "shoulder_to_underbust",
-      name: "shoulder_to_underbust",
-      placeholder: "Shoulder to under Bust",
-      delay: 1.3,
-      value: formData.shoulder_to_underbust,
+      label: "Chest",
+      id: "chest",
+      name: "chest",
+      placeholder: "Chest",
+      delay: 2.0,
+      value: formData.chest,
     },
     {
-      label: "Round under Bust",
-      id: "round_under_bust",
-      name: "round_under_bust",
-      placeholder: "Round under Bust",
-      delay: 1.4,
-      value: formData.round_under_bust,
-    },
-    {
-      label: "Sleeve Length",
-      id: "sleeve_length",
-      name: "sleeve_length",
-      placeholder: "Sleeve Length",
-      delay: 1.5,
-      value: formData.sleeve_length,
+      label: "Dress Length(Long, 3/4, Short)",
+      id: "dressLength",
+      name: "dress_length",
+      placeholder: "Dress Length",
+      delay: 1.9,
+      value: formData.dress_length,
     },
     {
       label: "Half Length",
@@ -238,36 +214,12 @@ const Form = () => {
       value: formData.half_length,
     },
     {
-      label: "Blouse Length",
-      id: "blouseLength",
-      name: "blouse_length",
-      placeholder: "Blouse Length",
-      delay: 1.7,
-      value: formData.blouse_length,
-    },
-    {
-      label: "Round Sleeve",
-      id: "roundSleeve",
-      name: "round_sleeve",
-      placeholder: "Round Sleeve",
-      delay: 1.8,
-      value: formData.round_sleeve,
-    },
-    {
-      label: "Dress Length",
-      id: "dressLength",
-      name: "dress_length",
-      placeholder: "Dress Length",
-      delay: 1.9,
-      value: formData.dress_length,
-    },
-    {
-      label: "Chest",
-      id: "chest",
-      name: "chest",
-      placeholder: "Chest",
-      delay: 2.0,
-      value: formData.chest,
+      label: "Hip",
+      id: "hip",
+      name: "hip",
+      placeholder: "Hip",
+      delay: 1.0,
+      value: formData.hip,
     },
     {
       label: "Round Shoulder",
@@ -278,7 +230,39 @@ const Form = () => {
       value: formData.round_shoulder,
     },
     {
-      label: "Skirt Length",
+      label: "Round Sleeve(Arm, Below Elbow, Wrist)",
+      id: "roundSleeve",
+      name: "round_sleeve",
+      placeholder: "Round Sleeve",
+      delay: 1.8,
+      value: formData.round_sleeve,
+    },
+    {
+      label: "Round under Bust",
+      id: "round_under_bust",
+      name: "round_under_bust",
+      placeholder: "Round under Bust",
+      delay: 1.4,
+      value: formData.round_under_bust,
+    },
+    {
+      label: "Shoulder",
+      id: "shoulder",
+      name: "shoulder",
+      placeholder: "Shoulder",
+      delay: 1.1,
+      value: formData.shoulder,
+    },
+    {
+      label: "Shoulder to under Bust",
+      id: "shoulder_to_underbust",
+      name: "shoulder_to_underbust",
+      placeholder: "Shoulder to under Bust",
+      delay: 1.3,
+      value: formData.shoulder_to_underbust,
+    },
+    {
+      label: "Skirt Length(Long, 3/4, Short)",
       id: "skirtLength",
       name: "skirt_length",
       placeholder: "Skirt Length",
@@ -286,36 +270,20 @@ const Form = () => {
       value: formData.skirt_length,
     },
     {
-      label: "Trousers Length",
-      id: "trousersLength",
-      name: "trousers_length",
-      placeholder: "Trousers Length",
-      delay: 2.3,
-      value: formData.trousers_length,
+      label: "Sleeve Length(Long, Quarter, Short)",
+      id: "sleeve_length",
+      name: "sleeve_length",
+      placeholder: "Sleeve Length",
+      delay: 1.5,
+      value: formData.sleeve_length,
     },
     {
-      label: "Round Thigh",
-      id: "roundThigh",
-      name: "round_thigh",
-      placeholder: "Round Thigh",
-      delay: 2.4,
-      value: formData.round_thigh,
-    },
-    {
-      label: "Round Knee",
-      id: "roundKnee",
-      name: "round_knee",
-      placeholder: "Round Knee",
-      delay: 2.5,
-      value: formData.round_knee,
-    },
-    {
-      label: "Round Feet",
-      id: "roundFeet",
-      name: "round_feet",
-      placeholder: "Round Feet",
-      delay: 2.6,
-      value: formData.round_feet,
+      label: "Waist",
+      id: "waist",
+      name: "waist",
+      placeholder: "Waist",
+      delay: 0.9,
+      value: formData.waist,
     },
   ];
 
@@ -456,15 +424,21 @@ const Form = () => {
             />
           </div>
           <div className="w-full">
-          <label
+            <label
               htmlFor="address"
               className="block text-sm font-medium text-gray-700"
             >
               Address
             </label>
-            <textarea name="address" id="address" value={formData.address}
-              onChange={handleChange} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required placeholder="Please enter your address"></textarea>
+            <textarea
+              name="address"
+              id="address"
+              value={formData.address}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+              placeholder="Please enter your address"
+            ></textarea>
           </div>
         </div>
 

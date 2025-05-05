@@ -263,8 +263,8 @@ export default function EditCustomer() {
         clothing_description: result.data.clothing_description,
         priority: result.data.priority,
         order_id: result.data.order_id,
-        first_fitting_date: result.data.first_fitting_date || "",
-        second_fitting_date: result.data.second_fitting_date || "",
+        first_fitting_date: result.data.first_fitting_date || "Not available",
+        second_fitting_date: result.data.second_fitting_date || "Not available",
         duration: result.data.duration || "",
       });
 
@@ -543,7 +543,7 @@ export default function EditCustomer() {
             <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">
               <div>
                 <label className="block text-gray-700 font-bold">
-                  Customer Style
+                  Style reference Images
                 </label>
                 <img
                   src={formData.style_reference_images}
@@ -658,80 +658,165 @@ export default function EditCustomer() {
               ))}
             </div>
           </div>
-
-          {/* Fitting Section */}
-          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">
-            <div className="text-2xl font-bold text-gray-700 mb-4">
-              Add other details
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  First Fitting Date
-                </label>
-                <DatePicker
-                  selected={firstFittingDate}
-                  onChange={(date) => {
-                    setFirstFittingDate(date);
-                    setFormData((prev) => ({
-                      ...prev,
-                      first_fitting_date: date
-                        ? date.toISOString().split("T")[0]
-                        : "",
-                    }));
-                  }}
-                  dateFormat="yyyy-MM-dd"
-                  placeholderText="Select first fitting date"
-                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Second Fitting Date
-                </label>
-                <DatePicker
-                  selected={secondFittingDate}
-                  onChange={(date) => {
-                    setSecondFittingDate(date);
-                    setFormData((prev) => ({
-                      ...prev,
-                      second_fitting_date: date
-                        ? date.toISOString().split("T")[0]
-                        : "",
-                    }));
-                  }}
-                  dateFormat="yyyy-MM-dd"
-                  placeholderText="Select second fitting date"
-                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-                />
-                {secondFittingDate &&
-                  firstFittingDate &&
-                  secondFittingDate < firstFittingDate && (
-                    <p className="text-red-500 text-sm mt-1">
-                      Second fitting date must be after the first.
-                    </p>
-                  )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Duration (days)
-                </label>
-                <input
-                  type="number"
-                  name="duration"
-                  placeholder="Enter number of days"
-                  value={formData.duration}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      duration: e.target.value,
-                    }))
-                  }
-                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-                />
-              </div>
-            </div>
+{/* Fitting Section */}
+<div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">
+  <div className="text-2xl font-bold text-gray-700 mb-4">
+    Add other details
+  </div>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {/* First Fitting */}
+    <div className="">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        First Fitting Date
+      </label>
+      <DatePicker
+        selected={firstFittingDate}
+        onChange={date => {
+          setFirstFittingDate(date);
+          setFormData(prev => ({
+            ...prev,
+            first_fitting_date: date
+              ? date.toISOString().split("T")[0]
+              : ''
+          }));
+          // Reset second date if it’s now before the new first date:
+          if (
+            date &&
+            secondFittingDate &&
+            secondFittingDate < date
+          ) {
+            setSecondFittingDate(null);
+            setFormData(prev => ({ ...prev, second_fitting_date: '' }));
+          }
+        }}
+        dateFormat="yyyy-MM-dd"
+        placeholderText="Select first fitting date"
+        className="datepicker-input"
+        calendarClassName="datepicker-calendar"
+        minDate={new Date()}                         // no past dates
+        renderCustomHeader={({ date, decreaseMonth, increaseMonth }) => (
+          <div className="datepicker-header">
+            <button
+              type="button"
+              onClick={decreaseMonth}
+              className="datepicker-nav-btn"
+            >
+              &lt;
+            </button>
+            <span className="datepicker-current-month">
+              {date.toLocaleString('default', {
+                month: 'long',
+                year: 'numeric'
+              })}
+            </span>
+            <button
+              type="button"
+              onClick={increaseMonth}
+              className="datepicker-nav-btn"
+            >
+              &gt;
+            </button>
           </div>
+        )}
+        dayClassName={date => {
+          const classes = ['datepicker-day'];
+          if (
+            firstFittingDate &&
+            date.toDateString() === firstFittingDate.toDateString()
+          ) classes.push('datepicker-day--selected');
+          if (date.toDateString() === new Date().toDateString())
+            classes.push('datepicker-day--today');
+          return classes.join(' ');
+        }}
+      />
+    </div>
+
+    {/* Second Fitting */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Second Fitting Date
+      </label>
+      <DatePicker
+        selected={secondFittingDate}
+        onChange={date => {
+          setSecondFittingDate(date);
+          setFormData(prev => ({
+            ...prev,
+            second_fitting_date: date
+              ? date.toISOString().split("T")[0]
+              : ''
+          }));
+        }}
+        dateFormat="yyyy-MM-dd"
+        placeholderText="Select second fitting date"
+        className="datepicker-input"
+        calendarClassName="datepicker-calendar"
+        // ensure second ≥ first, and also ≥ today
+        minDate={firstFittingDate || new Date()}
+        renderCustomHeader={({ date, decreaseMonth, increaseMonth }) => (
+          <div className="datepicker-header">
+            <button
+              type="button"
+              onClick={decreaseMonth}
+              className="datepicker-nav-btn"
+            >
+              &lt;
+            </button>
+            <span className="datepicker-current-month">
+              {date.toLocaleString('default', {
+                month: 'long',
+                year: 'numeric'
+              })}
+            </span>
+            <button
+              type="button"
+              onClick={increaseMonth}
+              className="datepicker-nav-btn"
+            >
+              &gt;
+            </button>
+          </div>
+        )}
+        dayClassName={date => {
+          const classes = ['datepicker-day'];
+          if (
+            secondFittingDate &&
+            date.toDateString() === secondFittingDate.toDateString()
+          ) classes.push('datepicker-day--selected');
+          if (date.toDateString() === new Date().toDateString())
+            classes.push('datepicker-day--today');
+          return classes.join(' ');
+        }}
+      />
+      {secondFittingDate && firstFittingDate && secondFittingDate < firstFittingDate && (
+        <p className="text-red-500 text-sm mt-1">
+          Second fitting date must be on or after the first fitting date.
+        </p>
+      )}
+    </div>
+
+    {/* Duration */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Duration (days)
+      </label>
+      <input
+        type="number"
+        name="duration"
+        placeholder="Enter number of days"
+        value={formData.duration}
+        onChange={e =>
+          setFormData(prev => ({
+            ...prev,
+            duration: e.target.value
+          }))
+        }
+        className="mt-1 block datepicker-input"
+      />
+    </div>
+  </div>
+</div>
+
 
           <div className="flex justify-end mt-6">
             <button

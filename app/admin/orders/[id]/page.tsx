@@ -4,6 +4,10 @@ import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+// at the top
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
+
 import {
   IoIosArrowBack,
   IoIosCheckmark,
@@ -15,6 +19,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getSession } from "next-auth/react";
 import SkeletonLoader from "@/components/SkeletonLoader";
 import Image from "next/image";
+import { AiOutlineDownload } from "react-icons/ai";
+import { FiPrinter } from "react-icons/fi";
 
 export default function ShowCustomer() {
   const targetRef = useRef<HTMLDivElement | null>(null);
@@ -26,6 +32,10 @@ export default function ShowCustomer() {
   const [toast, setToast] = useState(false);
   // New State for Close Order confirmation modal
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+
+  const contentRef = useRef<HTMLDivElement | null>(null);
+const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
 
   const handleOpenCloseModal = () => setIsCloseModalOpen(true);
   const handleCancelClose = () => setIsCloseModalOpen(false);
@@ -85,7 +95,7 @@ export default function ShowCustomer() {
     round_feet: number;
     clothing_description: string;
     clothing_name: string;
-    style_reference_images: string;
+    style_reference_images: string[];
     tailor_job_image: string;
     order_id: string;
     priority: string;
@@ -111,6 +121,28 @@ export default function ShowCustomer() {
   const handleScroll = () => {
     targetRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  const handleDownload = async () => {
+    if (!contentRef.current || !customer) return;
+    setIsGeneratingPDF(true);
+    try {
+      // take a snapshot of the content
+      const canvas = await html2canvas(contentRef.current, { useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+  
+      // build and save the PDF
+      const pdf = new jsPDF("p", "pt", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`order-${customer.order_id}.pdf`);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+  
 
   const handleCustomerImageClick = () => {
     if (!isRejectModalOpen && !isApproveModalOpen) {
@@ -346,36 +378,66 @@ export default function ShowCustomer() {
       transition={{ duration: 0.5 }}
     >
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-center mb-6">
-        <Link
-          href="/admin/orders"
-          className="flex items-center text-orange-500 hover:text-orange-700 transition-colors"
-        >
-          <IoIosArrowBack size={28} />
-          <span className="ml-2 font-semibold">Back to List</span>
-        </Link>
-        <div className="flex space-x-5 items-center justify-between">
-          {customer.order_status !== "closed" && (
-            <div>
-              {/* Close Order Button */}
-              <button
-                onClick={handleOpenCloseModal}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
-              >
-                <span className="font-medium">Close Order</span>
-              </button>
-            </div>
-          )}
-          <div className="mt-4 lg:mt-0 flex items-center space-x-2">
-            <h1 className="text-xl font-bold text-gray-800">
-              Head of Tailoring:
-            </h1>
-            <span className="text-xl font-medium text-gray-700">
-              {customer.manager_name}
-            </span>
-          </div>
-        </div>
-      </div>
+<div className="flex flex-col lg:flex-row justify-between items-center mb-6">
+  <Link
+    href="/admin/orders"
+    className="flex items-center text-orange-500 hover:text-orange-700 transition-colors"
+  >
+    <IoIosArrowBack size={28} />
+    <span className="ml-2 font-semibold">Back to List</span>
+  </Link>
+
+  <div className="flex space-x-3">
+      {/* Download Button */}
+      <button
+  onClick={handleDownload}
+  disabled={isGeneratingPDF}
+  className={`flex items-center space-x-2 px-4 py-2 rounded-lg shadow-sm transition
+    ${isGeneratingPDF ? "bg-gray-300 cursor-not-allowed" : "bg-green-500 hover:bg-green-600 text-white"}`}
+  aria-label="Download order details"
+>
+  {isGeneratingPDF
+    ? <Spinner />
+    : <>
+        <AiOutlineDownload size={20} />
+        <span className="font-medium">Download</span>
+      </>
+  }
+</button>
+
+    {/* Print Button */}
+    <button
+      onClick={() => window.print()}
+      className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg shadow-sm transition"
+      aria-label="Print order details"
+    >
+      <FiPrinter size={20} />
+      <span className="font-medium">Print</span>
+    </button>
+    </div>
+
+  <div className="flex flex-wrap items-center space-x-4 mt-4 lg:mt-0">
+    {customer.order_status !== "closed" && (
+      <button
+        onClick={handleOpenCloseModal}
+        className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm transition"
+      >
+        <span className="font-medium">Close Order</span>
+      </button>
+    )}
+
+
+    <div className="flex items-center space-x-2">
+      <h1 className="text-xl font-bold text-gray-800">
+        Head of Tailoring:
+      </h1>
+      <span className="text-xl font-medium text-gray-700">
+        {customer.manager_name}
+      </span>
+    </div>
+  </div>
+</div>
+
 
       <AnimatePresence>
         {toast && (
@@ -457,6 +519,7 @@ export default function ShowCustomer() {
       </button> */}
 
       {/* Order Information */}
+      <div ref={contentRef}>
       <form>
         <div className="flex justify-between">
           <h2 className="block text-2xl font-bold text-gray-800 mb-4">
@@ -538,17 +601,18 @@ export default function ShowCustomer() {
             <label className="block text-sm font-bold text-gray-700 mb-2">
               Style reference images
             </label>
-            {customer.style_reference_images === "" ? (
-              <div className="text-gray-500">No image selected</div>
-            ) : (
+            {Array.isArray(customer.style_reference_images) &&
+            customer.style_reference_images.length > 0 ? (
               <div>
                 <img
-                  src={customer.style_reference_images}
+                  src={customer.style_reference_images[0]}
                   alt="Customer Style Reference"
                   className="w-24 h-24 object-cover rounded-md border border-gray-300 cursor-pointer transition hover:shadow-lg"
                   onClick={handleCustomerImageClick}
                 />
               </div>
+            ) : (
+              <div className="text-gray-500">No image selected</div>
             )}
             {isCustomerModalOpen && (
               <motion.div
@@ -564,7 +628,7 @@ export default function ShowCustomer() {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <img
-                    src={customer.style_reference_images}
+                    src={customer.style_reference_images[0]}
                     alt="Style Reference"
                     className="w-full h-[80vh] object-contain rounded-lg"
                     onError={(e) => {
@@ -585,29 +649,23 @@ export default function ShowCustomer() {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { label: "Bust", value: customer.bust },
-              { label: "Waist", value: customer.waist },
-              { label: "Hips", value: customer.hip },
-              { label: "Shoulder", value: customer.shoulder },
-              { label: "Bust Point", value: customer.bustpoint },
-              {
-                label: "Shoulder to Underbust",
-                value: customer.shoulder_to_underbust,
-              },
-              { label: "Round Under Bust", value: customer.round_under_bust },
-              { label: "Half Length", value: customer.half_length },
-              { label: "Blouse Length", value: customer.blouse_length },
-              { label: "Sleeve Length", value: customer.sleeve_length },
-              { label: "Round Sleeve", value: customer.round_sleeve },
-              { label: "Dress Length", value: customer.dress_length },
-              { label: "Chest", value: customer.chest },
-              { label: "Round Shoulder", value: customer.round_shoulder },
-              { label: "Skirt Length", value: customer.skirt_length },
-              { label: "Trousers Length", value: customer.trousers_length },
-              { label: "Round Thigh", value: customer.round_thigh },
-              { label: "Round Knee", value: customer.round_knee },
-              { label: "Round Feet", value: customer.round_feet },
-            ].map((measurement, index) => (
+  { label: "Blouse Length", value: customer.blouse_length },
+  { label: "Bust", value: customer.bust },
+  { label: "Bust Point", value: customer.bustpoint },
+  { label: "Chest", value: customer.chest },
+  { label: "Dress Length(Long, 3/4, Short)", value: customer.dress_length },
+  { label: "Half Length", value: customer.half_length },
+  { label: "Hip", value: customer.hip },
+  { label: "Round Shoulder", value: customer.round_shoulder },
+  { label: "Round Sleeve(Arm, Below Elbow, Wrist)", value: customer.round_sleeve },
+  { label: "Round Under Bust", value: customer.round_under_bust },
+  { label: "Shoulder", value: customer.shoulder },
+  { label: "Shoulder to Underbust", value: customer.shoulder_to_underbust },
+  { label: "Skirt Length(Long, 3/4, Short)", value: customer.skirt_length },
+  { label: "Sleeve Length(Long, Quarter, Short)", value: customer.sleeve_length },
+  { label: "Waist", value: customer.waist },
+]
+.map((measurement, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 10 }}
@@ -864,50 +922,69 @@ export default function ShowCustomer() {
         </AnimatePresence>
 
         <div>
-          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">
-            <div className="text-2xl font-bold text-gray-700 mb-4">
-              Other details
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  First Fitting Date
-                </label>
+        <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-lg mt-8">
+  <h3 className="text-2xl font-semibold text-gray-700 mb-6">Other Details</h3>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {/* First Fitting Date */}
+    <div>
+      <label htmlFor="firstFitting" className="block text-sm font-medium text-gray-700 mb-1">
+        First Fitting Date
+      </label>
+      <input
+        id="firstFitting"
+        type="text"
+        value={formatDate(customer.first_fitting_date) || "Not available"}
+        className={`
+          w-full rounded-lg border border-gray-300 p-2
+          bg-white text-gray-700 placeholder-gray-400
+          focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200
+          transition
+        `}
+      />
+    </div>
 
-                <input
-                  type="text"
-                  value={customer.first_fitting_date}
-                  readOnly
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Second Fitting Date
-                </label>
-                <input
-                  type="text"
-                  value={customer.second_fitting_date}
-                  readOnly
-                  className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Duration (days)
-                </label>
-                <input
-                  type="number"
-                  name="duration"
-                  placeholder="Enter number of days"
-                  value={customer.duration}
-                  className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-                />
-              </div>
-            </div>
-          </div>
+    {/* Second Fitting Date */}
+    <div>
+      <label htmlFor="secondFitting" className="block text-sm font-medium text-gray-700 mb-1">
+        Second Fitting Date
+      </label>
+      <input
+        id="secondFitting"
+        type="text"
+        value={formatDate(customer.second_fitting_date) || "Not available"}
+        className={`
+          w-full rounded-lg border border-gray-300 p-2
+          bg-white text-gray-700 placeholder-gray-400
+          focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200
+          transition
+        `}
+      />
+    </div>
+
+    {/* Duration */}
+    <div>
+      <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-1">
+        Duration (days)
+      </label>
+      <input
+        id="duration"
+        type="number"
+        name="duration"
+        value={customer.duration ?? "Not Available"}
+        className={`
+          w-full rounded-lg border border-gray-300 p-2
+          bg-white text-gray-700 placeholder-gray-400
+          focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200
+          transition
+        `}
+      />
+    </div>
+  </div>
+</div>
+
         </div>
       </form>
+      </div>
 
       {/* Edit Action */}
       <div className="mt-6 flex flex-col items-end">
