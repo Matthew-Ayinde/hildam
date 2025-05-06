@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hildam Couture 👗✨
 
-## Getting Started
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)  
+[![Build Status](https://github.com/your-username/hildam-couture/workflows/CI/badge.svg)](https://github.com/your-username/hildam-couture/actions)  
+[![Stars](https://img.shields.io/github/stars/your-username/hildam-couture)](https://github.com/your-username/hildam-couture/stargazers)  
 
-First, run the development server:
+A next-gen tailoring management platform built for fashion houses, small ateliers and freelance tailors. Streamline customer intake, assignment workflows, real-time reviews and final approvals—all in one beautiful dashboard.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Table of Contents
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. [Demo & Screenshots](#-demo--screenshots)  
+2. [Key Features](#-key-features)  
+3. [Tech Stack](#-tech-stack)  
+4. [Getting Started](#-getting-started)  
+   - [Prerequisites](#prerequisites)  
+   - [Installation](#installation)  
+   - [Running Locally](#running-locally)  
+5. [Usage](#-usage)  
+6. [Folder Structure](#-folder-structure)  
+7. [Contributing](#-contributing)  
+8. [Roadmap](#-roadmap)  
+9. [License](#-license)  
+10. [Contact](#-contact)  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🎬 Demo & Screenshots
 
-To learn more about Next.js, take a look at the following resources:
+![Dashboard Overview](./docs/screenshots/dashboard.png)  
+*Dashboard showing active projects, progress bars and quick-action cards.*
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+![Project Workflow](./docs/screenshots/workflow.png)  
+*Visual “In Design → Under Review → Customer Review → Completed” pipeline.*
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+_For a live preview, check out our [Deployed App](https://hildam-couture.example.com)._  
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## ✨ Key Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Customer Intake Form**  
+  Structured fields for sizes, fabric choices, style references and special instructions.  
+- **Role-Based Dashboards**  
+  - Account Managers see all projects  
+  - Project Managers assign tasks to Tailors & Designers  
+  - Tailors & Designers get individualized work queues  
+- **Iterative Review Cycle**  
+  In-app annotations on uploaded images + threaded comments for precise feedback.  
+- **Milestone Tracking & Notifications**  
+  Real-time in-app and email alerts when projects move through stages.  
+- **Mobile-Friendly UI**  
+  Fully responsive, with touch-optimized controls for on-the-go updates.  
+- **Analytics & Reporting**  
+  Exportable reports on turnaround times, order volume and team performance.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:**  
+  - Next.js (App Router, SSR/SSG)  
+  - Tailwind CSS, Framer Motion  
+  - React Hook Form + Zod for client-side validation  
+- **Backend:**  
+  - Node.js + Express API  
+  - MongoDB Atlas + Prisma ORM  
+  - NextAuth.js for authentication  
+- **DevOps & CI/CD:**  
+  - GitHub Actions (lint, tests, build)  
+  - Vercel for seamless deployments  
+- **Notifications:**  
+  - Nodemailer (email)  
+  - In-app WebSockets via Socket.io  
+
+---
+
+## 🏁 Getting Started
+
+### Prerequisites
+
+- Node.js ≥ 18.x  
+- npm or Yarn  
+- MongoDB URI (Atlas or local)  
+
+### Installation
+
+1. **Clone the repo**  
+   ```bash
+   git clone https://github.com/your-username/hildam-couture.git
+   cd hildam-couture
