@@ -8,6 +8,7 @@ import Link from "next/link";
 import { motion } from "framer-motion"; // Import Framer Motion
 import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 import Spinner from "@/components/Spinner";
+import DataPageError from "@/components/admin/DataNotFound";
 
 // Extend the NextAuth session type
 declare module "next-auth" {
@@ -169,17 +170,17 @@ export default function Table() {
         </div>
       )}
       <div className="overflow-x-auto bg-white rounded-2xl py-3">
-       <div className="flex justify-between items-center">
-       <div className="mx-2 ml-5 font-bold text-gray-500 text-xl my-3">
-          Customers List
-        </div>
+        <div className="flex justify-between items-center">
+          <div className="mx-2 ml-5 font-bold text-gray-500 text-xl my-3">
+            Customers List
+          </div>
           <Link
             href="/admin/customers/create"
-            className="bg-[#ff6c2f] text-white py-1 px-3 rounded me-4"
+            className="bg-[#ff6c2f] text-white py-1 px-3 font-bold rounded-lg me-4"
           >
-            Add new customer
+            + Add new customer
           </Link>
-       </div>
+        </div>
         <table className="min-w-full border-collapse border border-gray-200">
           <thead className="bg-[#f6f8fb] sticky top-0 z-10">
             <tr className="text-[#5d7186]">
@@ -204,20 +205,19 @@ export default function Table() {
             {isLoading ? (
               // Show Spinner while loading
               <tr>
-                <td colSpan={6} className="text-center py-10">  
+                <td colSpan={6} className="text-center py-10">
                   <Spinner />
                 </td>
               </tr>
             ) : data.length === 0 ? (
               // Show "No data found" when the API returns an empty array
               <tr>
-                <td colSpan={6} className="text-center py-10 text-gray-700 font-bold">
+                <td
+                  colSpan={6}
+                  className="text-center py-10 text-gray-700 font-bold"
+                >
                   <div>No customers found</div>
-                  <div className="flex justify-center">
-                    <Link href="/admin/customers/create" className="bg-[#ff6c2f] text-white py-1 px-2 mt-2 rounded-lg">
-                      <div className="">Add new customer</div>
-                    </Link>
-                  </div>
+                  
                 </td>
               </tr>
             ) : (
@@ -256,7 +256,6 @@ export default function Table() {
                   </td>
                 </motion.tr>
               ))
-              
             )}
           </tbody>
         </table>

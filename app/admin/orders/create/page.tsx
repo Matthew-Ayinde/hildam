@@ -185,7 +185,7 @@ const Form = () => {
       }
 
       setResponseMessage("Order created successfully!");
-      setFormData(initialFormData);
+      // setFormData(initialFormData);
       setImagePreview(null);
 
       // Redirect after a short delay

@@ -21,6 +21,7 @@ import SkeletonLoader from "@/components/SkeletonLoader";
 import Image from "next/image";
 import { AiOutlineDownload } from "react-icons/ai";
 import { FiPrinter } from "react-icons/fi";
+import OrderPageError from "@/components/admin/OrderPageError";
 
 export default function ShowCustomer() {
   const targetRef = useRef<HTMLDivElement | null>(null);
@@ -122,26 +123,60 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
     targetRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleDownload = async () => {
-    if (!contentRef.current || !customer) return;
-    setIsGeneratingPDF(true);
-    try {
-      // take a snapshot of the content
-      const canvas = await html2canvas(contentRef.current, { useCORS: true });
-      const imgData = canvas.toDataURL("image/png");
   
-      // build and save the PDF
-      const pdf = new jsPDF("p", "pt", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`order-${customer.order_id}.pdf`);
-    } catch (err) {
-      console.error("PDF generation failed:", err);
-    } finally {
-      setIsGeneratingPDF(false);
-    }
-  };
+const handleDownload = async () => {
+  if (!contentRef.current || !customer) return;
+  setIsGeneratingPDF(true);
+
+  try {
+    // take a snapshot of the content
+    const canvas = await html2canvas(contentRef.current, { useCORS: true });
+    const imgData = canvas.toDataURL("image/png");
+
+    // create PDF and define margins
+    const pdf = new jsPDF("p", "pt", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const marginX = 0; // margin in points (adjust as needed)
+    const marginY = 40; // margin in points (adjust as needed)
+
+
+    // calculate dimensions to maintain aspect ratio within margins
+    const availableWidth = pageWidth - marginX * 2;
+    const availableHeight = pageHeight - marginY * 2;
+    const imgWidth = availableWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    // if image height exceeds available height, scale down
+    const finalImgHeight = imgHeight > availableHeight
+      ? availableHeight
+      : imgHeight;
+    const finalImgWidth = imgHeight > availableHeight
+      ? (canvas.width * availableHeight) / canvas.height
+      : imgWidth;
+
+    // center image if smaller than available space
+    const xOffset = marginX + (availableWidth - finalImgWidth) / 2;
+    const yOffset = marginY + (availableHeight - finalImgHeight) / 2;
+
+    // add image to PDF with margins
+    pdf.addImage(
+      imgData,
+      "PNG",
+      xOffset,
+      yOffset,
+      finalImgWidth,
+      finalImgHeight
+    );
+
+    // save the PDF
+    pdf.save(`order-${customer.order_id}.pdf`);
+  } catch (err) {
+    console.error("PDF generation failed:", err);
+  } finally {
+    setIsGeneratingPDF(false);
+  }
+};
   
 
   const handleCustomerImageClick = () => {
@@ -160,7 +195,7 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
     setIsCustomerModalOpen(false);
   };
 
-  const fetchCustomer = async () => {
+  const fetchOrder = async () => {
     setLoading(true);
     setError(null);
 
@@ -241,7 +276,7 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   };
 
   useEffect(() => {
-    fetchCustomer();
+    fetchOrder();
   }, [id]);
 
   // ----- New Handlers for Reject Modal -----
@@ -356,11 +391,12 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   if (error) {
     return (
-      <div className="text-center text-red-500 py-10">
-        Error: {error}{" "}
-        <button onClick={fetchCustomer} className="text-blue-500 underline">
+      <div className="text-center">
+        {/* Error: {error}{" "} */}
+        <OrderPageError />
+        {/* <button onClick={fetchOrder} className="text-blue-500 underline">
           Retry
-        </button>
+        </button> */}
       </div>
     );
   }
@@ -405,36 +441,24 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   }
 </button>
 
-    {/* Print Button */}
-    <button
-      onClick={() => window.print()}
-      className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg shadow-sm transition"
-      aria-label="Print order details"
-    >
-      <FiPrinter size={20} />
-      <span className="font-medium">Print</span>
-    </button>
     </div>
 
   <div className="flex flex-wrap items-center space-x-4 mt-4 lg:mt-0">
-    {customer.order_status !== "closed" && (
+    {customer.order_status !== "closed" ? (
       <button
         onClick={handleOpenCloseModal}
         className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm transition"
       >
         <span className="font-medium">Close Order</span>
       </button>
+    ) : (
+      <div className="flex items-center space-x-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg shadow-sm transition">
+        <span className="font-medium">Order Closed</span>
+      </div>
     )}
 
 
-    <div className="flex items-center space-x-2">
-      <h1 className="text-xl font-bold text-gray-800">
-        Head of Tailoring:
-      </h1>
-      <span className="text-xl font-medium text-gray-700">
-        {customer.manager_name}
-      </span>
-    </div>
+    
   </div>
 </div>
 
@@ -527,12 +551,14 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
           </h2>
 
           <div className="flex items-center space-x-2">
-            {customer.order_status === "completed" && (
-              <div className="text-sm text-green-500">
-                *order has been completed
-              </div>
-            )}
-          </div>
+      <h1 className="text-xl font-bold text-gray-800">
+        Head of Tailoring:
+      </h1>
+      <span className="text-xl font-medium text-gray-700">
+        {customer.manager_name}
+      </span>
+    </div>
+
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {[
@@ -798,14 +824,6 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
                             Style Rejected ✖
                           </div>
                         )}
-
-                        <a
-                          href={customer.tailor_job_image}
-                          download="tailor_job_image.jpg"
-                          className="px-5 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-                        >
-                          Download Image
-                        </a>
                       </div>
                     </motion.div>
                   </motion.div>
@@ -815,7 +833,7 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
           </div>
         ) : (
           <div>
-            <h3 className="block text-xl font-bold text-gray-700 mt-10 mb-4">
+            <h3 className="block text-2xl font-bold text-gray-700 mt-10 mb-4">
               Tailor Job Image
             </h3>
             <div className="text-gray-500">No image yet</div>
@@ -922,7 +940,7 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
         </AnimatePresence>
 
         <div>
-        <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-lg mt-8">
+        <div className="w-full mt-8">
   <h3 className="text-2xl font-semibold text-gray-700 mb-6">Other Details</h3>
   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
     {/* First Fitting Date */}
@@ -936,7 +954,7 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
         value={formatDate(customer.first_fitting_date) || "Not available"}
         className={`
           w-full rounded-lg border border-gray-300 p-2
-          bg-white text-gray-700 placeholder-gray-400
+          bg-gray-50 text-gray-700 placeholder-gray-400
           focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200
           transition
         `}
@@ -954,7 +972,7 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
         value={formatDate(customer.second_fitting_date) || "Not available"}
         className={`
           w-full rounded-lg border border-gray-300 p-2
-          bg-white text-gray-700 placeholder-gray-400
+          bg-gray-50 text-gray-700 placeholder-gray-400
           focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200
           transition
         `}
@@ -973,7 +991,7 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
         value={customer.duration ?? "Not Available"}
         className={`
           w-full rounded-lg border border-gray-300 p-2
-          bg-white text-gray-700 placeholder-gray-400
+          bg-gray-50 text-gray-700 placeholder-gray-400
           focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200
           transition
         `}
@@ -987,7 +1005,7 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
       </div>
 
       {/* Edit Action */}
-      <div className="mt-6 flex flex-col items-end">
+      {customer.order_status !== "closed" && <div className="mt-6 flex flex-col items-end">
         <Link
           href={`/admin/orders/${id}/edit`}
           className="px-6 py-3 bg-orange-500 text-white rounded-md font-semibold hover:bg-orange-600 transition duration-200"
@@ -997,7 +1015,7 @@ const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
         <div className="mt-2 text-sm text-gray-600">
           Click edit to make changes
         </div>
-      </div>
+      </div>}
     </motion.div>
   );
 }

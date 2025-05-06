@@ -581,7 +581,7 @@ export default function EditCustomer() {
                             onClick={handleKeepImage}
                             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
                           >
-                            Keep
+                            Update
                           </button>
                           <button
                             onClick={handleCancelImage}
@@ -610,27 +610,24 @@ export default function EditCustomer() {
             </div>
             <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
+                { label: "Blouse Length", name: "blouse_length" },
                 { label: "Bust", name: "bust" },
-                { label: "Waist", name: "waist" },
-                { label: "Hip", name: "hip" },
                 { label: "Bust Point", name: "bustpoint" },
+                { label: "Chest", name: "chest" },
+                { label: "Dress Length(Long, 3/4, Short)", name: "dress_length" },
+                { label: "Half Length", name: "half_length" },
+                { label: "Hip", name: "hip" },
+                { label: "Round Shoulder", name: "round_shoulder" },
+                { label: "Round Sleeve(Arm, Below Elbow, Wrist)", name: "round_sleeve" },
+                { label: "Round Under Bust", name: "round_under_bust" },
+                { label: "Shoulder", name: "shoulder" },
                 {
                   label: "Shoulder to Underbust",
                   name: "shoulder_to_underbust",
                 },
-                { label: "Round Under Bust", name: "round_under_bust" },
-                { label: "Half Length", name: "half_length" },
-                { label: "Blouse Length", name: "blouse_length" },
-                { label: "Sleeve Length", name: "sleeve_length" },
-                { label: "Round Sleeve", name: "round_sleeve" },
-                { label: "Dress Length", name: "dress_length" },
-                { label: "Chest", name: "chest" },
-                { label: "Round Shoulder", name: "round_shoulder" },
-                { label: "Skirt Length", name: "skirt_length" },
-                { label: "Trousers Length", name: "trousers_length" },
-                { label: "Round Thigh", name: "round_thigh" },
-                { label: "Round Knee", name: "round_knee" },
-                { label: "Round Feet", name: "round_feet" },
+                { label: "Skirt Length(Long, 3/4, Short)", name: "skirt_length" },
+                { label: "Sleeve Length(Long, Quarter, Short)", name: "sleeve_length" },
+                { label: "Waist", name: "waist" },
               ].map((measurement, index) => (
                 <motion.div
                   key={index}
@@ -649,7 +646,9 @@ export default function EditCustomer() {
                     type="number"
                     id={measurement.name}
                     name={measurement.name}
-                    value={formData[measurement.name as keyof typeof formData] || ""}
+                    value={
+                      formData[measurement.name as keyof typeof formData] || ""
+                    }
                     onChange={handleInputChange}
                     placeholder={measurement.label}
                     className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
@@ -658,165 +657,176 @@ export default function EditCustomer() {
               ))}
             </div>
           </div>
-{/* Fitting Section */}
-<div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">
-  <div className="text-2xl font-bold text-gray-700 mb-4">
-    Add other details
-  </div>
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-    {/* First Fitting */}
-    <div className="">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        First Fitting Date
-      </label>
-      <DatePicker
-        selected={firstFittingDate}
-        onChange={date => {
-          setFirstFittingDate(date);
-          setFormData(prev => ({
-            ...prev,
-            first_fitting_date: date
-              ? date.toISOString().split("T")[0]
-              : ''
-          }));
-          // Reset second date if it’s now before the new first date:
-          if (
-            date &&
-            secondFittingDate &&
-            secondFittingDate < date
-          ) {
-            setSecondFittingDate(null);
-            setFormData(prev => ({ ...prev, second_fitting_date: '' }));
-          }
-        }}
-        dateFormat="yyyy-MM-dd"
-        placeholderText="Select first fitting date"
-        className="datepicker-input"
-        calendarClassName="datepicker-calendar"
-        minDate={new Date()}                         // no past dates
-        renderCustomHeader={({ date, decreaseMonth, increaseMonth }) => (
-          <div className="datepicker-header">
-            <button
-              type="button"
-              onClick={decreaseMonth}
-              className="datepicker-nav-btn"
-            >
-              &lt;
-            </button>
-            <span className="datepicker-current-month">
-              {date.toLocaleString('default', {
-                month: 'long',
-                year: 'numeric'
-              })}
-            </span>
-            <button
-              type="button"
-              onClick={increaseMonth}
-              className="datepicker-nav-btn"
-            >
-              &gt;
-            </button>
+          {/* Fitting Section */}
+          <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md mt-6">
+            <div className="text-2xl font-bold text-gray-700 mb-4">
+              Add other details
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* First Fitting */}
+              <div className="">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  First Fitting Date
+                </label>
+                <DatePicker
+                  selected={firstFittingDate}
+                  onChange={(date) => {
+                    setFirstFittingDate(date);
+                    setFormData((prev) => ({
+                      ...prev,
+                      first_fitting_date: date
+                        ? date.toISOString().split("T")[0]
+                        : "",
+                    }));
+                    // Reset second date if it’s now before the new first date:
+                    if (date && secondFittingDate && secondFittingDate < date) {
+                      setSecondFittingDate(null);
+                      setFormData((prev) => ({
+                        ...prev,
+                        second_fitting_date: "",
+                      }));
+                    }
+                  }}
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="Select first fitting date"
+                  className="datepicker-input"
+                  calendarClassName="datepicker-calendar"
+                  minDate={new Date()} // no past dates
+                  renderCustomHeader={({
+                    date,
+                    decreaseMonth,
+                    increaseMonth,
+                  }) => (
+                    <div className="datepicker-header">
+                      <button
+                        type="button"
+                        onClick={decreaseMonth}
+                        className="datepicker-nav-btn"
+                      >
+                        &lt;
+                      </button>
+                      <span className="datepicker-current-month">
+                        {date.toLocaleString("default", {
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={increaseMonth}
+                        className="datepicker-nav-btn"
+                      >
+                        &gt;
+                      </button>
+                    </div>
+                  )}
+                  dayClassName={(date) => {
+                    const classes = ["datepicker-day"];
+                    if (
+                      firstFittingDate &&
+                      date.toDateString() === firstFittingDate.toDateString()
+                    )
+                      classes.push("datepicker-day--selected");
+                    if (date.toDateString() === new Date().toDateString())
+                      classes.push("datepicker-day--today");
+                    return classes.join(" ");
+                  }}
+                />
+              </div>
+
+              {/* Second Fitting */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Second Fitting Date
+                </label>
+                <DatePicker
+                  selected={secondFittingDate}
+                  onChange={(date) => {
+                    setSecondFittingDate(date);
+                    setFormData((prev) => ({
+                      ...prev,
+                      second_fitting_date: date
+                        ? date.toISOString().split("T")[0]
+                        : "",
+                    }));
+                  }}
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="Select second fitting date"
+                  className="datepicker-input"
+                  calendarClassName="datepicker-calendar"
+                  // ensure second ≥ first, and also ≥ today
+                  minDate={firstFittingDate || new Date()}
+                  renderCustomHeader={({
+                    date,
+                    decreaseMonth,
+                    increaseMonth,
+                  }) => (
+                    <div className="datepicker-header">
+                      <button
+                        type="button"
+                        onClick={decreaseMonth}
+                        className="datepicker-nav-btn"
+                      >
+                        &lt;
+                      </button>
+                      <span className="datepicker-current-month">
+                        {date.toLocaleString("default", {
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={increaseMonth}
+                        className="datepicker-nav-btn"
+                      >
+                        &gt;
+                      </button>
+                    </div>
+                  )}
+                  dayClassName={(date) => {
+                    const classes = ["datepicker-day"];
+                    if (
+                      secondFittingDate &&
+                      date.toDateString() === secondFittingDate.toDateString()
+                    )
+                      classes.push("datepicker-day--selected");
+                    if (date.toDateString() === new Date().toDateString())
+                      classes.push("datepicker-day--today");
+                    return classes.join(" ");
+                  }}
+                />
+                {secondFittingDate &&
+                  firstFittingDate &&
+                  secondFittingDate < firstFittingDate && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Second fitting date must be on or after the first fitting
+                      date.
+                    </p>
+                  )}
+              </div>
+
+              {/* Duration */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Duration (days)
+                </label>
+                <input
+                  type="number"
+                  name="duration"
+                  placeholder="Enter number of days"
+                  value={formData.duration}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      duration: e.target.value,
+                    }))
+                  }
+                  className="mt-1 block datepicker-input"
+                />
+              </div>
+            </div>
           </div>
-        )}
-        dayClassName={date => {
-          const classes = ['datepicker-day'];
-          if (
-            firstFittingDate &&
-            date.toDateString() === firstFittingDate.toDateString()
-          ) classes.push('datepicker-day--selected');
-          if (date.toDateString() === new Date().toDateString())
-            classes.push('datepicker-day--today');
-          return classes.join(' ');
-        }}
-      />
-    </div>
-
-    {/* Second Fitting */}
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        Second Fitting Date
-      </label>
-      <DatePicker
-        selected={secondFittingDate}
-        onChange={date => {
-          setSecondFittingDate(date);
-          setFormData(prev => ({
-            ...prev,
-            second_fitting_date: date
-              ? date.toISOString().split("T")[0]
-              : ''
-          }));
-        }}
-        dateFormat="yyyy-MM-dd"
-        placeholderText="Select second fitting date"
-        className="datepicker-input"
-        calendarClassName="datepicker-calendar"
-        // ensure second ≥ first, and also ≥ today
-        minDate={firstFittingDate || new Date()}
-        renderCustomHeader={({ date, decreaseMonth, increaseMonth }) => (
-          <div className="datepicker-header">
-            <button
-              type="button"
-              onClick={decreaseMonth}
-              className="datepicker-nav-btn"
-            >
-              &lt;
-            </button>
-            <span className="datepicker-current-month">
-              {date.toLocaleString('default', {
-                month: 'long',
-                year: 'numeric'
-              })}
-            </span>
-            <button
-              type="button"
-              onClick={increaseMonth}
-              className="datepicker-nav-btn"
-            >
-              &gt;
-            </button>
-          </div>
-        )}
-        dayClassName={date => {
-          const classes = ['datepicker-day'];
-          if (
-            secondFittingDate &&
-            date.toDateString() === secondFittingDate.toDateString()
-          ) classes.push('datepicker-day--selected');
-          if (date.toDateString() === new Date().toDateString())
-            classes.push('datepicker-day--today');
-          return classes.join(' ');
-        }}
-      />
-      {secondFittingDate && firstFittingDate && secondFittingDate < firstFittingDate && (
-        <p className="text-red-500 text-sm mt-1">
-          Second fitting date must be on or after the first fitting date.
-        </p>
-      )}
-    </div>
-
-    {/* Duration */}
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        Duration (days)
-      </label>
-      <input
-        type="number"
-        name="duration"
-        placeholder="Enter number of days"
-        value={formData.duration}
-        onChange={e =>
-          setFormData(prev => ({
-            ...prev,
-            duration: e.target.value
-          }))
-        }
-        className="mt-1 block datepicker-input"
-      />
-    </div>
-  </div>
-</div>
-
 
           <div className="flex justify-end mt-6">
             <button

@@ -738,7 +738,7 @@ const handleAssignTailors = async () => {
         </form>
 
         <motion.div
-  className="mt-8 p-6 bg-white rounded-3xl shadow-lg"
+  className="mt-8 px-3 py-5"
   initial="hidden"
   animate="visible"
   variants={fadeInUp}
@@ -753,12 +753,6 @@ const handleAssignTailors = async () => {
       Tailors
     </h2>
   </div>
-  {/* <div className="flex space-x-3 whitespace-nowrap">
-      <div className="font-bold text-xl text-gray-700">Tailor Commission:</div>
-      <div className="flex space-x-2 font-normal items-center text-xl text-gray-700">
-        <span>₦</span><span>commission_amount</span>
-      </div>
-  </div> */}
   </div>
 
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 my-5 gap-6">
@@ -1003,7 +997,7 @@ const handleAssignTailors = async () => {
 
         {customer.tailor_image !== null && (
           <>
-            <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">
+            <div className="w-full mx-auto min-h-full p-6">
               <motion.div
                 className="font-bold text-xl mt-5 text-gray-700"
                 initial="hidden"

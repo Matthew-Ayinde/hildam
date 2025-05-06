@@ -8,7 +8,8 @@ import React, { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { getSession } from "next-auth/react"; // Import getSession from NextAuth
-import SkeletonLoader from "@/components/SkeletonLoader"
+import SkeletonLoader from "@/components/SkeletonLoader";
+import DataPageError from "@/components/admin/DataNotFound";
 
 export default function ShowCustomer() {
   const router = useRouter();
@@ -24,7 +25,6 @@ export default function ShowCustomer() {
     fullName: string;
     age: number;
     gender: string;
-    phone: string;
     email: string;
     address: string;
     bust: number;
@@ -151,8 +151,7 @@ export default function ShowCustomer() {
           chest: result.data.chest || 0,
           dress_length: result.data.dress_length || 0,
           create_date: result.data.created_at,
-          phone: "",
-          address: ""
+          address: result.data.address || "N/A",
         };
         setCustomer(mappedCustomer);
       } else {
@@ -177,18 +176,14 @@ export default function ShowCustomer() {
     return (
       <div className="text-center text-gray-500 py-10">
         <SkeletonLoader />
-        
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center text-red-500 py-10">
-        Error: {error}{" "}
-        <button onClick={fetchCustomer} className="text-blue-500 underline">
-          Retry
-        </button>
+      <div className="text-center text-red-500">
+        <DataPageError />
       </div>
     );
   }
@@ -198,25 +193,21 @@ export default function ShowCustomer() {
   }
 
   const measurements = [
-    { label: "Bust", key: "bust" },
-    { label: "Waist", key: "waist" },
-    { label: "Hip", key: "hip" },
-    { label: "Shoulder", key: "shoulder" },
-    { label: "Bust Point", key: "bustpoint" },
-    { label: "Shoulder to Underbust", key: "shoulder_to_underbust" },
-    { label: "Round Under Bust", key: "round_under_bust" },
-    { label: "Sleeve Length", key: "sleeve_length" },
-    { label: "Half Length", key: "half_length" },
     { label: "Blouse Length", key: "blouse_length" },
-    { label: "Round Sleeve", key: "round_sleeve" },
-    { label: "Dress Length", key: "dress_length" },
+    { label: "Bust", key: "bust" },
+    { label: "Bust Point", key: "bustpoint" },
     { label: "Chest", key: "chest" },
+    { label: "Dress Length(Long, 3/4, Short)", key: "dress_length" },
+    { label: "Half Length", key: "half_length" },
+    { label: "Hip", key: "hip" },
     { label: "Round Shoulder", key: "round_shoulder" },
-    { label: "Skirt Length", key: "skirt_length" },
-    { label: "Trouser Length", key: "trousers_length" },
-    { label: "Round Thigh", key: "round_thigh" },
-    { label: "Round Knee", key: "round_knee" },
-    { label: "Round Feet", key: "round_feet" },
+    { label: "Round Sleeve(Arm, Below Elbow, Wrist)", key: "round_sleeve" },
+    { label: "Round Under Bust", key: "round_under_bust" },
+    { label: "Shoulder", key: "shoulder" },
+    { label: "Shoulder to Underbust", key: "shoulder_to_underbust" },
+    { label: "Skirt Length(Long, 3/4, Short)", key: "skirt_length" },
+    { label: "Sleeve Length(Long, Quarter, Short)", key: "sleeve_length" },
+    { label: "Waist", key: "waist" },
   ];
 
   return (
@@ -250,7 +241,9 @@ export default function ShowCustomer() {
         </Link>
       </div>
 
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Customer Details</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">
+        Customer Details
+      </h2>
 
       {/* Customer Details Form */}
       <form>
@@ -330,7 +323,7 @@ export default function ShowCustomer() {
             transition={{ duration: 0.4, delay: 0.5 }}
           >
             <label className="block text-gray-700 font-bold mb-2">
-              Create Date
+              Date Created
             </label>
             <input
               type="text"
@@ -360,42 +353,56 @@ export default function ShowCustomer() {
           </motion.div>
         </motion.div>
 
-        {/* Measurements Section */}
-        <div className="w-full">
-  <h3 className="block text-xl font-bold text-gray-800 mb-3">
-    Measurements
-  </h3>
-  <div className="mb-6">
-    <div className="flex flex-wrap -mx-2">
-      {measurements.map((measurement, index) => (
         <motion.div
-          key={measurement.key}
-          initial={{ opacity: 0, y: 20 }}
+          key={7}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 + index * 0.1 }}
-          className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4"
+          transition={{ duration: 0.4, delay: 0.6 }}
         >
-          <label
-            htmlFor={measurement.key}
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            {measurement.label}
-          </label>
-          <input
-            type="number"
+          <label className="block text-gray-700 font-bold mb-2">Address</label>
+          <textarea
+            rows={2}
+            value={customer.address}
             readOnly
-            id={measurement.key}
-            name={measurement.key}
-            value={customer[measurement.key]}
-            placeholder={measurement.label}
-            className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm bg-gray-50 text-gray-600 sm:text-sm p-3 focus:border-orange-500 focus:ring-orange-500 transition duration-200"
+            className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
           />
         </motion.div>
-      ))}
-    </div>
-  </div>
-</div>
 
+        {/* Measurements Section */}
+        <div className="w-full">
+          <h3 className="block text-2xl font-bold text-gray-800 my-3">
+            Measurements
+          </h3>
+          <div className="mb-6">
+            <div className="flex flex-wrap -mx-2">
+              {measurements.map((measurement, index) => (
+                <motion.div
+                  key={measurement.key}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 + index * 0.1 }}
+                  className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4"
+                >
+                  <label
+                    htmlFor={measurement.key}
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    {measurement.label}
+                  </label>
+                  <input
+                    type="number"
+                    readOnly
+                    id={measurement.key}
+                    name={measurement.key}
+                    value={customer[measurement.key]}
+                    placeholder={measurement.label}
+                    className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm bg-gray-50 text-gray-600 sm:text-sm p-3 focus:border-orange-500 focus:ring-orange-500 transition duration-200"
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
       </form>
 
       {/* Action Buttons */}
