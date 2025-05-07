@@ -1,10 +1,436 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 import { FaRegSmile } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import Spinner from "@/components/Spinner"; // Import your Spinner component
+
+// Dummy customer data with measurements
+const dummyCustomers = [
+  {
+    id: 1,
+    name: "Customer 1",
+    email: "customer1@example.com",
+    age: "21",
+    blouseLength: 42.1,
+    bust: 36.5,
+    bustpoint: 37.0,
+    chest: 38.2,
+    dressLength: 50.0,
+    halfLength: 25.5,
+    hip: 40.3,
+    roundShoulder: 12.5,
+    roundSleeve: 16.0,
+    round_under_bust: 34.2,
+    shoulder: 14.1,
+    shoulder_to_underbust: 9.8,
+    sleeve_length: 24.3,
+    skirtLength: 45.7,
+    waist: 32.0,
+  },
+  {
+    id: 2,
+    name: "Customer 2",
+    email: "customer2@example.com",
+    age: "22",
+    blouseLength: 44.8,
+    bust: 38.1,
+    bustpoint: 38.5,
+    chest: 39.0,
+    dressLength: 52.3,
+    halfLength: 26.0,
+    hip: 42.6,
+    roundShoulder: 13.0,
+    roundSleeve: 16.8,
+    round_under_bust: 36.0,
+    shoulder: 14.5,
+    shoulder_to_underbust: 10.2,
+    sleeve_length: 25.1,
+    skirtLength: 47.5,
+    waist: 33.4,
+  },
+  {
+    id: 3,
+    name: "Customer 3",
+    email: "customer3@example.com",
+    age: "23",
+    blouseLength: 41.3,
+    bust: 35.8,
+    bustpoint: 36.2,
+    chest: 37.4,
+    dressLength: 49.1,
+    halfLength: 24.7,
+    hip: 39.8,
+    roundShoulder: 12.2,
+    roundSleeve: 15.5,
+    round_under_bust: 33.5,
+    shoulder: 13.8,
+    shoulder_to_underbust: 9.5,
+    sleeve_length: 23.7,
+    skirtLength: 44.2,
+    waist: 31.7,
+  },
+  {
+    id: 4,
+    name: "Customer 4",
+    email: "customer4@example.com",
+    age: "24",
+    blouseLength: 43.5,
+    bust: 37.3,
+    bustpoint: 37.9,
+    chest: 38.7,
+    dressLength: 51.0,
+    halfLength: 25.9,
+    hip: 41.5,
+    roundShoulder: 12.9,
+    roundSleeve: 16.2,
+    round_under_bust: 35.1,
+    shoulder: 14.3,
+    shoulder_to_underbust: 10.0,
+    sleeve_length: 24.9,
+    skirtLength: 46.8,
+    waist: 32.9,
+  },
+  {
+    id: 5,
+    name: "Customer 5",
+    email: "customer5@example.com",
+    age: "25",
+    blouseLength: 45.0,
+    bust: 38.8,
+    bustpoint: 39.4,
+    chest: 40.1,
+    dressLength: 53.2,
+    halfLength: 27.1,
+    hip: 43.2,
+    roundShoulder: 13.4,
+    roundSleeve: 17.0,
+    round_under_bust: 36.8,
+    shoulder: 14.8,
+    shoulder_to_underbust: 10.5,
+    sleeve_length: 26.3,
+    skirtLength: 48.9,
+    waist: 34.2,
+  },
+  {
+    id: 6,
+    name: "Customer 6",
+    email: "customer6@example.com",
+    age: "26",
+    blouseLength: 40.7,
+    bust: 35.2,
+    bustpoint: 36.0,
+    chest: 37.0,
+    dressLength: 48.3,
+    halfLength: 24.2,
+    hip: 39.1,
+    roundShoulder: 12.0,
+    roundSleeve: 15.2,
+    round_under_bust: 33.0,
+    shoulder: 13.5,
+    shoulder_to_underbust: 9.3,
+    sleeve_length: 23.4,
+    skirtLength: 43.5,
+    waist: 31.2,
+  },
+  {
+    id: 7,
+    name: "Customer 7",
+    email: "customer7@example.com",
+    age: "27",
+    blouseLength: 46.2,
+    bust: 39.5,
+    bustpoint: 40.1,
+    chest: 41.3,
+    dressLength: 54.1,
+    halfLength: 27.8,
+    hip: 44.0,
+    roundShoulder: 13.7,
+    roundSleeve: 17.3,
+    round_under_bust: 37.5,
+    shoulder: 15.1,
+    shoulder_to_underbust: 10.8,
+    sleeve_length: 26.9,
+    skirtLength: 49.7,
+    waist: 35.0,
+  },
+  {
+    id: 8,
+    name: "Customer 8",
+    email: "customer8@example.com",
+    age: "28",
+    blouseLength: 42.9,
+    bust: 36.9,
+    bustpoint: 37.6,
+    chest: 38.5,
+    dressLength: 51.5,
+    halfLength: 26.4,
+    hip: 41.0,
+    roundShoulder: 12.7,
+    roundSleeve: 16.5,
+    round_under_bust: 35.5,
+    shoulder: 14.6,
+    shoulder_to_underbust: 10.3,
+    sleeve_length: 25.3,
+    skirtLength: 47.1,
+    waist: 33.7,
+  },
+  {
+    id: 9,
+    name: "Customer 9",
+    email: "customer9@example.com",
+    age: "29",
+    blouseLength: 44.4,
+    bust: 38.2,
+    bustpoint: 38.9,
+    chest: 39.8,
+    dressLength: 52.7,
+    halfLength: 26.9,
+    hip: 42.5,
+    roundShoulder: 13.2,
+    roundSleeve: 16.9,
+    round_under_bust: 36.2,
+    shoulder: 14.9,
+    shoulder_to_underbust: 10.6,
+    sleeve_length: 26.1,
+    skirtLength: 48.3,
+    waist: 34.4,
+  },
+  {
+    id: 10,
+    name: "Customer 10",
+    email: "customer10@example.com",
+    age: "30",
+    blouseLength: 41.8,
+    bust: 35.6,
+    bustpoint: 36.4,
+    chest: 37.6,
+    dressLength: 49.8,
+    halfLength: 24.8,
+    hip: 40.0,
+    roundShoulder: 12.3,
+    roundSleeve: 15.7,
+    round_under_bust: 33.8,
+    shoulder: 13.9,
+    shoulder_to_underbust: 9.6,
+    sleeve_length: 23.9,
+    skirtLength: 44.8,
+    waist: 31.9,
+  },
+  {
+    id: 11,
+    name: "Customer 11",
+    email: "customer11@example.com",
+    age: "31",
+    blouseLength: 45.5,
+    bust: 39.0,
+    bustpoint: 39.7,
+    chest: 40.6,
+    dressLength: 53.8,
+    halfLength: 27.4,
+    hip: 43.8,
+    roundShoulder: 13.6,
+    roundSleeve: 17.1,
+    round_under_bust: 37.0,
+    shoulder: 15.0,
+    shoulder_to_underbust: 10.7,
+    sleeve_length: 26.7,
+    skirtLength: 49.3,
+    waist: 35.5,
+  },
+  {
+    id: 12,
+    name: "Customer 12",
+    email: "customer12@example.com",
+    age: "32",
+    blouseLength: 43.0,
+    bust: 37.5,
+    bustpoint: 38.2,
+    chest: 39.1,
+    dressLength: 51.2,
+    halfLength: 26.2,
+    hip: 41.2,
+    roundShoulder: 12.8,
+    roundSleeve: 16.4,
+    round_under_bust: 35.2,
+    shoulder: 14.4,
+    shoulder_to_underbust: 10.1,
+    sleeve_length: 25.0,
+    skirtLength: 47.0,
+    waist: 33.9,
+  },
+  {
+    id: 13,
+    name: "Customer 13",
+    email: "customer13@example.com",
+    age: "33",
+    blouseLength: 42.5,
+    bust: 36.7,
+    bustpoint: 37.3,
+    chest: 38.0,
+    dressLength: 50.5,
+    halfLength: 25.6,
+    hip: 40.5,
+    roundShoulder: 12.6,
+    roundSleeve: 15.9,
+    round_under_bust: 34.5,
+    shoulder: 14.0,
+    shoulder_to_underbust: 9.7,
+    sleeve_length: 24.5,
+    skirtLength: 45.4,
+    waist: 32.5,
+  },
+  {
+    id: 14,
+    name: "Customer 14",
+    email: "customer14@example.com",
+    age: "34",
+    blouseLength: 46.0,
+    bust: 39.3,
+    bustpoint: 39.9,
+    chest: 40.9,
+    dressLength: 54.0,
+    halfLength: 27.6,
+    hip: 44.2,
+    roundShoulder: 13.8,
+    roundSleeve: 17.2,
+    round_under_bust: 37.3,
+    shoulder: 15.2,
+    shoulder_to_underbust: 10.9,
+    sleeve_length: 26.8,
+    skirtLength: 49.5,
+    waist: 35.2,
+  },
+  {
+    id: 15,
+    name: "Customer 15",
+    email: "customer15@example.com",
+    age: "35",
+    blouseLength: 41.5,
+    bust: 35.4,
+    bustpoint: 36.1,
+    chest: 37.2,
+    dressLength: 49.5,
+    halfLength: 24.5,
+    hip: 39.5,
+    roundShoulder: 12.1,
+    roundSleeve: 15.4,
+    round_under_bust: 33.2,
+    shoulder: 13.7,
+    shoulder_to_underbust: 9.4,
+    sleeve_length: 23.6,
+    skirtLength: 44.5,
+    waist: 31.5,
+  },
+  {
+    id: 16,
+    name: "Customer 16",
+    email: "customer16@example.com",
+    age: "36",
+    blouseLength: 44.2,
+    bust: 38.0,
+    bustpoint: 38.7,
+    chest: 39.6,
+    dressLength: 52.0,
+    halfLength: 26.7,
+    hip: 42.0,
+    roundShoulder: 13.3,
+    roundSleeve: 16.7,
+    round_under_bust: 36.1,
+    shoulder: 14.7,
+    shoulder_to_underbust: 10.4,
+    sleeve_length: 26.0,
+    skirtLength: 48.0,
+    waist: 34.0,
+  },
+  {
+    id: 17,
+    name: "Customer 17",
+    email: "customer17@example.com",
+    age: "37",
+    blouseLength: 43.8,
+    bust: 37.8,
+    bustpoint: 38.4,
+    chest: 39.3,
+    dressLength: 51.8,
+    halfLength: 26.5,
+    hip: 41.8,
+    roundShoulder: 13.1,
+    roundSleeve: 16.6,
+    round_under_bust: 35.9,
+    shoulder: 14.5,
+    shoulder_to_underbust: 10.3,
+    sleeve_length: 25.8,
+    skirtLength: 47.8,
+    waist: 33.8,
+  },
+  {
+    id: 18,
+    name: "Customer 18",
+    email: "customer18@example.com",
+    age: "38",
+    blouseLength: 45.8,
+    bust: 39.7,
+    bustpoint: 40.2,
+    chest: 41.6,
+    dressLength: 54.5,
+    halfLength: 28.0,
+    hip: 44.5,
+    roundShoulder: 13.9,
+    roundSleeve: 17.4,
+    round_under_bust: 37.7,
+    shoulder: 15.3,
+    shoulder_to_underbust: 11.0,
+    sleeve_length: 27.0,
+    skirtLength: 49.9,
+    waist: 35.7,
+  },
+  {
+    id: 19,
+    name: "Customer 19",
+    email: "customer19@example.com",
+    age: "39",
+    blouseLength: 42.3,
+    bust: 36.3,
+    bustpoint: 37.1,
+    chest: 38.1,
+    dressLength: 50.2,
+    halfLength: 25.3,
+    hip: 40.1,
+    roundShoulder: 12.4,
+    roundSleeve: 15.6,
+    round_under_bust: 34.1,
+    shoulder: 13.8,
+    shoulder_to_underbust: 9.6,
+    sleeve_length: 24.0,
+    skirtLength: 45.0,
+    waist: 31.8,
+  },
+  {
+    id: 20,
+    name: "Customer 20",
+    email: "customer20@example.com",
+    age: "40",
+    blouseLength: 46.5,
+    bust: 39.9,
+    bustpoint: 40.5,
+    chest: 41.8,
+    dressLength: 55.0,
+    halfLength: 28.2,
+    hip: 45.0,
+    roundShoulder: 14.0,
+    roundSleeve: 17.5,
+    round_under_bust: 38.0,
+    shoulder: 15.4,
+    shoulder_to_underbust: 11.1,
+    sleeve_length: 27.2,
+    skirtLength: 50.2,
+    waist: 36.0,
+  },
+];
+
 
 type FormDataType = {
   blouse_length: string;
@@ -14,7 +440,7 @@ type FormDataType = {
   clothing_description: string;
   clothing_name: string;
   customer_description: string;
-  customer_email: string;
+  customer_email: string;  
   customer_name: string;
   dress_length: string;
   gender: string;
@@ -70,6 +496,10 @@ const initialFormData: FormDataType = {
 
 const Form = () => {
   const [formData, setFormData] = useState<FormDataType>(initialFormData);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+    const [filteredCustomers, setFilteredCustomers] = useState<typeof dummyCustomers>([]);
+    const inputRef = useRef<HTMLInputElement>(null);
+    
   const [managers, setManagers] = useState<
     {
       id: string;
@@ -83,6 +513,18 @@ const Form = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null); // State for image preview
   const router = useRouter();
+
+    // Close suggestions on click outside
+      useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+          if (inputRef.current && !inputRef.current.contains(e.target as Node)) {
+            setShowSuggestions(false);
+          }
+        };
+        document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
+      }, []);
+    
 
   useEffect(() => {
     const fetchHeadOfTailoringList = async () => {
@@ -131,19 +573,49 @@ const Form = () => {
     >
   ) => {
     const { name, value, type } = e.target;
+  
+    // 1. Handle file inputs (and preview)
     if (type === "file" && e.target instanceof HTMLInputElement) {
       const file = e.target.files ? e.target.files[0] : null;
-      setFormData({ ...formData, [name]: file });
-      // Create a URL for the selected image
+      setFormData(prev => ({ ...prev, [name]: file }));
+  
       if (file) {
         const fileURL = URL.createObjectURL(file);
-        setImagePreview(fileURL); // Set the image preview URL
+        setImagePreview(fileURL);
       } else {
-        setImagePreview(null); // Reset the preview if no file is selected
+        setImagePreview(null);
       }
-    } else {
-      setFormData({ ...formData, [name]: value });
+      return; // bail out so we don't run the text logic
     }
+  
+    // 2. Handle all other inputs (text, textarea, select)
+    setFormData(prev => ({ ...prev, [name]: value }));
+  
+    // 3. If this field is your customer‐name, update suggestions
+    if (name === "customer_name") {
+      const trimmed = value.trim();
+      if (trimmed === "") {
+        setFilteredCustomers([]);
+        setShowSuggestions(false);
+        return;
+      }
+      const matches = dummyCustomers.filter(c =>
+        c.name.toLowerCase().includes(trimmed.toLowerCase())
+      );
+      setFilteredCustomers(matches);
+      setShowSuggestions(matches.length > 0);
+    }
+  };
+  
+
+  const handleSelect = (customer: typeof dummyCustomers[0]) => {
+    setFormData(prev => ({
+      ...prev,
+      customer_name: customer.name,
+      customer_email: customer.email,
+      customer_age: customer.age,
+    }));
+    setShowSuggestions(false);
   };
 
 
@@ -224,7 +696,39 @@ const Form = () => {
         </div>
 
         {/* Customer Info */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Autocomplete Customer Name */}
+          <div className="relative" ref={inputRef}>
+                    <label htmlFor="customer_name" className="block text-sm font-medium text-gray-700 mb-1">
+                      Customer Name
+                    </label>
+                    <motion.input
+                      id="customer_name"
+                      name="customer_name"
+                      type="text"
+                      value={formData.customer_name}
+                      onChange={handleChange}
+                      placeholder="Start typing customer name..."
+                      autoComplete="off"
+                      className="mt-1 block w-full rounded-md border border-gray-300 p-2 focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
+                    />
+                    {showSuggestions && (
+                      <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                        {filteredCustomers.map(c => (
+                          <li
+                            key={c.id}
+                            onClick={() => handleSelect(c)}
+                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          >
+                            <div className="font-medium text-gray-800">{c.name}</div>
+                            <div className="text-sm text-gray-500">{c.email}</div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
         <div>
             <label
               htmlFor="customer_email"
@@ -241,26 +745,6 @@ const Form = () => {
               value={formData.customer_email}
               onChange={handleChange}
               placeholder="Enter customer email"
-              required
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="customer_name"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Name
-            </label>
-            <motion.input
-              whileFocus={{ scale: 1.02 }}
-              whileHover={{ scale: 1.01 }}
-              id="customer_name"
-              name="customer_name"
-              type="text"
-              value={formData.customer_name}
-              onChange={handleChange}
-              placeholder="Enter customer name"
               required
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
             />
@@ -324,7 +808,11 @@ const Form = () => {
               Select Head of Tailoring
             </label>
             {loadingManagers ? (
-              <div className="text-center text-gray-500 mt-2">Loading...</div>
+              <div className="text-center text-gray-500 mt-2">
+                <Spinner
+                />
+                <span className="text-sm">please wait...</span>
+              </div>
             ) : (
               <select
                 id="manager_id"
@@ -332,7 +820,7 @@ const Form = () => {
                 value={formData.manager_id}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2 bg-white focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
+                className="mt-1 block w-full rounded-md border text-gray-700 border-gray-300 shadow-sm p-2 bg-white focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
               >
                 <option value="">Select head of tailoring</option>
                 {managers.map((manager) => (

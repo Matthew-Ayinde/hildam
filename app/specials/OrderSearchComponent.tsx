@@ -149,7 +149,7 @@ const Form = () => {
     fetchHeadOfTailoringList();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
 
@@ -176,8 +176,6 @@ const Form = () => {
     }));
     setShowSuggestions(false);
   };
-
-
 
 
   const handleSubmit = async (e: React.FormEvent) => {
