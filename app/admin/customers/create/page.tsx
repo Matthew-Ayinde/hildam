@@ -5,6 +5,8 @@ import React, { useEffect, useState } from "react";
 import { MdOutlineHideSource, MdOutlineRemoveRedEye } from "react-icons/md";
 import { AnimatePresence, motion } from "framer-motion";
 import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 const Form = () => {
   const router = useRouter();
@@ -41,7 +43,7 @@ const Form = () => {
     name: "",
     gender: "",
     age: "",
-    phone_number: "",
+    phone_number: "+234",
     password: "",
     email: "",
     address: "",
@@ -78,6 +80,11 @@ const Form = () => {
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  // BELOW your generic handleChange…
+  const handlePhoneChange = (value: string) => {
+    setFormData({ ...formData, phone_number: value });
   };
 
   const togglePasswordVisibility = () => {
@@ -354,52 +361,6 @@ const Form = () => {
           </div>
           <div className="w-full">
             <label
-              htmlFor="phone_number"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              id="phone_number"
-              name="phone_number"
-              value={formData.phone_number}
-              onChange={(e) => {
-                let value = e.target.value.replace(/\D/g, ""); // remove non-digits
-                if (value.length <= 11) {
-                  handleChange({
-                    target: { name: "phone_number", value },
-                  } as React.ChangeEvent<HTMLInputElement>);
-                }
-              }}
-              placeholder="XXXX XXX XXXX"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            />
-          </div>
-          <div className="w-full">
-            <label
-              htmlFor="gender"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Gender
-            </label>
-            <select
-              id="gender"
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border text-gray-700 border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            >
-              <option value="">Select your gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div className="w-full">
-            <label
               htmlFor="age"
               className="block text-sm font-medium text-gray-700"
             >
@@ -423,6 +384,71 @@ const Form = () => {
               required
             />
           </div>
+         
+
+          <div className="w-full">
+            <label
+              htmlFor="gender"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Gender
+            </label>
+            <select
+              id="gender"
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border text-gray-700 border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+            >
+              <option value="">Select your gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          
+          <div className="w-full">
+            <label
+              htmlFor="phone_number"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Phone Number
+            </label>
+
+            <PhoneInput
+              country="ng"
+              enableSearch
+              disableCountryCode={false}
+              countryCodeEditable={false}
+              value={formData.phone_number}
+              onChange={handlePhoneChange}
+              /* container wraps the whole widget */
+              containerClass="w-full mt-1"
+              containerStyle={{ width: "100%" }}
+              /* exactly your form-input styles, with extra left-padding */
+              inputClass="
+      block w-full rounded-md border border-gray-300 shadow-sm
+      focus:border-[#ff6c2f] focus:ring-[#ff6c2f]
+      sm:text-sm p-2 pl-20
+    "
+              /* flag + code button styled and positioned flush left */
+              buttonClass="
+      absolute left-0 top-0 h-full bg-white
+      border-r border-gray-300 rounded-l-md
+      pl-3 pr-2
+    "
+              /* dropdown inherits full width and obvious styling */
+              dropdownClass="
+      w-full bg-white border border-gray-300
+      rounded-md shadow-md
+    "
+            />
+          </div>
+
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
           <div className="w-full">
             <label
               htmlFor="address"
@@ -438,6 +464,23 @@ const Form = () => {
               className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
               required
               placeholder="Please enter your address"
+            ></textarea>
+          </div>
+          <div className="w-full">
+            <label
+              htmlFor="address"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Customer Description
+            </label>
+            <textarea
+              name="customer_description"
+              id="customer_description"
+              value={formData.customer_description}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+              required
+              placeholder="Please enter customer description"
             ></textarea>
           </div>
         </div>

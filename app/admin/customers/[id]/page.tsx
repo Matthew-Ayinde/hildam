@@ -48,6 +48,7 @@ export default function ShowCustomer() {
     chest: number;
     dress_length: number;
     create_date: string;
+    customer_description: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -152,6 +153,7 @@ export default function ShowCustomer() {
           dress_length: result.data.dress_length || 0,
           create_date: result.data.created_at,
           address: result.data.address || "N/A",
+          customer_description: result.data.customer_description || "N/A",
         };
         setCustomer(mappedCustomer);
       } else {
@@ -353,6 +355,9 @@ export default function ShowCustomer() {
           </motion.div>
         </motion.div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Address */}
+         
         <motion.div
           key={7}
           initial={{ opacity: 0, y: 10 }}
@@ -367,6 +372,21 @@ export default function ShowCustomer() {
             className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
           />
         </motion.div>
+        <motion.div
+          key={8}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.6 }}
+        >
+          <label className="block text-gray-700 font-bold mb-2">Customer Description</label>
+          <textarea
+            rows={2}
+            value={customer.customer_description}
+            readOnly
+            className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
+          />
+        </motion.div>
+        </div>
 
         {/* Measurements Section */}
         <div className="w-full">

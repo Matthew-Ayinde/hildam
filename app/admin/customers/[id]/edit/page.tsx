@@ -38,6 +38,7 @@ export default function EditCustomer() {
     waist: number;
     shoulder: number;
     address: string;
+    customer_description: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -69,6 +70,7 @@ export default function EditCustomer() {
     bustpoint: "",
     waist: "",
     address: "",
+    customer_description: "",
   });
 
   const fetchCustomer = async () => {
@@ -121,6 +123,7 @@ export default function EditCustomer() {
         bustpoint: result.data.bust,
         waist: result.data.waist,
         address: result.data.address,
+        customer_description: result.data.customer_description,
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -306,6 +309,7 @@ export default function EditCustomer() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
       <div className="mt-3">
           <label className="block text-gray-700 font-bold mb-1">
             Address
@@ -314,11 +318,24 @@ export default function EditCustomer() {
             rows={2} 
             name="address"
             value={formData.address}
-            readOnly
             onChange={handleInputChange}
             className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 "
           />
         </div>
+
+      <div className="mt-3">
+          <label className="block text-gray-700 font-bold mb-1">
+            Customer Description
+          </label>
+          <textarea
+            rows={2} 
+            name="customer_description"
+            value={formData.customer_description}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 "
+          />
+        </div>
+      </div>
 
       {/* Measurements Section */}
       <div className="mt-10">
