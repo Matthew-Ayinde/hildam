@@ -501,6 +501,8 @@ const Form = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
     const [filteredCustomers, setFilteredCustomers] = useState<typeof dummyCustomers>([]);
     const inputRef = useRef<HTMLInputElement>(null);
+
+const [basicCustomers, setBasicCustomers] = useState<typeof dummyCustomers>([]);
     
   const [managers, setManagers] = useState<
     {
@@ -515,6 +517,23 @@ const Form = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null); // State for image preview
   const router = useRouter();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const session = await getSession();
+        const token   = session?.user?.token!;
+        const res     = await fetch(
+          `https://hildam.insightpublicis.com/api/customerslist`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const json    = await res.json();
+        setBasicCustomers(json.data);
+      } catch (err) {
+        console.error("Failed to load customer list", err);
+      }
+    })();
+  }, []);
 
     // Close suggestions on click outside
       useEffect(() => {
@@ -595,47 +614,63 @@ const Form = () => {
   
     // 3. If this field is your customer‐name, update suggestions
     if (name === "customer_name") {
-      const trimmed = value.trim();
-      if (trimmed === "") {
+      setFormData(f => ({ ...f, customer_name: value }));
+      if (value.trim()) {
+        const matches = basicCustomers.filter(c =>
+          c.name.toLowerCase().includes(value.trim().toLowerCase())
+        );
+        setFilteredCustomers(matches);
+        setShowSuggestions(matches.length > 0);
+      } else {
         setFilteredCustomers([]);
         setShowSuggestions(false);
-        return;
       }
-      const matches = dummyCustomers.filter(c =>
-        c.name.toLowerCase().includes(trimmed.toLowerCase())
-      );
-      setFilteredCustomers(matches);
-      setShowSuggestions(matches.length > 0);
+      return;
     }
   };
   
 
-  const handleSelect = (customer: typeof dummyCustomers[0]) => {
-    setFormData(prev => ({
-      ...prev,
-      customer_name:            customer.name,
-      customer_email:           customer.email,
-      customer_age:             customer.age,
+  const handleSelect = async (customer: {
+    id: string; name: string; email: string; age: string;
+  }) => {
+    try {
+      setShowSuggestions(false);
+      const session = await getSession();
+      const token   = session?.user?.token!;
+      const res     = await fetch(
+        `https://hildam.insightpublicis.com/api/customerslist/${customer.id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const { data } = await res.json();
   
-      // Measurements, converted to snake_case
-      blouse_length:            customer.blouse_length.toString(),
-      bust:                     customer.bust.toString(),
-      bust_point:               customer.bust_point.toString(),
-      chest:                    customer.chest.toString(),
-      dress_length:             customer.dress_length.toString(),
-      half_length:              customer.half_length.toString(),
-      hip:                      customer.hip.toString(),
-      round_shoulder:           customer.round_shoulder.toString(),
-      round_sleeve:             customer.round_sleeve.toString(),
-      round_under_bust:         customer.round_under_bust.toString(),
-      shoulder:                 customer.shoulder.toString(),
-      shoulder_to_underbust:    customer.shoulder_to_underbust.toString(),
-      sleeve_length:            customer.sleeve_length.toString(),
-      skirt_length:             customer.skirt_length.toString(),
-      waist:                    customer.waist.toString(),
-      
-    }));
-    setShowSuggestions(false);
+      // Map the returned data directly into formData:
+      setFormData(f => ({
+        ...f,
+        customer_name: data.name,
+        customer_email: data.email,
+        // age or phone if you track them
+        // now all your measurement fields:
+        blouse_length:          data.blouse_length,
+        bust:                   data.bust,
+        bust_point:             data.bustpoint,
+        chest:                  data.chest,
+        dress_length:           data.dress_length,
+        half_length:            data.half_length,
+        hip:                    data.hip,
+        round_shoulder:         data.round_shoulder,
+        round_sleeve:           data.round_sleeve,
+        round_under_bust:       data.round_under_bust,
+        shoulder:               data.shoulder,
+        shoulder_to_underbust:  data.shoulder_to_underbust,
+        sleeve_length:          data.sleeve_length,
+        skirt_length:           data.skirt_length,
+        waist:                  data.waist,
+        customer_description:   data.customer_description,
+        // …any other fields you want to prefill
+      }));
+    } catch (err) {
+      console.error("Failed to load customer details", err);
+    }
   };
   
 

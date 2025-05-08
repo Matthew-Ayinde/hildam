@@ -136,6 +136,8 @@ export default function Table() {
   };
 
   const handleDelete = async (id: any) => {
+    setIsPopupOpen(false);
+
     try {
       const session = await getSession(); // Get session from NextAuth
       const token = session?.user?.token; // Access token from session
@@ -164,7 +166,6 @@ export default function Table() {
         prevData.filter((order) => order.id !== selectedUserId)
       );
 
-      setIsPopupOpen(false);
       setToastMessage("Order deleted successfully");
       setToastType("success");
     } catch (error) {
@@ -179,7 +180,7 @@ export default function Table() {
       setTimeout(() => {
         setToastMessage(null);
         setToastType(null);
-      }, 3000);
+      }, 2000);
     }
   };
 
