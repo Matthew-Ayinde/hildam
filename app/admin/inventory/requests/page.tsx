@@ -29,6 +29,7 @@ export default function Table() {
     status: string;
     orderId: string;
     date: string;
+    color: string;
   }
 
   const [data, setData] = useState<Customer[]>([]);
@@ -74,6 +75,7 @@ export default function Table() {
           const filteredData: Customer[] = result.data.map((item: any) => ({
             id: item.id,
             itemName: item.items_name,
+            color: item.color,
             requestedQty: Number(item.requested_quantities),
             headOfTailoring: item.requested_by_name,
             status: item.status,
@@ -245,6 +247,7 @@ export default function Table() {
                 "Request ID",
                 "Item Name",
                 "Requested Qty",
+                "Colour",
                 "Head of Tailoring",
                 "Status",
                 "Date",
@@ -292,6 +295,8 @@ export default function Table() {
                   <td className="px-4 py-2 text-sm border-b">
                     {row.requestedQty}
                   </td>
+                  <td className="px-4 py-2 text-sm border-b">{row.color}</td>
+                  {/* Added color column */}
                   <td className="px-4 py-2 text-sm border-b">
                     {row.headOfTailoring}
                   </td>
