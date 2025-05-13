@@ -3,11 +3,11 @@
 import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { HiEye, HiEyeOff } from "react-icons/hi";
+import { HiEye, HiEyeOff, HiMail } from "react-icons/hi";
 import Image from "next/image";
 import Logo from "@/public/logo.png";
 import Spinner from "@/components/WhiteSpinner";
-
+import { TbLockPassword } from "react-icons/tb";
 
 export default function LoginPage() {
   const { data: session, status } = useSession();
@@ -95,66 +95,102 @@ export default function LoginPage() {
         </div>
       )}
 
-      <form onSubmit={handleLogin} className="bg-white p-6 rounded shadow-md w-full max-w-md">
-        {/* Logo */}
-        <div className="flex flex-row space-x-2 items-center mb-5">
-          <div className="w-7 h-7">
-            <Image src={Logo} width={300} height={300} alt="Logo" className="w-full h-full" />
-          </div>
-          <div className="font-bold text-lg">Hildam Couture</div>
-        </div>
+<form
+  onSubmit={handleLogin}
+  className="bg-white dar:bg-gray-800 p-8 rounded-2xl shadow-xl max-w-md w-full mx-auto space-y-6"
+>
+  {/* Logo */}
+  <div className="flex items-center justify-center space-x-3 mb-4">
+    <div className="w-8 h-8">
+      <Image
+        src={Logo}
+        width={300}
+        height={300}
+        alt="Logo"
+        className="w-full h-full"
+      />
+    </div>
+    <span className="text-2xl font-extrabold text-gray-900 dar:text-gray-100">
+      Hildam Couture
+    </span>
+  </div>
 
-        {/* Title */}
-        <div className="text-3xl font-bold mb-2">Sign In</div>
-        <div className="text-gray-700 mb-8">Please enter your email and password</div>
+  {/* Heading */}
+  <div className="text-center space-y-1">
+    <h2 className="text-3xl font-bold text-gray-900 dar:text-gray-100">
+      Sign In
+    </h2>
+    <p className="text-sm text-gray-500 dar:text-gray-400">
+      Enter your credentials to access your account
+    </p>
+  </div>
 
-        {/* Email Input */}
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700 mb-2">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="Please enter your email"
-            className="w-full border border-gray-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-        </div>
+  {/* Email Input */}
+  <div className="relative">
+    <label htmlFor="email" className="sr-only">
+      Email
+    </label>
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <HiMail className="text-gray-400 dar:text-gray-500" size={20} />
+    </div>
+    <input
+      id="email"
+      type="email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      required
+      placeholder="Email address"
+      className="w-full pl-10 pr-4 py-3 bg-gray-100 dar:bg-gray-700 rounded-lg border border-transparent focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+    />
+  </div>
 
-        {/* Password Input */}
-        <div className="mb-4 relative">
-          <label htmlFor="password" className="block text-gray-700 mb-2">Password</label>
-          <input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="Please enter your password"
-            className="w-full border border-gray-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-11 text-gray-500"
-          >
-            {showPassword ? <HiEyeOff size={20} /> : <HiEye size={20} />}
-          </button>
-        </div>
+  {/* Password Input */}
+  <div className="relative">
+    <label htmlFor="password" className="sr-only">
+      Password
+    </label>
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <TbLockPassword className="text-gray-400 dar:text-gray-500" size={20} />
+    </div>
+    <input
+      id="password"
+      type={showPassword ? "text" : "password"}
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      required
+      placeholder="Password"
+      className="w-full pl-10 pr-12 py-3 bg-gray-100 dar:bg-gray-700 rounded-lg border border-transparent focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+    />
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dar:text-gray-400"
+    >
+      {showPassword ? <HiEyeOff size={20} /> : <HiEye size={20} />}
+    </button>
+  </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full bg-orange-500 text-white font-bold py-3 rounded ${loading ? "opacity-50 cursor-not-allowed" : "hover:bg-orange-600"} transition-all duration-300`}
-        >
-          {loading ? <div className="flex space-x-2 justify-center items-center">
-            <span className="me-2">Logging in...</span>
-            <Spinner />
-          </div> : "Login"}
-        </button>
-      </form>
+  {/* Submit */}
+  <button
+    type="submit"
+    disabled={loading}
+    className={`w-full flex justify-center items-center py-3 font-semibold rounded-lg shadow-md
+      ${
+        loading
+          ? "bg-orange-300 text-white cursor-not-allowed opacity-60"
+          : "bg-orange-500 text-white hover:bg-orange-600 focus:ring-2 focus:ring-orange-400 transition"
+      }`}
+  >
+    {loading ? (
+      <>
+        <Spinner  /> Logging in...
+      </>
+    ) : (
+      "Login"
+    )}
+  </button>
+</form>
+
 
       {/* Animations */}
       <style jsx>{`
