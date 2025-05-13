@@ -460,7 +460,7 @@ type FormDataType = {
   shoulder_to_underbust: string;
   skirt_length: string;
   sleeve_length: string;
-  style_reference_images: File | null;
+  style_reference_images: File[];
   waist: string;
 };
 
@@ -491,13 +491,15 @@ const initialFormData: FormDataType = {
   shoulder_to_underbust: "",
   skirt_length: "",
   sleeve_length: "",
-  style_reference_images: null,
+  style_reference_images: [],
   waist: ""
 };
 
 
 const Form = () => {
-  const [formData, setFormData] = useState<FormDataType>(initialFormData);
+  const [formData, setFormData] = useState<FormDataType & { style_reference_images: File[] }>(
+    { ...initialFormData, style_reference_images: [] as File[] }
+  );
   const [showSuggestions, setShowSuggestions] = useState(false);
     const [filteredCustomers, setFilteredCustomers] = useState<typeof dummyCustomers>([]);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -516,6 +518,8 @@ const [basicCustomers, setBasicCustomers] = useState<typeof dummyCustomers>([]);
   const [popupMessage, setPopupMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null); // State for image preview
+
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -594,6 +598,18 @@ const [basicCustomers, setBasicCustomers] = useState<typeof dummyCustomers>([]);
     >
   ) => {
     const { name, value, type } = e.target;
+
+    if (name === "style_reference_images" && e.target instanceof HTMLInputElement) {
+      const files = Array.from(e.target.files || []);
+      // merge and cap at 5
+      const newFiles = [...formData.style_reference_images, ...files].slice(0, 5);
+      setFormData(f => ({ ...f, style_reference_images: newFiles }));
+      // generate previews
+      const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+      setImagePreviews(newPreviews);
+      return;
+    }
+      
   
     // 1. Handle file inputs (and preview)
     if (type === "file" && e.target instanceof HTMLInputElement) {
@@ -627,6 +643,19 @@ const [basicCustomers, setBasicCustomers] = useState<typeof dummyCustomers>([]);
       }
       return;
     }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(f => {
+      const imgs = [...f.style_reference_images];
+      imgs.splice(index, 1);
+      return { ...f, style_reference_images: imgs };
+    });
+    setImagePreviews(prev => {
+      const p = [...prev];
+      p.splice(index, 1);
+      return p;
+    });
   };
   
 
@@ -679,54 +708,64 @@ const [basicCustomers, setBasicCustomers] = useState<typeof dummyCustomers>([]);
     e.preventDefault();
     setIsSubmitting(true);
     setResponseMessage(null);
-
+  
     try {
       const session = await getSession();
       const token = session?.user?.token;
       if (!token) throw new Error("Authentication required. Please log in.");
-
+  
       // Build FormData dynamically
       const payload = new FormData();
+  
+      // Append all scalar fields
       Object.entries(formData).forEach(([key, value]) => {
-        if (value !== "" && value !== null) {
-          // Handle file input separately
-          if (key === "style_reference_images" && value instanceof File) {
-            payload.append(key, value);
-          } else if (typeof value === "string") {
-            payload.append(key, value);
-          }
+        // skip the images array for now
+        if (key === "style_reference_images") return;
+  
+        if (value !== "" && value != null) {
+          payload.append(key, value as string);
         }
       });
-
+  
+      // Append each image file under the same key
+      formData.style_reference_images.forEach((file) => {
+        payload.append("style_reference_images", file);
+      });
+  
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/createorder`,
         {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            // Note: do NOT set Content-Type; the browser will set
+          },
           body: payload,
         }
       );
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to create order.");
       }
-
+  
       setResponseMessage("Order created successfully!");
-      // setFormData(initialFormData);
-      setImagePreview(null);
-
-      // Redirect after a short delay
+      // reset form & previews
+      setFormData({ ...initialFormData, style_reference_images: [] });
+      setImagePreviews([]);
+  
+      // optionally redirect
       // setTimeout(() => router.push("/admin/orders"), 1000);
     } catch (error: any) {
       console.error(error);
       setResponseMessage(error.message || "An unexpected error occurred.");
     } finally {
       setIsSubmitting(false);
-      // Hide response message after 5 seconds
+      // clear messages
       setTimeout(() => setResponseMessage(null), 5000);
     }
   };
+  
 
   return (
     <motion.div
@@ -948,30 +987,40 @@ const [basicCustomers, setBasicCustomers] = useState<typeof dummyCustomers>([]);
           </div>
          
           {/* File Input */}
-          <div className="lg:col-span-2">
-            <label
-              htmlFor="style_reference_images"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Style Reference Images
-            </label>
-            <motion.input
-              whileFocus={{ scale: 1.02 }}
-              whileHover={{ scale: 1.01 }}
-              id="style_reference_images"
-              name="style_reference_images"
-              type="file"
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
-            />
-            {imagePreview && (
-              <img
-                src={imagePreview}
-                alt="Selected"
-                className="mt-2 w-24 h-24 object-cover rounded-lg"
-              />
-            )}
-          </div>
+          {/* 4. Updated JSX for the file input + previews */}
+<div className="lg:col-span-2">
+  <label htmlFor="style_reference_images" className="block text-sm font-medium text-gray-700 mb-1">
+    Style Reference Images (max 5)
+  </label>
+  <motion.input
+    whileFocus={{ scale: 1.02 }}
+    whileHover={{ scale: 1.01 }}
+    id="style_reference_images"
+    name="style_reference_images"
+    type="file"
+    multiple
+    accept="image/*"
+    onChange={handleChange}
+    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
+  />
+  <div className="mt-2 flex space-x-4 overflow-x-auto">
+    {imagePreviews.map((src, idx) => (
+      <div key={idx} className="relative w-24 h-24 flex-shrink-0">
+        <img src={src} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover rounded-lg" />
+        <button
+          type="button"
+          onClick={() => removeImage(idx)}
+          className="absolute top-0 right-0 bg-white rounded-full p-1 shadow hover:bg-gray-100"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    ))}
+  </div>
+</div>
+
 
         {/* Measurement Fields */}
         <div>
