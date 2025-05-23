@@ -24,6 +24,8 @@ import { FiPrinter } from "react-icons/fi";
 import OrderPageError from "@/components/admin/OrderPageError";
 
 export default function ShowCustomer() {
+
+const [activeStyleImage, setActiveStyleImage] = useState<string | null>(null);
   const targetRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
   const { id } = useParams();
@@ -36,6 +38,15 @@ export default function ShowCustomer() {
 
   const contentRef = useRef<HTMLDivElement | null>(null);
 const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+const handleOpenStyleModal = (src: string) => {
+  setActiveStyleImage(src);
+  setIsCustomerModalOpen(true);
+};
+const handleCloseStyleModal = () => {
+  setActiveStyleImage(null);
+  setIsCustomerModalOpen(false);
+};
 
 
   const handleOpenCloseModal = () => setIsCloseModalOpen(true);
@@ -616,57 +627,62 @@ const handleDownload = async () => {
 
         {/* Style Reference */}
         {customer.style_reference_images && (
-          <motion.div
-            ref={targetRef}
-            className="w-full mb-8 p-6 bg-gray-50 rounded-2xl shadow-md"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.5 }}
-          >
-            <label className="block text-sm font-bold text-gray-700 mb-2">
-              Style reference images
-            </label>
-            {Array.isArray(customer.style_reference_images) &&
-            customer.style_reference_images.length > 0 ? (
-              <div>
-                <img
-                  src={customer.style_reference_images[0]}
-                  alt="Customer Style Reference"
-                  className="w-24 h-24 object-cover rounded-md border border-gray-300 cursor-pointer transition hover:shadow-lg"
-                  onClick={handleCustomerImageClick}
-                />
-              </div>
-            ) : (
-              <div className="text-gray-500">No image selected</div>
-            )}
-            {isCustomerModalOpen && (
-              <motion.div
-                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-                onClick={handleCustomerCloseModal}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div
-                  className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <img
-                    src={customer.style_reference_images[0]}
-                    alt="Style Reference"
-                    className="w-full h-[80vh] object-contain rounded-lg"
-                    onError={(e) => {
-                      e.currentTarget.src = "";
-                      e.currentTarget.alt = "Image failed to load";
-                    }}
-                  />
-                </div>
-              </motion.div>
-            )}
-          </motion.div>
-        )}
+  <motion.div
+    ref={targetRef}
+    className="w-full mb-8 p-6 bg-gray-50 rounded-2xl shadow-md"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 20 }}
+    transition={{ duration: 0.5 }}
+  >
+    <label className="block text-sm font-bold text-gray-700 mb-2">
+      Style reference images
+    </label>
+
+    {customer.style_reference_images.length > 0 ? (
+      <div className="flex space-x-4 overflow-x-auto">
+        {customer.style_reference_images.map((src, idx) => (
+          <img
+            key={idx}
+            src={src}
+            alt={`Style Reference ${idx + 1}`}
+            className="w-24 h-24 object-cover rounded-md border border-gray-300 cursor-pointer transition hover:shadow-lg"
+            onClick={() => handleOpenStyleModal(src)}
+          />
+        ))}
+      </div>
+    ) : (
+      <div className="text-gray-500">No images available</div>
+    )}
+
+    {/* Modal */}
+    {isCustomerModalOpen && activeStyleImage && (
+      <motion.div
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+        onClick={handleCloseStyleModal}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div
+          className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <img
+            src={activeStyleImage}
+            alt="Style Reference Full"
+            className="w-full h-[80vh] object-contain rounded-lg"
+            onError={(e) => {
+              e.currentTarget.src = "";
+              e.currentTarget.alt = "Image failed to load";
+            }}
+          />
+        </div>
+      </motion.div>
+    )}
+  </motion.div>
+)}
 
         {/* Measurements */}
         <div className="w-full">

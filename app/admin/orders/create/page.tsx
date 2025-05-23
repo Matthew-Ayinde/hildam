@@ -681,7 +681,7 @@ const [basicCustomers, setBasicCustomers] = useState<typeof dummyCustomers>([]);
         // now all your measurement fields:
         blouse_length:          data.blouse_length,
         bust:                   data.bust,
-        bust_point:             data.bustpoint,
+        bustpoint:             data.bustpoint,
         chest:                  data.chest,
         dress_length:           data.dress_length,
         half_length:            data.half_length,
@@ -720,7 +720,7 @@ const [basicCustomers, setBasicCustomers] = useState<typeof dummyCustomers>([]);
       // Append all scalar fields
       Object.entries(formData).forEach(([key, value]) => {
         // skip the images array for now
-        if (key === "style_reference_images") return;
+        if (key === "style_reference_images[]") return;
   
         if (value !== "" && value != null) {
           payload.append(key, value as string);
@@ -729,7 +729,7 @@ const [basicCustomers, setBasicCustomers] = useState<typeof dummyCustomers>([]);
   
       // Append each image file under the same key
       formData.style_reference_images.forEach((file) => {
-        payload.append("style_reference_images", file);
+        payload.append("style_reference_images[]", file);
       });
   
       const response = await fetch(
@@ -989,7 +989,7 @@ const [basicCustomers, setBasicCustomers] = useState<typeof dummyCustomers>([]);
           {/* File Input */}
           {/* 4. Updated JSX for the file input + previews */}
 <div className="lg:col-span-2">
-  <label htmlFor="style_reference_images" className="block text-sm font-medium text-gray-700 mb-1">
+  <label htmlFor="style_reference_images[]" className="block text-sm font-medium text-gray-700 mb-1">
     Style Reference Images (max 5)
   </label>
   <motion.input
