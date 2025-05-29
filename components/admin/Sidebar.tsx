@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { FaUsers, FaShoppingCart, FaBoxes, FaUser  } from "react-icons/fa";
+import { FaUsers, FaShoppingCart, FaBoxes, FaUser } from "react-icons/fa";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import Image from "next/image";
 import { MdDashboard } from "react-icons/md";
@@ -74,16 +74,19 @@ const sidebarItems = [
     links: [
       { name: "List", href: "/admin/inventory" },
       { name: "Create", href: "/admin/inventory/create" },
-      { name: "View Requests", href: "/admin/inventory/requests" }
+      { name: "View Requests", href: "/admin/inventory/requests" },
     ],
   },
   {
     id: 6,
-    text: "Expense",
+    text: "Expenses",
     icon: <MdOutlineInventory2 />,
     prefix: "/admin/expense",
     links: [
-      { name: "List", href: "/admin/expenses" },    ],
+      { name: "List", href: "/admin/expenses" },
+      { name: "Daily Expenses", href: "/admin/expenses/daily-expenses" },
+            { name: "Job Expenses", href: "/admin/expenses/job-expenses" },
+    ],
   },
   {
     id: 7,
@@ -98,7 +101,7 @@ const sidebarItems = [
   {
     id: 8,
     text: "Users",
-    icon: <FaUser  />,
+    icon: <FaUser />,
     prefix: "/admin/users",
     links: [
       { name: "List", href: "/admin/users" },
@@ -108,7 +111,7 @@ const sidebarItems = [
 ];
 
 const Sidebar = () => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
   const router = useRouter();
   const pathname = usePathname();
@@ -145,15 +148,12 @@ const Sidebar = () => {
       const token = sessionStorage.getItem("access_token");
       if (!token) throw new Error("No access token found");
 
-      const response = await fetch(
-        `${baseUrl}/allnotifications`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${baseUrl}/allnotifications`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to fetch notifications");
@@ -183,17 +183,14 @@ const Sidebar = () => {
       const token = sessionStorage.getItem("access_token");
       if (!token) throw new Error("No access token found");
 
-      await fetch(
-        `${baseUrl}/readnotification/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ message, link }),
-        }
-      );
+      await fetch(`${baseUrl}/readnotification/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message, link }),
+      });
 
       setNotifications((prev) =>
         prev.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif))
@@ -221,16 +218,13 @@ const Sidebar = () => {
       const token = sessionStorage.getItem("access_token");
       if (!token) throw new Error("No access token found");
 
-      await fetch(
-        `${baseUrl}/readallnotification`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await fetch(`${baseUrl}/readallnotification`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       // Immediately clear notifications from the state
       setNotifications([]);
@@ -342,7 +336,8 @@ const Sidebar = () => {
                     ))}
 
                   {/* See More Button */}
-                  {notifications.filter((notif) => notif.read === "0").length > 4 && (
+                  {notifications.filter((notif) => notif.read === "0").length >
+                    4 && (
                     <div className="flex justify-center p-3">
                       <Link
                         href="/notifications"

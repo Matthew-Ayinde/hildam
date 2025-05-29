@@ -1,10 +1,23 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { MdOutlineHideSource, MdOutlineRemoveRedEye } from "react-icons/md";
+import type React from "react";
+import { useEffect, useState } from "react";
+import {
+  MdPerson,
+  MdEmail,
+  MdPhone,
+  MdLocationOn,
+  MdDescription,
+  MdCalendarToday,
+  MdWc,
+  MdStraighten,
+  MdCheckCircle,
+  MdError,
+  MdAdd,
+} from "react-icons/md";
 import { AnimatePresence, motion } from "framer-motion";
-import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+import { getSession } from "next-auth/react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
@@ -72,6 +85,7 @@ const Form = () => {
   const [loading, setLoading] = useState(false);
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -82,7 +96,6 @@ const Form = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  // BELOW your generic handleChange…
   const handlePhoneChange = (value: string) => {
     setFormData({ ...formData, phone_number: value });
   };
@@ -97,8 +110,8 @@ const Form = () => {
     setResponseMessage(null);
 
     try {
-      const session = await getSession(); // Get session from NextAuth
-      const token = session?.user?.token; // Access token from session
+      const session = await getSession();
+      const token = session?.user?.token;
       if (!token) {
         throw new Error("Access token not found.");
       }
@@ -111,35 +124,7 @@ const Form = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            name: formData.name,
-            gender: formData.gender,
-            age: formData.age,
-            phone_number: formData.phone_number,
-            password: formData.password,
-            email: formData.email,
-            address: formData.address,
-            customer_description: formData.customer_description,
-            bust: formData.bust,
-            waist: formData.waist,
-            hip: formData.hip,
-            shoulder: formData.shoulder,
-            bustpoint: formData.bustpoint,
-            shoulder_to_underbust: formData.shoulder_to_underbust,
-            round_under_bust: formData.round_under_bust,
-            sleeve_length: formData.sleeve_length,
-            half_length: formData.half_length,
-            blouse_length: formData.blouse_length,
-            round_sleeve: formData.round_sleeve,
-            dress_length: formData.dress_length,
-            chest: formData.chest,
-            round_shoulder: formData.round_shoulder,
-            skirt_length: formData.skirt_length,
-            trousers_length: formData.trousers_length,
-            round_thigh: formData.round_thigh,
-            round_knee: formData.round_knee,
-            round_feet: formData.round_feet,
-          }),
+          body: JSON.stringify(formData),
         }
       );
 
@@ -150,14 +135,12 @@ const Form = () => {
       const result = await response.json();
       setResponseMessage("Customer created successfully!");
 
-      // Automatically clear the response message after 5 seconds
       setTimeout(() => {
         setResponseMessage(null);
       }, 5000);
     } catch (error: any) {
       setResponseMessage(`Error: ${error.message}`);
 
-      // Automatically clear the error message after 5 seconds
       setTimeout(() => {
         setResponseMessage(null);
       }, 5000);
@@ -167,91 +150,10 @@ const Form = () => {
 
     setTimeout(() => {
       router.push("/admin/customers");
-    }, 2000); // Redirect after 2 seconds
+    }, 2000);
   };
 
-  // Define measurements
   const measurements = [
-    {
-      label: "Blouse Length",
-      id: "blouseLength",
-      name: "blouse_length",
-      placeholder: "Blouse Length",
-      delay: 1.7,
-      value: formData.blouse_length,
-    },
-    {
-      label: "Bust",
-      id: "bust",
-      name: "bust",
-      placeholder: "Bust",
-      delay: 0.8,
-      value: formData.bust,
-    },
-    {
-      label: "Bust Point",
-      id: "bustpoint",
-      name: "bustpoint",
-      placeholder: "Bust Point",
-      delay: 1.2,
-      value: formData.bustpoint,
-    },
-    {
-      label: "Chest",
-      id: "chest",
-      name: "chest",
-      placeholder: "Chest",
-      delay: 2.0,
-      value: formData.chest,
-    },
-    {
-      label: "Dress Length(Long, 3/4, Short)",
-      id: "dressLength",
-      name: "dress_length",
-      placeholder: "Dress Length",
-      delay: 1.9,
-      value: formData.dress_length,
-    },
-    {
-      label: "Half Length",
-      id: "halfLength",
-      name: "half_length",
-      placeholder: "Half Length",
-      delay: 1.6,
-      value: formData.half_length,
-    },
-    {
-      label: "Hip",
-      id: "hip",
-      name: "hip",
-      placeholder: "Hip",
-      delay: 1.0,
-      value: formData.hip,
-    },
-    {
-      label: "Round Shoulder",
-      id: "roundShoulder",
-      name: "round_shoulder",
-      placeholder: "Round Shoulder",
-      delay: 2.1,
-      value: formData.round_shoulder,
-    },
-    {
-      label: "Round Sleeve(Arm, Below Elbow, Wrist)",
-      id: "roundSleeve",
-      name: "round_sleeve",
-      placeholder: "Round Sleeve",
-      delay: 1.8,
-      value: formData.round_sleeve,
-    },
-    {
-      label: "Round under Bust",
-      id: "round_under_bust",
-      name: "round_under_bust",
-      placeholder: "Round under Bust",
-      delay: 1.4,
-      value: formData.round_under_bust,
-    },
     {
       label: "Shoulder",
       id: "shoulder",
@@ -261,295 +163,455 @@ const Form = () => {
       value: formData.shoulder,
     },
     {
+      label: "Bust",
+      id: "bust",
+      name: "bust",
+      placeholder: "Bust",
+      delay: 0.2,
+      value: formData.bust,
+    },
+    {
+      label: "Bust Point",
+      id: "bustpoint",
+      name: "bustpoint",
+      placeholder: "Bust Point",
+      delay: 0.3,
+      value: formData.bustpoint,
+    },
+    {
       label: "Shoulder to under Bust",
       id: "shoulder_to_underbust",
       name: "shoulder_to_underbust",
       placeholder: "Shoulder to under Bust",
-      delay: 1.3,
+      delay: 1.2,
       value: formData.shoulder_to_underbust,
     },
+
     {
-      label: "Skirt Length(Long, 3/4, Short)",
-      id: "skirtLength",
-      name: "skirt_length",
-      placeholder: "Skirt Length",
-      delay: 2.2,
-      value: formData.skirt_length,
-    },
-    {
-      label: "Sleeve Length(Long, Quarter, Short)",
-      id: "sleeve_length",
-      name: "sleeve_length",
-      placeholder: "Sleeve Length",
-      delay: 1.5,
-      value: formData.sleeve_length,
+      label: "Round under Bust",
+      id: "round_under_bust",
+      name: "round_under_bust",
+      placeholder: "Round under Bust",
+      delay: 1.0,
+      value: formData.round_under_bust,
     },
     {
       label: "Waist",
       id: "waist",
       name: "waist",
       placeholder: "Waist",
-      delay: 0.9,
+      delay: 1.5,
       value: formData.waist,
+    },
+    {
+      label: "Half Length",
+      id: "halfLength",
+      name: "half_length",
+      placeholder: "Half Length",
+      delay: 0.6,
+      value: formData.half_length,
+    },
+    {
+      label: "Blouse Length",
+      id: "blouseLength",
+      name: "blouse_length",
+      placeholder: "Blouse Length",
+      delay: 0.1,
+      value: formData.blouse_length,
+    },
+    {
+      label: "Sleeve Length (Long, Quarter, Short)",
+      id: "sleeve_length",
+      name: "sleeve_length",
+      placeholder: "Sleeve Length",
+      delay: 1.4,
+      value: formData.sleeve_length,
+    },
+    {
+      label: "Round Sleeve (Arm, Below Elbow, Wrist)",
+      id: "roundSleeve",
+      name: "round_sleeve",
+      placeholder: "Round Sleeve",
+      delay: 0.9,
+      value: formData.round_sleeve,
+    },
+    {
+      label: "Dress Length (Long, 3/4, Short)",
+      id: "dressLength",
+      name: "dress_length",
+      placeholder: "Dress Length",
+      delay: 0.5,
+      value: formData.dress_length,
+    },
+
+    {
+      label: "Hip",
+      id: "hip",
+      name: "hip",
+      placeholder: "Hip",
+      delay: 0.7,
+      value: formData.hip,
+    },
+    {
+      label: "Chest",
+      id: "chest",
+      name: "chest",
+      placeholder: "Chest",
+      delay: 0.4,
+      value: formData.chest,
+    },
+
+    {
+      label: "Round Shoulder",
+      id: "roundShoulder",
+      name: "round_shoulder",
+      placeholder: "Round Shoulder",
+      delay: 0.8,
+      value: formData.round_shoulder,
+    },
+
+    {
+      label: "Skirt Length (Long, 3/4, Short)",
+      id: "skirtLength",
+      name: "skirt_length",
+      placeholder: "Skirt Length",
+      delay: 1.3,
+      value: formData.skirt_length,
     },
   ];
 
   useEffect(() => {
     if (responseMessage) {
       const timer = setTimeout(() => {
-        setResponseMessage(""); // or however you clear it
-      }, 3000); // 3 seconds
+        setResponseMessage("");
+      }, 3000);
 
-      return () => clearTimeout(timer); // Cleanup if component unmounts early
+      return () => clearTimeout(timer);
     }
   }, [responseMessage]);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -50 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="bg-gray-100 flex justify-center"
-    >
-      <motion.form
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        onSubmit={handleSubmit}
-        className="w-full bg-white rounded-lg shadow-md p-6"
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-8 px-4 rounded-3xl">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="max-w-6xl mx-auto"
       >
-        <div className="font-bold text-gray-700 text-xl my-3">
-          Add Customer Information
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="text-center mb-8"
+        >
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#ff6c2f] to-orange-600 rounded-2xl mb-4 shadow-lg">
+            <MdAdd className="text-white text-2xl" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Add New Customer
+          </h1>
+          <p className="text-gray-600">
+            Create a comprehensive customer profile with measurements
+          </p>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
-          <div className="w-full">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter your name"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            />
-          </div>
-          <div className="w-full">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            />
-          </div>
-          <div className="w-full">
-            <label
-              htmlFor="age"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Age
-            </label>
-            <input
-              type="number"
-              id="age"
-              name="age"
-              value={formData.age}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (/^\d*$/.test(value) && Number(value) <= 100) {
-                  handleChange(e);
-                }
-              }}
-              placeholder="Enter your age"
-              min="0"
-              max="100"
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            />
-          </div>
-         
+        <motion.form
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          onSubmit={handleSubmit}
+          className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100"
+        >
+          {/* Personal Information Section */}
+          <motion.div variants={itemVariants} className="mb-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-r from-[#ff6c2f] to-orange-600 rounded-xl flex items-center justify-center">
+                <MdPerson className="text-white text-xl" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800">
+                Personal Information
+              </h2>
+            </div>
 
-          <div className="w-full">
-            <label
-              htmlFor="gender"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Gender
-            </label>
-            <select
-              id="gender"
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border text-gray-700 border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-            >
-              <option value="">Select your gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          
-          <div className="w-full">
-            <label
-              htmlFor="phone_number"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Phone Number
-            </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <motion.div variants={itemVariants} className="space-y-2">
+                <label
+                  htmlFor="name"
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                >
+                  <MdPerson className="text-[#ff6c2f]" />
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter full name"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white"
+                  required
+                />
+              </motion.div>
 
-            <PhoneInput
-              country="ng"
-              enableSearch
-              disableCountryCode={false}
-              countryCodeEditable={false}
-              value={formData.phone_number}
-              onChange={handlePhoneChange}
-              /* container wraps the whole widget */
-              containerClass="w-full mt-1"
-              containerStyle={{ width: "100%" }}
-              /* exactly your form-input styles, with extra left-padding */
-              inputClass="
-      block w-full rounded-md border border-gray-300 shadow-sm
-      focus:border-[#ff6c2f] focus:ring-[#ff6c2f]
-      sm:text-sm p-2 pl-20
-    "
-              /* flag + code button styled and positioned flush left */
-              buttonClass="
-      absolute left-0 top-0 h-full bg-white
-      border-r border-gray-300 rounded-l-md
-      pl-3 pr-2
-    "
-              /* dropdown inherits full width and obvious styling */
-              dropdownClass="
-      w-full bg-white border border-gray-300
-      rounded-md shadow-md
-    "
-            />
-          </div>
+              <motion.div variants={itemVariants} className="space-y-2">
+                <label
+                  htmlFor="email"
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                >
+                  <MdEmail className="text-[#ff6c2f]" />
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter email address"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white"
+                  required
+                />
+              </motion.div>
 
-        </div>
+              <motion.div variants={itemVariants} className="space-y-2">
+                <label
+                  htmlFor="age"
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                >
+                  <MdCalendarToday className="text-[#ff6c2f]" />
+                  Age
+                </label>
+                <input
+                  type="number"
+                  id="age"
+                  name="age"
+                  value={formData.age}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*$/.test(value) && Number(value) <= 100) {
+                      handleChange(e);
+                    }
+                  }}
+                  placeholder="Enter age"
+                  min="0"
+                  max="100"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white"
+                  required
+                />
+              </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-5">
-          <div className="w-full">
-            <label
-              htmlFor="address"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Address
-            </label>
-            <textarea
-              name="address"
-              id="address"
-              value={formData.address}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-              placeholder="Please enter your address"
-            ></textarea>
-          </div>
-          <div className="w-full">
-            <label
-              htmlFor="address"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Customer Description
-            </label>
-            <textarea
-              name="customer_description"
-              id="customer_description"
-              value={formData.customer_description}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
-              required
-              placeholder="Please enter customer description"
-            ></textarea>
-          </div>
-        </div>
+              <motion.div variants={itemVariants} className="space-y-2">
+                <label
+                  htmlFor="gender"
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                >
+                  <MdWc className="text-[#ff6c2f]" />
+                  Gender
+                </label>
+                <select
+                  id="gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-700"
+                  required
+                >
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </motion.div>
 
-        <div className="w-full">
-          <div className="block text-xl font-bold text-gray-700 mt-10 mb-1">
-            Measurements
-          </div>
-          <div className="mb-4">
-            <div className="flex flex-wrap -mx-2">
+              <motion.div
+                variants={itemVariants}
+                className="space-y-2 md:col-span-2 lg:col-span-1"
+              >
+                <label
+                  htmlFor="address"
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                >
+                  <MdLocationOn className="text-[#ff6c2f]" />
+                  Address
+                </label>
+                <textarea
+                  name="address"
+                  id="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white resize-none"
+                  rows={3}
+                  required
+                  placeholder="Enter full address"
+                />
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="space-y-2">
+                <label
+                  htmlFor="phone_number"
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                >
+                  <MdPhone className="text-[#ff6c2f]" />
+                  Phone Number
+                </label>
+                <PhoneInput
+                  country="ng"
+                  enableSearch
+                  disableCountryCode={false}
+                  countryCodeEditable={false}
+                  value={formData.phone_number}
+                  onChange={handlePhoneChange}
+                  containerClass="w-full"
+                  containerStyle={{ width: "100%" }}
+                  inputClass="w-full px-4 py-3 pl-20 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white"
+                  buttonClass="absolute left-0 top-0 h-full bg-gray-50 border-r border-gray-200 rounded-l-xl pl-3 pr-2"
+                  dropdownClass="w-full bg-white border border-gray-200 rounded-xl shadow-lg"
+                />
+              </motion.div>
+            </div>
+
+            <motion.div variants={itemVariants} className="mt-6">
+              <label
+                htmlFor="customer_description"
+                className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2"
+              >
+                <MdDescription className="text-[#ff6c2f]" />
+                Customer Description
+              </label>
+              <textarea
+                name="customer_description"
+                id="customer_description"
+                value={formData.customer_description}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white resize-none"
+                rows={3}
+                required
+                placeholder="Enter customer description and preferences"
+              />
+            </motion.div>
+          </motion.div>
+
+          {/* Measurements Section */}
+          <motion.div variants={itemVariants} className="mb-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-r from-[#ff6c2f] to-orange-600 rounded-xl flex items-center justify-center">
+                <MdStraighten className="text-white text-xl" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800">
+                Body Measurements
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {measurements.map((measurement, index) => (
                 <motion.div
                   key={measurement.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: measurement.delay }}
-                  className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4"
+                  variants={itemVariants}
+                  className="space-y-2"
                 >
                   <label
                     htmlFor={measurement.id}
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-semibold text-gray-700"
                   >
                     {measurement.label}
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     id={measurement.id}
                     name={measurement.name}
                     placeholder={measurement.placeholder}
                     onChange={handleChange}
                     value={formData[measurement.name as keyof typeof formData]}
-                    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-[#ff6c2f] focus:ring-[#ff6c2f] sm:text-sm p-2"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white"
                   />
                 </motion.div>
               ))}
             </div>
-          </div>
-        </div>
+          </motion.div>
 
-        {/* Submit Button */}
-        <div className="mt-6 text-right">
-          <button
-            type="submit"
-            className={`px-4 bg-[#ff6c2f] text-white rounded-md py-2 text-sm font-medium ${
-              loading ? "cursor-not-allowed opacity-50" : "hover:bg-orange-600"
-            } focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2`}
-            disabled={loading}
-          >
-            {loading ? "Loading..." : "Create Customer"}
-          </button>
-        </div>
+          {/* Submit Button */}
+          <motion.div variants={itemVariants} className="flex justify-end">
+            <motion.button
+              type="submit"
+              disabled={loading}
+              whileHover={{ scale: loading ? 1 : 1.02 }}
+              whileTap={{ scale: loading ? 1 : 0.98 }}
+              className={`px-8 py-4 bg-gradient-to-r from-[#ff6c2f] to-orange-600 text-white rounded-2xl font-semibold text-lg shadow-lg transition-all duration-200 ${
+                loading
+                  ? "cursor-not-allowed opacity-50"
+                  : "hover:shadow-xl hover:from-orange-600 hover:to-[#ff6c2f]"
+              } focus:outline-none focus:ring-4 focus:ring-orange-200`}
+            >
+              <div className="flex items-center gap-3">
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Creating Customer...
+                  </>
+                ) : (
+                  <>
+                    <MdAdd className="text-xl" />
+                    Create Customer
+                  </>
+                )}
+              </div>
+            </motion.button>
+          </motion.div>
+        </motion.form>
 
-        {/* Response Message */}
         {/* Response Message */}
         <AnimatePresence>
           {responseMessage && (
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-              className="fixed top-6 left-1/2 -translate-x-1/2 text-sm bg-green-500 text-white px-4 py-2 rounded-lg shadow-md z-50"
+              initial={{ opacity: 0, y: -50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -50, scale: 0.9 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="fixed top-8 left-1/2 -translate-x-1/2 z-50"
             >
-              {responseMessage}
+              <div
+                className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border ${
+                  responseMessage.includes("Error")
+                    ? "bg-red-500 border-red-600 text-white"
+                    : "bg-green-500 border-green-600 text-white"
+                }`}
+              >
+                {responseMessage.includes("Error") ? (
+                  <MdError className="text-xl" />
+                ) : (
+                  <MdCheckCircle className="text-xl" />
+                )}
+                <span className="font-semibold">{responseMessage}</span>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.form>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 };
 

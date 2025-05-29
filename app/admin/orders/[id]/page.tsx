@@ -1,241 +1,204 @@
-"use client";
+"use client"
 
-import Spinner from "@/components/Spinner";
-import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
-// at the top
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
+import Spinner from "@/components/Spinner"
+import Link from "next/link"
+import { useRouter, useParams } from "next/navigation"
+import { useEffect, useState, useRef } from "react"
+import { jsPDF } from "jspdf"
+import html2canvas from "html2canvas"
 
-import {
-  IoIosArrowBack,
-  IoIosCheckmark,
-  IoIosCheckmarkCircleOutline,
-  IoIosClose,
-  IoIosWarning,
-} from "react-icons/io";
-import { motion, AnimatePresence } from "framer-motion";
-import { getSession } from "next-auth/react";
-import SkeletonLoader from "@/components/SkeletonLoader";
-import Image from "next/image";
-import { AiOutlineDownload } from "react-icons/ai";
-import { FiPrinter } from "react-icons/fi";
-import OrderPageError from "@/components/admin/OrderPageError";
+import { IoIosArrowBack, IoIosCheckmark, IoIosCheckmarkCircleOutline, IoIosClose, IoIosWarning } from "react-icons/io"
+import { motion, AnimatePresence } from "framer-motion"
+import { getSession } from "next-auth/react"
+import SkeletonLoader from "@/components/SkeletonLoader"
+import Image from "next/image"
+import { AiOutlineDownload } from "react-icons/ai"
+import { FiUser, FiCalendar, FiPackage, FiEdit3 } from "react-icons/fi"
+import { HiOutlineSparkles, HiOutlinePhotograph } from "react-icons/hi"
+import { MdOutlineRule, MdOutlineClose } from "react-icons/md"
+import { BsStars } from "react-icons/bs"
+import OrderPageError from "@/components/admin/OrderPageError"
 
 export default function ShowCustomer() {
+  const [activeStyleImage, setActiveStyleImage] = useState<string | null>(null)
+  const targetRef = useRef<HTMLDivElement | null>(null)
+  const router = useRouter()
+  const { id } = useParams()
+  const [isTailorJobModalOpen, setIsTailorJobModalOpen] = useState(false)
+  const [feedback, setFeedback] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [toast, setToast] = useState(false)
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
 
-const [activeStyleImage, setActiveStyleImage] = useState<string | null>(null);
-  const targetRef = useRef<HTMLDivElement | null>(null);
-  const router = useRouter();
-  const { id } = useParams();
-  const [isTailorJobModalOpen, setIsTailorJobModalOpen] = useState(false);
-  const [feedback, setFeedback] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [toast, setToast] = useState(false);
-  // New State for Close Order confirmation modal
-  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+  const contentRef = useRef<HTMLDivElement | null>(null)
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
 
-  const contentRef = useRef<HTMLDivElement | null>(null);
-const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const handleOpenStyleModal = (src: string) => {
+    setActiveStyleImage(src)
+    setIsCustomerModalOpen(true)
+  }
+  const handleCloseStyleModal = () => {
+    setActiveStyleImage(null)
+    setIsCustomerModalOpen(false)
+  }
 
-const handleOpenStyleModal = (src: string) => {
-  setActiveStyleImage(src);
-  setIsCustomerModalOpen(true);
-};
-const handleCloseStyleModal = () => {
-  setActiveStyleImage(null);
-  setIsCustomerModalOpen(false);
-};
-
-
-  const handleOpenCloseModal = () => setIsCloseModalOpen(true);
-  const handleCancelClose = () => setIsCloseModalOpen(false);
+  const handleOpenCloseModal = () => setIsCloseModalOpen(true)
+  const handleCancelClose = () => setIsCloseModalOpen(false)
   const handleConfirmClose = async () => {
     try {
-      const session = await getSession();
-      const token = session?.user?.token;
-      if (!token) throw new Error("No access token");
+      const session = await getSession()
+      const token = session?.user?.token
+      if (!token) throw new Error("No access token")
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/closeorder/${id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!response.ok) throw new Error("Failed to close order");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/closeorder/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) throw new Error("Failed to close order")
 
-      // Refresh or navigate after close
-      router.push("/admin/orders");
+      router.push("/admin/orders")
     } catch (err) {
-      console.error(err);
-      // Optionally show toast or error state
+      console.error(err)
     } finally {
-      setIsCloseModalOpen(false);
+      setIsCloseModalOpen(false)
     }
-  };
+  }
 
   interface Customer {
-    [x: string]: string | number | readonly string[] | undefined;
-    gender: string;
-    phone_number: string;
-    created_at: string;
-    customer_email: string;
-    address: string;
-    bust: number;
-    waist: number;
-    hip: number;
-    shoulder: number;
-    shoulder_to_underbust: number;
-    bustpoint: number;
-    round_under_bust: number;
-    half_length: number;
-    blouse_length: number;
-    sleeve_length: number;
-    round_sleeve: number;
-    dress_length: number;
-    chest: number;
-    round_shoulder: number;
-    skirt_length: number;
-    trousers_length: number;
-    round_thigh: number;
-    round_knee: number;
-    round_feet: number;
-    clothing_description: string;
-    clothing_name: string;
-    style_reference_images: string[];
-    tailor_job_image: string;
-    order_id: string;
-    priority: string;
-    order_status: string;
-    customer_description: string;
-    first_fitting_date: string;
-    second_fitting_date: string;
-    customer_name: string;
-    manager_name: string;
-    duration: number;
-    style_approval: string;
+    [x: string]: string | number | readonly string[] | undefined
+    gender: string
+    phone_number: string
+    created_at: string
+    customer_email: string
+    address: string
+    bust: number
+    waist: number
+    hip: number
+    shoulder: number
+    shoulder_to_underbust: number
+    bustpoint: number
+    round_under_bust: number
+    half_length: number
+    blouse_length: number
+    sleeve_length: number
+    round_sleeve: number
+    dress_length: number
+    chest: number
+    round_shoulder: number
+    skirt_length: number
+    trousers_length: number
+    round_thigh: number
+    round_knee: number
+    round_feet: number
+    clothing_description: string
+    clothing_name: string
+    style_reference_images: string[]
+    tailor_job_image: string
+    order_id: string
+    priority: string
+    order_status: string
+    customer_description: string
+    first_fitting_date: string
+    second_fitting_date: string
+    customer_name: string
+    manager_name: string
+    duration: number
+    style_approval: string
   }
 
-  const [customer, setCustomer] = useState<Customer | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
-  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
-  const [rejectFeedback, setRejectFeedback] = useState("");
-  const [approvePrice, setApprovePrice] = useState("");
+  const [customer, setCustomer] = useState<Customer | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false)
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false)
+  const [rejectFeedback, setRejectFeedback] = useState("")
+  const [approvePrice, setApprovePrice] = useState("")
 
   const handleScroll = () => {
-    targetRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  
-const handleDownload = async () => {
-  if (!contentRef.current || !customer) return;
-  setIsGeneratingPDF(true);
-
-  try {
-    // take a snapshot of the content
-    const canvas = await html2canvas(contentRef.current, { useCORS: true });
-    const imgData = canvas.toDataURL("image/png");
-
-    // create PDF and define margins
-    const pdf = new jsPDF("p", "pt", "a4");
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const marginX = 0; // margin in points (adjust as needed)
-    const marginY = 40; // margin in points (adjust as needed)
-
-
-    // calculate dimensions to maintain aspect ratio within margins
-    const availableWidth = pageWidth - marginX * 2;
-    const availableHeight = pageHeight - marginY * 2;
-    const imgWidth = availableWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    // if image height exceeds available height, scale down
-    const finalImgHeight = imgHeight > availableHeight
-      ? availableHeight
-      : imgHeight;
-    const finalImgWidth = imgHeight > availableHeight
-      ? (canvas.width * availableHeight) / canvas.height
-      : imgWidth;
-
-    // center image if smaller than available space
-    const xOffset = marginX + (availableWidth - finalImgWidth) / 2;
-    const yOffset = marginY + (availableHeight - finalImgHeight) / 2;
-
-    // add image to PDF with margins
-    pdf.addImage(
-      imgData,
-      "PNG",
-      xOffset,
-      yOffset,
-      finalImgWidth,
-      finalImgHeight
-    );
-
-    // save the PDF
-    pdf.save(`order-${customer.order_id}.pdf`);
-  } catch (err) {
-    console.error("PDF generation failed:", err);
-  } finally {
-    setIsGeneratingPDF(false);
+    targetRef.current?.scrollIntoView({ behavior: "smooth" })
   }
-};
-  
+
+  const handleDownload = async () => {
+    if (!contentRef.current || !customer) return
+    setIsGeneratingPDF(true)
+
+    try {
+      const canvas = await html2canvas(contentRef.current, { useCORS: true })
+      const imgData = canvas.toDataURL("image/png")
+
+      const pdf = new jsPDF("p", "pt", "a4")
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const pageHeight = pdf.internal.pageSize.getHeight()
+      const marginX = 40  // Increased from 0 to add horizontal margins
+      const marginY = 40
+
+      const availableWidth = pageWidth - marginX * 2
+      const availableHeight = pageHeight - marginY * 2
+      const imgWidth = availableWidth
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      const finalImgHeight = imgHeight > availableHeight ? availableHeight : imgHeight
+      const finalImgWidth = imgHeight > availableHeight ? (canvas.width * availableHeight) / canvas.height : imgWidth
+
+      const xOffset = marginX + (availableWidth - finalImgWidth) / 2
+      const yOffset = marginY + (availableHeight - finalImgHeight) / 2
+
+      pdf.addImage(imgData, "PNG", xOffset, yOffset, finalImgWidth, finalImgHeight)
+      pdf.save(`order-${customer.order_id}.pdf`)
+    } catch (err) {
+      console.error("PDF generation failed:", err)
+    } finally {
+      setIsGeneratingPDF(false)
+    }
+  }
 
   const handleCustomerImageClick = () => {
     if (!isRejectModalOpen && !isApproveModalOpen) {
-      setIsCustomerModalOpen(true);
+      setIsCustomerModalOpen(true)
     }
-  };
+  }
 
   const handleTailorJobImageClick = () => {
     if (!isRejectModalOpen && !isApproveModalOpen) {
-      setIsTailorJobModalOpen(true);
+      setIsTailorJobModalOpen(true)
     }
-  };
+  }
 
   const handleCustomerCloseModal = () => {
-    setIsCustomerModalOpen(false);
-  };
+    setIsCustomerModalOpen(false)
+  }
 
   const fetchOrder = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
 
     try {
-      const session = await getSession();
-      const accessToken = session?.user?.token;
-      if (!accessToken) throw new Error("No access token found");
+      const session = await getSession()
+      const accessToken = session?.user?.token
+      if (!accessToken) throw new Error("No access token found")
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/orderslist/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/orderslist/${id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
 
       if (!response.ok) {
-        throw new Error("Failed to fetch orders");
+        throw new Error("Failed to fetch orders")
       }
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (result.data) {
         const mappedCustomer: Customer = {
           hip: result.data.hip,
           waist: result.data.waist,
           bust: result.data.bust,
-          shoulder: result.data.shoulder, // Added shoulder field
+          shoulder: result.data.shoulder,
           bustpoint: result.data.bustpoint,
           shoulder_to_underbust: result.data.shoulder_to_underbust,
           round_under_bust: result.data.round_under_bust,
@@ -270,229 +233,867 @@ const handleDownload = async () => {
           manager_name: result.data.manager_name,
           duration: result.data.duration,
           style_approval: result.data.style_approval,
-        };
-        setCustomer(mappedCustomer);
+        }
+        setCustomer(mappedCustomer)
       } else {
-        setCustomer(null);
+        setCustomer(null)
       }
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.message);
+        setError(err.message)
       } else {
-        setError("An unknown error occurred");
+        setError("An unknown error occurred")
       }
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchOrder();
-  }, [id]);
+    fetchOrder()
+  }, [id])
 
-  // ----- New Handlers for Reject Modal -----
   const handleOpenRejectModal = () => {
-    // Close the underlying tailor job modal if open
-    setIsCustomerModalOpen(false);
-    setIsApproveModalOpen(false);
-    setIsRejectModalOpen(true);
-  };
+    setIsCustomerModalOpen(false)
+    setIsApproveModalOpen(false)
+    setIsRejectModalOpen(true)
+  }
 
   const handleRejectConfirm = async () => {
     try {
-      const session = await getSession();
-      const accessToken = session?.user?.token;
-      if (!accessToken) throw new Error("No access token found");
+      const session = await getSession()
+      const accessToken = session?.user?.token
+      if (!accessToken) throw new Error("No access token found")
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/rejecttailorstyle/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ feedback: rejectFeedback }),
-        }
-      );
-
-      console.log("Response:", response); // Debugging line
-      console.log("Reject Feedback:", rejectFeedback); // Debugging line
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/rejecttailorstyle/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ feedback: rejectFeedback }),
+      })
 
       if (!response.ok) {
-        throw new Error("Failed to send rejection feedback");
+        throw new Error("Failed to send rejection feedback")
       }
-      // Optionally handle the response here
 
-      setIsRejectModalOpen(false);
-      setRejectFeedback("");
+      setIsRejectModalOpen(false)
+      setRejectFeedback("")
     } catch (err) {
-      console.error(err);
-      // Optionally show error to user
+      console.error(err)
     }
 
-    setIsTailorJobModalOpen(false);
-
-    // Optionally show success message to user
-    setToast(true);
+    setIsTailorJobModalOpen(false)
+    setToast(true)
     setTimeout(() => {
-      setToast(false);
-    }, 3000); // Hide toast after 3 seconds
-  };
+      setToast(false)
+    }, 3000)
+  }
 
-  // ----- New Handlers for Approve Modal -----
   const handleOpenApproveModal = () => {
-    // Close the underlying tailor job modal if open
-    // setIsCustomerModalOpen(false);
-    // setIsRejectModalOpen(false);
-    setIsApproveModalOpen(true);
-    // router.push(`/admin/orders/${id}/create-payment`);
-  };
+    setIsApproveModalOpen(true)
+  }
 
   const handleApproveConfirm = async () => {
     try {
-      const session = await getSession();
-      const accessToken = session?.user?.token;
-      if (!accessToken) throw new Error("No access token found");
+      const session = await getSession()
+      const accessToken = session?.user?.token
+      if (!accessToken) throw new Error("No access token found")
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/accepttailorstyle/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          // body: JSON.stringify({ enter_price: approvePrice }),
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/accepttailorstyle/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
 
       if (!response.ok) {
-        throw new Error("Failed to send approval price");
+        throw new Error("Failed to send approval price")
       }
-      // Optionally handle the response here
 
-      setIsApproveModalOpen(false);
-      setApprovePrice("");
-      // Navigate to invoice route
-      router.push(`/admin/orders/${id}/create-payment`);
+      setIsApproveModalOpen(false)
+      setApprovePrice("")
+      router.push(`/admin/orders/${id}/create-payment`)
     } catch (err) {
-      console.error(err);
-      // Optionally show error to user
+      console.error(err)
     }
-  };
+  }
 
   const formatDate = (dateString: string | number | Date) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
+    if (!dateString) return ""
+    const date = new Date(dateString)
     return date.toLocaleDateString("en-US", {
       month: "long",
       day: "numeric",
       year: "numeric",
-    });
-  };
+    })
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "completed":
+      case "closed":
+        return "bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200"
+      case "processing":
+        return "bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 border-yellow-200"
+      case "pending":
+        return "bg-gradient-to-r from-red-100 to-rose-100 text-red-700 border-red-200"
+      default:
+        return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 border-gray-200"
+    }
+  }
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority?.toLowerCase()) {
+      case "high":
+        return "bg-gradient-to-r from-red-100 to-rose-100 text-red-700 border-red-200"
+      case "medium":
+        return "bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 border-yellow-200"
+      case "low":
+        return "bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200"
+      default:
+        return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 border-gray-200"
+    }
+  }
 
   if (loading) {
     return (
       <div className="text-center text-gray-500 py-10">
         <SkeletonLoader />
       </div>
-    );
+    )
   }
 
   if (error) {
     return (
       <div className="text-center">
-        {/* Error: {error}{" "} */}
         <OrderPageError />
-        {/* <button onClick={fetchOrder} className="text-blue-500 underline">
-          Retry
-        </button> */}
       </div>
-    );
+    )
   }
 
   if (!customer) {
-    return <div className="text-center text-gray-500 py-10">No data found</div>;
+    return <div className="text-center text-gray-500 py-10">No data found</div>
   }
 
   return (
     <motion.div
-      className="w-full mx-auto p-8 bg-white rounded-2xl shadow-xl relative"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.5 }}
+      className="min-h-screen p-4 lg:p-0"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
     >
-      {/* Header */}
-<div className="flex flex-col lg:flex-row justify-between items-center mb-6">
-  <Link
-    href="/admin/orders"
-    className="flex items-center text-orange-500 hover:text-orange-700 transition-colors"
-  >
-    <IoIosArrowBack size={28} />
-    <span className="ml-2 font-semibold">Back to List</span>
-  </Link>
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 bg-white rounded-2xl p-6 shadow-lg border border-orange-100"
+        >
+          <div className="flex items-center space-x-4 mb-4 lg:mb-0">
+            <Link
+              href="/admin/orders"
+              className="flex items-center space-x-2 text-orange-500 hover:text-orange-600 transition-all duration-200 group"
+            >
+              <motion.div
+                whileHover={{ x: -4 }}
+                className="p-2 rounded-full bg-orange-100 group-hover:bg-orange-200 transition-colors"
+              >
+                <IoIosArrowBack size={20} />
+              </motion.div>
+              <span className="font-semibold">Back to Orders</span>
+            </Link>
+            <div className="h-6 w-px bg-gray-300"></div>
+            <div className="flex items-center space-x-2">
+              <div className="p-2 rounded-full bg-gradient-to-r from-orange-100 to-amber-100">
+                <FiPackage className="text-orange-600" size={20} />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-800">Order #{customer.order_id}</h1>
+                <p className="text-sm text-gray-600">Order Details & Management</p>
+              </div>
+            </div>
+          </div>
 
-  <div className="flex space-x-3">
-      {/* Download Button */}
-      <button
-  onClick={handleDownload}
-  disabled={isGeneratingPDF}
-  className={`flex items-center space-x-2 px-4 py-2 rounded-lg shadow-sm transition
-    ${isGeneratingPDF ? "bg-gray-300 cursor-not-allowed" : "bg-green-500 hover:bg-green-600 text-white"}`}
-  aria-label="Download order details"
->
-  {isGeneratingPDF
-    ? <Spinner />
-    : <>
-        <AiOutlineDownload size={20} />
-        <span className="font-medium">Download</span>
-      </>
-  }
-</button>
+          <div className="flex items-center space-x-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleDownload}
+              disabled={isGeneratingPDF}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl shadow-sm transition-all duration-200 ${
+                isGeneratingPDF
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white"
+              }`}
+            >
+              {isGeneratingPDF ? (
+                <Spinner />
+              ) : (
+                <>
+                  <AiOutlineDownload size={18} />
+                  <span className="font-medium">Download PDF</span>
+                </>
+              )}
+            </motion.button>
 
-    </div>
+            {customer.order_status !== "closed" ? (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleOpenCloseModal}
+                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white rounded-xl shadow-sm transition-all duration-200"
+              >
+                <MdOutlineClose size={18} />
+                <span className="font-medium">Close Order</span>
+              </motion.button>
+            ) : (
+              <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-gray-300 to-gray-400 text-gray-700 rounded-xl shadow-sm">
+                <IoIosCheckmark size={18} />
+                <span className="font-medium">Order Closed</span>
+              </div>
+            )}
+          </div>
+        </motion.div>
 
-  <div className="flex flex-wrap items-center space-x-4 mt-4 lg:mt-0">
-    {customer.order_status !== "closed" ? (
-      <button
-        onClick={handleOpenCloseModal}
-        className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-sm transition"
-      >
-        <span className="font-medium">Close Order</span>
-      </button>
-    ) : (
-      <div className="flex items-center space-x-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg shadow-sm transition">
-        <span className="font-medium">Order Closed</span>
-      </div>
-    )}
+        {/* Toast Notification */}
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg z-50"
+              initial={{ opacity: 0, y: -50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -50, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-center space-x-2">
+                <IoIosCheckmark size={20} />
+                <span className="font-medium">Style Rejected Successfully!</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-
-    
-  </div>
-</div>
-
-
-      <AnimatePresence>
-        {toast && (
+        {/* Main Content */}
+        <div ref={contentRef} className="space-y-8">
+          {/* Order Information Card */}
           <motion.div
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-4 rounded-lg shadow-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="bg-white rounded-2xl shadow-lg border border-orange-100 overflow-hidden"
+          >
+            <div className="bg-gradient-to-r from-orange-500 to-amber-500 p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <FiUser className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Order Information</h2>
+                    <p className="text-orange-100">Complete order details and customer information</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-orange-100 text-sm">Head of Tailoring</p>
+                  <p className="text-white font-semibold text-lg">{customer.manager_name}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                {[
+                  { label: "Order ID", value: customer.order_id, icon: FiPackage },
+                  { label: "Cloth Name", value: customer.clothing_name, icon: HiOutlineSparkles },
+                  { label: "Customer Name", value: customer.customer_name, icon: FiUser },
+                  { label: "Gender", value: customer.gender, icon: FiUser },
+                  { label: "Phone Number", value: customer.phone_number, icon: FiUser },
+                  { label: "Customer Email", value: customer.customer_email, icon: FiUser },
+                  { label: "Create Date", value: formatDate(customer.created_at), icon: FiCalendar },
+                ].map((field, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className="group"
+                  >
+                    <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                      <field.icon className="text-orange-500" size={16} />
+                      <span>{field.label}</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={field.value}
+                      readOnly
+                      className="w-full border border-gray-200 rounded-xl shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400 transition-all duration-200"
+                    />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Priority and Status */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                    <BsStars className="text-orange-500" size={16} />
+                    <span>Priority</span>
+                  </label>
+                  <div
+                    className={`inline-flex items-center px-4 py-2 rounded-xl border font-medium ${getPriorityColor(customer.priority)}`}
+                  >
+                    {customer.priority}
+                  </div>
+                </div>
+                <div>
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                    <FiPackage className="text-orange-500" size={16} />
+                    <span>Order Status</span>
+                  </label>
+                  <div
+                    className={`inline-flex items-center px-4 py-2 rounded-xl border font-medium ${getStatusColor(customer.order_status)}`}
+                  >
+                    {customer.order_status}
+                  </div>
+                </div>
+              </div>
+
+              {/* Descriptions */}
+              <div className="space-y-6">
+                <div>
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                    <FiUser className="text-orange-500" size={16} />
+                    <span>Customer Description</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={customer.customer_description}
+                    readOnly
+                    className="w-full border border-gray-200 rounded-xl shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400 transition-all duration-200 resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                    <HiOutlineSparkles className="text-orange-500" size={16} />
+                    <span>Clothing Description</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={customer.clothing_description}
+                    readOnly
+                    className="w-full border border-gray-200 rounded-xl shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400 transition-all duration-200 resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Style Reference Images */}
+          {customer.style_reference_images && (
+            <motion.div
+              ref={targetRef}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-white rounded-2xl shadow-lg border border-orange-100 overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <HiOutlinePhotograph className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">Style Reference Images</h3>
+                    <p className="text-purple-100">Customer's style inspiration and references</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6">
+                {customer.style_reference_images.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {customer.style_reference_images.map((src, idx) => (
+                      <motion.div
+                        key={idx}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="group cursor-pointer"
+                        onClick={() => handleOpenStyleModal(src)}
+                      >
+                        <div className="relative overflow-hidden rounded-xl border-2 border-gray-200 group-hover:border-purple-300 transition-all duration-200">
+                          <img
+                            src={src || "/placeholder.svg"}
+                            alt={`Style Reference ${idx + 1}`}
+                            className="w-full h-24 object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
+                            <HiOutlinePhotograph
+                              className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                              size={20}
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <HiOutlinePhotograph className="mx-auto text-gray-400 mb-4" size={48} />
+                    <p className="text-gray-500">No style reference images available</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Measurements */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="bg-white rounded-2xl shadow-lg border border-orange-100 overflow-hidden"
+          >
+            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-6">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <MdOutlineRule className="text-white" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Measurements</h3>
+                  <p className="text-blue-100">Detailed body measurements for perfect fit</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {[
+                  { label: "Shoulder", value: customer.shoulder },
+                  { label: "Bust", value: customer.bust },
+                  { label: "Bust Point", value: customer.bustpoint },
+                  { label: "Shoulder to Underbust", value: customer.shoulder_to_underbust },
+                  { label: "Round Under Bust", value: customer.round_under_bust },
+                  { label: "Waist", value: customer.waist },
+                  { label: "Half Length", value: customer.half_length },
+                  { label: "Blouse Length", value: customer.blouse_length },
+                  { label: "Sleeve Length", value: customer.sleeve_length },
+                  { label: "Round Sleeve", value: customer.round_sleeve },
+                  { label: "Dress Length", value: customer.dress_length },
+                  { label: "Hip", value: customer.hip },
+                  { label: "Chest", value: customer.chest },
+                  { label: "Round Shoulder", value: customer.round_shoulder },
+                  { label: "Skirt Length", value: customer.skirt_length },
+                ].map((measurement, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.02 }}
+                    className="group"
+                  >
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{measurement.label}</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        readOnly
+                        value={measurement.value}
+                        className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-200"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+                        cm
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Tailor Job Image */}
+          {customer.tailor_job_image !== null && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="bg-white rounded-2xl shadow-lg border border-orange-100 overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <BsStars className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">Tailor Style</h3>
+                    <p className="text-emerald-100">Proposed design from our tailoring team</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6">
+                {customer.tailor_job_image === "" ? (
+                  <div className="text-center py-12">
+                    <BsStars className="mx-auto text-gray-400 mb-4" size={48} />
+                    <p className="text-gray-500">No tailor style image available yet</p>
+                  </div>
+                ) : (
+                  <div className="flex justify-center">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="cursor-pointer group"
+                      onClick={handleTailorJobImageClick}
+                    >
+                      <div className="relative overflow-hidden rounded-xl border-2 border-gray-200 group-hover:border-emerald-300 transition-all duration-200">
+                        <img
+                          src={customer.tailor_job_image || "/placeholder.svg"}
+                          alt="Tailor Job Style"
+                          className="w-32 h-32 object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
+                          <BsStars
+                            className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                            size={24}
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Other Details */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="bg-white rounded-2xl shadow-lg border border-orange-100 overflow-hidden"
+          >
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-500 p-6">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <FiCalendar className="text-white" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Other Details</h3>
+                  <p className="text-indigo-100">Fitting dates and project timeline</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                    <FiCalendar className="text-indigo-500" size={16} />
+                    <span>First Fitting Date</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formatDate(customer.first_fitting_date) || "Not scheduled"}
+                    readOnly
+                    className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                    <FiCalendar className="text-indigo-500" size={16} />
+                    <span>Second Fitting Date</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formatDate(customer.second_fitting_date) || "Not scheduled"}
+                    readOnly
+                    className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                    <FiCalendar className="text-indigo-500" size={16} />
+                    <span>Duration (days)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={customer.duration ?? "Not specified"}
+                    readOnly
+                    className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Edit Button */}
+        {customer.order_status !== "closed" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex justify-end mt-8"
+          >
+            <Link href={`/admin/orders/${id}/edit`}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl font-semibold shadow-lg transition-all duration-200"
+              >
+                <FiEdit3 size={18} />
+                <span>Edit Order</span>
+              </motion.button>
+            </Link>
+          </motion.div>
+        )}
+      </div>
+
+      {/* Modals */}
+      {/* Style Reference Modal */}
+      <AnimatePresence>
+        {isCustomerModalOpen && activeStyleImage && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4"
+            onClick={handleCloseStyleModal}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            Style Rejected Successfully!
+            <motion.div
+              className="bg-white rounded-2xl p-6 max-w-4xl w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-gray-800">Style Reference</h3>
+                <button
+                  onClick={handleCloseStyleModal}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <IoIosClose size={24} />
+                </button>
+              </div>
+              <img
+                src={activeStyleImage || "/placeholder.svg"}
+                alt="Style Reference Full"
+                className="w-full h-[70vh] object-contain rounded-xl"
+              />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Close Order Confirmation Modal */}
+      {/* Tailor Job Modal */}
+      <AnimatePresence>
+        {isTailorJobModalOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={() => setIsTailorJobModalOpen(false)}
+          >
+            <motion.div
+              className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setIsTailorJobModalOpen(false)}
+                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+              >
+                <IoIosClose size={24} />
+              </button>
+
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">Tailor Style Review</h3>
+                <p className="text-gray-600">Review and approve or reject the proposed design</p>
+              </div>
+
+              <div className="relative w-full h-[60vh] mb-6 rounded-xl bg-gray-100 overflow-hidden">
+                <Image
+                  src={customer.tailor_job_image || "/fallback.jpg"}
+                  alt="Tailor Job Style"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                {customer.style_approval === "pending" && (
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleOpenApproveModal}
+                      className="flex-1 min-w-[200px] px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-semibold"
+                    >
+                      ✓ Approve Style
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleOpenRejectModal}
+                      className="flex-1 min-w-[200px] px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:from-red-600 hover:to-rose-700 transition-all duration-200 font-semibold"
+                    >
+                      ✗ Reject Style
+                    </motion.button>
+                  </>
+                )}
+
+                {customer.style_approval === "accepted" && (
+                  <div className="text-center">
+                    <div className="flex items-center justify-center space-x-2 text-green-600 font-semibold text-lg mb-4">
+                      <IoIosCheckmark size={24} />
+                      <span>Style Approved</span>
+                    </div>
+                    <Link href={`/admin/orders/${id}/add-job-expense`}>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 transition-all duration-200 font-semibold"
+                      >
+                        Add Payment
+                      </motion.button>
+                    </Link>
+                  </div>
+                )}
+
+                {customer.style_approval === "rejected" && (
+                  <div className="flex items-center justify-center space-x-2 text-red-600 font-semibold text-lg">
+                    <IoIosClose size={24} />
+                    <span>Style Rejected</span>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Reject Modal */}
+      <AnimatePresence>
+        {isRejectModalOpen && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4"
+            onClick={() => {
+              setIsRejectModalOpen(false)
+              setRejectFeedback("")
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div
+              className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <IoIosClose className="text-red-600" size={32} />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Reject Style</h2>
+                <p className="text-gray-600">Please provide feedback for the rejection</p>
+              </div>
+              <textarea
+                rows={4}
+                placeholder="Enter your feedback here..."
+                value={rejectFeedback}
+                onChange={(e) => setRejectFeedback(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-xl mb-6 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400 transition-all duration-200 resize-none"
+              />
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => {
+                    setIsRejectModalOpen(false)
+                    setRejectFeedback("")
+                  }}
+                  className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleRejectConfirm}
+                  className="flex-1 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:from-red-600 hover:to-rose-700 transition-all duration-200 font-medium"
+                >
+                  Confirm Rejection
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Approve Modal */}
+      <AnimatePresence>
+        {isApproveModalOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={() => setIsApproveModalOpen(false)}
+          >
+            <motion.div
+              className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setIsApproveModalOpen(false)}
+                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <IoIosClose size={24} />
+              </button>
+
+              <div className="flex flex-col items-center space-y-4 mb-6">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <IoIosCheckmarkCircleOutline className="text-green-600" size={32} />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800">Approve Style</h2>
+                <p className="text-gray-600">You're about to approve this design and proceed to invoice generation.</p>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleApproveConfirm}
+                className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-semibold"
+              >
+                Confirm & Generate Invoice
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Close Order Modal */}
       <AnimatePresence>
         {isCloseModalOpen && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -500,538 +1101,43 @@ const handleDownload = async () => {
             onClick={handleCancelClose}
           >
             <motion.div
-              className="bg-white rounded-2xl shadow-xl p-6 w-96 relative"
+              className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ duration: 0.3 }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close Icon */}
-              <button
-                onClick={handleCancelClose}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
-              >
-                <IoIosClose size={24} />
-              </button>
-
-              <div className="flex flex-col items-center space-y-4 mt-4">
-                <IoIosWarning size={48} className="text-red-500" />
-                <h2 className="text-2xl font-bold text-gray-800">
-                  Confirm Close Order
-                </h2>
-                <p className="text-gray-600 text-center">
-                  Are you sure you want to close this order? This action cannot
-                  be undone.
+              <div className="flex flex-col items-center space-y-4 mb-6">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <IoIosWarning className="text-red-600" size={32} />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800">Close Order</h2>
+                <p className="text-gray-600">
+                  Are you sure you want to close this order? This action cannot be undone.
                 </p>
               </div>
 
-              <div className="mt-6 flex justify-between">
+              <div className="flex space-x-3">
                 <button
                   onClick={handleCancelClose}
-                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition"
+                  className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors duration-200"
                 >
                   Cancel
                 </button>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleConfirmClose}
-                  className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+                  className="flex-1 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:from-red-600 hover:to-rose-700 transition-all duration-200 font-medium"
                 >
-                  <IoIosCheckmark size={20} />
-                  <span>Confirm</span>
-                </button>
+                  Close Order
+                </motion.button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* <button
-        onClick={handleScroll}
-        className="mt-2 px-4 py-2 bg-white text-blue-600 rounded hover:bg-gray-200 transition"
-      >
-        Go to Section
-      </button> */}
-
-      {/* Order Information */}
-      <div ref={contentRef}>
-      <form>
-        <div className="flex justify-between">
-          <h2 className="block text-2xl font-bold text-gray-800 mb-4">
-            Order Information
-          </h2>
-
-          <div className="flex items-center space-x-2">
-      <h1 className="text-xl font-bold text-gray-800">
-        Head of Tailoring:
-      </h1>
-      <span className="text-xl font-medium text-gray-700">
-        {customer.manager_name}
-      </span>
-    </div>
-
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {[
-            { label: "Order ID", value: customer.order_id },
-            { label: "Cloth Name", value: customer.clothing_name },
-            { label: "Priority", value: customer.priority },
-            { label: "Order Status", value: customer.order_status },
-            { label: "Customer Name", value: customer.customer_name },
-            { label: "Gender", value: customer.gender },
-            { label: "Phone Number", value: customer.phone_number },
-            { label: "Create Date", value: formatDate(customer.created_at) },
-            { label: "Customer Email", value: customer.customer_email },
-          ].map((field, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <label className="block text-sm font-bold text-gray-700 mb-1">
-                {field.label}
-              </label>
-              <input
-                type="text"
-                value={field.value}
-                readOnly
-                className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
-              />
-            </motion.div>
-          ))}
-          <div className="lg:col-span-2">
-            <label className="block text-sm font-bold text-gray-700 mb-1">
-              Customer Description
-            </label>
-            <textarea
-              rows={2}
-              value={customer.customer_description}
-              readOnly
-              className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
-            />
-          </div>
-          <div className="lg:col-span-2">
-            <label className="block text-sm font-bold text-gray-700 mb-1">
-              Clothing Description
-            </label>
-            <textarea
-              rows={2}
-              value={customer.clothing_description}
-              readOnly
-              className="w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-gray-600 focus:outline-none focus:border-orange-500 focus:ring focus:ring-orange-200 transition"
-            />
-          </div>
-        </div>
-
-        {/* Style Reference */}
-        {customer.style_reference_images && (
-  <motion.div
-    ref={targetRef}
-    className="w-full mb-8 p-6 bg-gray-50 rounded-2xl shadow-md"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: 20 }}
-    transition={{ duration: 0.5 }}
-  >
-    <label className="block text-sm font-bold text-gray-700 mb-2">
-      Style reference images
-    </label>
-
-    {customer.style_reference_images.length > 0 ? (
-      <div className="flex space-x-4 overflow-x-auto">
-        {customer.style_reference_images.map((src, idx) => (
-          <img
-            key={idx}
-            src={src}
-            alt={`Style Reference ${idx + 1}`}
-            className="w-24 h-24 object-cover rounded-md border border-gray-300 cursor-pointer transition hover:shadow-lg"
-            onClick={() => handleOpenStyleModal(src)}
-          />
-        ))}
-      </div>
-    ) : (
-      <div className="text-gray-500">No images available</div>
-    )}
-
-    {/* Modal */}
-    {isCustomerModalOpen && activeStyleImage && (
-      <motion.div
-        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-        onClick={handleCloseStyleModal}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <div
-          className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <img
-            src={activeStyleImage}
-            alt="Style Reference Full"
-            className="w-full h-[80vh] object-contain rounded-lg"
-            onError={(e) => {
-              e.currentTarget.src = "";
-              e.currentTarget.alt = "Image failed to load";
-            }}
-          />
-        </div>
-      </motion.div>
-    )}
-  </motion.div>
-)}
-
-        {/* Measurements */}
-        <div className="w-full">
-          <h3 className="block text-xl font-bold text-gray-700 mt-10 mb-4">
-            Measurements
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-  { label: "Blouse Length", value: customer.blouse_length },
-  { label: "Bust", value: customer.bust },
-  { label: "Bust Point", value: customer.bustpoint },
-  { label: "Chest", value: customer.chest },
-  { label: "Dress Length(Long, 3/4, Short)", value: customer.dress_length },
-  { label: "Half Length", value: customer.half_length },
-  { label: "Hip", value: customer.hip },
-  { label: "Round Shoulder", value: customer.round_shoulder },
-  { label: "Round Sleeve(Arm, Below Elbow, Wrist)", value: customer.round_sleeve },
-  { label: "Round Under Bust", value: customer.round_under_bust },
-  { label: "Shoulder", value: customer.shoulder },
-  { label: "Shoulder to Underbust", value: customer.shoulder_to_underbust },
-  { label: "Skirt Length(Long, 3/4, Short)", value: customer.skirt_length },
-  { label: "Sleeve Length(Long, Quarter, Short)", value: customer.sleeve_length },
-  { label: "Waist", value: customer.waist },
-]
-.map((measurement, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-              >
-                <label
-                  htmlFor={measurement.label.toLowerCase().replace(/\s/g, "")}
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  {measurement.label}
-                </label>
-                <input
-                  type="number"
-                  readOnly
-                  id={measurement.label.toLowerCase().replace(/\s/g, "")}
-                  name={measurement.label.toLowerCase().replace(/\s/g, "")}
-                  value={measurement.value}
-                  placeholder={measurement.label}
-                  className="w-full rounded-md border border-gray-300 shadow-sm p-2 bg-gray-50 text-gray-600 focus:border-orange-500 focus:ring focus:ring-orange-500 transition"
-                />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Other Details - Tailor Job Image */}
-        {customer.tailor_job_image !== null ? (
-          <div className="w-full mb-8 p-6 rounded-2xl shadow-md">
-            <motion.div
-              className="w-full mb-8 p-6 bg-gray-50 rounded-2xl shadow-md"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.5 }}
-            >
-              <label className="block text-xl font-bold text-gray-700 mb-2">
-                Tailor Style
-              </label>
-              {customer.tailor_job_image === "" ? (
-                <div className="text-gray-500">No image selected</div>
-              ) : (
-                <div>
-                  <img
-                    src={customer.tailor_job_image}
-                    alt="Tailor Job Style"
-                    className="w-24 h-24 object-cover rounded-md border border-gray-300 cursor-pointer transition hover:shadow-lg"
-                    onClick={handleTailorJobImageClick}
-                  />
-                </div>
-              )}
-
-              {isTailorJobModalOpen && (
-                <AnimatePresence>
-                  <motion.div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.25 }}
-                    onClick={() => setIsTailorJobModalOpen(false)}
-                  >
-                    <motion.div
-                      className="relative bg-white rounded-2xl shadow-xl max-w-3xl w-full mx-4 p-6 overflow-hidden"
-                      initial={{ scale: 0.8 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0.8 }}
-                      transition={{ duration: 0.25 }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {/* Close Icon */}
-                      <button
-                        type="button"
-                        onClick={() => setIsTailorJobModalOpen(false)}
-                        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition"
-                      >
-                        <IoIosClose size={24} />
-                      </button>
-
-                      {/* Image Container */}
-                      <div className="relative w-full h-[70vh] mb-6 rounded-lg bg-gray-100">
-                        <Image
-                          src={customer.tailor_job_image || "/fallback.jpg"}
-                          alt="Tailor Job Style"
-                          fill
-                          className="object-contain rounded-lg"
-                        />
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex flex-wrap items-center justify-between gap-4">
-                        {customer.style_approval === "pending" && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={handleOpenApproveModal}
-                              className="flex-1 px-5 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-                            >
-                              Approve Style
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleOpenRejectModal}
-                              className="flex-1 px-5 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-                            >
-                              Reject Style
-                            </button>
-                          </>
-                        )}
-
-                        {customer.style_approval === "accepted" && (
-                          <div>
-                            <div className="flex-1 text-center text-green-600 font-semibold">
-                              Style Approved ✔
-                            </div>
-                            <div className="flex justify-center items-center mt-2">
-                              <Link
-                                href={`/admin/orders/${id}/create-payment`}
-                                className="bg-orange-500 px-4 py-1 text-white rounded hover:bg-orange-600 w-fit transition"
-                              >
-                                Generate Invoice
-                              </Link>
-                            </div>
-                          </div>
-                        )}
-
-                        {customer.style_approval === "rejected" && (
-                          <div className="flex-1 text-center text-red-600 font-semibold">
-                            Style Rejected ✖
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  </motion.div>
-                </AnimatePresence>
-              )}
-            </motion.div>
-          </div>
-        ) : (
-          <div>
-            <h3 className="block text-2xl font-bold text-gray-700 mt-10 mb-4">
-              Tailor Job Image
-            </h3>
-            <div className="text-gray-500">No image yet</div>
-          </div>
-        )}
-
-        {/* ---------- New Reject Modal ---------- */}
-        {isRejectModalOpen && (
-          <motion.div
-            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-            onClick={() => {
-              setIsRejectModalOpen(false);
-              setRejectFeedback("");
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <motion.div
-              className="bg-white rounded-lg p-6 w-96"
-              onClick={(e) => e.stopPropagation()}
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              transition={{ duration: 0.3 }}
-            >
-              <h2 className="text-xl font-bold mb-4 text-gray-800">
-                Reject Style
-              </h2>
-              <input
-                type="text"
-                placeholder="feedback"
-                name="rejectFeedback"
-                value={rejectFeedback}
-                onChange={(e) => setRejectFeedback(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:border-orange-500"
-              />
-              <button
-                type="button"
-                onClick={handleRejectConfirm}
-                className="w-full py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
-              >
-                Confirm
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-
-        <AnimatePresence>
-          {isApproveModalOpen && (
-            <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              onClick={() => {
-                setIsApproveModalOpen(false);
-              }}
-            >
-              <motion.div
-                className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Close Button */}
-                <button
-                  type="button"
-                  onClick={() => setIsApproveModalOpen(false)}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
-                >
-                  <IoIosClose size={24} />
-                </button>
-
-                {/* Success Icon & Text */}
-                <div className="flex flex-col items-center space-y-4 mb-6">
-                  <IoIosCheckmarkCircleOutline
-                    size={64}
-                    className="text-green-500"
-                  />
-                  <h2 className="text-2xl font-bold text-gray-800">
-                    Order Approved!
-                  </h2>
-                  <p className="text-gray-600">
-                    You’ve successfully approved this style.
-                  </p>
-                </div>
-
-                {/* Add Payment Button */}
-                <button
-                  type="button"
-                  onClick={handleApproveConfirm}
-                  className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-                >
-                  Generate Invoice
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div>
-        <div className="w-full mt-8">
-  <h3 className="text-2xl font-semibold text-gray-700 mb-6">Other Details</h3>
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-    {/* First Fitting Date */}
-    <div>
-      <label htmlFor="firstFitting" className="block text-sm font-medium text-gray-700 mb-1">
-        First Fitting Date
-      </label>
-      <input
-        id="firstFitting"
-        type="text"
-        value={formatDate(customer.first_fitting_date) || "Not available"}
-        className={`
-          w-full rounded-lg border border-gray-300 p-2
-          bg-gray-50 text-gray-700 placeholder-gray-400
-          focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200
-          transition
-        `}
-      />
-    </div>
-
-    {/* Second Fitting Date */}
-    <div>
-      <label htmlFor="secondFitting" className="block text-sm font-medium text-gray-700 mb-1">
-        Second Fitting Date
-      </label>
-      <input
-        id="secondFitting"
-        type="text"
-        value={formatDate(customer.second_fitting_date) || "Not available"}
-        className={`
-          w-full rounded-lg border border-gray-300 p-2
-          bg-gray-50 text-gray-700 placeholder-gray-400
-          focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200
-          transition
-        `}
-      />
-    </div>
-
-    {/* Duration */}
-    <div>
-      <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-1">
-        Duration (days)
-      </label>
-      <input
-        id="duration"
-        type="number"
-        name="duration"
-        value={customer.duration ?? "Not Available"}
-        className={`
-          w-full rounded-lg border border-gray-300 p-2
-          bg-gray-50 text-gray-700 placeholder-gray-400
-          focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200
-          transition
-        `}
-      />
-    </div>
-  </div>
-</div>
-
-        </div>
-      </form>
-      </div>
-
-      {/* Edit Action */}
-      {customer.order_status !== "closed" && <div className="mt-6 flex flex-col items-end">
-        <Link
-          href={`/admin/orders/${id}/edit`}
-          className="px-6 py-3 bg-orange-500 text-white rounded-md font-semibold hover:bg-orange-600 transition duration-200"
-        >
-          Edit
-        </Link>
-        <div className="mt-2 text-sm text-gray-600">
-          Click edit to make changes
-        </div>
-      </div>}
     </motion.div>
-  );
+  )
 }

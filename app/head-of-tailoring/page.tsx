@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
 import { motion } from "framer-motion"; // Import Framer Motion
 import { getSession } from "next-auth/react"; // Import getSession from NextAuth
-import TailorJobLists from "@/components/head-of-tailoring/TailorJobLists";
+import TailorJobLists from "@/components/admin/TailorJobLists";
 import { FaClipboardList, FaClock, FaCheckCircle } from "react-icons/fa";
    
 // Extend the NextAuth session type

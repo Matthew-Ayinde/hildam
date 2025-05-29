@@ -1,129 +1,120 @@
-"use client";
+"use client"
 
-import { motion } from "framer-motion";
-import Link from "next/link";
-import Spinner from "@/components/Spinner";
-import { useRouter, useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { IoIosArrowBack } from "react-icons/io";
-import { MdOutlineDeleteForever } from "react-icons/md";
-import { getSession } from "next-auth/react"; // Import getSession from NextAuth
-import SkeletonLoader from "@/components/SkeletonLoader";
-import DataPageError from "@/components/admin/DataNotFound";
+import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
+import { useRouter, useParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import { IoIosArrowBack } from "react-icons/io"
+import { IoPersonOutline } from "react-icons/io5"
+import { MdOutlineDeleteForever, MdOutlineRule, MdOutlineCheckCircle } from "react-icons/md"
+import { HiOutlineUser, HiOutlineDocumentText } from "react-icons/hi"
+import { BiMale, BiFemale } from "react-icons/bi"
+import { FiUser, FiCalendar, FiMail, FiPhone, FiMapPin, FiEdit3 } from "react-icons/fi"
+import { getSession } from "next-auth/react"
+import SkeletonLoader from "@/components/SkeletonLoader"
+import DataPageError from "@/components/admin/DataNotFound"
 
 export default function ShowCustomer() {
-  const router = useRouter();
-  const { id } = useParams();
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
-    null
-  );
-  const [popupMessage, setPopupMessage] = useState<string | null>(null);
+  const router = useRouter()
+  const { id } = useParams()
+  const [isPopupOpen, setIsPopupOpen] = useState(false)
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null)
+  const [popupMessage, setPopupMessage] = useState<string | null>(null)
+  const [messageType, setMessageType] = useState<"success" | "error">("success")
 
   interface Customer {
-    [x: string]: string | number | readonly string[] | undefined;
-    fullName: string;
-    age: number;
-    gender: string;
-    email: string;
-    address: string;
-    bust: number;
-    waist: number;
-    hip: number;
-    shoulder: number;
-    bustpoint: number;
-    shoulder_to_underbust: number;
-    round_under_bust: number;
-    sleeve_length: number;
-    half_length: number;
-    blouse_length: number;
-    trousers_length: number;
-    trouser_waist: number;
-    round_sleeve: number;
-    round_thigh: number;
-    round_knee: number;
-    round_feet: number;
-    skirt_length: number;
-    round_shoulder: number;
-    chest: number;
-    dress_length: number;
-    create_date: string;
-    customer_description: string;
+    [x: string]: string | number | readonly string[] | undefined
+    fullName: string
+    age: number
+    gender: string
+    email: string
+    address: string
+    bust: number
+    waist: number
+    hip: number
+    shoulder: number
+    bustpoint: number
+    shoulder_to_underbust: number
+    round_under_bust: number
+    sleeve_length: number
+    half_length: number
+    blouse_length: number
+    trousers_length: number
+    trouser_waist: number
+    round_sleeve: number
+    round_thigh: number
+    round_knee: number
+    round_feet: number
+    skirt_length: number
+    round_shoulder: number
+    chest: number
+    dress_length: number
+    create_date: string
+    customer_description: string
+    phone_number: string
   }
 
-  const [customer, setCustomer] = useState<Customer | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [customer, setCustomer] = useState<Customer | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const handleDelete = async () => {
-    if (!selectedCustomerId) return;
+    if (!selectedCustomerId) return
 
     try {
-      const session = await getSession(); // Get session from NextAuth
-      const accessToken = session?.user?.token; // Access token from session
+      const session = await getSession()
+      const accessToken = session?.user?.token
       if (!accessToken) {
-        throw new Error("Authentication token not found");
+        throw new Error("Authentication token not found")
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/deletecustomer/${selectedCustomerId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/deletecustomer/${selectedCustomerId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
 
       if (!response.ok) {
-        throw new Error("Failed to delete customer");
+        throw new Error("Failed to delete customer")
       }
 
-      // Show success popup
-      setPopupMessage("Customer successfully deleted");
-
-      // Hide popup after 5 seconds
-      setTimeout(() => setPopupMessage(null), 5000);
+      setPopupMessage("Customer successfully deleted")
+      setMessageType("success")
+      setTimeout(() => setPopupMessage(null), 3000)
     } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error deleting customer:", error.message);
-      } else {
-        console.error("Error deleting customer:", error);
-      }
-      setPopupMessage("Error deleting customer");
-      setTimeout(() => setPopupMessage(null), 5000);
+      console.error("Error deleting customer:", error)
+      setPopupMessage("Error deleting customer")
+      setMessageType("error")
+      setTimeout(() => setPopupMessage(null), 3000)
     } finally {
-      setIsPopupOpen(false);
-      router.push("/admin/customers");
+      setIsPopupOpen(false)
+      setTimeout(() => router.push("/admin/customers"), 1000)
     }
-  };
+  }
 
   const fetchCustomer = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
 
     try {
-      const session = await getSession(); // Get session from NextAuth
-      const accessToken = session?.user?.token; // Access token from session
-      if (!accessToken) throw new Error("No access token found");
+      const session = await getSession()
+      const accessToken = session?.user?.token
+      if (!accessToken) throw new Error("No access token found")
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/customerslist/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/customerslist/${id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
 
       if (!response.ok) {
-        throw new Error("Failed to fetch customer data");
+        throw new Error("Failed to fetch customer data")
       }
 
-      const result = await response.json();
+      const result = await response.json()
 
-      // Map response to fields used in the Table component
       if (result.data) {
         const mappedCustomer: Customer = {
           fullName: result.data.name,
@@ -154,32 +145,32 @@ export default function ShowCustomer() {
           create_date: result.data.created_at,
           address: result.data.address || "N/A",
           customer_description: result.data.customer_description || "N/A",
-        };
-        setCustomer(mappedCustomer);
+        }
+        setCustomer(mappedCustomer)
       } else {
-        setCustomer(null);
+        setCustomer(null)
       }
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.message);
+        setError(err.message)
       } else {
-        setError("An unknown error occurred");
+        setError("An unknown error occurred")
       }
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchCustomer();
-  }, [id]);
+    fetchCustomer()
+  }, [id])
 
   if (loading) {
     return (
       <div className="text-center text-gray-500 py-10">
         <SkeletonLoader />
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -187,318 +178,317 @@ export default function ShowCustomer() {
       <div className="text-center text-red-500">
         <DataPageError />
       </div>
-    );
+    )
   }
 
   if (!customer) {
-    return <div className="text-center text-gray-500 py-10">No data found</div>;
+    return <div className="text-center text-gray-500 py-10">No data found</div>
   }
 
   const measurements = [
-    { label: "Blouse Length", key: "blouse_length" },
+    { label: "Shoulder", key: "shoulder" },
     { label: "Bust", key: "bust" },
     { label: "Bust Point", key: "bustpoint" },
-    { label: "Chest", key: "chest" },
-    { label: "Dress Length(Long, 3/4, Short)", key: "dress_length" },
-    { label: "Half Length", key: "half_length" },
-    { label: "Hip", key: "hip" },
-    { label: "Round Shoulder", key: "round_shoulder" },
-    { label: "Round Sleeve(Arm, Below Elbow, Wrist)", key: "round_sleeve" },
+    { label: "Shoulder to Under Bust", key: "shoulder_to_underbust" },
     { label: "Round Under Bust", key: "round_under_bust" },
-    { label: "Shoulder", key: "shoulder" },
-    { label: "Shoulder to Underbust", key: "shoulder_to_underbust" },
-    { label: "Skirt Length(Long, 3/4, Short)", key: "skirt_length" },
-    { label: "Sleeve Length(Long, Quarter, Short)", key: "sleeve_length" },
     { label: "Waist", key: "waist" },
-  ];
+    { label: "Half Length", key: "half_length" },
+    { label: "Blouse Length", key: "blouse_length" },
+    { label: "Sleeve Length", key: "sleeve_length" },
+    { label: "Round Sleeve", key: "round_sleeve" },
+    { label: "Dress Length", key: "dress_length" },
+    { label: "Hip", key: "hip" },
+    { label: "Chest", key: "chest" },
+    { label: "Round Shoulder", key: "round_shoulder" },
+    { label: "Skirt Length", key: "skirt_length" },
+      ]
+
+  const getGenderIcon = (gender: string) => {
+    if (gender?.toLowerCase() === "male") {
+      return <BiMale className="text-blue-500" size={20} />
+    } else if (gender?.toLowerCase() === "female") {
+      return <BiFemale className="text-pink-500" size={20} />
+    }
+    return <IoPersonOutline className="text-gray-500" size={20} />
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(new Date(dateString))
+  }
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -50 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="w-full mx-auto p-8 bg-white rounded-2xl shadow-lg"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="min-h-screen"
     >
-      {/* Popup Message */}
-      {popupMessage && (
+      <div className="max-w-6xl mx-auto">
+        {/* Toast Notification */}
+        <AnimatePresence>
+          {popupMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -50, scale: 0.9 }}
+              className={`fixed top-6 left-1/2 transform -translate-x-1/2 px-6 py-4 rounded-xl text-white shadow-lg z-50 ${
+                messageType === "success"
+                  ? "bg-gradient-to-r from-green-500 to-emerald-600"
+                  : "bg-gradient-to-r from-red-500 to-rose-600"
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <MdOutlineCheckCircle size={20} />
+                <span className="font-medium">{popupMessage}</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50"
+          transition={{ duration: 0.6 }}
+          className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 bg-white rounded-2xl p-6 shadow-lg border border-orange-100"
         >
-          {popupMessage}
+          <div className="flex items-center space-x-4 mb-4 lg:mb-0">
+            <Link
+              href="/admin/customers"
+              className="flex items-center space-x-2 text-orange-500 hover:text-orange-600 transition-all duration-200 group"
+            >
+              <motion.div
+                whileHover={{ x: -4 }}
+                className="p-2 rounded-full bg-orange-100 group-hover:bg-orange-200 transition-colors"
+              >
+                <IoIosArrowBack size={20} />
+              </motion.div>
+              <span className="font-semibold">Back</span>
+            </Link>
+            <div className="h-6 w-px bg-gray-300"></div>
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-gradient-to-r from-orange-100 to-amber-100 rounded-full flex items-center justify-center">
+                <span className="text-orange-600 font-bold text-lg">{customer.fullName.charAt(0).toUpperCase()}</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-800">{customer.fullName}</h1>
+                <p className="text-sm text-gray-600">Customer Details</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            <Link href={`/admin/customers/${id}/edit`}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white rounded-xl shadow-sm transition-all duration-200"
+              >
+                <FiEdit3 size={18} />
+                <span className="font-medium">Edit</span>
+              </motion.button>
+            </Link>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                if (typeof id === "string") {
+                  setSelectedCustomerId(id)
+                }
+                setIsPopupOpen(true)
+              }}
+              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white rounded-xl shadow-sm transition-all duration-200"
+            >
+              <MdOutlineDeleteForever size={18} />
+              <span className="font-medium">Delete</span>
+            </motion.button>
+          </div>
         </motion.div>
-      )}
 
-      {/* Header & Back Link */}
-      <div className="flex items-center justify-between mb-6">
-        <Link
-          href="/admin/customers"
-          className="flex items-center space-x-2 text-orange-500 hover:text-orange-700 transition duration-200"
-        >
-          <IoIosArrowBack size={30} />
-          <span className="font-semibold">Back to List</span>
-        </Link>
-      </div>
-
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">
-        Customer Details
-      </h2>
-
-      {/* Customer Details Form */}
-      <form>
+        {/* Customer Information Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="bg-white rounded-2xl shadow-lg border border-orange-100 overflow-hidden mb-8"
         >
-          {/* Full Name */}
-          <motion.div
-            key={1}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-          >
-            <label className="block text-gray-700 font-bold mb-2">
-              Full Name
-            </label>
-            <input
-              type="text"
-              value={customer.fullName}
-              readOnly
-              className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
-            />
-          </motion.div>
-          {/* Age */}
-          <motion.div
-            key={2}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
-            <label className="block text-gray-700 font-bold mb-2">Age</label>
-            <input
-              type="text"
-              value={customer.age}
-              readOnly
-              className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
-            />
-          </motion.div>
-          {/* Gender */}
-          <motion.div
-            key={3}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-          >
-            <label className="block text-gray-700 font-bold mb-2">Gender</label>
-            <input
-              type="text"
-              value={customer.gender}
-              readOnly
-              className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
-            />
-          </motion.div>
-          {/* Phone */}
-          <motion.div
-            key={4}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
-          >
-            <label className="block text-gray-700 font-bold mb-2">Phone</label>
-            <input
-              type="text"
-              value={customer.phone_number}
-              readOnly
-              className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
-            />
-          </motion.div>
-          {/* Create Date */}
-          <motion.div
-            key={5}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.5 }}
-          >
-            <label className="block text-gray-700 font-bold mb-2">
-              Date Created
-            </label>
-            <input
-              type="text"
-              value={new Intl.DateTimeFormat("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              }).format(new Date(customer.create_date))}
-              readOnly
-              className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
-            />
-          </motion.div>
-          {/* Email */}
-          <motion.div
-            key={6}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.6 }}
-          >
-            <label className="block text-gray-700 font-bold mb-2">Email</label>
-            <input
-              type="text"
-              value={customer.email}
-              readOnly
-              className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
-            />
-          </motion.div>
-        </motion.div>
+          <div className="bg-gradient-to-r from-orange-500 to-amber-500 p-6">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <HiOutlineUser className="text-white" size={24} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Customer Information</h2>
+                <p className="text-orange-100">Personal details and contact information</p>
+              </div>
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Address */}
-         
-        <motion.div
-          key={7}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.6 }}
-        >
-          <label className="block text-gray-700 font-bold mb-2">Address</label>
-          <textarea
-            rows={2}
-            value={customer.address}
-            readOnly
-            className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
-          />
-        </motion.div>
-        <motion.div
-          key={8}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.6 }}
-        >
-          <label className="block text-gray-700 font-bold mb-2">Customer Description</label>
-          <textarea
-            rows={2}
-            value={customer.customer_description}
-            readOnly
-            className="w-full border border-gray-300 text-gray-600 text-sm rounded-lg p-3 bg-gray-50"
-          />
-        </motion.div>
-        </div>
-
-        {/* Measurements Section */}
-        <div className="w-full">
-          <h3 className="block text-2xl font-bold text-gray-800 my-3">
-            Measurements
-          </h3>
-          <div className="mb-6">
-            <div className="flex flex-wrap -mx-2">
-              {measurements.map((measurement, index) => (
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { label: "Full Name", value: customer.fullName, icon: FiUser },
+                { label: "Age", value: `${customer.age} years`, icon: FiCalendar },
+                {
+                  label: "Gender",
+                  value: customer.gender,
+                  icon: IoPersonOutline,
+                  customIcon: getGenderIcon(customer.gender),
+                },
+                { label: "Phone", value: customer.phone_number, icon: FiPhone },
+                { label: "Email", value: customer.email, icon: FiMail },
+                { label: "Date Created", value: formatDate(customer.create_date), icon: FiCalendar },
+              ].map((field, index) => (
                 <motion.div
-                  key={measurement.key}
-                  initial={{ opacity: 0, y: 20 }}
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + index * 0.1 }}
-                  className="px-2 w-full md:w-1/2 lg:w-1/3 mb-4"
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="group"
                 >
-                  <label
-                    htmlFor={measurement.key}
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    {measurement.label}
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                    {field.customIcon || <field.icon className="text-orange-500" size={16} />}
+                    <span>{field.label}</span>
                   </label>
                   <input
-                    type="number"
+                    type="text"
+                    value={field.value}
                     readOnly
-                    id={measurement.key}
-                    name={measurement.key}
-                    value={customer[measurement.key]}
-                    placeholder={measurement.label}
-                    className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm bg-gray-50 text-gray-600 sm:text-sm p-3 focus:border-orange-500 focus:ring-orange-500 transition duration-200"
+                    className="w-full border border-gray-200 rounded-xl shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400 transition-all duration-200"
                   />
                 </motion.div>
               ))}
             </div>
-          </div>
-        </div>
-      </form>
 
-      {/* Action Buttons */}
-      <div className="mt-8 flex justify-end space-x-4">
-        <Link href={`/admin/customers/${id}/edit`}>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold transition duration-200 hover:bg-orange-600"
-          >
-            Edit Customer Details
-          </motion.div>
-        </Link>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+              <div>
+                <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                  <FiMapPin className="text-orange-500" size={16} />
+                  <span>Address</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={customer.address}
+                  readOnly
+                  className="w-full border border-gray-200 rounded-xl shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400 transition-all duration-200 resize-none"
+                />
+              </div>
+              <div>
+                <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                  <HiOutlineDocumentText className="text-orange-500" size={16} />
+                  <span>Customer Description</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={customer.customer_description}
+                  readOnly
+                  className="w-full border border-gray-200 rounded-xl shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400 transition-all duration-200 resize-none"
+                />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Measurements Card */}
         <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            if (typeof id === "string") {
-              setSelectedCustomerId(id);
-            }
-            setIsPopupOpen(true);
-          }}
-          className="px-6 py-3 bg-red-500 text-white rounded-lg font-semibold transition duration-200 hover:bg-red-600 cursor-pointer"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-white rounded-2xl shadow-lg border border-orange-100 overflow-hidden"
         >
-          Delete
+          <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-6">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <MdOutlineRule className="text-white" size={24} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Body Measurements</h2>
+                <p className="text-blue-100">Detailed measurements for tailoring</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {measurements.map((measurement, index) => (
+                <motion.div
+                  key={measurement.key}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.02 }}
+                  className="group"
+                >
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{measurement.label}</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      readOnly
+                      value={customer[measurement.key] || 0}
+                      className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-200"
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">cm</div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </motion.div>
       </div>
 
-      {/* Confirmation Popup */}
-      {isPopupOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-          onClick={() => setIsPopupOpen(false)}
-        >
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {isPopupOpen && (
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="bg-white rounded-lg shadow-lg w-96 p-8 text-center"
-            onClick={(e) => e.stopPropagation()}
-            aria-modal="true"
-            role="dialog"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setIsPopupOpen(false)}
           >
-            <h3 className="text-lg font-bold text-gray-800 mb-4">
-              Confirm Deletion
-            </h3>
-            <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to delete this customer? This action cannot
-              be undone.
-            </p>
-            <div className="flex justify-center space-x-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleDelete}
-                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg transition duration-200 hover:bg-red-700"
-              >
-                Confirm
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsPopupOpen(false)}
-                className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg transition duration-200 hover:bg-orange-100"
-              >
-                Cancel
-              </motion.button>
-            </div>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MdOutlineDeleteForever className="text-red-600" size={32} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Delete Customer</h3>
+                <p className="text-gray-600 mb-6">
+                  Are you sure you want to delete this customer? This action cannot be undone.
+                </p>
+                <div className="flex space-x-3">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors duration-200"
+                    onClick={() => setIsPopupOpen(false)}
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors duration-200"
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </motion.div>
-  );
+  )
 }
