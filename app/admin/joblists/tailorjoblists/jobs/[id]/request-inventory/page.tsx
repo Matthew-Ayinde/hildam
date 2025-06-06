@@ -13,6 +13,7 @@ interface InventoryItem {
   item_name: string;
   item_quantity: number;
   created_at: string;
+  color: string; // Assuming color is a string, adjust if necessary
 }
 
 interface InventoryResponse {
@@ -22,6 +23,7 @@ interface InventoryResponse {
     item_name: string;
     item_quantity: string;
     created_at: string;
+    color: string; // Assuming color is a string, adjust if necessary
   }>;
 }
 
@@ -149,7 +151,7 @@ export default function InventoryPage() {
 
       const itemsToRequest = inventoryData
         .filter((item) => requests[item.id] > 0)
-        .map((item) => ({ name: item.item_name, quantity: requests[item.id] }));
+        .map((item) => ({ name: item.item_name, quantity: requests[item.id], color: item.color }));
 
       if (itemsToRequest.length === 0) {
         setErrors((prev) => ({ ...prev, general: "You must request at least one item." }));
@@ -198,7 +200,7 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-r from-orange-200 to-orange-100 rounded-xl">
+    <div className="relative rounded-xl">
       {/* Success Toast */}
       <AnimatePresence>
         {showToast && (
@@ -261,65 +263,72 @@ export default function InventoryPage() {
         </h1>
 
         <form onSubmit={handleSubmit}>
-          <div className="space-y-6">
-            {inventoryData.map((item) => (
-              <div
-                key={item.id}
-                className="flex flex-col sm:flex-row justify-between items-center border border-orange-300 p-4 rounded-lg shadow-sm"
-              >
-                <div className="mb-4 sm:mb-0">
-                  <h2 className="text-2xl font-semibold text-gray-800">
-                    {item.item_name}
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    Available: {item.item_quantity}
-                  </p>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="flex items-center space-x-3">
-                    <motion.button
-                      whileTap={{ scale: 0.9 }}
-                      type="button"
-                      onClick={() => handleDecrement(item.id)}
-                      className="px-3 py-1 bg-orange-500 text-white rounded-full focus:outline-none"
-                    >
-                      –
-                    </motion.button>
-                    <input
-                      type="number"
-                      value={requests[item.id]}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        handleChange(item.id, item.item_quantity, e.target.value)
-                      }
-                      className="w-20 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-300"
-                      min={0}
-                    />
-                    <motion.button
-                      whileTap={{ scale: 0.9 }}
-                      type="button"
-                      onClick={() => handleIncrement(item.id, item.item_quantity)}
-                      className="px-3 py-1 bg-orange-500 text-white rounded-full focus:outline-none"
-                    >
-                      +
-                    </motion.button>
-                  </div>
-                  {errors[item.id] && (
-                    <p className="mt-2 text-sm text-red-500">
-                      {errors[item.id]}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {inventoryData.map(item => (
+      <div
+        key={item.id}
+        className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col"
+      >
+        {/* Header */}
+        <div className="p-4 border-b">
+          <h2 className="text-xl font-semibold text-gray-800">{item.item_name}</h2>
+          <p className="text-sm text-gray-500">Available: {item.item_quantity}</p>
+          {/* New Color Display */}
+          <div className="mt-2 flex items-center">
+            <span className="text-sm font-medium text-gray-700 mr-2">Color:</span>
+            <div
+              className="w-5 h-5 rounded-full border"
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="ml-2 text-sm text-gray-600 capitalize">{item.color}</span>
           </div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="mt-8 w-full py-3 bg-orange-600 text-white font-semibold rounded-lg shadow-md hover:bg-orange-700 transition duration-300 disabled:opacity-50"
-          >
-            {isLoading ? "Submitting..." : "Submit Request"}
-          </button>
-        </form>
+        </div>
+
+        {/* Quantity Controls */}
+        <div className="p-4 flex-1 flex flex-col justify-between">
+          <div className="flex items-center justify-center space-x-4">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              type="button"
+              onClick={() => handleDecrement(item.id)}
+              className="px-3 py-1 bg-orange-500 text-white rounded-full focus:outline-none"
+            >
+              –
+            </motion.button>
+            <input
+              type="number"
+              value={requests[item.id]}
+              onChange={(e) => handleChange(item.id, item.item_quantity, e.target.value)}
+              className="w-16 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-300"
+              min={0}
+            />
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              type="button"
+              onClick={() => handleIncrement(item.id, item.item_quantity)}
+              className="px-3 py-1 bg-orange-500 text-white rounded-full focus:outline-none"
+            >
+              +
+            </motion.button>
+          </div>
+          {errors[item.id] && (
+            <p className="mt-2 text-center text-sm text-red-500">
+              {errors[item.id]}
+            </p>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <button
+    type="submit"
+    disabled={isLoading}
+    className="mt-8 w-full py-3 bg-orange-600 text-white font-semibold rounded-lg shadow-md hover:bg-orange-700 transition duration-300 disabled:opacity-50"
+  >
+    {isLoading ? "Submitting..." : "Submit Request"}
+  </button>
+</form>
 
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">

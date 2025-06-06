@@ -1,450 +1,539 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { FaArrowRight, FaArrowLeft, FaRegCalendarTimes, FaClipboardList } from "react-icons/fa";
-import { IoEyeOutline } from "react-icons/io5";
-import { MdOutlineDeleteForever } from "react-icons/md";
-import { useRouter } from "next/navigation";
-import Spinner from "@/components/Spinner";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+import { useEffect, useState } from "react"
+import { FaArrowRight, FaArrowLeft, FaClipboardList, FaFilter, FaSearch } from "react-icons/fa"
+import { IoEyeOutline, IoCalendarOutline } from "react-icons/io5"
+import { MdOutlineDeleteForever, MdFilterList } from "react-icons/md"
+import { HiOutlineRefresh } from "react-icons/hi"
+import { useRouter } from "next/navigation"
+import Spinner from "@/components/Spinner"
+import Link from "next/link"
+import { motion, AnimatePresence } from "framer-motion"
+import { getSession } from "next-auth/react"
+import OrdersAnalyticsChart from "./OrdersChart"
 
 export default function Table() {
   interface Order {
-    manager_name: string;
-    id: any;
-    order_id: string;
-    created_at: string;
-    clothing_name: string;
-    customer_name: string;
-    priority: string;
-    order_status: string;
+    manager_name: string
+    id: any
+    order_id: string
+    created_at: string
+    clothing_name: string
+    customer_name: string
+    priority: string
+    order_status: string
   }
 
-  const [data, setData] = useState<Order[]>([]);
-  const [filteredData, setFilteredData] = useState<Order[]>([]);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [toastType, setToastType] = useState<"success" | "error" | null>(null);
-  const [filterCategory, setFilterCategory] = useState<string>("");
-  const [filterValue, setFilterValue] = useState<string>("");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
-  const rowsPerPage = 10;
-  const router = useRouter();
+  const [data, setData] = useState<Order[]>([])
+  const [filteredData, setFilteredData] = useState<Order[]>([])
+  const [isPopupOpen, setIsPopupOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [selectedUserId, setSelectedUserId] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [toastType, setToastType] = useState<"success" | "error" | null>(null)
+  const [filterCategory, setFilterCategory] = useState<string>("")
+  const [filterValue, setFilterValue] = useState<string>("")
+  const [startDate, setStartDate] = useState<string>("")
+  const [endDate, setEndDate] = useState<string>("")
+  const [showFilters, setShowFilters] = useState(false)
+  const rowsPerPage = 10
+  const router = useRouter()
 
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage)
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        setLoading(true);
-        setError(null);
-        const session = await getSession(); // Get session from NextAuth
-        const token = session?.user?.token; // Access token from session
-        if (!token) throw new Error("No access token found");
+        setLoading(true)
+        setError(null)
+        const session = await getSession()
+        const token = session?.user?.token
+        if (!token) throw new Error("No access token found")
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/orderslist`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        if (result.message !== "success") {
-          throw new Error("Failed to fetch data");
-        }
-
-        setData(result.data);
-        setFilteredData(result.data); // Initialize filtered data
-      } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message || "An unexpected error occurred");
-        } else {
-          setError("An unexpected error occurred");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, []);
-
-  const handleFilter = () => {
-    let filtered = data;
-
-    if (filterCategory === "Customer" && filterValue) {
-      filtered = filtered.filter((order) =>
-        order.customer_name.toLowerCase().includes(filterValue.toLowerCase())
-      );
-    } else if (filterCategory === "Cloth Name" && filterValue) {
-      filtered = filtered.filter((order) =>
-        order.clothing_name.toLowerCase().includes(filterValue.toLowerCase())
-      );
-    } else if (filterCategory === "Priority" && filterValue) {
-      filtered = filtered.filter((order) => order.priority === filterValue);
-    }
-    else if (filterCategory === "Order Status" && filterValue) {
-      filtered = filtered.filter((order) => order.order_status === filterValue);
-    } else if (filterCategory === "Date" && startDate && !endDate) {
-      filtered = filtered.filter((order) => {
-        const orderDate = new Date(order.created_at);
-        return orderDate >= new Date(startDate);
-      });
-    } else if (filterCategory === "Date" && !startDate && endDate) {
-      filtered = filtered.filter((order) => {
-        const orderDate = new Date(order.created_at);
-        return orderDate <= new Date(endDate);
-      });
-    }
-    else if (filterCategory === "Date" && startDate && endDate) {
-      filtered = filtered.filter((order) => {
-        const orderDate = new Date(order.created_at);
-        return (
-          orderDate >= new Date(startDate) && orderDate <= new Date(endDate)
-        );
-      });
-    }
-
-    setFilteredData(filtered);
-    if (filtered.length === 0) {
-      setToastMessage("No results found");
-      setToastType("error");
-    }
-  };
-
-  const handleReset = () => {
-    setFilterCategory("");
-    setFilterValue("");
-    setStartDate("");
-    setEndDate("");
-    setFilteredData(data); // Reset to original data
-  };
-
-  const handleDelete = async (id: any) => {
-    try {
-      const session = await getSession(); // Get session from NextAuth
-      const token = session?.user?.token; // Access token from session
-      if (!token) throw new Error("No access token found");
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/deleteorder/${selectedUserId}`,
-        {
-          method: "DELETE",
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/orderslist`, {
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
+        })
 
-      const result = await response.json();
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const result = await response.json()
+        if (result.message !== "success") {
+          throw new Error("Failed to fetch data")
+        }
+
+        setData(result.data)
+        setFilteredData(result.data)
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error.message || "An unexpected error occurred")
+        } else {
+          setError("An unexpected error occurred")
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchOrders()
+  }, [])
+
+  const handleFilter = () => {
+    let filtered = data
+
+    if (filterCategory === "Customer" && filterValue) {
+      filtered = filtered.filter((order) => order.customer_name.toLowerCase().includes(filterValue.toLowerCase()))
+    } else if (filterCategory === "Cloth Name" && filterValue) {
+      filtered = filtered.filter((order) => order.clothing_name.toLowerCase().includes(filterValue.toLowerCase()))
+    } else if (filterCategory === "Priority" && filterValue) {
+      filtered = filtered.filter((order) => order.priority === filterValue)
+    } else if (filterCategory === "Order Status" && filterValue) {
+      filtered = filtered.filter((order) => order.order_status === filterValue)
+    } else if (filterCategory === "Date" && startDate && !endDate) {
+      filtered = filtered.filter((order) => {
+        const orderDate = new Date(order.created_at)
+        return orderDate >= new Date(startDate)
+      })
+    } else if (filterCategory === "Date" && !startDate && endDate) {
+      filtered = filtered.filter((order) => {
+        const orderDate = new Date(order.created_at)
+        return orderDate <= new Date(endDate)
+      })
+    } else if (filterCategory === "Date" && startDate && endDate) {
+      filtered = filtered.filter((order) => {
+        const orderDate = new Date(order.created_at)
+        return orderDate >= new Date(startDate) && orderDate <= new Date(endDate)
+      })
+    }
+
+    setFilteredData(filtered)
+    if (filtered.length === 0) {
+      setToastMessage("No results found")
+      setToastType("error")
+    }
+  }
+
+  const handleReset = () => {
+    setFilterCategory("")
+    setFilterValue("")
+    setStartDate("")
+    setEndDate("")
+    setFilteredData(data)
+  }
+
+  const handleDelete = async (id: any) => {
+    setIsPopupOpen(false)
+
+    try {
+      const session = await getSession()
+      const token = session?.user?.token
+      if (!token) throw new Error("No access token found")
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/deleteorder/${selectedUserId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const result = await response.json()
       if (!response.ok) {
-        throw new Error(result.message || "Failed to delete order");
+        throw new Error(result.message || "Failed to delete order")
       }
 
-      // Update state for both data and filteredData to immediately reflect deletion
-      setData((prevData) =>
-        prevData.filter((order) => order.id !== selectedUserId)
-      );
-      setFilteredData((prevData) =>
-        prevData.filter((order) => order.id !== selectedUserId)
-      );
+      setData((prevData) => prevData.filter((order) => order.id !== selectedUserId))
+      setFilteredData((prevData) => prevData.filter((order) => order.id !== selectedUserId))
 
-      setIsPopupOpen(false);
-      setToastMessage("Order deleted successfully");
-      setToastType("success");
+      setToastMessage("Order deleted successfully")
+      setToastType("success")
     } catch (error) {
       if (error instanceof Error) {
-        setToastMessage(error.message || "An unexpected error occurred");
+        setToastMessage(error.message || "An unexpected error occurred")
       } else {
-        setToastMessage("An unexpected error occurred");
+        setToastMessage("An unexpected error occurred")
       }
-      setToastType("error");
+      setToastType("error")
     } finally {
-      // Hide toast after 3 seconds
       setTimeout(() => {
-        setToastMessage(null);
-        setToastType(null);
-      }, 3000);
+        setToastMessage(null)
+        setToastType(null)
+      }, 3000)
     }
-  };
+  }
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
-      setCurrentPage(newPage);
+      setCurrentPage(newPage)
     }
-  };
+  }
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    const date = new Date(dateString)
     return date.toLocaleDateString("en-GB", {
       day: "numeric",
-      month: "long",
+      month: "short",
       year: "numeric",
-    });
-  };
+    })
+  }
 
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
+  const paginatedData = filteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority?.toLowerCase()) {
+      case "high":
+        return "text-red-600 bg-red-50 border-red-200"
+      case "medium":
+        return "text-yellow-600 bg-yellow-50 border-yellow-200"
+      case "low":
+        return "text-green-600 bg-green-50 border-green-200"
+      default:
+        return "text-gray-600 bg-gray-50 border-gray-200"
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "completed":
+      case "closed":
+        return "text-green-700 bg-green-50 border-green-200"
+      case "processing":
+        return "text-yellow-700 bg-yellow-50 border-yellow-200"
+      case "pending":
+        return "text-red-700 bg-red-50 border-red-200"
+      default:
+        return "text-gray-700 bg-gray-50 border-gray-200"
+    }
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="w-full relative"
+      transition={{ duration: 0.6 }}
+      className="w-full relative space-y-6"
     >
-      {/* Toast */}
-      {toastMessage && (
-        <div
-          className={`fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg text-white ${
-            toastType === "success" ? "bg-green-500" : "bg-red-500"
-          }`}
-        >
-          {toastMessage}
-        </div>
-      )}
- 
-      {/* Stats Section */}
-      <div className="flex flex-row gap-5">
-        {[
-          { label: "Total Orders", value: filteredData.length },
-          // Add more stats as needed
-        ].map((stat, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-xl flex items-center p-5 mb-5"
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -50, scale: 0.9 }}
+            className={`fixed top-6 left-1/2 transform -translate-x-1/2 px-6 py-4 rounded-xl text-white shadow-lg z-50 ${
+              toastType === "success"
+                ? "bg-gradient-to-r from-green-500 to-green-600"
+                : "bg-gradient-to-r from-red-500 to-red-600"
+            }`}
           >
-            <div className="text-[#81899d]">
-              <div className="font-bold text-gray-700">{stat.label}</div>
-              <div className="text-2xl text-[#5d7186]">{stat.value}</div>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+              <span className="font-medium">{toastMessage}</span>
             </div>
-            <div className="p-4 rounded-lg bg-[#fff0ea] text-[#ff6c2f] ml-5">
-              <FaClipboardList size={30} />
-            </div>
-          </div>
-        ))}
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div className="overflow-x-auto bg-white py-3 rounded-2xl">
-        {loading ? (
-          <div className="text-center py-10">
-            <Spinner />
+      {/* Stats Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+      >
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Total Orders</p>
+              <p className="text-3xl font-bold text-[#5d7186]">{filteredData.length}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-gradient-to-br from-[#fff0ea] to-[#ffe5d9]">
+              <FaClipboardList className="text-[#ff6c2f] text-2xl" />
+            </div>
           </div>
-        ) : error ? (
-          <div className="text-center py-10 text-red-500">
-            {error}{" "}
-            <button
-              className="text-blue-500 underline"
-              onClick={() => window.location.reload()}
-            >
-              Retry
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* Filter Section */}
-            <div className="flex flex-row justify-between items-center px-4 mb-5">
-              <div className="mx-2 font-bold text-gray-500 text-2xl my-3 whitespace-nowrap me-10">
-                Orders list
-              </div>
-              <div className="flex items-center text-gray-500 text-sm my-3">
-                <select
-                  value={filterCategory}
-                  onChange={(e) => {
-                    setFilterCategory(e.target.value);
-                    setFilterValue(""); // Reset filter value when category changes
-                    setStartDate(""); // Reset start date
-                    setEndDate(""); // Reset end date
-                  }}
-                  className="border rounded p-2 mr-2"
+        </div>
+      </motion.div>
+
+      <OrdersAnalyticsChart />
+
+      {/* Main Content Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+      >
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-gray-100">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">Orders Management</h2>
+              <p className="text-sm text-gray-600 mt-1">Manage and track all your orders</p>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-colors duration-200"
+              >
+                <MdFilterList className="text-lg" />
+                <span className="font-medium">Filters</span>
+              </motion.button>
+
+              <Link href="/admin/orders/create">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-[#ff6c2f] to-[#ff8c5f] hover:from-[#ff5722] hover:to-[#ff7043] text-white rounded-xl font-medium shadow-sm transition-all duration-200"
                 >
-                  <option value="">Select Category</option>
-                  <option value="Customer">Customer</option>
-                  <option value="Cloth Name">Cloth Name</option>
-                  <option value="Priority">Priority</option>
-                  <option value="Order Status">Order Status</option>
-                  <option value="Date">Date</option>
-                </select>
+                  <span>Create Order</span>
+                </motion.button>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters Section */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="px-6 py-4 bg-gray-50 border-b border-gray-100"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <select
+                    value={filterCategory}
+                    onChange={(e) => {
+                      setFilterCategory(e.target.value)
+                      setFilterValue("")
+                      setStartDate("")
+                      setEndDate("")
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6c2f] focus:border-transparent transition-all duration-200"
+                  >
+                    <option value="">Select Category</option>
+                    <option value="Customer">Customer</option>
+                    <option value="Cloth Name">Cloth Name</option>
+                    <option value="Priority">Priority</option>
+                    <option value="Order Status">Order Status</option>
+                    <option value="Date">Date</option>
+                  </select>
+                </div>
 
                 {filterCategory === "Priority" ? (
-                  <select
-                    value={filterValue}
-                    onChange={(e) => setFilterValue(e.target.value)}
-                    className="border rounded p-2 mr-2"
-                  >
-                    <option value="">Select Priority</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                  </select>
-                ) : filterCategory === "Order Status" ? (
-                  <select
-                    value={filterValue}
-                    onChange={(e) => setFilterValue(e.target.value)}
-                    className="border rounded p-2 mr-2"
-                  >
-                    <option value="">Select Status</option>
-                    <option value="completed">Completed</option>
-                    <option value="processing">Processing</option>
-                    <option value="pending">Pending</option>
-                  </select>
-                 ) : filterCategory === "Date" ? (
-                  <>
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="border rounded p-2 mr-2"
-                    />
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="border rounded p-2 mr-2"
-                    />
-                  </>
-                ) : (
-                  <input
-                    type="text"
-                    value={filterValue}
-                    onChange={(e) => setFilterValue(e.target.value)}
-                    placeholder="Type to filter..."
-                    className="border rounded p-2 mr-2"
-                  />
-                )}
-
-                <button
-                  onClick={handleFilter}
-                  className="bg-orange-500 text-white rounded p-2 mr-2"
-                >
-                  Submit
-                </button>
-                <button
-                  onClick={handleReset}
-                  className="bg-gray-500 text-white rounded p-2"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-            <table className="min-w-full border-collapse border border-gray-200">
-              <thead className="bg-[#f6f8fb]">
-                <tr className="text-[#5d7186]">
-                  {[
-                    "Order ID",
-                    "Date",
-                    "Customer",
-                    "Cloth Name",
-                    "Priority",
-                    "Order Status",
-                    "Head of Tailoring",
-                    "Action",
-                  ].map((header) => (
-                    <th
-                      key={header}
-                      className="px-4 py-4 text-left text-sm font-extrabold text-gray-700 border-b border-gray-200"
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                    <select
+                      value={filterValue}
+                      onChange={(e) => setFilterValue(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6c2f] focus:border-transparent transition-all duration-200"
                     >
-                      {header}
-                    </th>
-                  ))}
+                      <option value="">Select Priority</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                    </select>
+                  </div>
+                ) : filterCategory === "Order Status" ? (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select
+                      value={filterValue}
+                      onChange={(e) => setFilterValue(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6c2f] focus:border-transparent transition-all duration-200"
+                    >
+                      <option value="">Select Status</option>
+                      <option value="completed">Completed</option>
+                      <option value="processing">Processing</option>
+                      <option value="pending">Pending</option>
+                    </select>
+                  </div>
+                ) : filterCategory === "Date" ? (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6c2f] focus:border-transparent transition-all duration-200"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6c2f] focus:border-transparent transition-all duration-200"
+                      />
+                    </div>
+                  </>
+                ) : filterCategory ? (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                    <div className="relative">
+                      <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        value={filterValue}
+                        onChange={(e) => setFilterValue(e.target.value)}
+                        placeholder="Type to filter..."
+                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6c2f] focus:border-transparent transition-all duration-200"
+                      />
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="flex items-center space-x-3 mt-4">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleFilter}
+                  className="flex items-center space-x-2 px-4 py-2 bg-[#ff6c2f] hover:bg-[#ff5722] text-white rounded-lg font-medium transition-colors duration-200"
+                >
+                  <FaFilter />
+                  <span>Apply Filter</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleReset}
+                  className="flex items-center space-x-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors duration-200"
+                >
+                  <HiOutlineRefresh />
+                  <span>Reset</span>
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Table Content */}
+        <div className="overflow-x-auto">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Spinner />
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <div className="text-red-500 mb-4">{error}</div>
+              <button
+                className="text-[#ff6c2f] hover:text-[#ff5722] underline font-medium"
+                onClick={() => window.location.reload()}
+              >
+                Try Again
+              </button>
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  {["Order ID", "Date", "Customer", "Cloth Name", "Priority", "Status", "Manager", "Actions"].map(
+                    (header) => (
+                      <th
+                        key={header}
+                        className="px-6 py-4 text-left text-sm font-semibold text-gray-700 whitespace-nowrap"
+                      >
+                        {header}
+                      </th>
+                    ),
+                  )}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {paginatedData.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={8}
-                      className="px-4 py-10 text-center text-gray-500"
-                    >
-                      <div className="mb-3">No Order found</div>
-                      <div className="my-5">
-                      <Link
-                        href="/admin/orders/create"
-                        className="bg-orange-500 rounded px-4 py-2 text-white"
-                      >
-                        Create Order
-                      </Link>
+                    <td colSpan={8} className="px-6 py-20 text-center">
+                      <div className="flex flex-col items-center space-y-4">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                          <FaClipboardList className="text-gray-400 text-2xl" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+                          <p className="text-gray-500 mb-6">Get started by creating your first order</p>
+                          <Link href="/admin/orders/create">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="px-6 py-3 bg-[#ff6c2f] hover:bg-[#ff5722] text-white rounded-xl font-medium transition-colors duration-200"
+                            >
+                              Create Order
+                            </motion.button>
+                          </Link>
+                        </div>
                       </div>
                     </td>
                   </tr>
                 ) : (
                   paginatedData.map((row, index) => (
                     <motion.tr
-                      key={index}
-                      className="hover:cursor-pointer text-[#5d7186] hover:bg-gray-100 transition duration-200"
+                      key={row.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.2 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      className="hover:bg-gray-50 transition-colors duration-200"
                     >
-                      <td className="px-4 py-2 text-sm border-b">
-                        {row.order_id}
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{row.order_id}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        <div className="flex items-center space-x-2">
+                          <IoCalendarOutline className="text-gray-400" />
+                          <span>{formatDate(row.created_at)}</span>
+                        </div>
                       </td>
-                      <td className="px-4 py-2 text-sm border-b">
-                        {formatDate(row.created_at)}
-                      </td>
-                      <td className="px-4 py-2 text-sm border-b text-[#da6d35]">
-                        {row.customer_name}
-                      </td>
-                      <td className="px-4 py-2 text-sm border-b">
-                        {row.clothing_name}
-                      </td>
-                      <td
-                        className={`px-4 py-2 text-sm border-b ${
-                          row.priority === "high" ? "text-red-500" : ""
-                        }`}
-                      >
-                        {row.priority || "medium"}
-                      </td>
-                      <td className="px-4 py-2 text-sm border-b">
+                      <td className="px-6 py-4 text-sm font-medium text-[#da6d35]">{row.customer_name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{row.clothing_name}</td>
+                      <td className="px-6 py-4">
                         <span
-                          className={`px-3 py-1 text-sm font-medium rounded ${
-                            row.order_status === "closed"
-                              ? "bg-white text-green-800 border border-green-800"
-                              : row.order_status === "processing"
-                              ? "text-yellow-600 bg-white border border-yellow-600"
-                              : "text-red-600 bg-white border border-red-600"
-                          }`}
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(row.priority || "medium")}`}
+                        >
+                          {row.priority || "medium"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(row.order_status || "pending")}`}
                         >
                           {row.order_status || "pending"}
                         </span>
                       </td>
-                      <td className="px-4 py-2 text-sm border-b">
-                        {row.manager_name || "Not Assigned"}
-                      </td>
-                      <td className="px-4 py-2 text-sm border-b">
-                        <div className="flex flex-row">
-                          <Link
-                            href={`/admin/orders/${row.id}`}
-                            className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg hover:bg-red-200 transition duration-200"
-                          >
-                            <IoEyeOutline size={20} />
+                      <td className="px-6 py-4 text-sm text-gray-600">{row.manager_name || "Not Assigned"}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-2">
+                          <Link href={`/admin/orders/${row.id}`}>
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              className="p-2 text-[#ff6c2f] bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors duration-200"
+                            >
+                              <IoEyeOutline size={18} />
+                            </motion.button>
                           </Link>
-                          <div
-                            className="mx-2 px-3 bg-red-100 text-orange-500 p-2 rounded-lg hover:bg-red-200 transition duration-200"
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => {
-                              setSelectedUserId(row.id);
-                              setIsPopupOpen(true);
+                              setSelectedUserId(row.id)
+                              setIsPopupOpen(true)
                             }}
+                            className="p-2 text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors duration-200"
                           >
-                            <MdOutlineDeleteForever size={20} />
-                          </div>
+                            <MdOutlineDeleteForever size={18} />
+                          </motion.button>
                         </div>
                       </td>
                     </motion.tr>
@@ -452,100 +541,118 @@ export default function Table() {
                 )}
               </tbody>
             </table>
-          </>
-        )}
-      </div>
+          )}
+        </div>
 
-      {/* Pagination Bar */}
-      {!loading && !error && (
-        <div className="bottom-0 flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200 text-[#A5A8AB]">
-          <div>
-            Showing{" "}
-            <span className="font-bold">
-              {currentPage * rowsPerPage - rowsPerPage + 1}
-            </span>
-            -
-            <span className="font-bold">
-              {Math.min(currentPage * rowsPerPage, filteredData.length)}
-            </span>{" "}
-            of <span className="font-bold">{filteredData.length}</span> Orders
-          </div>
-          <div className="flex items-center space-x-2">
-            <button
-              className="p-3 text-sm text-gray-600 bg-gray-200 rounded disabled:opacity-50"
-              disabled={currentPage === 1}
-              onClick={() => handlePageChange(currentPage - 1)}
-            >
-              <FaArrowLeft />
-            </button>
-            {Array.from(
-              { length: Math.min(3, totalPages) },
-              (_, i) => currentPage + i - 1
-            )
-              .filter((page) => page > 0 && page <= totalPages)
-              .map((page) => (
-                <button
-                  key={page}
-                  className={`px-4 py-2 text-sm ${
-                    page === currentPage
-                      ? "bg-[#ff6c2f] text-white rounded"
-                      : "text-gray-600"
-                  }`}
-                  onClick={() => handlePageChange(page)}
+        {/* Pagination */}
+        {!loading && !error && filteredData.length > 0 && (
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+            <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+              <div className="text-sm text-gray-600">
+                Showing <span className="font-medium text-gray-900">{currentPage * rowsPerPage - rowsPerPage + 1}</span>{" "}
+                -{" "}
+                <span className="font-medium text-gray-900">
+                  {Math.min(currentPage * rowsPerPage, filteredData.length)}
+                </span>{" "}
+                of <span className="font-medium text-gray-900">{filteredData.length}</span> orders
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  disabled={currentPage === 1}
+                  onClick={() => handlePageChange(currentPage - 1)}
                 >
-                  {page}
-                </button>
-              ))}
-            <button
-              className="p-3 text-sm text-gray-600 bg-gray-200 rounded disabled:opacity-50"
-              disabled={currentPage === totalPages}
-              onClick={() => handlePageChange(currentPage + 1)}
-            >
-              <FaArrowRight />
-            </button>
-          </div>
-        </div>
-      )}
+                  <FaArrowLeft size={14} />
+                </motion.button>
 
-      {/* Popup */}
-      {isPopupOpen && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-          onClick={() => setIsPopupOpen(false)}
-        >
-          <motion.div
-            className="bg-white rounded-lg shadow-lg w-96 p-6 text-center"
-            onClick={(e) => e.stopPropagation()}
-            aria-modal="true"
-            role="dialog"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h3 className="text-lg font-bold text-gray-700 mb-4">
-              Confirm Deletion
-            </h3>
-            <p className="text-sm text-gray-600 mb-6">
-              Are you sure you want to delete this order? This action cannot be
-              undone.
-            </p>
-            <div className="flex justify-center space-x-4">
-              <button
-                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition duration-200"
-                onClick={handleDelete}
-              >
-                Confirm
-              </button>{" "}
-              <button
-                className="px-4 py-2 text-sm font-bold text-orange-600 border border-orange-600 rounded-lg hover:bg-orange-100 transition duration-200"
-                onClick={() => setIsPopupOpen(false)}
-              >
-                Cancel
-              </button>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const page = currentPage - 2 + i
+                  return page > 0 && page <= totalPages ? page : null
+                })
+                  .filter(Boolean)
+                  .map((page) => (
+                    <motion.button
+                      key={page}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                        page === currentPage
+                          ? "bg-[#ff6c2f] text-white shadow-sm"
+                          : "text-gray-600 bg-white border border-gray-300 hover:bg-gray-50"
+                      }`}
+                      onClick={() => handlePageChange(page!)}
+                    >
+                      {page}
+                    </motion.button>
+                  ))}
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  disabled={currentPage === totalPages}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                >
+                  <FaArrowRight size={14} />
+                </motion.button>
+              </div>
             </div>
+          </div>
+        )}
+      </motion.div>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {isPopupOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setIsPopupOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MdOutlineDeleteForever className="text-red-600 text-2xl" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Delete Order</h3>
+                <p className="text-gray-600 mb-6">
+                  Are you sure you want to delete this order? This action cannot be undone.
+                </p>
+                <div className="flex space-x-3">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors duration-200"
+                    onClick={() => setIsPopupOpen(false)}
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors duration-200"
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </motion.div>
-  );
+  )
 }

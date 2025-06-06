@@ -37,6 +37,8 @@ export default function EditCustomer() {
     bustpoint: number;
     waist: number;
     shoulder: number;
+    address: string;
+    customer_description: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -67,6 +69,8 @@ export default function EditCustomer() {
     shoulder: "",
     bustpoint: "",
     waist: "",
+    address: "",
+    customer_description: "",
   });
 
   const fetchCustomer = async () => {
@@ -118,6 +122,8 @@ export default function EditCustomer() {
         shoulder: result.data.shoulder,
         bustpoint: result.data.bust,
         waist: result.data.waist,
+        address: result.data.address,
+        customer_description: result.data.customer_description,
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -196,26 +202,23 @@ export default function EditCustomer() {
   }
 
   const measurements = [
-    { label: "Bust", key: "bust" },
-    { label: "Waist", key: "waist" },
-    { label: "Hip", key: "hip" },
-    { label: "Shoulder", key: "shoulder" },
-    { label: "Bust Point", key: "bustpoint" },
-    { label: "Shoulder to Underbust", key: "shoulder_to_underbust" },
-    { label: "Round Under Bust", key: "round_under_bust" },
-    { label: "Sleeve Length", key: "sleeve_length" },
-    { label: "Half Length", key: "half_length" },
     { label: "Blouse Length", key: "blouse_length" },
-    { label: "Round Sleeve", key: "round_sleeve" },
-    { label: "Dress Length", key: "dress_length" },
+    { label: "Bust", key: "bust" },
+    { label: "Bust Point", key: "bustpoint" },
     { label: "Chest", key: "chest" },
+    { label: "Dress Length(Long, 3/4, Short)", key: "dress_length" },
+    { label: "Half Length", key: "half_length" },
+    { label: "Hip", key: "hip" },
     { label: "Round Shoulder", key: "round_shoulder" },
-    { label: "Skirt Length", key: "skirt_length" },
-    { label: "Trouser Length", key: "trousers_length" },
-    { label: "Round Thigh", key: "round_thigh" },
-    { label: "Round Knee", key: "round_knee" },
-    { label: "Round Feet", key: "round_feet" },
+    { label: "Round Sleeve(Arm, Below Elbow, Wrist)", key: "round_sleeve" },
+    { label: "Round Under Bust", key: "round_under_bust" },
+    { label: "Shoulder", key: "shoulder" },
+    { label: "Shoulder to Underbust", key: "shoulder_to_underbust" },
+    { label: "Skirt Length(Long, 3/4, Short)", key: "skirt_length" },
+    { label: "Sleeve Length(Long, Quarter, Short)", key: "sleeve_length" },
+    { label: "Waist", key: "waist" },
   ];
+  
 
   return (
     <motion.div
@@ -301,14 +304,42 @@ export default function EditCustomer() {
             value={formData.email}
             readOnly
             onChange={handleInputChange}
-            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 bg-gray-50"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 "
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+      <div className="mt-3">
+          <label className="block text-gray-700 font-bold mb-1">
+            Address
+          </label>
+          <textarea
+            rows={2} 
+            name="address"
+            value={formData.address}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 "
+          />
+        </div>
+
+      <div className="mt-3">
+          <label className="block text-gray-700 font-bold mb-1">
+            Customer Description
+          </label>
+          <textarea
+            rows={2} 
+            name="customer_description"
+            value={formData.customer_description}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 "
           />
         </div>
       </div>
 
       {/* Measurements Section */}
       <div className="mt-10">
-        <h3 className="block text-xl font-bold text-gray-800 mb-3">
+        <h3 className="block text-2xl font-bold text-gray-800 mb-3">
           Measurements
         </h3>
         <div className="mb-4">
