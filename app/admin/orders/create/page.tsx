@@ -309,6 +309,7 @@ const Form = () => {
 
       setResponseMessage("Order created successfully!")
       setMessageType("success")
+      router.push('/admin/orders')
 
       // // Reset form after successful submission
       // setTimeout(() => {

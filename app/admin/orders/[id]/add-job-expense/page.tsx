@@ -9,8 +9,6 @@ import {
   FaCut,
   FaRuler,
   FaUserTie,
-  FaTruck,
-  FaBox,
   FaCog,
   FaPalette,
   FaPlus,
@@ -25,6 +23,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useRouter } from "next/navigation"
 
 interface ExpenseItem {
   id: string
@@ -53,6 +53,8 @@ export default function AddExpensePage() {
   const params = useParams()
   const id = params.id as string
 
+  const router = useRouter()
+
   const [orderInfo, setOrderInfo] = useState<OrderInfo>({
     orderId: "",
     customerName: "",
@@ -64,29 +66,35 @@ export default function AddExpensePage() {
     { id: "utilities", name: "Utilities", icon: <FaCut className="w-5 h-5" />, amount: 0 },
     { id: "service", name: "Services", icon: <FaRuler className="w-5 h-5" />, amount: 0 },
     { id: "labour", name: "Labour", icon: <FaUserTie className="w-5 h-5" />, amount: 0 },
-    { id: "equipment", name: "Equipment Maintenance", icon: <FaCog className="w-5 h-5" />, amount: 0 },
-    { id: "design", name: "Design/Pattern Costs", icon: <FaPalette className="w-5 h-5" />, amount: 0 },
   ])
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   // Fetch order data on component mount
   useEffect(() => {
     const fetchOrderData = async () => {
-      if (!id) return
+      if (!id) {
+        setError("No order ID provided in URL")
+        return
+      }
 
       setIsLoading(true)
+      setError(null)
+
       try {
         const session = await getSession()
         const token = session?.user?.token
 
         if (!token) {
-          console.error("No authentication token found")
+          setError("No authentication token found. Please log in.")
           return
         }
 
         const response = await fetch(`https://hildam.insightpublicis.com/api/orderslist/${id}`, {
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -94,7 +102,7 @@ export default function AddExpensePage() {
         })
 
         if (!response.ok) {
-          throw new Error("Failed to fetch order data")
+          throw new Error(`Failed to fetch order data: ${response.status} ${response.statusText}`)
         }
 
         const result = await response.json()
@@ -102,14 +110,18 @@ export default function AddExpensePage() {
         if (result.message === "success" && result.data) {
           const data: OrderData = result.data
           setOrderInfo({
-            orderId: data.order_id,
-            customerName: data.customer_name,
-            orderDescription: data.clothing_description,
-            clothingName: data.clothing_name,
+            orderId: data.order_id || `ORD-${id}`,
+            customerName: data.customer_name || "",
+            orderDescription: data.clothing_description || "",
+            clothingName: data.clothing_name || "",
           })
+          setSuccess("Order data loaded successfully!")
+        } else {
+          throw new Error("Invalid response format or no data found")
         }
       } catch (error) {
         console.error("Error fetching order data:", error)
+        setError(error instanceof Error ? error.message : "Failed to fetch order data")
       } finally {
         setIsLoading(false)
       }
@@ -125,26 +137,53 @@ export default function AddExpensePage() {
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
 
   const handleSubmit = async () => {
-    setIsSubmitting(true)
+    if (!orderInfo.orderId || !orderInfo.customerName) {
+      setError("Order information is incomplete. Please ensure order data is loaded.")
+      return
+    }
 
-    // Prepare data for backend (excluding total amount)
+    setIsSubmitting(true)
+    setError(null)
+    setSuccess(null)
+
+    // Prepare data for backend submission in the required format
     const submitData = {
-      orderInfo,
-      expenses: expenses.map(({ id, name, amount }) => ({
-        id,
-        name,
-        amount,
-      })),
+      order_id: orderInfo.orderId,
+      utilities: expenses.find((expense) => expense.id === "utilities")?.amount || 0,
+      labour: expenses.find((expense) => expense.id === "labour")?.amount || 0,
+      service: expenses.find((expense) => expense.id === "service")?.amount || 0,
     }
 
     try {
-      console.log("Sending to backend:", submitData)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      console.log("Submitting expense data:", submitData)
+
+      // Replace this with your actual API endpoint for submitting expenses
+      const session = await getSession()
+      const token = session?.user?.token
+
+      console.log(submitData)
+
+      const response = await fetch("https://hildam.insightpublicis.com/api/addexpense", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(submitData),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to submit expenses")
+      }
+
+      setSuccess("Expenses submitted successfully!")
+      router.push(`https://hildam.insightpublicis.com/api/addexpense/admin/orders/create-payment/${id}`) // Redirect to order details page
 
       // Reset only the expense amounts after successful submission
       setExpenses((prev) => prev.map((expense) => ({ ...expense, amount: 0 })))
     } catch (error) {
-      console.error("Error submitting data:", error)
+      console.error("Error submitting expenses:", error)
+      setError(error instanceof Error ? error.message : "Failed to submit expenses")
     } finally {
       setIsSubmitting(false)
     }
@@ -182,7 +221,8 @@ export default function AddExpensePage() {
             transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
             className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"
           />
-          <p className="text-gray-600">Loading order data...</p>
+          <p className="text-gray-600">Loading order data from API...</p>
+          <p className="text-sm text-gray-500 mt-2">Fetching order ID: {id}</p>
         </div>
       </div>
     )
@@ -210,6 +250,23 @@ export default function AddExpensePage() {
           <p className="text-gray-600 text-lg">Professional expense tracking for tailoring orders</p>
         </div>
 
+        {/* Error/Success Messages */}
+        {error && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+            <Alert className="border-red-200 bg-red-50">
+              <AlertDescription className="text-red-800">{error}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+
+        {success && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+            <Alert className="border-green-200 bg-green-50">
+              <AlertDescription className="text-green-800">{success}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+
         {/* Order ID - Prominent at top */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -225,14 +282,14 @@ export default function AddExpensePage() {
                   className="text-lg font-bold text-white mb-3 block flex items-center justify-center gap-2"
                 >
                   <FaClipboardList className="w-5 h-5" />
-                  Order ID
+                  Order ID (Auto-populated from API)
                 </Label>
                 <Input
                   id="orderId"
                   value={orderInfo.orderId}
                   readOnly
                   className="text-center text-xl font-bold bg-white text-gray-900 border-0 focus:ring-2 focus:ring-white max-w-md mx-auto cursor-not-allowed"
-                  placeholder="ORD-2024-001"
+                  placeholder="Loading..."
                 />
               </div>
             </CardContent>
@@ -250,7 +307,7 @@ export default function AddExpensePage() {
             <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3 text-xl">
                 <FaFileInvoice className="w-6 h-6" />
-                Order Details
+                Order Details (Auto-populated from API)
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -265,7 +322,7 @@ export default function AddExpensePage() {
                     value={orderInfo.customerName}
                     readOnly
                     className="border-gray-200 focus:border-orange-500 focus:ring-orange-500 cursor-not-allowed bg-gray-50"
-                    placeholder="John Doe"
+                    placeholder="Loading customer name..."
                   />
                 </div>
 
@@ -278,7 +335,7 @@ export default function AddExpensePage() {
                     value={orderInfo.clothingName}
                     readOnly
                     className="border-gray-200 focus:border-orange-500 focus:ring-orange-500 cursor-not-allowed bg-gray-50"
-                    placeholder="Suit, Dress, Shirt, etc."
+                    placeholder="Loading clothing name..."
                   />
                 </div>
 
@@ -291,7 +348,7 @@ export default function AddExpensePage() {
                     value={orderInfo.orderDescription}
                     readOnly
                     className="border-gray-200 focus:border-orange-500 focus:ring-orange-500 min-h-[100px] cursor-not-allowed bg-gray-50"
-                    placeholder="Detailed description of the order requirements, measurements, special instructions..."
+                    placeholder="Loading clothing description..."
                   />
                 </div>
               </div>
@@ -366,7 +423,7 @@ export default function AddExpensePage() {
                   >
                     ₦{totalExpenses.toFixed(2)}
                   </motion.div>
-                  <p className="text-orange-100 mt-2">Calculated automatically from expense categories</p>
+                  <p className="text-orange-100 mt-2">Order ID: {orderInfo.orderId || "Loading..."}</p>
                 </div>
 
                 <Separator orientation="vertical" className="hidden md:block h-20 bg-white/20" />
@@ -387,7 +444,7 @@ export default function AddExpensePage() {
                     ) : (
                       <>
                         <FaSave className="w-5 h-5 mr-3" />
-                        Save Order & Expenses
+                        Submit Order & Expenses
                       </>
                     )}
                   </Button>

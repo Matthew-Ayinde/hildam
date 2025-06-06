@@ -315,7 +315,7 @@ export default function ShowCustomer() {
 
       setIsApproveModalOpen(false)
       setApprovePrice("")
-      router.push(`/admin/orders/${id}/create-payment`)
+      router.push(`/admin/orders/${id}/add-job-expense`)
     } catch (err) {
       console.error(err)
     }

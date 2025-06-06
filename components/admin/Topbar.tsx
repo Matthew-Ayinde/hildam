@@ -150,9 +150,9 @@ const Topbar = () => {
       if (link.includes("inventory")) {
         router.push("/admin/inventory/")
       }
-      if (link.includes("tailorjoblist")) {
-        router.push("/admin/joblists/tailorjoblists/jobs/" + linking_id)
-      }
+      // if (link.includes("tailorjoblist")) {
+      //   router.push("/admin/joblists/tailorjoblists/jobs/" + linking_id)
+      // }
       if (link.includes("storerequest")) {
         router.push("/admin/inventory/requests/")
       }
@@ -437,8 +437,11 @@ const Topbar = () => {
                     </div>
 
                     <div className="py-2">
-                      <Link href="/profile" passHref>
-                        <button className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                      <Link href="/admin/users" passHref>
+                        <button 
+                          className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        >
                           <HiOutlineUserCircle size={20} />
                           <span>Your Profile</span>
                         </button>

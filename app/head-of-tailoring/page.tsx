@@ -108,43 +108,6 @@ export default function Table() {
 
   return (
     <div className="w-full">
-      <div ref={statsRef} className="flex flex-row gap-5 overflow-x-auto">
-        {[
-          {
-            label: "Total Jobs",
-            value: data.length,
-            icon: <FaClipboardList size={30} className="text-[#ff6c2f]" />,
-          },
-          {
-            label: "Pending Jobs",
-            value: '-',
-            icon: <FaClock size={30} className="text-[#ff6c2f]" />,
-          },
-          {
-            label: "Completed Jobs",
-            value: '-',
-            icon: <FaCheckCircle size={30} className="text-[#ff6c2f]" />,
-          },
-          // Add more stats if needed
-        ].map((stat, index) => (
-          <motion.div
-            key={index}
-            className="bg-white rounded-xl flex items-center p-5 mb-5 min-w-[200px]" // min-w helps for scrollable layout
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.2 }}
-          >
-            <div className="text-[#81899d]">
-              <div className="font-bold text-gray-700 whitespace-nowrap">
-                {stat.label}
-              </div>
-              <div className="text-2xl text-[#5d7186]">{stat.value}</div>
-            </div>
-            <div className="p-4 rounded-lg bg-[#fff0ea] ml-5">{stat.icon}</div>
-          </motion.div>
-        ))}
-      </div>
-
       <TailorJobLists />
     </div>
   );
