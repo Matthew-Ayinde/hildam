@@ -435,7 +435,14 @@ const Form = () => {
                           <motion.li
                             key={c.id}
                             whileHover={{ backgroundColor: "#f3f4f6" }}
-                            onClick={() => handleSelect(c)}
+                            onClick={() =>
+                              handleSelect({
+                                id: String(c.id),
+                                name: c.name,
+                                email: c.email,
+                                age: c.age,
+                              })
+                            }
                             className="px-4 py-3 cursor-pointer border-b border-gray-100 last:border-b-0"
                           >
                             <div className="font-medium text-gray-800">{c.name}</div>

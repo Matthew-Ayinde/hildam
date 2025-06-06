@@ -298,12 +298,12 @@ export default function OperationalBudgetTracker() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-orange-50">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div className="space-y-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-orange-600 bg-clip-text text-transparent">
               Operational Budget Tracker
             </h1>
             <p className="text-slate-600 text-lg">Manage your business operational budgets and expenses</p>
@@ -573,7 +573,7 @@ export default function OperationalBudgetTracker() {
         {budgetAnalytics && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-indigo-500 text-white">
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-300 to-orange-600 text-white">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-blue-100">Total Budget</CardTitle>
                   <Target className="h-5 w-5 text-blue-200" />

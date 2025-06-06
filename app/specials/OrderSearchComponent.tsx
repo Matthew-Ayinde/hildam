@@ -16,6 +16,7 @@ const dummyCustomers = [
 
 
 type FormDataType = {
+  customer_age: string | number | readonly string[] | undefined;
   blouse_length: string;
   bust: string;
   bustpoint: string;
@@ -73,7 +74,8 @@ const initialFormData: FormDataType = {
   skirt_length: "",
   sleeve_length: "",
   style_reference_images: null,
-  waist: ""
+  waist: "",
+  customer_age: undefined
 };
 
 
