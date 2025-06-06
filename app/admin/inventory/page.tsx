@@ -27,28 +27,21 @@ const Spinner = () => (
 
 export default function ModernInventoryTable() {
   interface InventoryItem {
-    id: number
-    itemData: string
-    itemQuantity: number
-    date: string
+    id: string
+    item_name: string
+    item_quantity: string
+    color: string
+    created_at: string
   }
 
-  const [data, setData] = useState<InventoryItem[]>([
-    { id: 1, itemData: "Premium Silk Fabric", itemQuantity: 45, date: "15 January 2024" },
-    { id: 2, itemData: "Cotton Thread Spools", itemQuantity: 120, date: "14 January 2024" },
-    { id: 3, itemData: "Sewing Machine Needles", itemQuantity: 200, date: "13 January 2024" },
-    { id: 4, itemData: "Zipper Assortment", itemQuantity: 85, date: "12 January 2024" },
-    { id: 5, itemData: "Button Collection", itemQuantity: 350, date: "11 January 2024" },
-    { id: 6, itemData: "Measuring Tape", itemQuantity: 25, date: "10 January 2024" },
-    { id: 7, itemData: "Fabric Scissors", itemQuantity: 15, date: "09 January 2024" },
-    { id: 8, itemData: "Embroidery Floss", itemQuantity: 95, date: "08 January 2024" },
-  ])
-  const [filteredData, setFilteredData] = useState<InventoryItem[]>(data)
+  const [data, setData] = useState<InventoryItem[]>([])
+
+  const [filteredData, setFilteredData] = useState<InventoryItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState("")
   const [toastType, setToastType] = useState<"success" | "error">("success")
@@ -58,9 +51,55 @@ export default function ModernInventoryTable() {
   const router = useRouter()
   const totalPages = Math.ceil(filteredData.length / rowsPerPage)
 
+
+  useEffect(() => {
+    const fetchInventoryData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const session = await getSession()
+      const token = session?.user?.token
+
+        const response = await fetch("https://hildam.insightpublicis.com/api/inventory", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch inventory data")
+        }
+
+        const result = await response.json()
+
+        if (result.message === "success" && result.data) {
+          setData(result.data)
+          setFilteredData(result.data)
+        } else {
+          throw new Error("Invalid response format")
+        }
+      } catch (error) {
+        console.error("Error fetching inventory:", error)
+        setError("Failed to load inventory data. Please try again.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchInventoryData()
+  }, [])
+
   // Search functionality
   useEffect(() => {
-    const filtered = data.filter((item) => item.itemData.toLowerCase().includes(searchTerm.toLowerCase()))
+    const filtered = data.filter(
+      (item) =>
+        item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.color.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
     setFilteredData(filtered)
     setCurrentPage(1)
   }, [searchTerm, data])
@@ -73,9 +112,10 @@ export default function ModernInventoryTable() {
         throw new Error("Access token not found.")
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${selectedUserId}`, {
+      const response = await fetch(`https://hildam.insightpublicis.com/api/inventory/${selectedUserId}`, {
         method: "DELETE",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       })
@@ -111,9 +151,10 @@ export default function ModernInventoryTable() {
 
   const paginatedData = filteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
 
-  const getStockStatus = (quantity: number) => {
-    if (quantity <= 20) return { status: "Low Stock", color: "text-red-600 bg-red-50 border-red-200" }
-    if (quantity <= 50) return { status: "Medium Stock", color: "text-amber-600 bg-amber-50 border-amber-200" }
+  const getStockStatus = (quantity: string) => {
+    const qty = Number.parseInt(quantity)
+    if (qty <= 10) return { status: "Low Stock", color: "text-red-600 bg-red-50 border-red-200" }
+    if (qty <= 50) return { status: "Medium Stock", color: "text-amber-600 bg-amber-50 border-amber-200" }
     return { status: "In Stock", color: "text-green-600 bg-green-50 border-green-200" }
   }
 
@@ -170,7 +211,7 @@ export default function ModernInventoryTable() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-6">
+    <div className="min-h-screen bg-white rounded-2xl p-6">
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -256,7 +297,7 @@ export default function ModernInventoryTable() {
               <div>
                 <p className="text-sm font-medium text-slate-600 mb-1">In Stock</p>
                 <p className="text-3xl font-bold text-green-600">
-                  {data.filter((item) => item.itemQuantity > 50).length}
+                  {data.filter((item) => Number.parseInt(item.item_quantity) > 50).length}
                 </p>
               </div>
               <div className="p-4 rounded-xl bg-gradient-to-br from-green-100 to-emerald-100">
@@ -270,7 +311,7 @@ export default function ModernInventoryTable() {
               <div>
                 <p className="text-sm font-medium text-slate-600 mb-1">Low Stock</p>
                 <p className="text-3xl font-bold text-amber-600">
-                  {data.filter((item) => item.itemQuantity <= 20).length}
+                  {data.filter((item) => Number.parseInt(item.item_quantity) <= 20).length}
                 </p>
               </div>
               <div className="p-4 rounded-xl bg-gradient-to-br from-amber-100 to-yellow-100">
@@ -279,17 +320,7 @@ export default function ModernInventoryTable() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-purple-100 hover:shadow-md transition-shadow duration-300">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600 mb-1">Total Value</p>
-                <p className="text-3xl font-bold text-purple-600">₦2.4M</p>
-              </div>
-              <div className="p-4 rounded-xl bg-gradient-to-br from-purple-100 to-indigo-100">
-                <HiOutlineSparkles className="text-purple-600 text-2xl" />
-              </div>
-            </div>
-          </div>
+       
         </motion.div>
 
         {/* Main Table Card */}
@@ -366,7 +397,7 @@ export default function ModernInventoryTable() {
                   </tr>
                 ) : (
                   paginatedData.map((row, index) => {
-                    const stockInfo = getStockStatus(row.itemQuantity)
+                    const stockInfo = getStockStatus(row.item_quantity)
                     return (
                       <motion.tr
                         key={row.id}
@@ -388,16 +419,14 @@ export default function ModernInventoryTable() {
                               <BiPackage className="text-slate-600" size={20} />
                             </div>
                             <div>
-                              <div className="font-medium text-slate-900">{row.itemData}</div>
-                              <div className="text-sm text-slate-500">
-                                SKU: ITM-{row.id.toString().padStart(3, "0")}
-                              </div>
+                              <div className="font-medium text-slate-900">{row.item_name}</div>
+                              <div className="text-sm text-slate-500">Color: {row.color}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-2">
-                            <span className="text-2xl font-bold text-slate-800">{row.itemQuantity}</span>
+                            <span className="text-2xl font-bold text-slate-800">{row.item_quantity}</span>
                             <span className="text-sm text-slate-500">units</span>
                           </div>
                         </td>
@@ -411,7 +440,7 @@ export default function ModernInventoryTable() {
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-2 text-slate-600">
                             <FaCalendarAlt className="text-slate-400" size={14} />
-                            <span className="text-sm">{row.date}</span>
+                            <span className="text-sm">{new Date(row.created_at).toLocaleDateString()}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4">

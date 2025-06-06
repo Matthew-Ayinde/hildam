@@ -86,7 +86,7 @@ export default function CustomerAnalyticsChart() {
   const returningCustomers = latestData.returning
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-yellow-50 p-6">
+    <div className="min-h-screen rounded-2xl">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
@@ -204,7 +204,7 @@ export default function CustomerAnalyticsChart() {
                       newCustomers: { label: "New Customers", color: "#3b82f6" },
                       totalCustomers: { label: "Total Customers", color: "#10b981" },
                     }}
-                    className="h-[300px]"
+                    className="h-[300px] w-full"
                   >
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={currentData}>
@@ -258,7 +258,7 @@ export default function CustomerAnalyticsChart() {
                     config={{
                       totalCustomers: { label: "Total Customers", color: "#10b981" },
                     }}
-                    className="h-[300px]"
+                    className="h-[300px] w-full"
                   >
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={currentData}>
@@ -318,7 +318,7 @@ export default function CustomerAnalyticsChart() {
                     retention: { label: "Retention Rate (%)", color: "#8b5cf6" },
                     satisfaction: { label: "Satisfaction Score", color: "#f59e0b" },
                   }}
-                  className="h-[400px]"
+                  className="h-[400px] w-full"
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={customerRetentionData}>
@@ -472,7 +472,7 @@ export default function CustomerAnalyticsChart() {
                     newCustomers: { label: "New Customers", color: "#3b82f6" },
                     returning: { label: "Returning Customers", color: "#10b981" },
                   }}
-                  className="h-[400px]"
+                  className="h-[400px] w-full"
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={currentData}>

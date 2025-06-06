@@ -121,7 +121,7 @@ export default function OrdersAnalyticsChart() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-50 to-yellow-50 p-6">
+    <div className="min-h-screen bg-white rounded-2xl p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
@@ -241,7 +241,7 @@ export default function OrdersAnalyticsChart() {
                       totalOrders: { label: "Total Orders", color: "#f97316" },
                       completed: { label: "Completed", color: "#10b981" },
                     }}
-                    className="h-[300px]"
+                    className="h-[300px] w-full"
                   >
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={currentData}>
@@ -302,7 +302,7 @@ export default function OrdersAnalyticsChart() {
                     config={{
                       revenue: { label: "Revenue", color: "#10b981" },
                     }}
-                    className="h-[300px]"
+                    className="h-[300px] w-full"
                   >
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={monthlyOrdersData}>
@@ -372,7 +372,7 @@ export default function OrdersAnalyticsChart() {
                         { label: item.name, color: item.color },
                       ]),
                     )}
-                    className="h-[300px]"
+                    className="h-[300px] w-full"
                   >
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -457,7 +457,7 @@ export default function OrdersAnalyticsChart() {
                     config={{
                       orders: { label: "Orders", color: "#f97316" },
                     }}
-                    className="h-[300px]"
+                    className="h-[300px] w-full"
                   >
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={clothingTypeOrders} layout="horizontal">
@@ -510,7 +510,7 @@ export default function OrdersAnalyticsChart() {
                       orders: { label: "Orders", color: "#8b5cf6" },
                       avgValue: { label: "Avg Value", color: "#f59e0b" },
                     }}
-                    className="h-[300px]"
+                    className="h-[300px] w-full"
                   >
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart data={dailyOrderTrends}>
