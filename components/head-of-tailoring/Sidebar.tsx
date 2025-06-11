@@ -366,6 +366,28 @@ const Sidebar = () => {
               </Link>
             </div>
 
+                        <div className="relative mt-5 mx-4">
+              <div
+                className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
+                  pathname === "/head-of-tailoring/inventory-requests"
+                    ? "opacity-100"
+                    : "opacity-0"
+                }`}
+              ></div>
+              <Link
+                href="/head-of-tailoring/inventory-requests"
+                className={`flex items-center space-x-3 px-4 py-2 text-base font-medium transition-all duration-300 ${
+                  pathname === "/head-of-tailoring/inventory-requests"
+                    ? "text-[#ff6c2f]"
+                    : "text-[#A5A8AB]"
+                }`}
+                onClick={closeSidebar}
+              >
+                <FaBoxes />
+                <span>Inventory Requests</span>
+              </Link>
+            </div>
+
             {/* <div className="">
               <ul className="space-y-1 mt-3 mb-10 px-4">
                 {sidebarItems.map((item) => {
