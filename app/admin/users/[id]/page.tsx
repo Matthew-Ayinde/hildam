@@ -4,6 +4,7 @@ import Spinner from "@/components/Spinner";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
+import { getSession } from "next-auth/react"; 
 
 export default function ShowCustomer() {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
@@ -29,7 +30,9 @@ export default function ShowCustomer() {
     setError(null);
 
     try {
-      const accessToken = sessionStorage.getItem("access_token");
+      const session = await getSession(); // Get session from NextAuth
+      const accessToken = session?.user?.token;
+     ;
       const response = await fetch(
         `${baseUrl}/users/${id}`,
         {

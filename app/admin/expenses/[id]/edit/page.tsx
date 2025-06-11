@@ -7,6 +7,7 @@ import Spinner from "@/components/Spinner";
 import { motion } from "framer-motion";
 import { IoArrowBack } from "react-icons/io5";
 import { FiSave } from "react-icons/fi";
+import { TbCurrencyNaira } from "react-icons/tb";
 
 export default function EditExpensePage() {
   const { id } = useParams();
@@ -169,7 +170,7 @@ export default function EditExpensePage() {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Summary Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-gray-700 font-medium mb-1">
                 Total Amount
@@ -182,19 +183,8 @@ export default function EditExpensePage() {
                 className="w-full border border-gray-300 rounded p-2 focus:ring-orange-300 focus:border-orange-300"
               />
             </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">
-                Balance Remaining
-              </label>
-              <input
-                type="text"
-                name="balance_remaining"
-                value={form.balance_remaining}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded p-2 focus:ring-orange-300 focus:border-orange-300"
-              />
-            </div>
-          </div>
+          
+          </div> */}
 
           {/* Breakdown Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -216,14 +206,14 @@ export default function EditExpensePage() {
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded p-2 focus:ring-orange-300 focus:border-orange-300"
                 />
-                <textarea
+                {/* <textarea
                   name={desc}
                   value={(form as any)[desc]}
                   onChange={handleChange}
                   rows={2}
                   className="w-full border border-gray-300 rounded p-2 focus:ring-orange-300 focus:border-orange-300"
                   placeholder="Description"
-                />
+                /> */}
               </div>
             ))}
           </div>

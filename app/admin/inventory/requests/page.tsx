@@ -130,6 +130,10 @@ export default function ModernInventoryTable() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
+
+          body: JSON.stringify({
+            "feedback": "Request cannot be granted",
+          }),
       })
 
       if (!response.ok) {
@@ -585,8 +589,7 @@ export default function ModernInventoryTable() {
                   </div>
                 </div>
                 <p className="text-gray-700 mb-6">
-                  Are you sure you want to reject this inventory request? The request will be permanently removed from
-                  the system.
+                  Are you sure you want to reject this inventory request? 
                 </p>
                 <div className="flex gap-3">
                   <motion.button

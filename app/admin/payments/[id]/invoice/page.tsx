@@ -243,7 +243,7 @@ export default function Invoice() {
               <div className="grid grid-cols-2 gap-2 text-gray-800 text-right mb-4">
                 <div className="space-y-2">
                   <p>Subtotal:</p>
-                  <p>VAT (10%):</p>
+                  <p>VAT:</p>
                   <p>Discount:</p>
                   <p>Total:</p>
                   <p>Paid:</p>
