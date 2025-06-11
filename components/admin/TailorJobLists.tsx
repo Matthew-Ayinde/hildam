@@ -4,8 +4,6 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   FiEye,
-  FiEdit3,
-  FiTrash2,
   FiChevronLeft,
   FiChevronRight,
   FiCalendar,
@@ -21,6 +19,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { getSession } from "next-auth/react"
 
 interface JobItem {
   id: string
@@ -35,84 +34,9 @@ interface JobItem {
   customer_description: string
 }
 
-const mockData: JobItem[] = [
-  {
-    id: "52",
-    order_id: "PWT821",
-    assigned_at: "2025-06-06 04:17:09",
-    clothing_name: "Buba",
-    clothing_description: "Gown",
-    priority: "high",
-    customer_name: "Collins",
-    gender: "male",
-    age: "30",
-    customer_description: "Tall, Broad chest, Dark",
-  },
-  {
-    id: "51",
-    order_id: "HBK493",
-    assigned_at: "2025-05-25 17:10:44",
-    clothing_name: "Ankara",
-    clothing_description: "Iro and buba",
-    priority: "medium",
-    customer_name: "Collins",
-    gender: "male",
-    age: "30",
-    customer_description: "Tall, Broad chest, Dark",
-  },
-  {
-    id: "50",
-    order_id: "RJB965",
-    assigned_at: "2025-05-25 16:39:05",
-    clothing_name: "Lace",
-    clothing_description: "Iro and buba",
-    priority: "medium",
-    customer_name: "Jago",
-    gender: "female",
-    age: "50",
-    customer_description: "Short",
-  },
-  {
-    id: "49",
-    order_id: "CYI456",
-    assigned_at: "2025-05-25 16:32:17",
-    clothing_name: "Buba",
-    clothing_description: "Lace",
-    priority: "high",
-    customer_name: "Adebosola Adediran",
-    gender: "male",
-    age: "30",
-    customer_description: "Short, Fat, Broad chested",
-  },
-  {
-    id: "48",
-    order_id: "XSH534",
-    assigned_at: "2025-05-24 01:13:22",
-    clothing_name: "Silk",
-    clothing_description: "Suit",
-    priority: "high",
-    customer_name: "Adebosola Adediran",
-    gender: "male",
-    age: "30",
-    customer_description: "Short, Fat, Broad chested",
-  },
-  {
-    id: "47",
-    order_id: "CSB450",
-    assigned_at: "2025-05-23 22:38:37",
-    clothing_name: "Aso oke",
-    clothing_description: "Iro and Buba",
-    priority: "high",
-    customer_name: "Adebosola Adediran",
-    gender: "male",
-    age: "30",
-    customer_description: "Short, Fat, Broad chested",
-  },
-]
-
 export default function TailorDashboard() {
-  const [data, setData] = useState<JobItem[]>(mockData)
-  const [filteredData, setFilteredData] = useState<JobItem[]>(mockData)
+  const [data, setData] = useState<JobItem[]>([])
+  const [filteredData, setFilteredData] = useState<JobItem[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState("")
   const [priorityFilter, setPriorityFilter] = useState<string>("all")
@@ -213,6 +137,45 @@ export default function TailorDashboard() {
         return "bg-gray-100 text-gray-700 border-gray-200"
     }
   }
+
+  const fetchJobs = async () => {
+    setLoading(true)
+    try {
+      const session = await getSession()
+      const token = session?.user?.token // Assuming you have the token in the session
+      const response = await fetch("https://hildam.insightpublicis.com/api/tailorjoblists", {
+        headers: {
+          Authorization: `Bearer ${token}`, // Replace with actual token
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch jobs")
+      }
+
+      const result = await response.json()
+
+      if (result.message === "success" && result.data) {
+        // Filter out incomplete records and sort by date (most recent first)
+        const validJobs = result.data
+          .filter((job: any) => job.order_id && job.customer_name && job.clothing_name)
+          .sort((a: any, b: any) => new Date(b.assigned_at).getTime() - new Date(a.assigned_at).getTime())
+        // Remove the slice limit to fetch all jobs
+
+        setData(validJobs)
+      }
+    } catch (error) {
+      console.error("Error fetching jobs:", error)
+      // You might want to show a toast notification or error message here
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchJobs()
+  }, [])
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -329,33 +292,54 @@ export default function TailorDashboard() {
         </motion.div>
 
         {/* Jobs Grid */}
-        {filteredData.length === 0 && (
+        {loading ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="col-span-full">
             <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm overflow-hidden">
               <CardContent className="p-12 flex flex-col items-center justify-center text-center">
-                <div className="p-4 bg-orange-100 rounded-full mb-4">
-                  <FiPackage className="w-8 h-8 text-orange-500" />
+                <div className="animate-spin p-4 bg-orange-100 rounded-full mb-4">
+                  <FiClock className="w-8 h-8 text-orange-500" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">No Jobs Found</h3>
-                <p className="text-gray-600 mb-6">
-                  {searchTerm || priorityFilter !== "all"
-                    ? "Try adjusting your search or filter criteria"
-                    : "There are no jobs assigned to you at the moment"}
-                </p>
-                {(searchTerm || priorityFilter !== "all") && (
-                  <Button
-                    onClick={() => {
-                      setSearchTerm("")
-                      setPriorityFilter("all")
-                    }}
-                    className="bg-orange-500 hover:bg-orange-600 text-white"
-                  >
-                    Clear Filters
-                  </Button>
-                )}
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Jobs...</h3>
+                <p className="text-gray-600">Please wait while we fetch your assignments</p>
               </CardContent>
             </Card>
           </motion.div>
+        ) : (
+          filteredData.length === 0 && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="col-span-full">
+              <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm overflow-hidden">
+                <CardContent className="p-12 flex flex-col items-center justify-center text-center">
+                  <div className="p-4 bg-orange-100 rounded-full mb-4">
+                    <FiPackage className="w-8 h-8 text-orange-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">No Jobs Found</h3>
+                  <p className="text-gray-600 mb-6">
+                    {searchTerm || priorityFilter !== "all"
+                      ? "Try adjusting your search or filter criteria"
+                      : "There are no jobs assigned to you at the moment"}
+                  </p>
+                  {(searchTerm || priorityFilter !== "all") && (
+                    <Button
+                      onClick={() => {
+                        setSearchTerm("")
+                        setPriorityFilter("all")
+                      }}
+                      className="bg-orange-500 hover:bg-orange-600 text-white"
+                    >
+                      Clear Filters
+                    </Button>
+                  )}
+                  <Button
+                    onClick={fetchJobs}
+                    variant="outline"
+                    className="mt-2 border-orange-200 text-orange-600 hover:bg-orange-50"
+                  >
+                    Refresh Jobs
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )
         )}
         <AnimatePresence mode="wait">
           <motion.div
@@ -403,10 +387,10 @@ export default function TailorDashboard() {
 
                     <div className="flex gap-2 pt-2">
                       <Link href={`/head-of-tailoring/jobs/${job.id}`}>
-                      <Button size="sm" className="flex-1 bg-orange-500 hover:bg-orange-600 text-white">
-                        <FiEye className="w-4 h-4 mr-2" />
-                        View
-                      </Button>
+                        <Button size="sm" className="flex-1 bg-orange-500 hover:bg-orange-600 text-white">
+                          <FiEye className="w-4 h-4 mr-2" />
+                          View
+                        </Button>
                       </Link>
                     </div>
                   </CardContent>

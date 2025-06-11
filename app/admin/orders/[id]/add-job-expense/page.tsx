@@ -66,6 +66,8 @@ export default function AddExpensePage() {
     { id: "utilities", name: "Utilities", icon: <FaCut className="w-5 h-5" />, amount: 0 },
     { id: "service", name: "Services", icon: <FaRuler className="w-5 h-5" />, amount: 0 },
     { id: "labour", name: "Labour", icon: <FaUserTie className="w-5 h-5" />, amount: 0 },
+    { id: "purchase", name: "Purchase Costs", icon: <FaCog className="w-5 h-5" />, amount: 0 },
+    { id: "rent", name: "Rent", icon: <FaPalette className="w-5 h-5" />, amount: 0 },
   ])
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -115,7 +117,7 @@ export default function AddExpensePage() {
             orderDescription: data.clothing_description || "",
             clothingName: data.clothing_name || "",
           })
-          setSuccess("Order data loaded successfully!")
+          // setSuccess("Order data loaded successfully!")
         } else {
           throw new Error("Invalid response format or no data found")
         }
@@ -177,7 +179,7 @@ export default function AddExpensePage() {
       }
 
       setSuccess("Expenses submitted successfully!")
-      router.push(`https://hildam.insightpublicis.com/api/addexpense/admin/orders/create-payment/${id}`) // Redirect to order details page
+      router.push(`/admin/orders/${id}/create-payment`) // Redirect to order details page
 
       // Reset only the expense amounts after successful submission
       setExpenses((prev) => prev.map((expense) => ({ ...expense, amount: 0 })))
@@ -221,7 +223,7 @@ export default function AddExpensePage() {
             transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
             className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"
           />
-          <p className="text-gray-600">Loading order data from API...</p>
+          <p className="text-gray-600">Loading order data...</p>
           <p className="text-sm text-gray-500 mt-2">Fetching order ID: {id}</p>
         </div>
       </div>
@@ -282,7 +284,7 @@ export default function AddExpensePage() {
                   className="text-lg font-bold text-white mb-3 block flex items-center justify-center gap-2"
                 >
                   <FaClipboardList className="w-5 h-5" />
-                  Order ID (Auto-populated from API)
+                  Order ID
                 </Label>
                 <Input
                   id="orderId"
@@ -307,7 +309,7 @@ export default function AddExpensePage() {
             <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3 text-xl">
                 <FaFileInvoice className="w-6 h-6" />
-                Order Details (Auto-populated from API)
+                Order Details
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -443,8 +445,8 @@ export default function AddExpensePage() {
                       />
                     ) : (
                       <>
-                        <FaSave className="w-5 h-5 mr-3" />
-                        Submit Order & Expenses
+                        {/* <FaSave className="w-5 h-5 mr-3" /> */}
+                        Create Expense
                       </>
                     )}
                   </Button>

@@ -145,7 +145,7 @@ const Form = () => {
               Create Payment
             </CardTitle>
             <CardDescription className="text-lg text-slate-600">
-              Generate a new payment record for the order
+              Generate payment to get invoice for order <span className="text-orange-500">{formData.order_id || "Loading..."} </span>
             </CardDescription>
           </CardHeader>
 

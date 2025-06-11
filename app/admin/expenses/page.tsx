@@ -197,6 +197,12 @@ export default function ExpenseTable() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
+                        <Link
+                          href={`/admin/expenses/${row.id}`}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors duration-200"
+                        >
+                          <Eye size={16} />
+                        </Link>
                         <button
                           onClick={() => {
                             setSelectedExpenseId(row.id)

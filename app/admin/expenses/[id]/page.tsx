@@ -10,6 +10,7 @@ import { FiDollarSign, FiPieChart } from "react-icons/fi";
 import { GiWaterDrop, GiTakeMyMoney } from "react-icons/gi";
 import { MdMiscellaneousServices, MdConstruction } from "react-icons/md";
 import { FaHome } from "react-icons/fa";
+import { TbCurrencyNaira } from "react-icons/tb";
 
 export default function ShowExpensePage() {
   const { id } = useParams();
@@ -101,21 +102,31 @@ export default function ShowExpensePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
+    <div className="bg-gray-50 py-10 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full mx-auto bg-white rounded-2xl shadow-lg overflow-hidden"
       >
-        <header className="flex items-center bg-orange-500 text-white p-4">
-          <IoArrowBack
+        <header className="flex items-center justify-between bg-orange-500 text-white p-4">
+          <div className="flex items-center">
+            <IoArrowBack
             size={24}
             className="cursor-pointer mr-4 hover:text-orange-200"
             onClick={() => router.back()}
           />
           <FiPieChart size={28} className="mr-2" />
           <h1 className="text-2xl font-semibold">Expense Overview</h1>
+          </div>
+          <motion.button
+            onClick={() => router.push(`/admin/expenses/${id}/edit`)}
+            className="ml-auto px-4 py-2 text-orange-500 bg-white rounded-lg hover:bg-gray-200 transition"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Edit Expense
+          </motion.button>
         </header>
 
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -157,15 +168,7 @@ export default function ShowExpensePage() {
               </div>
             </div>
 
-            <div className="flex items-center bg-orange-50 p-4 rounded-lg shadow-sm">
-              <div className="text-orange-500 mr-3 text-3xl">₦</div>
-              <div>
-                <p className="text-gray-700 font-medium">Updated On</p>
-                <p className="text-lg font-semibold">
-                  {formatDate(expense.updated_at)}
-                </p>
-              </div>
-            </div>
+           
           </motion.div>
           {/* Breakdown Section */}
           <motion.div
@@ -198,14 +201,7 @@ export default function ShowExpensePage() {
                   />
                 ),
               },
-              {
-                label: "Purchase Costs",
-                value: expense.purchase_costs,
-                desc: expense.purchase_costs_description,
-                icon: (
-                  <GiTakeMyMoney size={24} className="text-orange-500 mr-3" />
-                ),
-              },
+             
               {
                 label: "Labour",
                 value: expense.labour,
@@ -215,11 +211,20 @@ export default function ShowExpensePage() {
                 ),
               },
               {
+                label: "Purchase Costs",
+                value: expense.purchase_costs,
+                desc: expense.purchase_costs_description,
+                icon: (
+                  <TbCurrencyNaira size={24} className="text-orange-500 mr-3" />
+                ),
+              },
+              {
                 label: "Rent",
                 value: expense.rent,
                 desc: expense.rent_description,
                 icon: <FaHome size={24} className="text-orange-500 mr-3" />,
               },
+             
             ].map(({ label, value, desc, icon }) => (
               <div
                 key={label}
@@ -243,13 +248,13 @@ export default function ShowExpensePage() {
             transition={{ delay: 0.7, duration: 0.4 }}
             className="flex justify-end m-5"
           >
-            <button
+            {/* <button
               onClick={() => router.push(`/admin/expenses/${id}/edit`)}
               className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
             >
               <div className="text-orange-500 mr-3 text-3xl">₦</div>
               Edit Expense
-            </button>
+            </button> */}
           </motion.div>
       </motion.div>
     </div>

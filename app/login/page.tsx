@@ -64,10 +64,10 @@ export default function LoginPage() {
       password,
     });
 
-    setLoading(false);
 
     if (result?.error) {
       setError("Invalid email or password");
+          setLoading(false);
     } else {
       setSuccess(true);
     }
@@ -183,7 +183,7 @@ export default function LoginPage() {
   >
     {loading ? (
       <>
-        <Spinner  /> Logging in...
+        <Spinner  /> 
       </>
     ) : (
       "Login"
