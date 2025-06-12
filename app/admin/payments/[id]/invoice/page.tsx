@@ -151,7 +151,7 @@ export default function Invoice() {
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
         <div
           ref={invoiceRef}
-          className="w-full max-w-4xl bg-white p-10 rounded-xl shadow-2xl border border-gray-200 text-sm sm:text-base"
+          className="w-full max-w-4xl bg-white p-10 rounded-xl shadow-2xl border border-gray-200 text-sm sm:text-base pb-80"
         >
           {/* Header */}
           <div className="mb-8">
@@ -198,13 +198,11 @@ export default function Invoice() {
               <div className="space-y-2">
                 <p className="font-medium">Invoice No:</p>
                 <p className="font-medium">Date:</p>
-                <p className="font-medium">Terms:</p>
                 <p className="font-medium">Due Date:</p>
               </div>
               <div className="space-y-2">
                 <p>{invoiceData.order_id}</p>
                 <p>{formatDate(invoiceData.created_at)}</p>
-                <p>Net 30</p>
                 <p>{formatDate(invoiceData.updated_at)}</p>
               </div>
             </div>
@@ -216,9 +214,9 @@ export default function Invoice() {
               <div className="font-semibold">Description</div>
               <div>
                 <div className="grid grid-cols-3 text-right font-semibold">
-                  <div>Quantity</div>
-                  <div>Rate</div>
                   <div>Amount</div>
+                  <div>Discount</div>
+                  <div>Total</div>
                 </div>
               </div>
             </div>
@@ -226,9 +224,9 @@ export default function Invoice() {
               <div className="text-gray-800">{invoiceData.clothing_name}</div>
               <div>
                 <div className="grid grid-cols-3 text-right text-gray-800">
-                  <div>1</div>
-                  <div>{invoiceData.going_rate}</div>
                   <div>₦{invoiceData.total_amount_due}</div>
+                  <div>₦{invoiceData.discount}</div>
+                  <div>₦{invoiceData.cumulative_total_amount}</div>
                 </div>
               </div>
             </div>
@@ -242,14 +240,12 @@ export default function Invoice() {
             <div className="w-full sm:w-1/2">
               <div className="grid grid-cols-2 gap-2 text-gray-800 text-right mb-4">
                 <div className="space-y-2">
-                  <p>Subtotal:</p>
                   <p>VAT:</p>
                   <p>Discount:</p>
                   <p>Total:</p>
                   <p>Paid:</p>
                 </div>
                 <div className="space-y-2">
-                  <p>₦{invoiceData.going_rate}</p>
                   <p>₦{invoiceData.VAT}</p>
                   <p>₦{invoiceData.discount}</p>
                   <p>₦{invoiceData.cumulative_total_amount}</p>

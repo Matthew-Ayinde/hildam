@@ -151,7 +151,7 @@ export default function Receipt() {
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
         <div
           ref={receiptRef}
-          className="w-full max-w-4xl bg-white p-10 rounded-xl shadow-2xl border border-gray-200 text-sm sm:text-base"
+          className="w-full max-w-4xl bg-white p-10 rounded-xl shadow-2xl border border-gray-200 text-sm sm:text-base pb-80"
         >
           {/* Header */}
           <div className="mb-8">
@@ -198,13 +198,11 @@ export default function Receipt() {
               <div className="space-y-2">
                 <p className="font-medium">Invoice No:</p>
                 <p className="font-medium">Date:</p>
-                <p className="font-medium">Terms:</p>
                 <p className="font-medium">Due Date:</p>
               </div>
               <div className="space-y-2">
                 <p>{receiptData.order_id}</p>
                 <p>{formatDate(receiptData.created_at)}</p>
-                <p>Net 30</p>
                 <p>{formatDate(receiptData.updated_at)}</p>
               </div>
             </div>
@@ -216,9 +214,9 @@ export default function Receipt() {
               <div className="font-semibold">Description</div>
               <div>
                 <div className="grid grid-cols-3 text-right font-semibold">
-                  <div>Quantity</div>
-                  <div>Rate</div>
-                  <div>Amount</div>
+                  <div>VAT</div>
+                  <div>Discount</div>
+                  <div>Total</div>
                 </div>
               </div>
             </div>
@@ -226,8 +224,8 @@ export default function Receipt() {
               <div className="text-gray-800">{receiptData.clothing_name}</div>
               <div>
                 <div className="grid grid-cols-3 text-right text-gray-800">
-                  <div>1</div>
-                  <div>{receiptData.going_rate}</div>
+                  <div>₦{receiptData.VAT}</div>
+                  <div>₦{receiptData.discount}</div>
                   <div>₦{receiptData.total_amount_due}</div>
                 </div>
               </div>
@@ -242,14 +240,12 @@ export default function Receipt() {
             <div className="w-full sm:w-1/2">
               <div className="grid grid-cols-2 gap-2 text-gray-800 text-right mb-4">
                 <div className="space-y-2">
-                  <p>Subtotal:</p>
                   <p>VAT:</p>
                   <p>Discount:</p>
                   <p>Total:</p>
                   <p>Paid:</p>
                 </div>
                 <div className="space-y-2">
-                  <p>₦{receiptData.going_rate}</p>
                   <p>₦{receiptData.VAT}</p>
                   <p>₦{receiptData.discount}</p>
                   <p>₦{receiptData.cumulative_total_amount}</p>
