@@ -149,7 +149,7 @@ export default function ShowCustomer() {
       {/* Unit */}
       <div>
         <label className="block text-gray-800 font-bold mb-2">
-          Unit
+          Description
         </label>
         <input
           type="text"
