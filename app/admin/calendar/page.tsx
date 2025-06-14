@@ -11,6 +11,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AppointmentDialog } from "./AppointmentDialog"
+import { QuickAppointmentCard } from "./QuickAppointmentCard"
 
 // Sample order data with Naira currency
 const orders = [
@@ -109,6 +111,13 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [filterType, setFilterType] = useState<"all" | "first" | "second">("all")
+  const [showAppointmentDialog, setShowAppointmentDialog] = useState(false)
+  const [appointments, setAppointments] = useState(orders)
+
+  // Appointment saving function
+  const handleSaveAppointment = (newAppointment: any) => {
+    setAppointments((prev) => [...prev, newAppointment])
+  }
 
   const currentYear = selectedYear
   const currentMonth = currentDate.getMonth()
@@ -117,7 +126,7 @@ export default function CalendarPage() {
 
   // Filter orders by selected year and filter type
   const getFilteredOrders = () => {
-    return orders.filter((order) => {
+    return appointments.filter((order) => {
       const orderYear =
         order.firstFitting.getFullYear() === selectedYear || order.secondFitting.getFullYear() === selectedYear
 
@@ -211,6 +220,16 @@ export default function CalendarPage() {
           <p className="text-muted-foreground mt-2">
             {dayOrders.length} fitting{dayOrders.length !== 1 ? "s" : ""} scheduled
           </p>
+          <Button
+            onClick={() => {
+              setSelectedDate(currentDate)
+              setShowAppointmentDialog(true)
+            }}
+            className="mt-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+          >
+            <Calendar className="h-4 w-4 mr-2" />
+            Add Appointment
+          </Button>
         </div>
         {dayOrders.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
@@ -305,24 +324,49 @@ export default function CalendarPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
             <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-orange-50/30">
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
-                  {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })} Fittings
-                </CardTitle>
-                <CardDescription className="text-base">
-                  {getOrdersForDate(selectedDate).length} fitting
-                  {getOrdersForDate(selectedDate).length !== 1 ? "s" : ""} scheduled
-                </CardDescription>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-xl bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
+                      {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })} Fittings
+                    </CardTitle>
+                    <CardDescription className="text-base">
+                      {getOrdersForDate(selectedDate).length} fitting
+                      {getOrdersForDate(selectedDate).length !== 1 ? "s" : ""} scheduled
+                    </CardDescription>
+                  </div>
+                  <Button
+                    onClick={() => setShowAppointmentDialog(true)}
+                    size="sm"
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Add
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {getOrdersForDate(selectedDate).map((order) => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      isFitting={isFirstFitting(selectedDate, order) ? "First" : "Second"}
-                    />
-                  ))}
-                </div>
+                <QuickAppointmentCard
+                  selectedDate={selectedDate}
+                  onAddAppointment={() => setShowAppointmentDialog(true)}
+                  existingAppointments={getOrdersForDate(selectedDate)}
+                />
+
+                {getOrdersForDate(selectedDate).length > 0 && (
+                  <>
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-3">Existing Appointments</h4>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {getOrdersForDate(selectedDate).map((order) => (
+                        <OrderCard
+                          key={order.id}
+                          order={order}
+                          isFitting={isFirstFitting(selectedDate, order) ? "First" : "Second"}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -385,7 +429,11 @@ export default function CalendarPage() {
                     ? "ring-2 ring-orange-400 ring-offset-2"
                     : "",
                 )}
-                onClick={() => setSelectedDate(day.date)}
+                onClick={() => {
+                  setSelectedDate(day.date)
+                  // Remove the immediate dialog opening
+                  // setShowAppointmentDialog(true)
+                }}
               >
                 <div className="flex justify-between items-center mb-1">
                   <span
@@ -434,27 +482,54 @@ export default function CalendarPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
             <Card className="shadow-xl border-0 bg-gradient-to-br from-white via-orange-50/20 to-white">
               <CardHeader className="pb-4 bg-gradient-to-r from-orange-500/5 to-orange-400/5 rounded-t-lg">
-                <CardTitle className="text-2xl bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
-                  {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                </CardTitle>
-                <CardDescription className="text-base">
-                  {getOrdersForDate(selectedDate).length} fitting
-                  {getOrdersForDate(selectedDate).length !== 1 ? "s" : ""} scheduled
-                </CardDescription>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-2xl bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
+                      {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                    </CardTitle>
+                    <CardDescription className="text-base">
+                      {getOrdersForDate(selectedDate).length} fitting
+                      {getOrdersForDate(selectedDate).length !== 1 ? "s" : ""} scheduled
+                    </CardDescription>
+                  </div>
+                  <Button
+                    onClick={() => setShowAppointmentDialog(true)}
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Add Appointment
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="pt-6">
-                <div className="grid gap-4 md:grid-cols-2">
-                  {getOrdersForDate(selectedDate).map((order, index) => (
-                    <motion.div
-                      key={order.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <OrderCard order={order} isFitting={isFirstFitting(selectedDate, order) ? "First" : "Second"} />
-                    </motion.div>
-                  ))}
-                </div>
+                <QuickAppointmentCard
+                  selectedDate={selectedDate}
+                  onAddAppointment={() => setShowAppointmentDialog(true)}
+                  existingAppointments={getOrdersForDate(selectedDate)}
+                />
+
+                {getOrdersForDate(selectedDate).length > 0 && (
+                  <>
+                    <div className="mb-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-3">Existing Appointments</h4>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {getOrdersForDate(selectedDate).map((order, index) => (
+                        <motion.div
+                          key={order.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                        >
+                          <OrderCard
+                            order={order}
+                            isFitting={isFirstFitting(selectedDate, order) ? "First" : "Second"}
+                          />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -664,6 +739,12 @@ export default function CalendarPage() {
           </div>
         </div>
       </div>
+      <AppointmentDialog
+        open={showAppointmentDialog}
+        onOpenChange={setShowAppointmentDialog}
+        selectedDate={selectedDate}
+        onSaveAppointment={handleSaveAppointment}
+      />
     </div>
   )
 }
@@ -719,9 +800,6 @@ function OrderCard({ order, isFitting }: { order: any; isFitting: "First" | "Sec
           <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg col-span-2">
             <Package className="h-4 w-4 text-orange-500 flex-shrink-0" />
             <span className="font-medium">{order.items.join(", ")}</span>
-          </div>
-          <div className="col-span-2 flex items-center justify-center p-3 bg-gradient-to-r from-orange-50 to-orange-25 rounded-lg">
-            <span className="text-lg font-bold text-orange-700">{order.totalAmount}</span>
           </div>
         </div>
       </div>

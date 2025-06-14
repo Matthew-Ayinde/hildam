@@ -83,7 +83,7 @@ const sidebarItems = [
     icon: <MdOutlineInventory2 />,
     prefix: "/admin/calendar",
     links: [
-      { name: "View Fitting Dates", href: "/admin/calendar" },
+      { name: "Fitting Dates", href: "/admin/calendar" },
     ],
   },
   {
