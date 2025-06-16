@@ -117,7 +117,7 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="fittingType">Fitting Type</Label>
+            <Label htmlFor="fittingType">Appointments</Label>
             <Select
               value={formData.fittingType}
               onValueChange={(value: "first" | "second") => setFormData((prev) => ({ ...prev, fittingType: value }))}
@@ -128,6 +128,7 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
               <SelectContent>
                 <SelectItem value="first">First Fitting</SelectItem>
                 <SelectItem value="second">Second Fitting</SelectItem>
+                <SelectItem value="final">Collection/pickup date</SelectItem>
               </SelectContent>
             </Select>
           </div>
