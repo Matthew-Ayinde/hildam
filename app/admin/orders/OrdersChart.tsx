@@ -214,10 +214,6 @@ export default function OrdersAnalyticsChart() {
               <PieChartIcon className="h-4 w-4" />
               Status
             </TabsTrigger>
-            <TabsTrigger value="performance" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Performance
-            </TabsTrigger>
             <TabsTrigger value="insights" className="gap-2">
               <Activity className="h-4 w-4" />
               Insights
@@ -441,115 +437,6 @@ export default function OrdersAnalyticsChart() {
             </div>
           </TabsContent>
 
-          <TabsContent value="performance" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Clothing Type Performance */}
-              <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl text-slate-800 flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-blue-500" />
-                    Orders by Clothing Type
-                  </CardTitle>
-                  <CardDescription>Performance by product category</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      orders: { label: "Orders", color: "#f97316" },
-                    }}
-                    className="h-[300px] w-full"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={clothingTypeOrders} layout="horizontal">
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis type="number" stroke="#64748b" fontSize={12} />
-                        <YAxis dataKey="type" type="category" stroke="#64748b" fontSize={10} width={100} />
-                        <ChartTooltip
-                          content={({ active, payload, label }) => {
-                            if (active && payload && payload.length) {
-                              const data = payload[0].payload
-                              return (
-                                <div className="bg-white p-4 border rounded-lg shadow-lg">
-                                  <p className="font-medium text-slate-800 mb-2">{label}</p>
-                                  <div className="space-y-1">
-                                    <p className="text-sm text-slate-600">
-                                      Orders: <span className="font-semibold">{data.orders}</span>
-                                    </p>
-                                    <p className="text-sm text-slate-600">
-                                      Revenue: <span className="font-semibold">{formatCurrency(data.revenue)}</span>
-                                    </p>
-                                    <p className="text-sm text-slate-600">
-                                      Avg Price: <span className="font-semibold">{formatCurrency(data.avgPrice)}</span>
-                                    </p>
-                                  </div>
-                                </div>
-                              )
-                            }
-                            return null
-                          }}
-                        />
-                        <Bar dataKey="orders" fill="#f97316" radius={[0, 4, 4, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-
-              {/* Daily Order Trends */}
-              <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl text-slate-800 flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-purple-500" />
-                    Daily Order Patterns
-                  </CardTitle>
-                  <CardDescription>Orders by day of the week</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      orders: { label: "Orders", color: "#8b5cf6" },
-                      avgValue: { label: "Avg Value", color: "#f59e0b" },
-                    }}
-                    className="h-[300px] w-full"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={dailyOrderTrends}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="day" stroke="#64748b" fontSize={12} />
-                        <YAxis yAxisId="left" stroke="#64748b" fontSize={12} />
-                        <YAxis yAxisId="right" orientation="right" stroke="#64748b" fontSize={12} />
-                        <ChartTooltip
-                          content={({ active, payload, label }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-white p-4 border rounded-lg shadow-lg">
-                                  <p className="font-medium text-slate-800 mb-2">{label}</p>
-                                  {payload.map((entry, index) => (
-                                    <div key={index} className="flex items-center gap-2">
-                                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                                      <span className="text-sm text-slate-600">{entry.name}:</span>
-                                      <span className="font-semibold text-slate-800">
-                                        {entry.dataKey === "avgValue"
-                                          ? formatCurrency(entry.value as number)
-                                          : entry.value}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )
-                            }
-                            return null
-                          }}
-                        />
-                        <Bar yAxisId="left" dataKey="orders" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-                        <Line yAxisId="right" type="monotone" dataKey="avgValue" stroke="#f59e0b" strokeWidth={2} />
-                      </ComposedChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
 
           <TabsContent value="insights" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -596,43 +483,6 @@ export default function OrdersAnalyticsChart() {
                 </CardContent>
               </Card>
 
-              {/* Key Metrics Summary */}
-              <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl text-slate-800 flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-green-500" />
-                    Key Performance Metrics
-                  </CardTitle>
-                  <CardDescription>Important business insights</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
-                      <div>
-                        <p className="text-sm font-medium text-green-700">Average Order Value</p>
-                        <p className="text-2xl font-bold text-green-800">₦2,150</p>
-                      </div>
-                      <CheckCircle className="h-8 w-8 text-green-500" />
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200">
-                      <div>
-                        <p className="text-sm font-medium text-blue-700">Average Completion Time</p>
-                        <p className="text-2xl font-bold text-blue-800">5.2 days</p>
-                      </div>
-                      <Clock className="h-8 w-8 text-blue-500" />
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200">
-                      <div>
-                        <p className="text-sm font-medium text-orange-700">Customer Satisfaction</p>
-                        <p className="text-2xl font-bold text-orange-800">4.8/5.0</p>
-                      </div>
-                      <TrendingUp className="h-8 w-8 text-orange-500" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </TabsContent>
         </Tabs>
