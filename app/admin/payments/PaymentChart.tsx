@@ -2,91 +2,130 @@
 
 import { motion } from "framer-motion"
 import { useState } from "react"
-import {
-  Line,
-  LineChart,
-  Area,
-  AreaChart,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  Bar,
-  BarChart,
-  Legend,
-} from "recharts"
+import { Line, LineChart, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Bar, BarChart, Legend } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { FaArrowUp, FaArrowDown, FaDollarSign, FaChartLine, FaFilter } from "react-icons/fa"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { FaArrowUp, FaArrowDown, FaDollarSign, FaChartLine } from "react-icons/fa"
 import { IoTrendingUp, IoTrendingDown } from "react-icons/io5"
-import { CalendarDays, TrendingUp } from "lucide-react"
+import { CalendarDays, TrendingUp, CalendarIcon } from "lucide-react"
+import {
+  format,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+  isWithinInterval,
+} from "date-fns"
 
-// Extended data for different time periods
-const yearlyData = [
-  { period: "2022", income: 650000, expenses: 480000, profit: 170000 },
-  { period: "2023", income: 720000, expenses: 520000, profit: 200000 },
-  { period: "2024", income: 780000, expenses: 580000, profit: 200000 },
-]
+// Extended data with actual dates
+const allData = [
+  // 2022 data
+  { date: new Date(2025, 0, 15), income: 45000, expenses: 32000, profit: 13000 },
+  { date: new Date(2025, 1, 15), income: 52000, expenses: 35000, profit: 17000 },
+  { date: new Date(2025, 2, 15), income: 48000, expenses: 38000, profit: 10000 },
+  { date: new Date(2025, 3, 15), income: 61000, expenses: 42000, profit: 19000 },
+  { date: new Date(2025, 4, 15), income: 58000, expenses: 39000, profit: 19000 },
+  { date: new Date(2025, 5, 15), income: 67000, expenses: 45000, profit: 22000 },
+  { date: new Date(2025, 6, 15), income: 72000, expenses: 48000, profit: 24000 },
+  { date: new Date(2025, 7, 15), income: 69000, expenses: 46000, profit: 23000 },
+  { date: new Date(2025, 8, 15), income: 75000, expenses: 52000, profit: 23000 },
+  { date: new Date(2025, 9, 15), income: 78000, expenses: 54000, profit: 24000 },
+  { date: new Date(2025, 10, 15), income: 82000, expenses: 58000, profit: 24000 },
+  { date: new Date(2025, 11, 15), income: 85000, expenses: 61000, profit: 24000 },
 
-const monthlyData = [
-  { period: "Jan", income: 45000, expenses: 32000, profit: 13000 },
-  { period: "Feb", income: 52000, expenses: 35000, profit: 17000 },
-  { period: "Mar", income: 48000, expenses: 38000, profit: 10000 },
-  { period: "Apr", income: 61000, expenses: 42000, profit: 19000 },
-  { period: "May", income: 58000, expenses: 39000, profit: 19000 },
-  { period: "Jun", income: 67000, expenses: 45000, profit: 22000 },
-  { period: "Jul", income: 72000, expenses: 48000, profit: 24000 },
-  { period: "Aug", income: 69000, expenses: 46000, profit: 23000 },
-  { period: "Sep", income: 75000, expenses: 52000, profit: 23000 },
-  { period: "Oct", income: 78000, expenses: 54000, profit: 24000 },
-  { period: "Nov", income: 82000, expenses: 58000, profit: 24000 },
-  { period: "Dec", income: 85000, expenses: 61000, profit: 24000 },
-]
+  // 2023 data
+  { date: new Date(2023, 0, 15), income: 48000, expenses: 34000, profit: 14000 },
+  { date: new Date(2023, 1, 15), income: 55000, expenses: 37000, profit: 18000 },
+  { date: new Date(2023, 2, 15), income: 51000, expenses: 40000, profit: 11000 },
+  { date: new Date(2023, 3, 15), income: 64000, expenses: 44000, profit: 20000 },
+  { date: new Date(2023, 4, 15), income: 61000, expenses: 41000, profit: 20000 },
+  { date: new Date(2023, 5, 15), income: 70000, expenses: 47000, profit: 23000 },
+  { date: new Date(2023, 6, 15), income: 75000, expenses: 50000, profit: 25000 },
+  { date: new Date(2023, 7, 15), income: 72000, expenses: 48000, profit: 24000 },
+  { date: new Date(2023, 8, 15), income: 78000, expenses: 54000, profit: 24000 },
+  { date: new Date(2023, 9, 15), income: 81000, expenses: 56000, profit: 25000 },
+  { date: new Date(2023, 10, 15), income: 85000, expenses: 60000, profit: 25000 },
+  { date: new Date(2023, 11, 15), income: 88000, expenses: 63000, profit: 25000 },
 
-const weeklyData = [
-  { period: "Week 1", income: 18500, expenses: 13200, profit: 5300 },
-  { period: "Week 2", income: 21200, expenses: 14800, profit: 6400 },
-  { period: "Week 3", income: 19800, expenses: 15600, profit: 4200 },
-  { period: "Week 4", income: 22100, expenses: 16800, profit: 5300 },
+  // 2024 data (weekly data for current month)
+  { date: new Date(2024, 11, 1), income: 18500, expenses: 13200, profit: 5300 },
+  { date: new Date(2024, 11, 8), income: 21200, expenses: 14800, profit: 6400 },
+  { date: new Date(2024, 11, 15), income: 19800, expenses: 15600, profit: 4200 },
+  { date: new Date(2024, 11, 22), income: 22100, expenses: 16800, profit: 5300 },
+  { date: new Date(2024, 11, 29), income: 20500, expenses: 15200, profit: 5300 },
 ]
 
 type FilterType = "year" | "month" | "week"
 
 export default function IncomeExpenseChart() {
   const [activeFilter, setActiveFilter] = useState<FilterType>("month")
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
-  const getCurrentData = () => {
+  const getFilteredData = () => {
+    let startDate: Date
+    let endDate: Date
+
     switch (activeFilter) {
       case "year":
-        return yearlyData
+        startDate = startOfYear(selectedDate)
+        endDate = endOfYear(selectedDate)
+        break
+      case "month":
+        startDate = startOfMonth(selectedDate)
+        endDate = endOfMonth(selectedDate)
+        break
       case "week":
-        return weeklyData
+        startDate = startOfWeek(selectedDate, { weekStartsOn: 1 })
+        endDate = endOfWeek(selectedDate, { weekStartsOn: 1 })
+        break
       default:
-        return monthlyData
+        startDate = startOfMonth(selectedDate)
+        endDate = endOfMonth(selectedDate)
     }
+
+    const filteredData = allData.filter((item) => isWithinInterval(item.date, { start: startDate, end: endDate }))
+
+    return filteredData.map((item) => ({
+      ...item,
+      period:
+        activeFilter === "year"
+          ? format(item.date, "MMM yyyy")
+          : activeFilter === "month"
+            ? format(item.date, "MMM dd")
+            : format(item.date, "MMM dd"),
+    }))
   }
 
-  const currentData = getCurrentData()
+  const currentData = getFilteredData()
 
   // Calculate totals and averages based on current filter
   const totalIncome = currentData.reduce((sum, item) => sum + item.income, 0)
   const totalExpenses = currentData.reduce((sum, item) => sum + item.expenses, 0)
   const totalProfit = totalIncome - totalExpenses
-  const avgIncome = totalIncome / currentData.length
-  const avgExpenses = totalExpenses / currentData.length
-  const profitMargin = ((totalProfit / totalIncome) * 100).toFixed(1)
+  const profitMargin = totalIncome > 0 ? ((totalProfit / totalIncome) * 100).toFixed(1) : "0"
 
   // Growth calculations
-  const incomeGrowth = (
-    ((currentData[currentData.length - 1].income - currentData[0].income) / currentData[0].income) *
-    100
-  ).toFixed(1)
-  const expenseGrowth = (
-    ((currentData[currentData.length - 1].expenses - currentData[0].expenses) / currentData[0].expenses) *
-    100
-  ).toFixed(1)
+  const incomeGrowth =
+    currentData.length > 1
+      ? (((currentData[currentData.length - 1].income - currentData[0].income) / currentData[0].income) * 100).toFixed(
+          1,
+        )
+      : "0"
+
+  const expenseGrowth =
+    currentData.length > 1
+      ? (
+          ((currentData[currentData.length - 1].expenses - currentData[0].expenses) / currentData[0].expenses) *
+          100
+        ).toFixed(1)
+      : "0"
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -121,11 +160,26 @@ export default function IncomeExpenseChart() {
   const getFilterLabel = () => {
     switch (activeFilter) {
       case "year":
-        return "Yearly Overview"
+        return `Year ${format(selectedDate, "yyyy")}`
       case "week":
-        return "Weekly Breakdown"
+        return `Week of ${format(startOfWeek(selectedDate, { weekStartsOn: 1 }), "MMM dd, yyyy")}`
       default:
-        return "Monthly Analysis"
+        return `${format(selectedDate, "MMMM yyyy")}`
+    }
+  }
+
+  const getDateRangeText = () => {
+    switch (activeFilter) {
+      case "year":
+        return format(selectedDate, "yyyy")
+      case "month":
+        return format(selectedDate, "MMM yyyy")
+      case "week":
+        const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
+        const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 })
+        return `${format(weekStart, "MMM dd")} - ${format(weekEnd, "MMM dd, yyyy")}`
+      default:
+        return format(selectedDate, "MMM yyyy")
     }
   }
 
@@ -156,12 +210,7 @@ export default function IncomeExpenseChart() {
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="w-full min-h-screen bg-gradient-to-br from-orange-50 to-white p-6"
-    >
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="w-full min-h-screen p-6">
       {/* Header with Filters */}
       <motion.div variants={itemVariants} className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -171,25 +220,50 @@ export default function IncomeExpenseChart() {
           </div>
 
           {/* Filter Controls */}
-          <div className="flex items-center gap-2">
-            <FaFilter className="text-gray-500" />
-            <span className="text-sm text-gray-600 mr-2">View by:</span>
-            <div className="flex gap-2">
-              {(["year", "month", "week"] as FilterType[]).map((filter) => (
-                <Button
-                  key={filter}
-                  variant={activeFilter === filter ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setActiveFilter(filter)}
-                  className={`capitalize ${
-                    activeFilter === filter ? "bg-orange-500 hover:bg-orange-600 text-white" : "hover:bg-orange-50"
-                  }`}
-                >
-                  <CalendarDays className="w-4 h-4 mr-1" />
-                  {filter}
-                </Button>
-              ))}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            {/* Period Type Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">View by:</span>
+              <div className="flex gap-2">
+                {(["year", "month", "week"] as FilterType[]).map((filter) => (
+                  <Button
+                    key={filter}
+                    variant={activeFilter === filter ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setActiveFilter(filter)}
+                    className={`capitalize ${
+                      activeFilter === filter ? "bg-orange-500 hover:bg-orange-600 text-white" : "hover:bg-orange-50"
+                    }`}
+                  >
+                    <CalendarDays className="w-4 h-4 mr-1" />
+                    {filter}
+                  </Button>
+                ))}
+              </div>
             </div>
+
+            {/* Date Picker */}
+            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-[280px] justify-start text-left font-normal bg-transparent">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {getDateRangeText()}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setSelectedDate(date)
+                      setIsCalendarOpen(false)
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
@@ -275,31 +349,11 @@ export default function IncomeExpenseChart() {
             </div>
           </div>
         </motion.div>
-
-        <motion.div
-          whileHover={{ scale: 1.02, y: -2 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-orange-100 hover:shadow-xl transition-all duration-300"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium">
-                Average {activeFilter === "year" ? "Yearly" : activeFilter === "month" ? "Monthly" : "Weekly"}
-              </p>
-              <p className="text-2xl font-bold text-blue-600 mt-1">{formatCurrency(avgIncome)}</p>
-              <div className="flex items-center mt-2">
-                <span className="text-gray-600 text-sm">Income per {activeFilter}</span>
-              </div>
-            </div>
-            <div className="p-4 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl">
-              <FaChartLine className="text-white text-2xl" />
-            </div>
-          </div>
-        </motion.div>
       </motion.div>
 
       {/* Main Chart */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <Card className="shadow-xl border border-orange-100">
+      <motion.div variants={itemVariants} className="w-full mb-8">
+        <Card className="shadow-xl border border-orange-100 w-full">
           <CardHeader className="bg-gradient-to-r from-orange-50 to-white">
             <CardTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-orange-500" />
@@ -307,7 +361,7 @@ export default function IncomeExpenseChart() {
             </CardTitle>
             <CardDescription>{getFilterLabel()} - Track performance over time</CardDescription>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-6 w-full">
             <ChartContainer
               config={{
                 income: {
@@ -319,7 +373,7 @@ export default function IncomeExpenseChart() {
                   color: "hsl(0, 84%, 60%)",
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={currentData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -351,59 +405,19 @@ export default function IncomeExpenseChart() {
             </ChartContainer>
           </CardContent>
         </Card>
-
-        <Card className="shadow-xl border border-orange-100">
-          <CardHeader className="bg-gradient-to-r from-orange-50 to-white">
-            <CardTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-orange-500" />
-              Profit Analysis
-            </CardTitle>
-            <CardDescription>{getFilterLabel()} - Profit margins and trends</CardDescription>
-          </CardHeader>
-          <CardContent className="p-6">
-            <ChartContainer
-              config={{
-                profit: {
-                  label: "Profit",
-                  color: "hsl(25, 95%, 53%)",
-                },
-              }}
-              className="h-[300px]"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={currentData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="period" stroke="#666" fontSize={12} />
-                  <YAxis stroke="#666" fontSize={12} tickFormatter={(value) => `₦${(value / 1000).toFixed(0)}k`} />
-                  <ChartTooltip content={<CustomTooltip />} />
-                  <Legend wrapperStyle={{ paddingTop: "20px" }} iconType="circle" />
-                  <Area
-                    type="monotone"
-                    dataKey="profit"
-                    stroke="var(--color-profit)"
-                    strokeWidth={3}
-                    fill="var(--color-profit)"
-                    fillOpacity={0.3}
-                    name="Profit"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
       </motion.div>
 
       {/* Detailed Breakdown */}
-      <motion.div variants={itemVariants}>
-        <Card className="shadow-xl border border-orange-100">
+      <motion.div variants={itemVariants} className="w-full">
+        <Card className="shadow-xl border border-orange-100 w-full">
           <CardHeader className="bg-gradient-to-r from-orange-50 to-white">
             <CardTitle className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <FaChartLine className="text-orange-500" />
               {getFilterLabel()} Breakdown
             </CardTitle>
-            <CardDescription>Detailed view of income, expenses, and profit by {activeFilter}</CardDescription>
+            <CardDescription>Detailed view of income, expenses, and profit for {getFilterLabel()}</CardDescription>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-6 w-full">
             <ChartContainer
               config={{
                 income: {
@@ -419,7 +433,7 @@ export default function IncomeExpenseChart() {
                   color: "hsl(25, 95%, 53%)",
                 },
               }}
-              className="h-[400px]"
+              className="h-[400px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={currentData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>

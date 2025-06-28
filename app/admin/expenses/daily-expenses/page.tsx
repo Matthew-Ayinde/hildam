@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useMemo } from "react"
+
+import { FaNairaSign } from "react-icons/fa6";
 import {
   Plus,
   TrendingUp,
-  DollarSign,
   Download,
   Search,
   Target,
@@ -77,8 +78,6 @@ const initialExpenses = [
     category: "materials",
     amount: 25000.0,
     description: "Silk fabric for premium orders",
-    supplier: "Premium Fabrics Ltd",
-    paymentMethod: "Bank Transfer",
   },
   {
     id: 2,
@@ -87,8 +86,6 @@ const initialExpenses = [
     category: "supplies",
     amount: 4500.0,
     description: "Threads and notions",
-    supplier: "Craft Supplies",
-    paymentMethod: "Cash",
   },
   {
     id: 3,
@@ -97,8 +94,6 @@ const initialExpenses = [
     category: "utilities",
     amount: 8000.0,
     description: "Electricity bill",
-    supplier: "Power Company",
-    paymentMethod: "Bank Transfer",
   },
   {
     id: 4,
@@ -107,8 +102,6 @@ const initialExpenses = [
     category: "labor",
     amount: 15000.0,
     description: "Weekly wages for assistants",
-    supplier: "Staff Payroll",
-    paymentMethod: "Cash",
   },
   {
     id: 5,
@@ -117,8 +110,6 @@ const initialExpenses = [
     category: "materials",
     amount: 45000.0,
     description: "Bulk fabric purchase",
-    supplier: "Wholesale Fabrics",
-    paymentMethod: "Bank Transfer",
   },
   {
     id: 6,
@@ -127,8 +118,6 @@ const initialExpenses = [
     category: "equipment",
     amount: 35000.0,
     description: "New sewing machine maintenance",
-    supplier: "Equipment Services",
-    paymentMethod: "Card",
   },
 ]
 
@@ -146,8 +135,6 @@ export default function OperationalBudgetTracker() {
     category: "",
     amount: "",
     description: "",
-    supplier: "",
-    paymentMethod: "",
   })
 
   const [newBudget, setNewBudget] = useState({
@@ -164,8 +151,7 @@ export default function OperationalBudgetTracker() {
   // Filter expenses
   const filteredExpenses = budgetExpenses.filter((expense) => {
     const matchesSearch =
-      expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      expense.supplier.toLowerCase().includes(searchTerm.toLowerCase())
+      expense.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = filterCategory === "all" || expense.category === filterCategory
     return matchesSearch && matchesCategory
   })
@@ -240,8 +226,6 @@ export default function OperationalBudgetTracker() {
         category: "",
         amount: "",
         description: "",
-        supplier: "",
-        paymentMethod: "",
       })
       setIsAddExpenseDialogOpen(false)
     }
@@ -298,7 +282,7 @@ export default function OperationalBudgetTracker() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-orange-50">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
@@ -309,10 +293,6 @@ export default function OperationalBudgetTracker() {
             <p className="text-slate-600 text-lg">Manage your business operational budgets and expenses</p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" className="gap-2 hover:bg-blue-50 border-blue-200">
-              <Download className="h-4 w-4" />
-              Export Report
-            </Button>
             <Dialog open={isAddBudgetDialogOpen} onOpenChange={setIsAddBudgetDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="gap-2 hover:bg-indigo-50 border-indigo-200">
@@ -490,38 +470,8 @@ export default function OperationalBudgetTracker() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="expense-supplier" className="text-sm font-medium">
-                        Supplier/Vendor
-                      </Label>
-                      <Input
-                        id="expense-supplier"
-                        placeholder="Supplier name"
-                        value={newExpense.supplier}
-                        onChange={(e) => setNewExpense({ ...newExpense, supplier: e.target.value })}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="expense-payment" className="text-sm font-medium">
-                        Payment Method
-                      </Label>
-                      <Select
-                        value={newExpense.paymentMethod}
-                        onValueChange={(value) => setNewExpense({ ...newExpense, paymentMethod: value })}
-                      >
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Payment method" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Cash">Cash</SelectItem>
-                          <SelectItem value="Card">Card</SelectItem>
-                          <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                          <SelectItem value="Check">Check</SelectItem>
-                          <SelectItem value="Mobile Money">Mobile Money</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    
+                   
                   </div>
 
                   <Button
@@ -587,7 +537,7 @@ export default function OperationalBudgetTracker() {
               <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-slate-700">Total Spent</CardTitle>
-                  <DollarSign className="h-5 w-5 text-red-500" />
+                  <FaNairaSign className="h-5 w-5 text-red-500" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-red-600">{formatCurrency(budgetAnalytics.totalSpent)}</div>
@@ -608,16 +558,7 @@ export default function OperationalBudgetTracker() {
                 </CardContent>
               </Card>
 
-              <Card className={`border-0 shadow-lg ${getStatusColor(budgetAnalytics.status)}`}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Budget Status</CardTitle>
-                  {getStatusIcon(budgetAnalytics.status)}
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold capitalize">{budgetAnalytics.status}</div>
-                  <Progress value={budgetAnalytics.spentPercentage} className="mt-2" />
-                </CardContent>
-              </Card>
+            
             </div>
 
             {/* Charts Section */}
@@ -626,10 +567,6 @@ export default function OperationalBudgetTracker() {
                 <TabsTrigger value="categories" className="gap-2">
                   <PieChartIcon className="h-4 w-4" />
                   Categories
-                </TabsTrigger>
-                <TabsTrigger value="trends" className="gap-2">
-                  <BarChart3 className="h-4 w-4" />
-                  Spending Trends
                 </TabsTrigger>
               </TabsList>
 
@@ -744,52 +681,7 @@ export default function OperationalBudgetTracker() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="trends" className="space-y-6">
-                <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
-                  <CardHeader>
-                    <CardTitle className="text-xl text-slate-800">Daily Spending Trend</CardTitle>
-                    <CardDescription>Track your daily expenses over time</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {budgetAnalytics.trendData.length > 0 ? (
-                      <ChartContainer
-                        config={{
-                          amount: { label: "Amount", color: "#3b82f6" },
-                        }}
-                        className="h-[400px]"
-                      >
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={budgetAnalytics.trendData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" />
-                            <YAxis tickFormatter={(value) => `₦${(value / 1000).toFixed(0)}k`} />
-                            <ChartTooltip
-                              content={({ active, payload, label }) => {
-                                if (active && payload && payload.length) {
-                                  return (
-                                    <div className="bg-white p-3 border rounded-lg shadow-lg">
-                                      <p className="font-medium text-slate-800">{label}</p>
-                                      <p className="text-blue-600 font-semibold">
-                                        {formatCurrency(payload[0].value as number)}
-                                      </p>
-                                    </div>
-                                  )
-                                }
-                                return null
-                              }}
-                            />
-                            <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </ChartContainer>
-                    ) : (
-                      <div className="h-[400px] flex items-center justify-center text-slate-500">
-                        No spending data available
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
+             
             </Tabs>
           </>
         )}
@@ -840,8 +732,6 @@ export default function OperationalBudgetTracker() {
                       <TableHead className="font-semibold text-slate-700">Date</TableHead>
                       <TableHead className="font-semibold text-slate-700">Category</TableHead>
                       <TableHead className="font-semibold text-slate-700">Description</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Supplier</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Payment</TableHead>
                       <TableHead className="text-right font-semibold text-slate-700">Amount</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -870,12 +760,6 @@ export default function OperationalBudgetTracker() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-slate-700 max-w-xs truncate">{expense.description}</TableCell>
-                          <TableCell className="text-slate-700">{expense.supplier}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="border-slate-200 text-slate-600">
-                              {expense.paymentMethod}
-                            </Badge>
-                          </TableCell>
                           <TableCell className="text-right font-semibold text-slate-800">
                             {formatCurrency(expense.amount)}
                           </TableCell>
@@ -887,7 +771,7 @@ export default function OperationalBudgetTracker() {
               </div>
             ) : (
               <div className="text-center py-12 text-slate-500">
-                <DollarSign className="h-12 w-12 mx-auto mb-4 text-slate-300" />
+                <FaNairaSign className="h-12 w-12 mx-auto mb-4 text-slate-300" />
                 <p className="text-lg font-medium">No expenses found</p>
                 <p className="text-sm">Try adjusting your filters or add a new expense</p>
               </div>

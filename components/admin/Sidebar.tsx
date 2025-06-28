@@ -93,19 +93,9 @@ const sidebarItems = [
     prefix: "/admin/expense",
     links: [
       { name: "Job Expenses", href: "/admin/expenses" },
-      { name: "Daily Expenses", href: "/admin/expenses/daily-expenses" },
+      { name: "Operational Expenses", href: "/admin/expenses/daily-expenses" },
     ],
   },
-  // {
-  //   id: 7,
-  //   text: "Analytics",
-  //   icon: <MdOutlineDashboard />,
-  //   prefix: "/admin/analytics",
-  //   links: [
-  //     { name: "List", href: "/admin/analytics" },
-  //     { name: "Create", href: "/admin/users/create" },
-  //   ],
-  // },
   {
     id: 8,
     text: "Users",

@@ -75,8 +75,8 @@ export default function ModernPaymentTable() {
 
   const handleDelete = async (id: any) => {
     try {
-      const token = sessionStorage.getItem("access_token")
-      if (!token) throw new Error("No access token found")
+       const session = await getSession()
+        const token = session?.user?.token
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/deleteorder/${selectedUserId}`, {
         method: "DELETE",
@@ -223,58 +223,6 @@ export default function ModernPaymentTable() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Stats Cards */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <motion.div
-          whileHover={{ scale: 1.02, y: -2 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-orange-100 hover:shadow-xl transition-all duration-300"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium">Total Payments</p>
-              <p className="text-3xl font-bold text-gray-800 mt-1">{data.length}</p>
-            </div>
-            <div className="p-4 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl">
-              <FaMoneyBill className="text-white text-2xl" />
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ scale: 1.02, y: -2 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-orange-100 hover:shadow-xl transition-all duration-300"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium">Completed</p>
-              <p className="text-3xl font-bold text-green-600 mt-1">
-                {data.filter((order) => order.payment_status?.toLowerCase() === "completed").length}
-              </p>
-            </div>
-            <div className="p-4 bg-gradient-to-br from-green-400 to-green-500 rounded-xl">
-              <FaCheckCircle className="text-white text-2xl" />
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ scale: 1.02, y: -2 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-orange-100 hover:shadow-xl transition-all duration-300"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium">Pending</p>
-              <p className="text-3xl font-bold text-orange-600 mt-1">
-                {data.filter((order) => order.payment_status?.toLowerCase() === "pending").length}
-              </p>
-            </div>
-            <div className="p-4 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl">
-              <FaClock className="text-white text-2xl" />
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
 
       {/* Main Table Container */}
       <motion.div
