@@ -8,6 +8,8 @@ import Image from "next/image";
 import Logo from "@/public/logo.png";
 import Spinner from "@/components/WhiteSpinner";
 import { TbLockPassword } from "react-icons/tb";
+import Link from "next/link";
+import { ApplicationRoutes } from "@/constants/ApplicationRoutes";
 
 export default function LoginPage() {
   const { data: session, status } = useSession();
@@ -168,6 +170,15 @@ export default function LoginPage() {
     >
       {showPassword ? <HiEyeOff size={20} /> : <HiEye size={20} />}
     </button>
+  </div>
+
+   <div className="w-full text-right mb-4">
+    <Link
+      href={ApplicationRoutes.ForgotPassword}
+      className="text-sm text-orange-500 hover:underline"
+    >
+      Forgot password?
+    </Link>
   </div>
 
   {/* Submit */}

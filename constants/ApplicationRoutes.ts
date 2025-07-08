@@ -2,12 +2,21 @@ export class ApplicationRoutes {
 
     static readonly Homepage = "/";
 
-    static readonly AdminHomepage = "/admin";
 
-    static readonly ClientManagerHomepage = "/client-manager";
-    static readonly HeadOfTailoringHomepage = "/head-of-tailoring";
+
+
     static readonly Login = "/login";
+    static readonly ForgotPassword = "/forgot-password";
 
+
+
+
+
+
+
+
+
+    static readonly AdminHomepage = "/admin";
     static readonly AdminCustomers = "/admin/customers";
     static readonly AdminCustomersCreate = "/admin/customers/create";
     static readonly AdminCustomersEdit = "/admin/customers/edit";
@@ -41,7 +50,7 @@ export class ApplicationRoutes {
 
 
 
-
+    static readonly ClientManagerHomepage = "/client-manager";
     static readonly ClientManagerOrders = "/client-manager/orders";
     static readonly ClientManagerOrdersCreate = "/client-manager/orders/create";
     static readonly ClientManagerOrdersEdit = "/client-manager/orders/edit";
@@ -67,7 +76,10 @@ export class ApplicationRoutes {
 
 
 
+
+    static readonly HeadOfTailoringHomepage = "/head-of-tailoring";
     static readonly HeadOfTailoringJobs = "/head-of-tailoring/jobs";
+    
     
 
 }
