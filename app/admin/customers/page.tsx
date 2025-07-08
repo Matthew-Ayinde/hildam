@@ -193,10 +193,6 @@ export default function Table() {
               <p className="text-gray-600">Manage all customers information</p>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-4xl font-bold text-orange-600">{data.length}</div>
-            <p className="text-sm text-gray-500">Active customers</p>
-          </div>
         </div>
       </motion.div>
 

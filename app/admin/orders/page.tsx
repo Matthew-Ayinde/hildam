@@ -239,29 +239,10 @@ export default function Table() {
         )}
       </AnimatePresence>
 
-      {/* Stats Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-      >
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total Orders</p>
-              <p className="text-3xl font-bold text-[#5d7186]">{filteredData.length}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-gradient-to-br from-[#fff0ea] to-[#ffe5d9]">
-              <FaClipboardList className="text-[#ff6c2f] text-2xl" />
-            </div>
-          </div>
-        </div>
-      </motion.div>
+      
 
       <OrdersAnalyticsChart />
 
-      {/* Main Content Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

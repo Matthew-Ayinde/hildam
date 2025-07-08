@@ -54,20 +54,6 @@ const customerDemographics = [
   { name: "55+", value: 41, color: "#8b5cf6", percentage: 4.8 },
 ]
 
-const customerRetentionData = [
-  { month: "Jan", retention: 85, satisfaction: 4.2 },
-  { month: "Feb", retention: 87, satisfaction: 4.3 },
-  { month: "Mar", retention: 82, satisfaction: 4.1 },
-  { month: "Apr", retention: 89, satisfaction: 4.4 },
-  { month: "May", retention: 91, satisfaction: 4.5 },
-  { month: "Jun", retention: 88, satisfaction: 4.3 },
-  { month: "Jul", retention: 92, satisfaction: 4.6 },
-  { month: "Aug", retention: 90, satisfaction: 4.4 },
-  { month: "Sep", retention: 93, satisfaction: 4.7 },
-  { month: "Oct", retention: 94, satisfaction: 4.8 },
-  { month: "Nov", retention: 92, satisfaction: 4.6 },
-  { month: "Dec", retention: 95, satisfaction: 4.9 },
-]
 
 export default function CustomerAnalyticsChart() {
   const [timeRange, setTimeRange] = useState("monthly")
@@ -94,7 +80,7 @@ export default function CustomerAnalyticsChart() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Customer Analytics
             </h1>
-            <p className="text-slate-600 text-lg">Track customer growth, retention, and engagement metrics</p>
+            <p className="text-slate-600 text-lg">Manage and view customers statistics</p>
           </div>
           <div className="flex gap-3">
             <Select value={timeRange} onValueChange={setTimeRange}>
@@ -126,44 +112,7 @@ export default function CustomerAnalyticsChart() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">New Customers</CardTitle>
-              <UserPlus className="h-5 w-5 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-600">{newCustomersThisPeriod}</div>
-              <div className="flex items-center gap-1 text-xs">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-600 font-medium">+{growthRate.toFixed(1)}%</span>
-                <span className="text-slate-500">vs last {timeRange.slice(0, -2)}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">Returning Customers</CardTitle>
-              <Activity className="h-5 w-5 text-orange-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-orange-600">{returningCustomers}</div>
-              <p className="text-xs text-slate-500">Repeat customers this {timeRange.slice(0, -2)}</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-700">Retention Rate</CardTitle>
-              <TrendingUp className="h-5 w-5 text-purple-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-purple-600">
-                {customerRetentionData[customerRetentionData.length - 1].retention}%
-              </div>
-              <p className="text-xs text-slate-500">Customer retention rate</p>
-            </CardContent>
-          </Card>
+        
         </div>
 
         {/* Charts Section */}
@@ -171,80 +120,19 @@ export default function CustomerAnalyticsChart() {
           <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
             <TabsTrigger value="growth" className="gap-2">
               <BarChart3 className="h-4 w-4" />
-              Growth
-            </TabsTrigger>
-            <TabsTrigger value="retention" className="gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Retention
+              Statistics
             </TabsTrigger>
             <TabsTrigger value="demographics" className="gap-2">
               <PieChartIcon className="h-4 w-4" />
               Demographics
             </TabsTrigger>
-            <TabsTrigger value="activity" className="gap-2">
-              <Activity className="h-4 w-4" />
-              Activity
-            </TabsTrigger>
+            
           </TabsList>
 
           <TabsContent value="growth" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Customer Growth Line Chart */}
-              <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl text-slate-800 flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-500" />
-                    Customer Growth Trend
-                  </CardTitle>
-                  <CardDescription>New customers acquired over time</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      newCustomers: { label: "New Customers", color: "#3b82f6" },
-                      totalCustomers: { label: "Total Customers", color: "#10b981" },
-                    }}
-                    className="h-[300px] w-full"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={currentData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey={timeRange === "monthly" ? "month" : "week"} stroke="#64748b" fontSize={12} />
-                        <YAxis stroke="#64748b" fontSize={12} />
-                        <ChartTooltip
-                          content={({ active, payload, label }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-white p-4 border rounded-lg shadow-lg">
-                                  <p className="font-medium text-slate-800 mb-2">{label}</p>
-                                  {payload.map((entry, index) => (
-                                    <div key={index} className="flex items-center gap-2">
-                                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                                      <span className="text-sm text-slate-600">{entry.name}:</span>
-                                      <span className="font-semibold text-slate-800">{entry.value}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )
-                            }
-                            return null
-                          }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="newCustomers"
-                          stroke="#3b82f6"
-                          strokeWidth={3}
-                          dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
-                          activeDot={{ r: 6, stroke: "#3b82f6", strokeWidth: 2 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-1 gap-6">
+              
 
-              {/* Total Customers Area Chart */}
               <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="text-xl text-slate-800 flex items-center gap-2">
@@ -303,74 +191,7 @@ export default function CustomerAnalyticsChart() {
             </div>
           </TabsContent>
 
-          <TabsContent value="retention" className="space-y-6">
-            <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl text-slate-800 flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-purple-500" />
-                  Customer Retention & Satisfaction
-                </CardTitle>
-                <CardDescription>Monthly retention rates and satisfaction scores</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer
-                  config={{
-                    retention: { label: "Retention Rate (%)", color: "#8b5cf6" },
-                    satisfaction: { label: "Satisfaction Score", color: "#f59e0b" },
-                  }}
-                  className="h-[400px] w-full"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={customerRetentionData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                      <YAxis yAxisId="left" stroke="#64748b" fontSize={12} />
-                      <YAxis yAxisId="right" orientation="right" stroke="#64748b" fontSize={12} />
-                      <ChartTooltip
-                        content={({ active, payload, label }) => {
-                          if (active && payload && payload.length) {
-                            return (
-                              <div className="bg-white p-4 border rounded-lg shadow-lg">
-                                <p className="font-medium text-slate-800 mb-2">{label}</p>
-                                {payload.map((entry, index) => (
-                                  <div key={index} className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                                    <span className="text-sm text-slate-600">{entry.name}:</span>
-                                    <span className="font-semibold text-slate-800">
-                                      {entry.dataKey === "retention" ? `${entry.value}%` : entry.value}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            )
-                          }
-                          return null
-                        }}
-                      />
-                      <Line
-                        yAxisId="left"
-                        type="monotone"
-                        dataKey="retention"
-                        stroke="#8b5cf6"
-                        strokeWidth={3}
-                        dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 4 }}
-                        name="Retention Rate (%)"
-                      />
-                      <Line
-                        yAxisId="right"
-                        type="monotone"
-                        dataKey="satisfaction"
-                        stroke="#f59e0b"
-                        strokeWidth={3}
-                        dot={{ fill: "#f59e0b", strokeWidth: 2, r: 4 }}
-                        name="Satisfaction Score"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          </TabsContent>
+      
 
           <TabsContent value="demographics" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -457,55 +278,7 @@ export default function CustomerAnalyticsChart() {
             </div>
           </TabsContent>
 
-          <TabsContent value="activity" className="space-y-6">
-            <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl text-slate-800 flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-blue-500" />
-                  Customer Activity Overview
-                </CardTitle>
-                <CardDescription>New vs returning customers comparison</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer
-                  config={{
-                    newCustomers: { label: "New Customers", color: "#3b82f6" },
-                    returning: { label: "Returning Customers", color: "#10b981" },
-                  }}
-                  className="h-[400px] w-full"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={currentData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis dataKey={timeRange === "monthly" ? "month" : "week"} stroke="#64748b" fontSize={12} />
-                      <YAxis stroke="#64748b" fontSize={12} />
-                      <ChartTooltip
-                        content={({ active, payload, label }) => {
-                          if (active && payload && payload.length) {
-                            return (
-                              <div className="bg-white p-4 border rounded-lg shadow-lg">
-                                <p className="font-medium text-slate-800 mb-2">{label}</p>
-                                {payload.map((entry, index) => (
-                                  <div key={index} className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-                                    <span className="text-sm text-slate-600">{entry.name}:</span>
-                                    <span className="font-semibold text-slate-800">{entry.value}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )
-                          }
-                          return null
-                        }}
-                      />
-                      <Bar dataKey="newCustomers" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="returning" fill="#10b981" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          
         </Tabs>
       </div>
     </div>

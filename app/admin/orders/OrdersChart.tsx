@@ -10,54 +10,83 @@ import {
   BarChart3,
   PieChartIcon,
   Activity,
-  Calendar,
   Filter,
-  Download,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { CalendarIcon } from "lucide-react"
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-  ComposedChart,
-} from "recharts"
+  format,
+  subDays,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+  eachDayOfInterval,
+  eachWeekOfInterval,
+  eachMonthOfInterval,
+} from "date-fns"
+import { cn } from "@/lib/utils"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
+import type { DateRange } from "react-day-picker"
 
-// Dummy data for orders analytics
-const monthlyOrdersData = [
-  { month: "Jan", totalOrders: 145, completed: 132, processing: 8, pending: 5, revenue: 285000 },
-  { month: "Feb", totalOrders: 162, completed: 148, processing: 10, pending: 4, revenue: 324000 },
-  { month: "Mar", totalOrders: 138, completed: 125, processing: 9, pending: 4, revenue: 276000 },
-  { month: "Apr", totalOrders: 189, completed: 171, processing: 12, pending: 6, revenue: 378000 },
-  { month: "May", totalOrders: 205, completed: 186, processing: 14, pending: 5, revenue: 410000 },
-  { month: "Jun", totalOrders: 178, completed: 162, processing: 11, pending: 5, revenue: 356000 },
-  { month: "Jul", totalOrders: 221, completed: 201, processing: 15, pending: 5, revenue: 442000 },
-  { month: "Aug", totalOrders: 198, completed: 180, processing: 13, pending: 5, revenue: 396000 },
-  { month: "Sep", totalOrders: 234, completed: 214, processing: 16, pending: 4, revenue: 468000 },
-  { month: "Oct", totalOrders: 256, completed: 235, processing: 17, pending: 4, revenue: 512000 },
-  { month: "Nov", totalOrders: 289, completed: 267, processing: 18, pending: 4, revenue: 578000 },
-  { month: "Dec", totalOrders: 312, completed: 289, processing: 19, pending: 4, revenue: 624000 },
-]
+// Enhanced data generation based on date ranges
+const generateDataForDateRange = (startDate: Date, endDate: Date, timeRange: string) => {
+  const data = []
 
-const weeklyOrdersData = [
-  { week: "Week 1", totalOrders: 78, completed: 72, processing: 4, pending: 2 },
-  { week: "Week 2", totalOrders: 85, completed: 79, processing: 4, pending: 2 },
-  { week: "Week 3", totalOrders: 92, completed: 85, processing: 5, pending: 2 },
-  { week: "Week 4", totalOrders: 89, completed: 82, processing: 5, pending: 2 },
-]
+  if (timeRange === "daily") {
+    const days = eachDayOfInterval({ start: startDate, end: endDate })
+    days.forEach((day, index) => {
+      const baseOrders = 45 + Math.floor(Math.random() * 30)
+      data.push({
+        period: format(day, "MMM dd"),
+        date: format(day, "yyyy-MM-dd"),
+        totalOrders: baseOrders,
+        completed: Math.floor(baseOrders * 0.85),
+        processing: Math.floor(baseOrders * 0.1),
+        pending: Math.floor(baseOrders * 0.05),
+        revenue: baseOrders * (1800 + Math.random() * 400),
+      })
+    })
+  } else if (timeRange === "weekly") {
+    const weeks = eachWeekOfInterval({ start: startDate, end: endDate })
+    weeks.forEach((week, index) => {
+      const baseOrders = 280 + Math.floor(Math.random() * 100)
+      data.push({
+        period: `Week ${format(week, "MMM dd")}`,
+        date: format(week, "yyyy-MM-dd"),
+        totalOrders: baseOrders,
+        completed: Math.floor(baseOrders * 0.85),
+        processing: Math.floor(baseOrders * 0.1),
+        pending: Math.floor(baseOrders * 0.05),
+        revenue: baseOrders * (2000 + Math.random() * 500),
+      })
+    })
+  } else {
+    const months = eachMonthOfInterval({ start: startDate, end: endDate })
+    months.forEach((month, index) => {
+      const baseOrders = 180 + Math.floor(Math.random() * 80)
+      data.push({
+        period: format(month, "MMM yyyy"),
+        date: format(month, "yyyy-MM-dd"),
+        totalOrders: baseOrders,
+        completed: Math.floor(baseOrders * 0.85),
+        processing: Math.floor(baseOrders * 0.1),
+        pending: Math.floor(baseOrders * 0.05),
+        revenue: baseOrders * (2200 + Math.random() * 600),
+      })
+    })
+  }
+
+  return data
+}
 
 const orderStatusDistribution = [
   { name: "Completed", value: 2567, color: "#10b981", percentage: 82.3 },
@@ -72,15 +101,6 @@ const orderPriorityData = [
   { name: "Low", value: 875, color: "#10b981", percentage: 28.1 },
 ]
 
-const clothingTypeOrders = [
-  { type: "Wedding Dresses", orders: 145, revenue: 725000, avgPrice: 5000 },
-  { type: "Business Suits", orders: 289, revenue: 867000, avgPrice: 3000 },
-  { type: "Casual Wear", orders: 456, revenue: 684000, avgPrice: 1500 },
-  { type: "Evening Gowns", orders: 123, revenue: 492000, avgPrice: 4000 },
-  { type: "Traditional Wear", orders: 234, revenue: 702000, avgPrice: 3000 },
-  { type: "School Uniforms", orders: 567, revenue: 567000, avgPrice: 1000 },
-]
-
 const orderCompletionTimes = [
   { timeRange: "1-3 days", orders: 234, percentage: 25.1 },
   { timeRange: "4-7 days", orders: 456, percentage: 48.9 },
@@ -88,33 +108,64 @@ const orderCompletionTimes = [
   { timeRange: "15+ days", orders: 53, percentage: 5.7 },
 ]
 
-const dailyOrderTrends = [
-  { day: "Mon", orders: 45, avgValue: 2100 },
-  { day: "Tue", orders: 52, avgValue: 2300 },
-  { day: "Wed", orders: 48, avgValue: 2000 },
-  { day: "Thu", orders: 61, avgValue: 2500 },
-  { day: "Fri", orders: 58, avgValue: 2400 },
-  { day: "Sat", orders: 39, avgValue: 1800 },
-  { day: "Sun", orders: 28, avgValue: 1600 },
-]
-
 export default function OrdersAnalyticsChart() {
   const [timeRange, setTimeRange] = useState("monthly")
-  const [selectedMetric, setSelectedMetric] = useState("orders")
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  })
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
 
-  const currentData = timeRange === "monthly" ? monthlyOrdersData : weeklyOrdersData
-  const latestData = currentData[currentData.length - 1]
+  // Quick date range presets
+  const setQuickRange = (days: number) => {
+    const end = new Date()
+    const start = subDays(end, days)
+    setDateRange({ from: start, to: end })
+  }
+
+  const setThisWeek = () => {
+    const start = startOfWeek(new Date())
+    const end = endOfWeek(new Date())
+    setDateRange({ from: start, to: end })
+    setTimeRange("daily")
+  }
+
+  const setThisMonth = () => {
+    const start = startOfMonth(new Date())
+    const end = endOfMonth(new Date())
+    setDateRange({ from: start, to: end })
+    setTimeRange("daily")
+  }
+
+  const setThisYear = () => {
+    const start = startOfYear(new Date())
+    const end = endOfYear(new Date())
+    setDateRange({ from: start, to: end })
+    setTimeRange("monthly")
+  }
+
+  // Get current data based on date range
+  const getCurrentData = () => {
+    if (!dateRange?.from || !dateRange?.to) {
+      return []
+    }
+    return generateDataForDateRange(dateRange.from, dateRange.to, timeRange)
+  }
+
+  const currentData = getCurrentData()
+  const latestData = currentData[currentData.length - 1] || { totalOrders: 0, completed: 0, processing: 0, pending: 0 }
   const previousData = currentData[currentData.length - 2]
 
-  const growthRate = previousData
-    ? ((latestData.totalOrders - previousData.totalOrders) / previousData.totalOrders) * 100
-    : 0
+  const growthRate =
+    previousData && latestData
+      ? ((latestData.totalOrders - previousData.totalOrders) / previousData.totalOrders) * 100
+      : 0
 
   const totalOrders = latestData.totalOrders
   const completedOrders = latestData.completed
   const processingOrders = latestData.processing
   const pendingOrders = latestData.pending
-  const completionRate = (completedOrders / totalOrders) * 100
+  const completionRate = totalOrders > 0 ? (completedOrders / totalOrders) * 100 : 0
 
   const formatCurrency = (amount: number) => {
     return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
@@ -131,23 +182,111 @@ export default function OrdersAnalyticsChart() {
             </h1>
             <p className="text-slate-600 text-lg">Track order performance, trends, and completion metrics</p>
           </div>
-          <div className="flex gap-3">
+
+          <div className="flex flex-wrap gap-3">
             <Select value={timeRange} onValueChange={setTimeRange}>
               <SelectTrigger className="w-40 border-orange-200 focus:border-orange-400">
                 <SelectValue placeholder="Time Range" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="daily">Daily</SelectItem>
                 <SelectItem value="weekly">Weekly</SelectItem>
                 <SelectItem value="monthly">Monthly</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" className="gap-2 hover:bg-orange-50 border-orange-200">
+
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[280px] justify-start text-left font-normal border-orange-200 hover:bg-orange-50",
+                    !dateRange && "text-muted-foreground",
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateRange?.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
+                      </>
+                    ) : (
+                      format(dateRange.from, "LLL dd, y")
+                    )
+                  ) : (
+                    <span>Pick a date range</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <div className="flex">
+                  <div className="border-r p-3 space-y-2">
+                    <div className="text-sm font-medium text-slate-700 mb-3">Quick Ranges</div>
+                    <div className="space-y-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start text-xs"
+                        onClick={() => {
+                          setQuickRange(7)
+                          setTimeRange("daily")
+                        }}
+                      >
+                        Last 7 days
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start text-xs"
+                        onClick={() => {
+                          setQuickRange(30)
+                          setTimeRange("daily")
+                        }}
+                      >
+                        Last 30 days
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full justify-start text-xs"
+                        onClick={() => {
+                          setQuickRange(90)
+                          setTimeRange("weekly")
+                        }}
+                      >
+                        Last 3 months
+                      </Button>
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs" onClick={setThisWeek}>
+                        This week
+                      </Button>
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs" onClick={setThisMonth}>
+                        This month
+                      </Button>
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs" onClick={setThisYear}>
+                        This year
+                      </Button>
+                    </div>
+                  </div>
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={dateRange?.from}
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    numberOfMonths={2}
+                  />
+                </div>
+                <div className="border-t p-3 flex justify-end">
+                  <Button size="sm" onClick={() => setDatePickerOpen(false)}>
+                    Apply Range
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            <Button variant="outline" className="gap-2 hover:bg-orange-50 border-orange-200 bg-transparent">
               <Filter className="h-4 w-4" />
               Filter
-            </Button>
-            <Button variant="outline" className="gap-2 hover:bg-orange-50 border-orange-200">
-              <Download className="h-4 w-4" />
-              Export
             </Button>
           </div>
         </div>
@@ -205,9 +344,9 @@ export default function OrdersAnalyticsChart() {
 
         {/* Charts Section */}
         <Tabs defaultValue="trends" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
             <TabsTrigger value="trends" className="gap-2">
-              <TrendingUp className="h-4 w-4" />
+              <BarChart3 className="h-4 w-4" />
               Trends
             </TabsTrigger>
             <TabsTrigger value="status" className="gap-2">
@@ -221,28 +360,34 @@ export default function OrdersAnalyticsChart() {
           </TabsList>
 
           <TabsContent value="trends" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Orders Growth Line Chart */}
+            <div className="grid grid-cols-1 gap-6">
+              {/* Orders Growth Bar Chart */}
               <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="text-xl text-slate-800 flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-orange-500" />
+                    <BarChart3 className="h-5 w-5 text-orange-500" />
                     Orders Growth Trend
                   </CardTitle>
-                  <CardDescription>Total orders over time</CardDescription>
+                  <CardDescription>
+                    {dateRange?.from && dateRange?.to
+                      ? `${format(dateRange.from, "MMM dd, yyyy")} - ${format(dateRange.to, "MMM dd, yyyy")}`
+                      : "Select a date range to view data"}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
                     config={{
                       totalOrders: { label: "Total Orders", color: "#f97316" },
                       completed: { label: "Completed", color: "#10b981" },
+                      processing: { label: "Processing", color: "#f59e0b" },
+                      pending: { label: "Pending", color: "#ef4444" },
                     }}
-                    className="h-[300px] w-full"
+                    className="h-[400px] w-full"
                   >
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={currentData}>
+                      <BarChart data={currentData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey={timeRange === "monthly" ? "month" : "week"} stroke="#64748b" fontSize={12} />
+                        <XAxis dataKey="period" stroke="#64748b" fontSize={12} />
                         <YAxis stroke="#64748b" fontSize={12} />
                         <ChartTooltip
                           content={({ active, payload, label }) => {
@@ -263,85 +408,11 @@ export default function OrdersAnalyticsChart() {
                             return null
                           }}
                         />
-                        <Line
-                          type="monotone"
-                          dataKey="totalOrders"
-                          stroke="#f97316"
-                          strokeWidth={3}
-                          dot={{ fill: "#f97316", strokeWidth: 2, r: 4 }}
-                          activeDot={{ r: 6, stroke: "#f97316", strokeWidth: 2 }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="completed"
-                          stroke="#10b981"
-                          strokeWidth={2}
-                          dot={{ fill: "#10b981", strokeWidth: 2, r: 3 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-
-              {/* Revenue Area Chart */}
-              <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl text-slate-800 flex items-center gap-2">
-                    <Package className="h-5 w-5 text-green-500" />
-                    Revenue Trend
-                  </CardTitle>
-                  <CardDescription>Monthly revenue from orders</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={{
-                      revenue: { label: "Revenue", color: "#10b981" },
-                    }}
-                    className="h-[300px] w-full"
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={monthlyOrdersData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                        <YAxis
-                          stroke="#64748b"
-                          fontSize={12}
-                          tickFormatter={(value) => `₦${(value / 1000).toFixed(0)}k`}
-                        />
-                        <ChartTooltip
-                          content={({ active, payload, label }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-white p-4 border rounded-lg shadow-lg">
-                                  <p className="font-medium text-slate-800 mb-2">{label}</p>
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-green-500" />
-                                    <span className="text-sm text-slate-600">Revenue:</span>
-                                    <span className="font-semibold text-slate-800">
-                                      {formatCurrency(payload[0].value as number)}
-                                    </span>
-                                  </div>
-                                </div>
-                              )
-                            }
-                            return null
-                          }}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="revenue"
-                          stroke="#10b981"
-                          strokeWidth={2}
-                          fill="url(#revenueGradient)"
-                        />
-                        <defs>
-                          <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
-                          </linearGradient>
-                        </defs>
-                      </AreaChart>
+                        <Bar dataKey="totalOrders" fill="#f97316" radius={[4, 4, 0, 0]} name="Total Orders" />
+                        <Bar dataKey="completed" fill="#10b981" radius={[4, 4, 0, 0]} name="Completed" />
+                        <Bar dataKey="processing" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Processing" />
+                        <Bar dataKey="pending" fill="#ef4444" radius={[4, 4, 0, 0]} name="Pending" />
+                      </BarChart>
                     </ResponsiveContainer>
                   </ChartContainer>
                 </CardContent>
@@ -437,9 +508,8 @@ export default function OrdersAnalyticsChart() {
             </div>
           </TabsContent>
 
-
           <TabsContent value="insights" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               {/* Completion Time Analysis */}
               <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
                 <CardHeader>
@@ -482,7 +552,6 @@ export default function OrdersAnalyticsChart() {
                   </div>
                 </CardContent>
               </Card>
-
             </div>
           </TabsContent>
         </Tabs>
