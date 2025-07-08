@@ -1,13 +1,12 @@
-import Providers from "../components/providers";
+
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Play } from "next/font/google";
 import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import SessionProvider from "@/components/SessionProvider";
-import { authOptions } from "@/lib/auth"; // Import NextAuth config
-import { Session } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import Providers  from "@/components/providers"
+import AuthWrapper from "@/components/AuthWrapper"
 
 const play = Play({ subsets: ["latin"], weight: ["400", "700"] });
 
@@ -40,11 +39,9 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-black bg-[#f9f7f7]`}
       >
-        <SessionProvider session={session}>
-          <div className={`w-full flex flex-row bg-[#f9f7f7] ${play.className}`}>
-            <Providers>{children}</Providers>
-          </div>
-        </SessionProvider>
+        <Providers>
+          <AuthWrapper>{children}</AuthWrapper>
+        </Providers>
       </body>
     </html>
   );

@@ -272,7 +272,7 @@ export default function ModernUsersTable() {
   }
 
   return (
-    <div className="w-full bg-gradient-to-br from-orange-50 to-white rounded-3xl p-6 shadow-sm border border-orange-100">
+    <div className="w-full rounded-3xl p-6 shadow-sm">
       <Toast message={toast.message} type={toast.type} isVisible={toast.isVisible} />
 
       {/* Header */}

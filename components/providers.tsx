@@ -3,9 +3,11 @@
 
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 
+import { SessionProvider } from "next-auth/react"
+
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
-    <>
+    <SessionProvider>
       {children}
       <ProgressBar
         height="2px"
@@ -13,7 +15,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
         options={{ showSpinner: false }}
         shallowRouting
       />
-    </>
+    </SessionProvider>
   );
 };
 
