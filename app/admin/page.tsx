@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { getSession } from "next-auth/react"
 import Link from "next/link"
+import { ApplicationRoutes } from "@/constants/ApplicationRoutes"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -441,7 +442,7 @@ export default function Dashboard() {
                     <ShoppingBag className="w-5 h-5 mr-2 text-orange-600" />
                     Recent Orders
                   </CardTitle>
-                  <Link href="/admin/orders">
+                  <Link href={ApplicationRoutes.AdminOrders}>
                     <Button variant="ghost" className="text-orange-600 hover:text-orange-700 hover:bg-orange-50">
                       View All
                     </Button>
@@ -520,7 +521,7 @@ export default function Dashboard() {
                               {formatDate(order.created_at)}
                             </TableCell>
                             <TableCell className="rounded-r-lg">
-                              <Link href={`/admin/orders/${order.id}`}>
+                              <Link href={`${ApplicationRoutes.AdminOrders}/${order.id}`}>
                                 <Button
                                   variant="ghost"
                                   size="sm"
@@ -592,7 +593,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col space-y-3">
-                <Link href="/admin/customers/create">
+                <Link href={ApplicationRoutes.AdminCustomersCreate}>
                   <Button
                     variant="secondary"
                     className="w-full justify-start bg-white/20 hover:bg-white/30 text-white border-0"
@@ -601,7 +602,7 @@ export default function Dashboard() {
                     Add New Customer
                   </Button>
                 </Link>
-                <Link href="/admin/orders/create">
+                <Link href={ApplicationRoutes.AdminOrdersCreate}>
                   <Button
                     variant="secondary"
                     className="w-full justify-start bg-white/20 hover:bg-white/30 text-white border-0"

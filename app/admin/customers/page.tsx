@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { getSession } from "next-auth/react"
 import Spinner from "@/components/Spinner"
 import CustomerAnalyticsChart from "./customerChart"
+import { ApplicationRoutes } from "@/constants/ApplicationRoutes"
 
 // Extend the NextAuth session type
 declare module "next-auth" {
@@ -221,7 +222,7 @@ export default function Table() {
               </div>
             </div>
 
-            <Link href="/admin/customers/create">
+          <Link href={ApplicationRoutes.AdminCustomersCreate}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -276,7 +277,7 @@ export default function Table() {
                       <div>
                         <h3 className="text-lg font-medium text-gray-900 mb-2">No customers found</h3>
                         <p className="text-gray-500 mb-6">Get started by adding your first customer</p>
-                        <Link href="/admin/customers/create">
+                        <Link href={ApplicationRoutes.AdminCustomersCreate}>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -322,7 +323,7 @@ export default function Table() {
                     <td className="px-6 py-4 text-sm text-gray-600">{row.date}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
-                        <Link href={`/admin/customers/${row.id}`}>
+                        <Link href={`${ApplicationRoutes.AdminCustomers}/${row.id}`}>
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}

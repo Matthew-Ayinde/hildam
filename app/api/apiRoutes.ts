@@ -7,5 +7,7 @@ export class ApiRoutes {
 
     static FetchAllOrders: string = 'api/orderslist';
 
+    static FetchOrderById: string = 'api/orderslist/{id}';
+
 
 }

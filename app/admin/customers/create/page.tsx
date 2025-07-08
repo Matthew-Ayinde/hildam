@@ -20,6 +20,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { getSession } from "next-auth/react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import { ApplicationRoutes } from "@/constants/ApplicationRoutes";
 
 const Form = () => {
   const router = useRouter();
@@ -149,7 +150,7 @@ const Form = () => {
     }
 
     setTimeout(() => {
-      router.push("/admin/customers");
+      router.push(ApplicationRoutes.AdminCustomers);
     }, 2000);
   };
 
