@@ -8,6 +8,7 @@ import { HiOutlineClipboardList } from "react-icons/hi"
 import { BiRefresh } from "react-icons/bi"
 import Link from "next/link"
 import { getSession } from "next-auth/react"
+import { Briefcase, Calendar } from "lucide-react"
 
 export default function ModernTable() {
   interface ProjectItem {
@@ -167,26 +168,61 @@ export default function ModernTable() {
 
   if (error) {
     return (
+    <motion.div
+      className="flex flex-col items-center justify-center min-h-[400px] px-6"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+    >
       <motion.div
-        className="flex items-center justify-center min-h-[400px]"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
+        className="relative mb-8"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.6 }}
       >
-        <div className="text-center p-8 bg-red-50 rounded-2xl border border-red-200">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h3 className="text-lg font-semibold text-red-700 mb-2">Error Loading Data</h3>
-          <p className="text-red-600 mb-4">{error}</p>
-          <motion.button
-            onClick={fetchData}
-            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Try Again
-          </motion.button>
+        <div className="relative">
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-xl"
+            animate={{
+              scale: [1, 1.1, 1],
+              opacity: [0.5, 0.8, 0.5],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+            }}
+          />
+          <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+            <Briefcase className="w-12 h-12 text-slate-400 dark:text-slate-500" />
+          </div>
         </div>
       </motion.div>
-    )
+
+      <motion.div
+        className="text-center space-y-4 max-w-md"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.6 }}
+      >
+        <h3 className="text-2xl font-semibold text-slate-800 dark:text-slate-200">No Jobs Assigned</h3>
+        <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+          No jobs have been assigned to you at the moment. Check back later or contact your manager for new assignments.
+        </p>
+      </motion.div>
+
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8, duration: 1 }}
+      >
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/30 rounded-full animate-pulse" />
+        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-purple-400/40 rounded-full animate-pulse delay-1000" />
+        <div className="absolute bottom-1/3 left-1/3 w-1.5 h-1.5 bg-indigo-400/25 rounded-full animate-pulse delay-500" />
+      </motion.div>
+    </motion.div>
+  )
   }
 
   return (

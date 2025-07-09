@@ -41,7 +41,7 @@ export default function StoreRequestsDashboard() {
     const token = session?.user?.token
     try {
       setLoading(true)
-      const response = await fetch("https://hildam.insightpublicis.com/api/allstorerequestsbyorderid", {
+      const response = await fetch("https://hildam.insightpublicis.com/api/allstorerequestsbyorderi", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -82,7 +82,7 @@ export default function StoreRequestsDashboard() {
       case "rejected":
         return "bg-red-100 text-red-800 border-red-200"
       default:
-        return "bg-orange-100 text-orange-800 border-orange-200"
+        return "bg-orange-100 text-orange-800 "
     }
   }
 
@@ -146,21 +146,21 @@ export default function StoreRequestsDashboard() {
 
   if (error) {
     return (
-      <div className=" bg-gradient-to-br from-orange-50 to-white p-6">
-        <div className="max-w-7xl mx-auto">
-          <Card className="border-red-200 bg-red-50">
-            <CardContent className="p-6 text-center">
-              <FiX className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Data</h3>
-              <p className="text-red-600 mb-4">{error}</p>
-              <Button onClick={fetchData} className="bg-orange-500 hover:bg-orange-600">
-                <FiRefreshCw className="w-4 h-4 mr-2" />
-                Try Again
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <div className="max-w-7xl mx-auto p-6 flex items-center justify-center h-[300px]">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="text-center"
+      >
+        <h2 className="text-2xl font-semibold text-gray-700">
+          You haven&apos;t made any requests
+        </h2>
+        <p className="mt-2 text-gray-500">
+          Once you do, they&apos;ll show up here.
+        </p>
+      </motion.div>
+    </div>
     )
   }
 
@@ -180,7 +180,7 @@ export default function StoreRequestsDashboard() {
           transition={{ delay: 0.1 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
         >
-          <Card className="border-orange-200 bg-white shadow-sm">
+          <Card className=" bg-white shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -194,7 +194,7 @@ export default function StoreRequestsDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-green-200 bg-white shadow-sm">
+          <Card className="bg-white shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -208,7 +208,7 @@ export default function StoreRequestsDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-red-200 bg-white shadow-sm">
+          <Card className="bg-white shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -230,7 +230,7 @@ export default function StoreRequestsDashboard() {
           transition={{ delay: 0.2 }}
           className="mb-8"
         >
-          <Card className="border-orange-200 bg-white shadow-sm">
+          <Card className=" bg-white shadow-sm">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
@@ -240,7 +240,7 @@ export default function StoreRequestsDashboard() {
                       placeholder="Search by item name, requester, or order ID..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 border-orange-200 focus:border-orange-500"
+                      className="pl-10  focus:border-orange-500"
                     />
                   </div>
                 </div>
@@ -251,7 +251,7 @@ export default function StoreRequestsDashboard() {
                     className={
                       statusFilter === "all"
                         ? "bg-orange-500 hover:bg-orange-600"
-                        : "border-orange-200 text-orange-600 hover:bg-orange-50"
+                        : " text-orange-600 hover:bg-orange-50"
                     }
                   >
                     All
@@ -295,7 +295,7 @@ export default function StoreRequestsDashboard() {
               transition={{ delay: orderIndex * 0.1 }}
               className="mb-8"
             >
-              <Card className="border-orange-200 bg-white shadow-sm overflow-hidden">
+              <Card className=" bg-white shadow-sm overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
