@@ -16,6 +16,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
 import type { DateRange } from "react-day-picker"
 import { getSession } from "next-auth/react"
+import { fetchOrderslist } from "@/app/api/apiClient"
 
 // API Response Types
 interface ApiResponse {
@@ -89,6 +90,7 @@ const OrdersAnalyticsChart = () => {
     const session = await getSession()
     const accessToken = session?.user?.token
 
+          
     if (!accessToken) {
       setError("Authentication required")
       return

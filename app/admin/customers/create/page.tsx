@@ -21,6 +21,7 @@ import { getSession } from "next-auth/react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { ApplicationRoutes } from "@/constants/ApplicationRoutes";
+import StyledPhoneInput from "./PhoneNumberInput";
 
 const Form = () => {
   const router = useRouter();
@@ -315,7 +316,7 @@ const Form = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 py-8 px-4 rounded-3xl">
+    <div className="min-h-screen  py-8 rounded-3xl">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -347,7 +348,10 @@ const Form = () => {
           className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100"
         >
           {/* Personal Information Section */}
-          <motion.div variants={itemVariants} className="mb-10">
+          <motion.div
+            variants={itemVariants}
+            className="mb-10 px-4 sm:px-6 lg:px-8"
+          >
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-r from-[#ff6c2f] to-orange-600 rounded-xl flex items-center justify-center">
                 <MdPerson className="text-white text-xl" />
@@ -357,14 +361,14 @@ const Form = () => {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Full Name */}
               <motion.div variants={itemVariants} className="space-y-2">
                 <label
                   htmlFor="name"
                   className="flex items-center gap-2 text-sm font-semibold text-gray-700"
                 >
-                  <MdPerson className="text-[#ff6c2f]" />
-                  Full Name
+                  <MdPerson className="text-[#ff6c2f]" /> Full Name
                 </label>
                 <input
                   type="text"
@@ -373,18 +377,18 @@ const Form = () => {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Enter full name"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition duration-200 bg-gray-50 focus:bg-white"
                   required
                 />
               </motion.div>
 
+              {/* Email */}
               <motion.div variants={itemVariants} className="space-y-2">
                 <label
                   htmlFor="email"
                   className="flex items-center gap-2 text-sm font-semibold text-gray-700"
                 >
-                  <MdEmail className="text-[#ff6c2f]" />
-                  Email Address
+                  <MdEmail className="text-[#ff6c2f]" /> Email Address
                 </label>
                 <input
                   type="email"
@@ -393,18 +397,18 @@ const Form = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Enter email address"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition duration-200 bg-gray-50 focus:bg-white"
                   required
                 />
               </motion.div>
 
+              {/* Age */}
               <motion.div variants={itemVariants} className="space-y-2">
                 <label
                   htmlFor="age"
                   className="flex items-center gap-2 text-sm font-semibold text-gray-700"
                 >
-                  <MdCalendarToday className="text-[#ff6c2f]" />
-                  Age
+                  <MdCalendarToday className="text-[#ff6c2f]" /> Age
                 </label>
                 <input
                   type="number"
@@ -412,33 +416,31 @@ const Form = () => {
                   name="age"
                   value={formData.age}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    if (/^\d*$/.test(value) && Number(value) <= 100) {
-                      handleChange(e);
-                    }
+                    const v = e.target.value;
+                    if (/^\d*$/.test(v) && Number(v) <= 100) handleChange(e);
                   }}
                   placeholder="Enter age"
                   min="0"
                   max="100"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition duration-200 bg-gray-50 focus:bg-white"
                   required
                 />
               </motion.div>
 
+              {/* Gender */}
               <motion.div variants={itemVariants} className="space-y-2">
                 <label
                   htmlFor="gender"
                   className="flex items-center gap-2 text-sm font-semibold text-gray-700"
                 >
-                  <MdWc className="text-[#ff6c2f]" />
-                  Gender
+                  <MdWc className="text-[#ff6c2f]" /> Gender
                 </label>
                 <select
                   id="gender"
                   name="gender"
                   value={formData.gender}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-700"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition duration-200 bg-gray-50 focus:bg-white"
                   required
                 >
                   <option value="">Select gender</option>
@@ -448,83 +450,78 @@ const Form = () => {
                 </select>
               </motion.div>
 
+              <div className="space-y-2">
+              <label htmlFor="phone_number" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <MdPhone className="text-[#ff6c2f]" /> Phone Number
+              </label>
+              <StyledPhoneInput value={formData.phone_number} onChange={handlePhoneChange} />
+            </div>
+
+              {/* Address (spans two on md and three on lg) */}
               <motion.div
                 variants={itemVariants}
-                className="space-y-2 md:col-span-2 lg:col-span-1"
+                className="space-y-2 sm:col-span-2 lg:col-span-3"
               >
                 <label
                   htmlFor="address"
                   className="flex items-center gap-2 text-sm font-semibold text-gray-700"
                 >
-                  <MdLocationOn className="text-[#ff6c2f]" />
-                  Address
+                  <MdLocationOn className="text-[#ff6c2f]" /> Address
                 </label>
                 <textarea
-                  name="address"
                   id="address"
+                  name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white resize-none"
                   rows={3}
-                  required
                   placeholder="Enter full address"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition duration-200 bg-gray-50 focus:bg-white resize-none"
+                  required
                 />
               </motion.div>
 
-              <motion.div variants={itemVariants} className="space-y-2">
-                <label
-                  htmlFor="phone_number"
-                  className="flex items-center gap-2 text-sm font-semibold text-gray-700"
-                >
-                  <MdPhone className="text-[#ff6c2f]" />
-                  Phone Number
-                </label>
-                <PhoneInput
-                  country="ng"
-                  enableSearch
-                  disableCountryCode={false}
-                  countryCodeEditable={false}
-                  value={formData.phone_number}
-                  onChange={handlePhoneChange}
-                  containerClass="w-full"
-                  containerStyle={{ width: "100%" }}
-                  inputClass="w-full px-4 py-3 pl-20 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white"
-                  buttonClass="absolute left-0 top-0 h-full bg-gray-50 border-r border-gray-200 rounded-l-xl pl-3 pr-2"
-                  dropdownClass="w-full bg-white border border-gray-200 rounded-xl shadow-lg"
-                />
-              </motion.div>
+            
             </div>
 
-            <motion.div variants={itemVariants} className="mt-6">
+            {/* Customer Description (full width) */}
+            <motion.div variants={itemVariants} className="mt-6 space-y-2">
               <label
                 htmlFor="customer_description"
-                className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2"
+                className="flex items-center gap-2 text-sm font-semibold text-gray-700"
               >
-                <MdDescription className="text-[#ff6c2f]" />
-                Customer Description
+                <MdDescription className="text-[#ff6c2f]" /> Customer
+                Description
               </label>
               <textarea
-                name="customer_description"
                 id="customer_description"
+                name="customer_description"
                 value={formData.customer_description}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition-all duration-200 bg-gray-50 focus:bg-white resize-none"
-                rows={3}
-                required
+                rows={4}
                 placeholder="Enter customer description and preferences"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition duration-200 bg-gray-50 focus:bg-white resize-none"
+                required
               />
             </motion.div>
           </motion.div>
 
           {/* Measurements Section */}
           <motion.div variants={itemVariants} className="mb-8">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex lg:flex-row flex-col  lg:justify-between lg:gap-0 gap-3 lg:items-center mb-6">
+                  <div className="flex items-center gap-3 ">
               <div className="w-10 h-10 bg-gradient-to-r from-[#ff6c2f] to-orange-600 rounded-xl flex items-center justify-center">
                 <MdStraighten className="text-white text-xl" />
               </div>
               <h2 className="text-2xl font-bold text-gray-800">
                 Body Measurements
               </h2>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-600">
+                For duplicate values, separate using hyphens (e.g., 34-36-38)
+              </p>
+            </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

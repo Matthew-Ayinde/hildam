@@ -123,7 +123,7 @@ export default function SplashScreen() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5 }}
               >
-                Hildam
+                Hilda'M
               </motion.h1>
 
               <motion.h2

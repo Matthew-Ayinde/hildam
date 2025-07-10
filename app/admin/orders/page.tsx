@@ -11,6 +11,7 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { getSession } from "next-auth/react"
 import OrdersAnalyticsChart from "./OrdersChart"
+import { deleteOrder, fetchOrderslist } from "@/app/api/apiClient"
 
 export default function Table() {
   interface Order {
@@ -28,7 +29,7 @@ export default function Table() {
   const [filteredData, setFilteredData] = useState<Order[]>([])
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-  const [selectedUserId, setSelectedUserId] = useState(null)
+  const [selectedUserId, setSelectedUserId] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -45,31 +46,18 @@ export default function Table() {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      try {
+
+
+     try {
         setLoading(true)
         setError(null)
         const session = await getSession()
         const token = session?.user?.token
         if (!token) throw new Error("No access token found")
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/orderslist`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const result = await response.json()
-        if (result.message !== "success") {
-          throw new Error("Failed to fetch data")
-        }
-
-        setData(result.data)
-        setFilteredData(result.data)
+        const result = await fetchOrderslist()       
+        setData(result)
+        setFilteredData(result)
       } catch (error) {
         if (error instanceof Error) {
           setError(error.message || "An unexpected error occurred")
@@ -130,21 +118,12 @@ export default function Table() {
   const handleDelete = async (id: any) => {
     setIsPopupOpen(false)
 
+    const orderId = selectedUserId
+
     try {
-      const session = await getSession()
-      const token = session?.user?.token
-      if (!token) throw new Error("No access token found")
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/deleteorder/${selectedUserId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      const result = await response.json()
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to delete order")
+      const result = await deleteOrder(orderId)
+      if (result.status !== 200) {
+        throw new Error("Failed to delete order")
       }
 
       setData((prevData) => prevData.filter((order) => order.id !== selectedUserId))

@@ -17,6 +17,8 @@ import { IoEyeOutline, IoTrashOutline } from "react-icons/io5"
 import { HiOutlineSparkles, HiOutlineCube } from "react-icons/hi"
 import { BiPackage } from "react-icons/bi"
 import { getSession } from "next-auth/react"
+import { fetchInventory } from "@/app/api/apiClient"
+import { ApplicationRoutes } from "@/constants/ApplicationRoutes"
 
 // Spinner component
 const Spinner = () => (
@@ -58,30 +60,12 @@ export default function ModernInventoryTable() {
         setLoading(true)
         setError(null)
 
-        const session = await getSession()
-      const token = session?.user?.token
 
-        const response = await fetch("https://hildam.insightpublicis.com/api/inventory", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+       const result = await fetchInventory()
+       console.log("Fetched inventory data:", result)
+       setData(result)
+       setFilteredData(result)
 
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch inventory data")
-        }
-
-        const result = await response.json()
-
-        if (result.message === "success" && result.data) {
-          setData(result.data)
-          setFilteredData(result.data)
-        } else {
-          throw new Error("Invalid response format")
-        }
       } catch (error) {
         console.error("Error fetching inventory:", error)
         setError("Failed to load inventory data. Please try again.")
@@ -93,7 +77,6 @@ export default function ModernInventoryTable() {
     fetchInventoryData()
   }, [])
 
-  // Search functionality
   useEffect(() => {
     const filtered = data.filter(
       (item) =>
@@ -252,22 +235,7 @@ export default function ModernInventoryTable() {
           </div>
           <div className="flex gap-3">
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-4 py-3 bg-white border border-orange-200 text-orange-600 rounded-xl font-medium shadow-sm hover:bg-orange-50 transition-all duration-200"
-            >
-              <FaFilter className="text-sm" />
-              Filter
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-4 py-3 bg-white border border-orange-200 text-orange-600 rounded-xl font-medium shadow-sm hover:bg-orange-50 transition-all duration-200"
-            >
-              <FaDownload className="text-sm" />
-              Export
-            </motion.button>
-            <motion.button
+            onClick={() => router.push(ApplicationRoutes.AdminInventoryCreate)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl font-medium shadow-lg transition-all duration-200"
