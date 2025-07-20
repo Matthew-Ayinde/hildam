@@ -1,6 +1,5 @@
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import jwt from "jsonwebtoken"
 
 export const authOptions = {
   providers: [
@@ -13,51 +12,38 @@ export const authOptions = {
       async authorize(credentials) {
         try {
           // Send login request to backend
-          const res = await fetch("https://hildam.insightpublicis.com/api/login", {
+          const res = await fetch("https://api.hildamcouture.com/api/v1/auth/login", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({
               email: credentials?.email,
               password: credentials?.password,
             }),
           })
 
-          const data = await res.json()
+          const response = await res.json()
 
-          if (!res.ok || !data.access_token) {
-            throw new Error("Invalid email or password")
+          // Check if login was successful
+          if (!response.status || !response.data) {
+            throw new Error(response.message || "Login failed")
           }
 
+          // Calculate expiration time (23 hours from now)
+          const expirationTime = Math.floor(Date.now() / 1000) + 23 * 60 * 60
 
-          
-          const expirationTime = Math.floor(Date.now() / 1000) + 1 * 60;
-
-
-          // Decode JWT to extract user details
-          const decodedToken = jwt.decode(data.access_token)
-          if (!decodedToken) {
-            throw new Error("Failed to decode token")
-          }
-
-          // Return user details along with access token
+          // Return user details from the API response
           return {
-            id:
-              typeof decodedToken === "object" && decodedToken !== null && "user_id" in decodedToken
-                ? decodedToken.user_id
-                : undefined,
-            name:
-              typeof decodedToken === "object" && decodedToken !== null && "name" in decodedToken
-                ? decodedToken.name
-                : undefined,
-            role:
-              typeof decodedToken === "object" && decodedToken !== null && "role" in decodedToken
-                ? decodedToken.role
-                : undefined,
-            token: data.access_token,
-            exp: expirationTime, // Set expiration time in token
+            id: response.data.email, // Using email as ID since no user_id is provided
+            name: response.data.name,
+            email: response.data.email,
+            role: response.data.role,
+            token: response.data.token,
+            exp: expirationTime,
           }
         } catch (error) {
-          console.error("Login error:", error)
+          console.error("Authentication error:", error)
           throw new Error("Login failed. Please try again.")
         }
       },
@@ -68,11 +54,10 @@ export const authOptions = {
       // If user logs in, store token & details
       if (user) {
         token.name = user.name
+        token.email = user.email
         token.role = user.role
-        token.token = user.token,
-        token.exp = user.exp; // Set expiration to the new token expiration
-
-
+        token.token = user.token
+        token.exp = user.exp
       }
 
       // Check if token is expired
@@ -93,9 +78,11 @@ export const authOptions = {
       // Pass user details & access token to session
       session.user = {
         name: token.name,
+        email: token.email,
         role: token.role,
         token: token.token,
       }
+
       return session
     },
   },

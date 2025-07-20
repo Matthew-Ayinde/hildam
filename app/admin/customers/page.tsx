@@ -12,6 +12,7 @@ import { getSession } from "next-auth/react"
 import Spinner from "@/components/Spinner"
 import CustomerAnalyticsChart from "./customerChart"
 import { ApplicationRoutes } from "@/constants/ApplicationRoutes"
+import { deleteCustomer, fetchAllCustomers } from "@/app/api/apiClient"
 
 // Extend the NextAuth session type
 declare module "next-auth" {
@@ -48,23 +49,12 @@ export default function Table() {
     if (!selectedCustomerId) return
 
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      if (!accessToken) {
-        throw new Error("Authentication token not found")
-      }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/deletecustomer/${selectedCustomerId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
+      const payload = selectedCustomerId;
 
-      if (!response.ok) {
-        throw new Error("Failed to delete customer")
-      }
+
+      const response = await deleteCustomer(payload)
+      console.log('deletion of customer', response)
 
       setData((prevData) => prevData.filter((customer) => customer.id !== selectedCustomerId))
       setPopupMessage("Customer successfully deleted")
@@ -84,27 +74,11 @@ export default function Table() {
     const fetchData = async () => {
       setIsLoading(true)
       try {
-        const session = await getSession()
-        const accessToken = session?.user?.token
-        if (!accessToken) {
-          throw new Error("No token found, please log in.")
-        }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/customerslist`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch data")
-        }
-
-        const result = await response.json()
-        if (result.data && Array.isArray(result.data)) {
-          const filteredData = result.data.map((item: any) => ({
+        const result = await fetchAllCustomers()
+        
+        if (result) {
+          const filteredData = result.map((item: any) => ({
             fullName: item.name,
             age: item.age,
             gender: item.gender,
@@ -118,7 +92,7 @@ export default function Table() {
         }
       } catch (error) {
         console.error("Error fetching data:", error)
-        setPopupMessage("Error fetching data")
+        // setPopupMessage("Error fetching data")
         setMessageType("error")
         setTimeout(() => setPopupMessage(null), 3000)
       } finally {
@@ -196,7 +170,7 @@ export default function Table() {
         </div>
       </motion.div>
 
-      <CustomerAnalyticsChart />
+      {/* <CustomerAnalyticsChart /> */}
 
       {/* Main Table Card */}
       <motion.div

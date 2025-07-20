@@ -220,7 +220,7 @@ export default function Table() {
 
       
 
-      <OrdersAnalyticsChart />
+      {/* <OrdersAnalyticsChart /> */}
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

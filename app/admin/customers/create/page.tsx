@@ -18,14 +18,12 @@ import {
 } from "react-icons/md";
 import { AnimatePresence, motion } from "framer-motion";
 import { getSession } from "next-auth/react";
-import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { ApplicationRoutes } from "@/constants/ApplicationRoutes";
 import StyledPhoneInput from "./PhoneNumberInput";
 
 const Form = () => {
   const router = useRouter();
-  const [passwordError, setPasswordError] = useState(false);
   const [formData, setFormData] = useState<{
     name: string;
     gender: string;
@@ -112,29 +110,13 @@ const Form = () => {
     setResponseMessage(null);
 
     try {
-      const session = await getSession();
-      const token = session?.user?.token;
-      if (!token) {
-        throw new Error("Access token not found.");
-      }
+     
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/addcustomer`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error("Failed to create customer.");
-      }
+      const result = await createCustomer(formData)
+    );
 
-      const result = await response.json();
+  
       setResponseMessage("Customer created successfully!");
 
       setTimeout(() => {

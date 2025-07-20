@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   //   ];
   // },
   images: {
-    domains: ['hildam.insightpublicis.com'], // Add your domain here
+    domains: ['api.hildamcouture.com'], // Add your domain here
   },
 };
 

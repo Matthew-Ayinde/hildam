@@ -22,6 +22,27 @@ async function getUserHeaders() {
 }
 
 
+export async function fetchAllCustomers(): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(ApiRoutes.FetchAllCustomers, { headers })
+  console.log(resp.data.data)
+  return resp.data.data;
+}
+
+export async function createCustomer(formData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(ApiRoutes.AddCustomer, {formData}, { headers });
+  console.log(resp);
+  return resp;
+}
+
+export async function deleteCustomer(payload: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.delete(`${ApiRoutes.DeleteCustomer}/${payload}`, { headers });
+  console.log(resp);
+  return resp;
+}
+
 
 export async function fetchOrderslist(): Promise<any> {
   const headers = await getUserHeaders()
