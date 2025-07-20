@@ -21,6 +21,7 @@ import { getSession } from "next-auth/react";
 import "react-phone-input-2/lib/style.css";
 import { ApplicationRoutes } from "@/constants/ApplicationRoutes";
 import StyledPhoneInput from "./PhoneNumberInput";
+import { createCustomer } from "@/app/api/apiClient";
 
 const Form = () => {
   const router = useRouter();
@@ -29,7 +30,6 @@ const Form = () => {
     gender: string;
     age: string;
     phone_number: string;
-    password: string;
     email: string;
     address: string;
     customer_description: string;
@@ -57,7 +57,6 @@ const Form = () => {
     gender: "",
     age: "",
     phone_number: "+234",
-    password: "",
     email: "",
     address: "",
     customer_description: "",
@@ -100,42 +99,46 @@ const Form = () => {
     setFormData({ ...formData, phone_number: value });
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setResponseMessage(null);
 
+    // Add this detailed logging
+  console.log('Raw formData:', formData);
+  console.log('formData.name:', formData.name);
+  console.log('formData.name length:', formData.name.length);
+  console.log('JSON.stringify formData:', JSON.stringify(formData));
+    
     try {
-     
-
-
-      const result = await createCustomer(formData)
-    );
-
-  
-      setResponseMessage("Customer created successfully!");
-
+      const result = await createCustomer(formData);
+      
+      if (result.success === "success") {
+        setResponseMessage(result.message);
+        setTimeout(() => {
+          router.push(ApplicationRoutes.AdminCustomers);
+        }, 2000);
+      } 
       setTimeout(() => {
         setResponseMessage(null);
       }, 5000);
     } catch (error: any) {
-      setResponseMessage(`Error: ${error.message}`);
-
+      console.log('Full error object:', error);
+    console.log('Error response:', error.response);
+      const messages = error.response.data.message;
+      const firstKey = Object.keys(messages)[0]; 
+      const firstMessage = messages[firstKey][0]
+      console.log('the error message', firstMessage)
+      setResponseMessage(`Error: ${firstMessage}`);
       setTimeout(() => {
         setResponseMessage(null);
       }, 5000);
     } finally {
       setLoading(false);
     }
-
-    setTimeout(() => {
-      router.push(ApplicationRoutes.AdminCustomers);
-    }, 2000);
   };
+
+
 
   const measurements = [
     {
@@ -380,7 +383,6 @@ const Form = () => {
                   onChange={handleChange}
                   placeholder="Enter email address"
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition duration-200 bg-gray-50 focus:bg-white"
-                  required
                 />
               </motion.div>
 

@@ -51,11 +51,11 @@ export default function Table() {
      try {
         setLoading(true)
         setError(null)
-        const session = await getSession()
-        const token = session?.user?.token
-        if (!token) throw new Error("No access token found")
 
-        const result = await fetchOrderslist()       
+        const response = await fetchOrderslist()
+
+        const result = response.orders
+        console.log('order list', result)       
         setData(result)
         setFilteredData(result)
       } catch (error) {

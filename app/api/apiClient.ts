@@ -31,9 +31,9 @@ export async function fetchAllCustomers(): Promise<any> {
 
 export async function createCustomer(formData: any): Promise<any> {
   const headers = await getUserHeaders();
-  const resp = await API.post(ApiRoutes.AddCustomer, {formData}, { headers });
-  console.log(resp);
-  return resp;
+  const resp = await API.post(ApiRoutes.AddCustomer, formData, { headers });
+  console.log('from API client', resp);
+  return resp.data;
 }
 
 export async function deleteCustomer(payload: string): Promise<any> {
@@ -47,7 +47,8 @@ export async function deleteCustomer(payload: string): Promise<any> {
 export async function fetchOrderslist(): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(ApiRoutes.FetchAllOrders, { headers })
-  return resp.data.data;
+  console.log(resp.data)
+  return resp.data;
 }
 
 export async function deleteOrder(orderId: string): Promise<any> {
