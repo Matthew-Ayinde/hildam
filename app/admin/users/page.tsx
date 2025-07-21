@@ -19,6 +19,7 @@ import { getSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { deleteUser, fetchAllUsers } from "@/app/api/apiClient"
 
 interface User {
   id: string
@@ -165,19 +166,10 @@ export default function ModernUsersTable() {
           return
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/users`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        })
+        const response = await fetchAllUsers()
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch users")
-        }
 
-        const result = await response.json()
-        const users = result.data || []
+        const users = response.data || []
         setData(users)
         setFilteredData(users)
       } catch (error) {
@@ -214,12 +206,9 @@ export default function ModernUsersTable() {
         return
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/users/${selectedUser.id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
+      const user = selectedUser.id
+
+      const response = await deleteUser(user)
 
       if (!response.ok) {
         throw new Error("Failed to delete user")

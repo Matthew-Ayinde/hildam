@@ -16,6 +16,8 @@ import { MdOutlineRule, MdOutlineCloudUpload, MdOutlineCheckCircle } from "react
 import { BsPerson } from "react-icons/bs"
 import { useRouter } from "next/navigation"
 import Spinner from "@/components/Spinner"
+import { createOrder, fetchAllCustomers, fetchCustomer } from "@/app/api/apiClient"
+import { ApplicationRoutes } from "@/constants/ApplicationRoutes"
 
 const dummyCustomers = [
   {
@@ -69,6 +71,7 @@ type FormDataType = {
   sleeve_length: string
   style_reference_images: File[]
   waist: string
+  customer_id: string
 }
 
 const initialFormData: FormDataType = {
@@ -99,6 +102,7 @@ const initialFormData: FormDataType = {
   sleeve_length: "",
   style_reference_images: [],
   waist: "",
+  customer_id: "",
 }
 
 const Form = () => {
@@ -126,15 +130,14 @@ const Form = () => {
   const router = useRouter()
 
   useEffect(() => {
-    ;(async () => {
+    (async () => {
       try {
         const session = await getSession()
         const token = session?.user?.token!
-        const res = await fetch(`https://hildam.insightpublicis.com/api/customerslist`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const json = await res.json()
-        setBasicCustomers(json.data)
+        const res = await fetchAllCustomers()
+        console.log('customersss', res)
+        
+        setBasicCustomers(res)
       } catch (err) {
         console.error("Failed to load customer list", err)
       }
@@ -238,12 +241,9 @@ const Form = () => {
   const handleSelect = async (customer: { id: string; name: string; email: string; age: string }) => {
     try {
       setShowSuggestions(false)
-      const session = await getSession()
-      const token = session?.user?.token!
-      const res = await fetch(`https://hildam.insightpublicis.com/api/customerslist/${customer.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const { data } = await res.json()
+      const customerId = customer.id
+
+      const data = await fetchCustomer(customerId)
 
       setFormData((f) => ({
         ...f,
@@ -265,6 +265,7 @@ const Form = () => {
         skirt_length: data.skirt_length,
         waist: data.waist,
         customer_description: data.customer_description,
+        customer_id: data.id
       }))
     } catch (err) {
       console.error("Failed to load customer details", err)
@@ -276,11 +277,9 @@ const Form = () => {
     setIsSubmitting(true)
     setResponseMessage(null)
 
+    
     try {
-      const session = await getSession()
-      const token = session?.user?.token
-      if (!token) throw new Error("Authentication required. Please log in.")
-
+      
       const payload = new FormData()
 
       Object.entries(formData).forEach(([key, value]) => {
@@ -294,22 +293,14 @@ const Form = () => {
         payload.append("style_reference_images[]", file)
       })
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/createorder`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: payload,
-      })
+      const response = await createOrder(formData)
+      console.log('create order', response)
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to create order.")
-      }
+  
 
       setResponseMessage("Order created successfully!")
       setMessageType("success")
-      router.push('/admin/orders')
+      router.push(ApplicationRoutes.AdminOrders)
 
       // // Reset form after successful submission
       // setTimeout(() => {
@@ -317,8 +308,12 @@ const Form = () => {
       //   setImagePreviews([])
       // }, 2000)
     } catch (error: any) {
-      console.error(error)
-      setResponseMessage(error.message || "An unexpected error occurred.")
+
+      const messages = error.response.data.message;
+      const firstKey = Object.keys(messages)[0];   
+      const firstMessage = messages[firstKey][0]
+
+      setResponseMessage(firstMessage || "An unexpected error occurred.")
       setMessageType("error")
     } finally {
       setIsSubmitting(false)
@@ -514,7 +509,7 @@ const Form = () => {
                       name="manager_id"
                       value={formData.manager_id}
                       onChange={handleChange}
-                      required
+                      // required
                       className="w-full rounded-xl border border-gray-300 shadow-sm p-3 bg-white focus:ring-2 focus:ring-purple-200 focus:border-purple-400 transition-all duration-200"
                     >
                       <option value="">Select Head of Tailoring</option>

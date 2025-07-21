@@ -104,11 +104,6 @@ const Form = () => {
     setLoading(true);
     setResponseMessage(null);
 
-    // Add this detailed logging
-  console.log('Raw formData:', formData);
-  console.log('formData.name:', formData.name);
-  console.log('formData.name length:', formData.name.length);
-  console.log('JSON.stringify formData:', JSON.stringify(formData));
     
     try {
       const result = await createCustomer(formData);

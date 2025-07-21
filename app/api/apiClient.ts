@@ -29,17 +29,21 @@ export async function fetchAllCustomers(): Promise<any> {
   return resp.data.data;
 }
 
+export async function fetchCustomer(customerId: any): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(`${ApiRoutes.FetchCustomer}/${customerId}`, { headers })
+  return resp.data.data;
+}
+
 export async function createCustomer(formData: any): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.post(ApiRoutes.AddCustomer, formData, { headers });
-  console.log('from API client', resp);
   return resp.data;
 }
 
 export async function deleteCustomer(payload: string): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.delete(`${ApiRoutes.DeleteCustomer}/${payload}`, { headers });
-  console.log(resp);
   return resp;
 }
 
@@ -47,19 +51,50 @@ export async function deleteCustomer(payload: string): Promise<any> {
 export async function fetchOrderslist(): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(ApiRoutes.FetchAllOrders, { headers })
-  console.log(resp.data)
   return resp.data;
 }
 
 export async function deleteOrder(orderId: string): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.delete(`${ApiRoutes.DeleteOrder}/${orderId}`, { headers })
-  console.log("Delete response:", resp)
   return resp;
+}
+
+export async function createOrder(formData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(ApiRoutes.CreateOrder, formData, { headers });
+  return resp.data;
 }
 
 export async function fetchInventory(): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(ApiRoutes.FetchInventory, { headers })
   return resp.data.data;
+}
+
+
+
+export async function fetchAllUsers(): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(ApiRoutes.FetchAllUsers, { headers })
+  console.log('all users', resp.data)
+  return resp.data;
+}
+
+export async function fetchUser(userId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(`${ApiRoutes.FetchUser}/${userId}`, { headers })
+  return resp.data.data;
+}
+
+export async function createUser(formData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(ApiRoutes.CreateUser, formData, { headers });
+  return resp.data;
+}
+
+export async function deleteUser(user: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.delete(`${ApiRoutes.DeleteUser}/${user}`, { headers });
+  return resp;
 }
