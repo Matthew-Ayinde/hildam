@@ -93,6 +93,12 @@ export async function createUser(formData: any): Promise<any> {
   return resp.data;
 }
 
+export async function editUser(userId: string, formData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.put(`${ApiRoutes.EditUser}/${userId}`, formData, { headers });
+  return resp.data;
+}
+
 export async function deleteUser(user: string): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.delete(`${ApiRoutes.DeleteUser}/${user}`, { headers });

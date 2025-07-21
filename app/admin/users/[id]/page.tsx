@@ -9,6 +9,9 @@ import { FaPerson } from "react-icons/fa6";
 import { IoMdMail } from "react-icons/io";
 import { IoTime } from "react-icons/io5";
 import { FaShieldAlt } from "react-icons/fa";
+import {fetchUser} from "@/app/api/apiClient"; // Adjust the import path as necessary
+import Link from "next/link"
+import { ApplicationRoutes } from "@/constants/ApplicationRoutes"
 
 
 // Spinner component
@@ -19,10 +22,10 @@ const Spinner = () => (
 )
 
 export default function ShowCustomer() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
   const router = useRouter()
   const { id } = useParams()
 
+  const userId = id as string
   interface Customer {
     item_name: string | number | readonly string[] | undefined
     item_quantity: string | number | readonly string[] | undefined
@@ -41,18 +44,10 @@ export default function ShowCustomer() {
     setLoading(true)
     setError(null)
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      const response = await fetch(`${baseUrl}/users/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-      if (!response.ok) {
-        throw new Error("Failed to fetch customer data")
-      }
-      const result = await response.json()
-      setCustomer(result.data)
+      const result = await fetchUser(userId)
+      console.log("Fetched customer data:", result)
+     
+      setCustomer(result)
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)
@@ -94,7 +89,7 @@ export default function ShowCustomer() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="min-h-screen flex items-center justify-center"
+        className="h-80 flex items-center justify-center"
       >
         <div className="text-center">
           <Spinner />
@@ -109,7 +104,7 @@ export default function ShowCustomer() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="min-h-screen flex items-center justify-center"
+        className="h-80 flex items-center justify-center"
       >
         <div className="text-center bg-white p-8 rounded-2xl shadow-lg">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -265,10 +260,10 @@ export default function ShowCustomer() {
               transition={{ delay: 0.9 }}
               className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200"
             >
-              
-              <button className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
-                Delete User 
-              </button>
+
+              <Link href={`${ApplicationRoutes.AdminUsers}/${customer.id}/edit`} className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-red-600 text-white rounded-xl font-semibold hover:from-red-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+                Edit User
+              </Link>
             </motion.div>
           </div>
         </motion.div>

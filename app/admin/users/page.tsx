@@ -15,7 +15,6 @@ import {
 } from "react-icons/hi"
 import { IoMailOutline, IoShieldCheckmarkOutline } from "react-icons/io5"
 import { useRouter } from "next/navigation"
-import { getSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -158,13 +157,7 @@ export default function ModernUsersTable() {
     const fetchData = async () => {
       try {
         setLoading(true)
-        const session = await getSession()
-        const accessToken = session?.user?.token
-
-        if (!accessToken) {
-          showToast("No access token found. Please log in.", "error")
-          return
-        }
+        
 
         const response = await fetchAllUsers()
 
@@ -198,21 +191,12 @@ export default function ModernUsersTable() {
     if (!selectedUser) return
 
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-
-      if (!accessToken) {
-        showToast("No access token found. Please log in.", "error")
-        return
-      }
-
+      
       const user = selectedUser.id
 
       const response = await deleteUser(user)
 
-      if (!response.ok) {
-        throw new Error("Failed to delete user")
-      }
+      console.log("User deleted:", response)
 
       setData((prevData) => prevData.filter((user) => user.id !== selectedUser.id))
       setIsPopupOpen(false)
