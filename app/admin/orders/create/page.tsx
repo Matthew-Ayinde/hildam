@@ -16,7 +16,7 @@ import { MdOutlineRule, MdOutlineCloudUpload, MdOutlineCheckCircle } from "react
 import { BsPerson } from "react-icons/bs"
 import { useRouter } from "next/navigation"
 import Spinner from "@/components/Spinner"
-import { createOrder, fetchAllCustomers, fetchCustomer } from "@/app/api/apiClient"
+import { createOrder, fetchAllCustomers, fetchCustomer, fetchHeadOfTailoringList } from "@/app/api/apiClient"
 import { ApplicationRoutes } from "@/constants/ApplicationRoutes"
 
 const dummyCustomers = [
@@ -117,7 +117,6 @@ const Form = () => {
   const [managers, setManagers] = useState<
     {
       id: string
-      user_id: string
       name: string
     }[]
   >([])
@@ -132,8 +131,6 @@ const Form = () => {
   useEffect(() => {
     (async () => {
       try {
-        const session = await getSession()
-        const token = session?.user?.token!
         const res = await fetchAllCustomers()
         console.log('customersss', res)
         
@@ -155,32 +152,15 @@ const Form = () => {
   }, [])
 
   useEffect(() => {
-    const fetchHeadOfTailoringList = async () => {
+    const getHeadOfTailoringList = async () => {
       try {
         setLoadingManagers(true)
-        const session = await getSession()
-        const token = session?.user?.token
-        if (!token) {
-          throw new Error("No token found, please log in.")
-        }
+       
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/headoftailoringlist`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        const response = await fetchHeadOfTailoringList()
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const result = await response.json()
-        if (!result.data) {
-          throw new Error("Failed to fetch head of tailoring list")
-        }
-
-        setManagers(result.data)
+        const result = response.head_of_tailoring
+        setManagers(result)
       } catch (error) {
         console.error(error)
       } finally {
@@ -188,7 +168,7 @@ const Form = () => {
       }
     }
 
-    fetchHeadOfTailoringList()
+    getHeadOfTailoringList()
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -514,7 +494,7 @@ const Form = () => {
                     >
                       <option value="">Select Head of Tailoring</option>
                       {managers.map((manager) => (
-                        <option key={manager.id} value={manager.user_id}>
+                        <option key={manager.id} value={manager.id}>
                           {manager.name}
                         </option>
                       ))}

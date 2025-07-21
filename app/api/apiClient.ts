@@ -22,6 +22,10 @@ async function getUserHeaders() {
 }
 
 
+
+
+    //#region Customers endpoint ---------------------------------
+
 export async function fetchAllCustomers(): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(ApiRoutes.FetchAllCustomers, { headers })
@@ -48,6 +52,13 @@ export async function deleteCustomer(payload: string): Promise<any> {
 }
 
 
+
+
+
+
+
+    //#region Orders endpoint ---------------------------------
+
 export async function fetchOrderslist(): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(ApiRoutes.FetchAllOrders, { headers })
@@ -66,6 +77,25 @@ export async function createOrder(formData: any): Promise<any> {
   return resp.data;
 }
 
+export async function fetchHeadOfTailoringList(): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(ApiRoutes.HeadOfTailoringList, { headers })
+  return resp.data;
+}
+
+
+
+
+
+
+
+
+
+
+
+    //#region Inventory endpoint ---------------------------------
+
+
 export async function fetchInventory(): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(ApiRoutes.FetchInventory, { headers })
@@ -73,6 +103,11 @@ export async function fetchInventory(): Promise<any> {
 }
 
 
+
+
+
+
+    //#region Users endpoint ---------------------------------
 
 export async function fetchAllUsers(): Promise<any> {
   const headers = await getUserHeaders()

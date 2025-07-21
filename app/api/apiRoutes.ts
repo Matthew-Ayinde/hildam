@@ -27,6 +27,8 @@ export class ApiRoutes {
     static UpdateOrder: string = '/orderslist/{id}';
     static DeleteOrder: string = '/deleteorder';
 
+    static HeadOfTailoringList: string = 'orders/list-of-head-of-tailoring'
+
 
 
 

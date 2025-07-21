@@ -19,7 +19,7 @@ export default function Table() {
     id: any
     order_id: string
     created_at: string
-    clothing_name: string
+    cloth_name: string
     customer_name: string
     priority: string
     order_status: string
@@ -78,7 +78,7 @@ export default function Table() {
     if (filterCategory === "Customer" && filterValue) {
       filtered = filtered.filter((order) => order.customer_name.toLowerCase().includes(filterValue.toLowerCase()))
     } else if (filterCategory === "Cloth Name" && filterValue) {
-      filtered = filtered.filter((order) => order.clothing_name.toLowerCase().includes(filterValue.toLowerCase()))
+      filtered = filtered.filter((order) => order.cloth_name.toLowerCase().includes(filterValue.toLowerCase()))
     } else if (filterCategory === "Priority" && filterValue) {
       filtered = filtered.filter((order) => order.priority === filterValue)
     } else if (filterCategory === "Order Status" && filterValue) {
@@ -456,7 +456,7 @@ export default function Table() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm font-medium text-[#da6d35]">{row.customer_name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{row.clothing_name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{row.cloth_name}</td>
                       <td className="px-6 py-4">
                         <span
                           className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(row.priority || "medium")}`}
