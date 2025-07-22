@@ -13,12 +13,13 @@ import { getSession } from "next-auth/react"
 import OrdersAnalyticsChart from "./OrdersChart"
 import { deleteOrder, fetchOrderslist } from "@/app/api/apiClient"
 
+
 export default function Table() {
   interface Order {
-    manager_name: string
+    head_of_tailoring: string
     id: any
     order_id: string
-    created_at: string
+    date_created: string
     cloth_name: string
     customer_name: string
     priority: string
@@ -85,17 +86,17 @@ export default function Table() {
       filtered = filtered.filter((order) => order.order_status === filterValue)
     } else if (filterCategory === "Date" && startDate && !endDate) {
       filtered = filtered.filter((order) => {
-        const orderDate = new Date(order.created_at)
+        const orderDate = new Date(order.date_created)
         return orderDate >= new Date(startDate)
       })
     } else if (filterCategory === "Date" && !startDate && endDate) {
       filtered = filtered.filter((order) => {
-        const orderDate = new Date(order.created_at)
+        const orderDate = new Date(order.date_created)
         return orderDate <= new Date(endDate)
       })
     } else if (filterCategory === "Date" && startDate && endDate) {
       filtered = filtered.filter((order) => {
-        const orderDate = new Date(order.created_at)
+        const orderDate = new Date(order.date_created)
         return orderDate >= new Date(startDate) && orderDate <= new Date(endDate)
       })
     }
@@ -452,7 +453,7 @@ export default function Table() {
                       <td className="px-6 py-4 text-sm text-gray-600">
                         <div className="flex items-center space-x-2">
                           <IoCalendarOutline className="text-gray-400" />
-                          <span>{formatDate(row.created_at)}</span>
+                          <span>{formatDate(row.date_created)}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm font-medium text-[#da6d35]">{row.customer_name}</td>
@@ -471,7 +472,7 @@ export default function Table() {
                           {row.order_status || "pending"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{row.manager_name || "Not Assigned"}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{row.head_of_tailoring || "Not Assigned"}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
                           <Link href={`/admin/orders/${row.id}`}>

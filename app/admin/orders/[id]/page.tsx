@@ -18,12 +18,14 @@ import { HiOutlineSparkles, HiOutlinePhotograph } from "react-icons/hi"
 import { MdOutlineRule, MdOutlineClose } from "react-icons/md"
 import { BsStars } from "react-icons/bs"
 import OrderPageError from "@/components/admin/OrderPageError"
+import { fetchOrderById } from "@/app/api/apiClient"
 
 export default function ShowCustomer() {
   const [activeStyleImage, setActiveStyleImage] = useState<string | null>(null)
   const targetRef = useRef<HTMLDivElement | null>(null)
   const router = useRouter()
   const { id } = useParams()
+  const orderId = id as string
   const [isTailorJobModalOpen, setIsTailorJobModalOpen] = useState(false)
   const [feedback, setFeedback] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -177,62 +179,52 @@ export default function ShowCustomer() {
     setError(null)
 
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      if (!accessToken) throw new Error("No access token found")
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/orderslist/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
+      const result = await fetchOrderById(orderId)
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch orders")
-      }
+      console.log("Fetched orderssssss data:", result)
 
-      const result = await response.json()
 
-      if (result.data) {
+      if (result) {
         const mappedCustomer: Customer = {
-          hip: result.data.hip,
-          waist: result.data.waist,
-          bust: result.data.bust,
-          shoulder: result.data.shoulder,
-          bustpoint: result.data.bustpoint,
-          shoulder_to_underbust: result.data.shoulder_to_underbust,
-          round_under_bust: result.data.round_under_bust,
-          half_length: result.data.half_length,
-          blouse_length: result.data.blouse_length,
-          sleeve_length: result.data.sleeve_length,
-          round_sleeve: result.data.round_sleeve,
-          dress_length: result.data.dress_length,
-          chest: result.data.chest,
-          round_shoulder: result.data.round_shoulder,
-          skirt_length: result.data.skirt_length,
-          trousers_length: result.data.trousers_length,
-          round_thigh: result.data.round_thigh,
-          round_knee: result.data.round_knee,
-          round_feet: result.data.round_feet,
-          clothing_description: result.data.clothing_description,
-          clothing_name: result.data.clothing_name,
-          style_reference_images: result.data.style_reference_images,
-          tailor_job_image: result.data.tailor_job_image,
-          order_id: result.data.order_id,
-          priority: result.data.priority,
-          order_status: result.data.order_status,
-          customer_description: result.data.customer_description,
-          created_at: result.data.created_at,
-          first_fitting_date: result.data.first_fitting_date,
-          second_fitting_date: result.data.second_fitting_date,
-          customer_name: result.data.customer_name,
-          customer_email: result.data.customer_email,
-          gender: result.data.gender,
-          phone_number: result.data.phone_number,
-          address: result.data.address,
-          manager_name: result.data.manager_name,
-          duration: result.data.duration,
-          style_approval: result.data.style_approval,
+          hip: result.customer.hip,
+          waist: result.customer.waist,
+          bust: result.customer.bust,
+          shoulder: result.customer.shoulder,
+          bustpoint: result.customer.bustpoint,
+          shoulder_to_underbust: result.customer.shoulder_to_underbust,
+          round_under_bust: result.customer.round_under_bust,
+          half_length: result.customer.half_length,
+          blouse_length: result.customer.blouse_length,
+          sleeve_length: result.customer.sleeve_length,
+          round_sleeve: result.customer.round_sleeve,
+          dress_length: result.customer.dress_length,
+          chest: result.customer.chest,
+          round_shoulder: result.customer.round_shoulder,
+          skirt_length: result.customer.skirt_length,
+          trousers_length: result.trousers_length,
+          round_thigh: result.round_thigh,
+          round_knee: result.round_knee,
+          round_feet: result.round_feet,
+          clothing_description: result.clothing_description,
+          clothing_name: result.clothing_name,
+          style_reference_images: result.style_reference_images,
+          tailor_job_image: result.tailor_uploaded_image,
+          order_id: result.order_id,
+          priority: result.priority,
+          order_status: result.order_status,
+          customer_description: result.customer.customer_description,
+          created_at: result.created_at,
+          first_fitting_date: result.first_fitting_date,
+          second_fitting_date: result.second_fitting_date,
+          customer_name: result.customer_name,
+          customer_email: result.customer.email,
+          gender: result.customer.gender,
+          phone_number: result.customer.phone_number,
+          address: result.address,
+          manager_name: result.manager_name,
+          duration: result.duration,
+          style_approval: result.style_approval,
         }
         setCustomer(mappedCustomer)
       } else {

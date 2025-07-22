@@ -15,6 +15,7 @@ import { FiPackage, FiHash, FiFileText } from "react-icons/fi"
 import { IoArrowBack } from "react-icons/io5"
 import Link from "next/link"
 import { TbCurrencyNaira } from "react-icons/tb";
+import { createInventory } from "@/app/api/apiClient"
 
 const Form = () => {
   const router = useRouter()
@@ -41,31 +42,9 @@ const Form = () => {
     setResponseMessage(null)
 
     try {
-      const session = await getSession()
-      const token = session?.user?.token
 
-      if (!token) {
-        throw new Error("Access token not found in session storage.")
-      }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/inventory`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          item_name: formData.item_name,
-          item_quantity: formData.item_quantity,
-          price_purchased: formData.price_purchased,
-          unit: formData.unit,
-          color: formData.color,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to create Inventory.")
-      }
+      const response = await createInventory(formData)
+      console.log('response', response)
 
       setResponseMessage("Inventory item created successfully!")
       setMessageType("success")

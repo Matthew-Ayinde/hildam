@@ -22,19 +22,23 @@ export class ApiRoutes {
     //#region Orders endpoint ---------------------------------
 
     static FetchAllOrders: string = '/orders/all-orders';
-    static FetchOrderById: string = '/orderslist/{id}';
+    static FetchOrderById: string = '/orders/order';
     static CreateOrder: string = '/orders/create-order';
-    static UpdateOrder: string = '/orderslist/{id}';
-    static DeleteOrder: string = '/deleteorder';
-
-    static HeadOfTailoringList: string = 'orders/list-of-head-of-tailoring'
+    static EditOrder: string = '/orders/edit-order';
+    static DeleteOrder: string = '/orders/delete-order';
+    static HeadOfTailoringList: string = '/orders/list-of-head-of-tailoring';
 
 
 
 
     
     //#region Inventory endpoint ---------------------------------
-    static FetchInventory: string = '/inventory';
+    static FetchAllInventories: string = '/inventories/all-inventories';
+    static FetchInventory: string = '/inventories/inventory';
+    static CreateInventory: string = '/inventories/add-inventory';
+    static EditInventory: string = '/inventories/edit-inventory';
+    static DeleteInventory: string = '/inventories/delete-inventory';
+
     
 
 

@@ -17,7 +17,7 @@ import { IoEyeOutline, IoTrashOutline } from "react-icons/io5"
 import { HiOutlineSparkles, HiOutlineCube } from "react-icons/hi"
 import { BiPackage } from "react-icons/bi"
 import { getSession } from "next-auth/react"
-import { fetchInventory } from "@/app/api/apiClient"
+import { deleteInventory, fetchAllInventories } from "@/app/api/apiClient"
 import { ApplicationRoutes } from "@/constants/ApplicationRoutes"
 
 // Spinner component
@@ -61,7 +61,7 @@ export default function ModernInventoryTable() {
         setError(null)
 
 
-       const result = await fetchInventory()
+       const result = await fetchAllInventories()
        console.log("Fetched inventory data:", result)
        setData(result)
        setFilteredData(result)
@@ -89,27 +89,17 @@ export default function ModernInventoryTable() {
 
   const handleDelete = async () => {
     try {
-      const session = await getSession()
-      const token = session?.user?.token
-      if (!token) {
-        throw new Error("Access token not found.")
-      }
-
-      const response = await fetch(`https://hildam.insightpublicis.com/api/inventory/${selectedUserId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (!response.ok) {
-        setToastMessage("Failed to delete inventory item.")
+      if (!selectedUserId) {
+        setToastMessage("No item selected for deletion.")
         setToastType("error")
         setShowToast(true)
         setTimeout(() => setShowToast(false), 3000)
         return
       }
+
+      const inventoryId = selectedUserId
+      const response = await deleteInventory(inventoryId)
+
 
       setData((prevData) => prevData.filter((item) => item.id !== selectedUserId))
       setIsPopupOpen(false)

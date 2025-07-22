@@ -8,10 +8,12 @@ import { ArrowLeft, Package, Calendar, Palette, Hash, FileText, Edit3 } from "lu
 import { getSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import { TbCurrencyNaira } from "react-icons/tb";
+import { fetchInventory } from "@/app/api/apiClient"
 
 export default function ShowCustomer() {
   const router = useRouter()
   const { id } = useParams()
+  const inventoryId = id as string
 
   interface Customer {
     item_name: string
@@ -30,21 +32,11 @@ export default function ShowCustomer() {
     setLoading(true)
     setError(null)
     try {
-      const session = await getSession()
-      const token = session?.user?.token
-      if (!token) {
-        throw new Error("Unauthorized")
-      }
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      if (!response.ok) {
-        throw new Error("Failed to fetch customer data")
-      }
-      const result = await response.json()
-      setCustomer(result.data)
+     
+   
+      const result = await fetchInventory(inventoryId)
+ 
+      setCustomer(result)
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)

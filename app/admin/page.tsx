@@ -11,6 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { getSession } from "next-auth/react"
 import Link from "next/link"
 import { ApplicationRoutes } from "@/constants/ApplicationRoutes"
+import { ApiRoutes } from "../api/apiRoutes"
+import axios from "axios"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -211,27 +213,25 @@ export default function Dashboard() {
     try {
       const session = await getSession()
       const accessToken = session?.user?.token
+      const baseUrl = ApiRoutes.BASE_URL_API_TEST
 
       if (!accessToken) {
         throw new Error("No access token found. Please log in.")
       }
 
-      const response = await fetch(endpoint, {
-        method: "GET",
+      const response = await axios.get(`${baseUrl}${endpoint}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
         },
       })
+      console.log('responseeeee', response)
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${dataType}`)
-      }
 
-      const result = await response.json()
+      const result = await response.data.orders
+      console.log('result', result)
 
       // Handle the specific API response format
-      if (result.message && result.data) {
+      if (result) {
         // Check for success messages (flexible matching)
         const successMessages = [
           "success",
@@ -269,7 +269,7 @@ export default function Dashboard() {
 
         // Fetch all data concurrently
         const [ordersData, customersData, inventoryData] = await Promise.allSettled([
-          fetchApiData("https://hildam.insightpublicis.com/api/orderslist", "orders"),
+          fetchApiData(ApiRoutes.FetchAllOrders, "orders"),
           fetchApiData("https://hildam.insightpublicis.com/api/customerslist", "customers"),
           fetchApiData("https://hildam.insightpublicis.com/api/inventory", "inventory"),
         ])
@@ -390,9 +390,9 @@ export default function Dashboard() {
         >
           {statsData.map((stat, index) => (
             <motion.div key={stat.title} variants={itemVariants}>
-              {stat.loading ? (
+              {/* {stat.loading ? (
                 <StatCardSkeleton />
-              ) : (
+              ) : ( */}
                 <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -422,7 +422,7 @@ export default function Dashboard() {
                     </div>
                   </CardContent>
                 </Card>
-              )}
+              {/* )} */}
             </motion.div>
           ))}
         </motion.div>

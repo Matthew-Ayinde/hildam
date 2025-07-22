@@ -65,6 +65,13 @@ export async function fetchOrderslist(): Promise<any> {
   return resp.data;
 }
 
+export async function fetchOrderById(orderId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(`${ApiRoutes.FetchOrderById}/${orderId}`, { headers })
+  console.log("Fetched order data:", resp)
+  return resp.data.order;
+}
+
 export async function deleteOrder(orderId: string): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.delete(`${ApiRoutes.DeleteOrder}/${orderId}`, { headers })
@@ -74,6 +81,12 @@ export async function deleteOrder(orderId: string): Promise<any> {
 export async function createOrder(formData: any): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.post(ApiRoutes.CreateOrder, formData, { headers });
+  return resp.data;
+}
+
+export async function editOrder(orderId: string, formData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(`${ApiRoutes.EditOrder}/${orderId}`, formData, { headers });
   return resp.data;
 }
 
@@ -96,10 +109,35 @@ export async function fetchHeadOfTailoringList(): Promise<any> {
     //#region Inventory endpoint ---------------------------------
 
 
-export async function fetchInventory(): Promise<any> {
+export async function fetchAllInventories(): Promise<any> {
   const headers = await getUserHeaders()
-  const resp = await API.get(ApiRoutes.FetchInventory, { headers })
+  const resp = await API.get(ApiRoutes.FetchAllInventories, { headers })
   return resp.data.data;
+}
+
+export async function fetchInventory(inventoryId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(`${ApiRoutes.FetchInventory}/${inventoryId}`, { headers })
+  return resp.data.data;
+}
+
+export async function createInventory(formData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(ApiRoutes.CreateInventory, formData, { headers });
+  return resp.data;
+}
+
+export async function editInventory(inventoryId: string, formData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.put(`${ApiRoutes.EditInventory}/${inventoryId}`, formData,
+    { headers });
+  return resp.data;
+}
+
+export async function deleteInventory(inventoryId: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.delete(`${ApiRoutes.DeleteInventory}/${inventoryId}`, { headers });
+  return resp;
 }
 
 

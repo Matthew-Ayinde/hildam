@@ -13,9 +13,10 @@ import { getSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
+import { fetchOrderById, editOrder, fetchHeadOfTailoringList } from "@/app/api/apiClient"
 
 interface ProjectManager {
-  user_id: string
+  id: string
   name: string
 }
 
@@ -71,6 +72,7 @@ export default function EditCustomer() {
 
   const router = useRouter()
   const { id } = useParams()
+  const orderId = id as string
 
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [loading, setLoading] = useState(true)
@@ -106,7 +108,7 @@ export default function EditCustomer() {
     round_thigh: 0,
     round_knee: 0,
     round_feet: 0,
-    style_reference_images: [] as string[],
+    style_reference_images: [],
     created_at: "",
     manager_id: "",
     manager_name: "",
@@ -199,22 +201,10 @@ export default function EditCustomer() {
     setLoading(true)
     setError("")
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      if (!accessToken) throw new Error("No access token found")
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/orderslist/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
+      const data = await fetchOrderById(orderId)
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch customer data")
-      }
-
-      const result = await response.json()
-      const data = result.data
+      console.log("Fetched order data:", data)
 
       setCustomer(data)
       setFormData({
@@ -248,7 +238,7 @@ export default function EditCustomer() {
         order_status: data.order_status,
         shoulder_width: data.shoulder_width,
         manager_id: data.manager_id,
-        manager_name: data.manager_name,
+        manager_name: data.tailoring.manager.name,
         clothing_name: data.clothing_name,
         clothing_description: data.clothing_description,
         priority: data.priority,
@@ -273,22 +263,11 @@ export default function EditCustomer() {
     setLoadingManagers(true)
     setErrorManagers("")
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      if (!accessToken) throw new Error("No access token found")
+     
+      const response = await fetchHeadOfTailoringList()
+      console.log("Fetched project managers:", response)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/headoftailoringlist`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch project managers")
-      }
-
-      const result = await response.json()
-      setProjectManagers(result.data)
+      setProjectManagers(response.head_of_tailoring)
     } catch (err) {
       setErrorManagers(err instanceof Error ? err.message : "An unknown error occurred")
     } finally {
@@ -307,9 +286,7 @@ export default function EditCustomer() {
     setSuccessMessage("")
 
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      if (!accessToken) throw new Error("No access token found")
+      
 
       const formDataToSend = new FormData()
 
@@ -334,13 +311,11 @@ export default function EditCustomer() {
         }
       })
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/editorder/${id}`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}` },
-        body: formDataToSend,
-      })
+      console.log("Form data to send:", formDataToSend)
 
-      if (!response.ok) throw new Error("Failed to update order")
+      const response = await editOrder(orderId, formDataToSend)
+      console.log("Edit order response:", response)
+
 
       setSuccessMessage("Order updated successfully!")
       setTimeout(() => router.push("/admin/orders"), 2000)
@@ -378,8 +353,8 @@ export default function EditCustomer() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
-      <div className="container mx-auto p-6 max-w-7xl">
+    <div className="min-h-screen">
+      <div className="container mx-auto">
         {/* Success Message */}
         <AnimatePresence>
           {successMessage && (
@@ -437,52 +412,13 @@ export default function EditCustomer() {
                     className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-gray-600 focus:outline-none"
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">Customer Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
-                  />
-                </div>
-
+        
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">Clothing Name</label>
                   <input
                     type="text"
                     name="clothing_name"
                     value={formData.clothing_name}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700 flex items-center">
-                    <FiPhone className="mr-2" />
-                    Phone Number
-                  </label>
-                  <input
-                    type="text"
-                    name="phone_number"
-                    value={formData.phone_number}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700 flex items-center">
-                    <FiMail className="mr-2" />
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
                     onChange={handleInputChange}
                     className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
                   />
@@ -503,20 +439,6 @@ export default function EditCustomer() {
                     <option value="medium">🟡 Medium</option>
                     <option value="low">🟢 Low</option>
                   </select>
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 flex items-center">
-                    <FiMapPin className="mr-2" />
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
-                  />
                 </div>
 
                 <div className="space-y-2 md:col-span-3">
@@ -555,12 +477,13 @@ export default function EditCustomer() {
                     onChange={handleInputChange}
                     className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white"
                     disabled={loadingManagers}
+                    required
                   >
                     <option value="" disabled>
                       {loadingManagers ? "Loading..." : errorManagers ? "Error loading" : "Select Manager"}
                     </option>
                     {projectManagers.map((manager) => (
-                      <option key={manager.user_id} value={manager.user_id}>
+                      <option key={manager.id} value={manager.id}>
                         {manager.name}
                       </option>
                     ))}
@@ -624,7 +547,7 @@ export default function EditCustomer() {
           </motion.div>
 
           {/* Measurements Card */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -673,7 +596,7 @@ export default function EditCustomer() {
                 ))}
               </div>
             </div>
-          </motion.div>
+          </motion.div> */}
 
           {/* Fitting Details Card */}
           <motion.div
