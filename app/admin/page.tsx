@@ -8,11 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { getSession } from "next-auth/react"
 import Link from "next/link"
 import { ApplicationRoutes } from "@/constants/ApplicationRoutes"
-import { ApiRoutes } from "../api/apiRoutes"
-import axios from "axios"
+import { fetchAllInventories, fetchOrderslist, fetchAllCustomers } from "../api/apiClient"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -29,25 +27,26 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 }
 
+// Updated interface to match your API response
 interface Order {
-  id: string
-  customer_name: string
-  customer_email: string
-  clothing_name: string
-  clothing_description: string
+  id: number
   order_id: string
+  date_created: string
+  cloth_name: string
   priority: string
   order_status: string
-  created_at: string
-  gender: string
-  age: string
-  customer_description: string
-  address: string
-  phone_number: string
-  manager_exists: boolean
-  manager_name_exists: boolean
-  manager_name: string
-  manager_id: string
+  customer_name: string
+  customer_email: string
+  cloth_description?: string
+  gender?: string
+  age?: string
+  customer_description?: string
+  address?: string
+  phone_number?: string
+  manager_exists?: boolean
+  manager_name_exists?: boolean
+  manager_name?: string
+  manager_id?: string
 }
 
 interface Customer {
@@ -129,7 +128,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [statsLoading, setStatsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
   const [statsData, setStatsData] = useState<StatsData[]>([
     {
       title: "Total Orders",
@@ -209,49 +207,33 @@ export default function Dashboard() {
     return `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`
   }
 
-  const fetchApiData = async (endpoint: string, dataType: string) => {
+  // Define individual API functions for easier editing
+  const fetchOrdersData = async () => {
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      const baseUrl = ApiRoutes.BASE_URL_API_TEST
-
-      if (!accessToken) {
-        throw new Error("No access token found. Please log in.")
-      }
-
-      const response = await axios.get(`${baseUrl}${endpoint}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-      console.log('responseeeee', response)
-
-
-      const result = await response.data.orders
-      console.log('result', result)
-
-      // Handle the specific API response format
-      if (result) {
-        // Check for success messages (flexible matching)
-        const successMessages = [
-          "success",
-          "customer list successfully gotten",
-          "orders list successfully gotten",
-          "inventory successfully gotten",
-        ]
-
-        const isSuccess = successMessages.some((msg) => result.message.toLowerCase().includes(msg.toLowerCase()))
-
-        if (isSuccess) {
-          return result.data
-        } else {
-          throw new Error(`API returned error: ${result.message}`)
-        }
-      } else {
-        throw new Error(`Invalid response format for ${dataType}`)
-      }
+      const ordersData = await fetchOrderslist()
+      return ordersData
     } catch (error) {
-      console.error(`Error fetching ${dataType}:`, error)
+      console.log("Error fetching orders:", error)
+      throw error
+    }
+  }
+
+  const fetchCustomersData = async () => {
+    try {
+      const customersData = await fetchAllCustomers()
+      return customersData
+    } catch (error) {
+      console.error("Error fetching customers:", error)
+      throw error
+    }
+  }
+
+  const fetchInventoryData = async () => {
+    try {
+      const inventoryData = await fetchAllInventories()
+      return inventoryData
+    } catch (error) {
+      console.error("Error fetching inventory:", error)
       throw error
     }
   }
@@ -267,23 +249,48 @@ export default function Dashboard() {
         setLoading(true)
         setStatsLoading(true)
 
-        // Fetch all data concurrently
-        const [ordersData, customersData, inventoryData] = await Promise.allSettled([
-          fetchApiData(ApiRoutes.FetchAllOrders, "orders"),
-          fetchApiData("https://hildam.insightpublicis.com/api/customerslist", "customers"),
-          fetchApiData("https://hildam.insightpublicis.com/api/inventory", "inventory"),
+        // Fetch all data concurrently using the defined functions
+        const [ordersResult, customersResult, inventoryResult] = await Promise.allSettled([
+          fetchOrdersData(),
+          fetchCustomersData(),
+          fetchInventoryData(),
         ])
 
-        // Process orders data
-        if (ordersData.status === "fulfilled") {
-          const recentOrders = ordersData.value.slice(0, 10)
-          setOrders(recentOrders)
+        // Process orders data - THIS IS THE FIX
+        if (ordersResult.status === "fulfilled") {
+          const recentOrders = ordersResult.value.orders
+          console.log("my fuf. orders", recentOrders)
+
+          // Map the API response to match your Order interface
+          const mappedOrders = recentOrders.map((order: any) => ({
+            id: order.id,
+            order_id: order.order_id,
+            date_created: order.date_created,
+            cloth_name: order.cloth_name,
+            priority: order.priority,
+            order_status: order.order_status || "pending", // Default status if not provided
+            customer_name: order.customer_name || "Unknown Customer",
+            customer_email: order.customer_email || "",
+            cloth_description: order.cloth_description || order.cloth_name,
+            gender: order.gender,
+            age: order.age,
+            customer_description: order.customer_description,
+            address: order.address,
+            phone_number: order.phone_number,
+            manager_exists: order.manager_exists,
+            manager_name_exists: order.manager_name_exists,
+            manager_name: order.manager_name,
+            manager_id: order.manager_id,
+          }))
+
+          // Set the orders state - THIS WAS MISSING
+          setOrders(mappedOrders)
         }
 
-        // Process customers data with the correct format
-        if (customersData.status === "fulfilled") {
+        // Process customers data
+        if (customersResult.status === "fulfilled") {
           // Map the API response to match our Customer interface
-          const mappedCustomers = customersData.value.map((customer: any) => ({
+          const mappedCustomers = customersResult.value.map((customer: any) => ({
             id: customer.id,
             name: customer.name,
             email: customer.email,
@@ -296,16 +303,17 @@ export default function Dashboard() {
         }
 
         // Process inventory data
-        if (inventoryData.status === "fulfilled") {
-          setInventory(inventoryData.value)
+        if (inventoryResult.status === "fulfilled") {
+          setInventory(inventoryResult.value)
         }
 
         // Update stats data
         const newStatsData = [...statsData]
 
         // Update orders stats
-        if (ordersData.status === "fulfilled") {
-          const totalOrders = ordersData.value.length
+        if (ordersResult.status === "fulfilled") {
+          const totalOrders = ordersResult.value.orders.length
+          console.log("totalllll orders", totalOrders)
           newStatsData[0] = {
             ...newStatsData[0],
             value: totalOrders.toString(),
@@ -315,8 +323,8 @@ export default function Dashboard() {
         }
 
         // Update customers stats
-        if (customersData.status === "fulfilled") {
-          const totalCustomers = customersData.value.length
+        if (customersResult.status === "fulfilled") {
+          const totalCustomers = customersResult.value.length
           newStatsData[1] = {
             ...newStatsData[1],
             value: totalCustomers.toString(),
@@ -326,12 +334,11 @@ export default function Dashboard() {
         }
 
         // Update inventory stats
-        if (inventoryData.status === "fulfilled") {
-          const totalInventoryItems = inventoryData.value.length
-          const totalInventoryQuantity = inventoryData.value.reduce((sum: number, item: InventoryItem) => {
+        if (inventoryResult.status === "fulfilled") {
+          const totalInventoryItems = inventoryResult.value.length
+          const totalInventoryQuantity = inventoryResult.value.reduce((sum: number, item: InventoryItem) => {
             return sum + (Number.parseInt(item.item_quantity) || 0)
           }, 0)
-
           newStatsData[2] = {
             ...newStatsData[2],
             value: `${totalInventoryItems}`,
@@ -357,7 +364,6 @@ export default function Dashboard() {
   const inventoryItems = inventory.slice(0, 4).map((item, index) => {
     const quantity = Number.parseInt(item.item_quantity) || 0
     const total = Math.max(quantity + Math.floor(Math.random() * 50), Math.floor(quantity * 1.5))
-
     return {
       name: item.item_name,
       stock: quantity,
@@ -390,39 +396,35 @@ export default function Dashboard() {
         >
           {statsData.map((stat, index) => (
             <motion.div key={stat.title} variants={itemVariants}>
-              {/* {stat.loading ? (
-                <StatCardSkeleton />
-              ) : ( */}
-                <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                        <div className="flex items-center mt-1">
-                          <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                        </div>
-                        <div className="flex items-center mt-2">
-                          {stat.trend === "up" ? (
-                            <ArrowUpRight className="w-4 h-4 text-green-600" />
-                          ) : (
-                            <ArrowDownRight className="w-4 h-4 text-red-600" />
-                          )}
-                          <span
-                            className={`text-sm font-medium ml-1 ${
-                              stat.trend === "up" ? "text-green-600" : "text-red-600"
-                            }`}
-                          >
-                            {stat.change}
-                          </span>
-                        </div>
+              <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                      <div className="flex items-center mt-1">
+                        <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
                       </div>
-                      <div className={`p-3 rounded-full bg-gray-50 ${stat.color}`}>
-                        <stat.icon className="w-6 h-6" />
+                      <div className="flex items-center mt-2">
+                        {stat.trend === "up" ? (
+                          <ArrowUpRight className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <ArrowDownRight className="w-4 h-4 text-red-600" />
+                        )}
+                        <span
+                          className={`text-sm font-medium ml-1 ${
+                            stat.trend === "up" ? "text-green-600" : "text-red-600"
+                          }`}
+                        >
+                          {stat.change}
+                        </span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              {/* )} */}
+                    <div className={`p-3 rounded-full bg-gray-50 ${stat.color}`}>
+                      <stat.icon className="w-6 h-6" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           ))}
         </motion.div>
@@ -454,13 +456,13 @@ export default function Dashboard() {
                   <LoadingSkeleton />
                 ) : error ? (
                   <div className="text-center py-8">
-                    <div className="text-red-500 mb-2">⚠️ Error loading orders</div>
-                    <p className="text-gray-500 text-sm">{error}</p>
+                    <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">No orders found</p>
                   </div>
                 ) : orders.length === 0 ? (
                   <div className="text-center py-8">
                     <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">No orders found</p>
+                    <p className="text-gray-500">No orders available</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -477,7 +479,7 @@ export default function Dashboard() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {orders.map((order, index) => (
+                        {orders.slice(0, 5).map((order, index) => (
                           <motion.tr
                             key={order.id}
                             initial={{ opacity: 0, y: 10 }}
@@ -501,10 +503,8 @@ export default function Dashboard() {
                             </TableCell>
                             <TableCell className="text-gray-700">
                               <div>
-                                <div className="font-medium">{order.clothing_name}</div>
-                                <div className="text-xs text-gray-500 whitespace-nowrap">
-                                  {order.clothing_description}
-                                </div>
+                                <div className="font-medium">{order.cloth_name}</div>
+                                <div className="text-xs text-gray-500 whitespace-nowrap">{order.cloth_description}</div>
                               </div>
                             </TableCell>
                             <TableCell>
@@ -518,7 +518,7 @@ export default function Dashboard() {
                               </Badge>
                             </TableCell>
                             <TableCell className="text-gray-600 text-sm whitespace-nowrap">
-                              {formatDate(order.created_at)}
+                              {formatDate(order.date_created)}
                             </TableCell>
                             <TableCell className="rounded-r-lg">
                               <Link href={`${ApplicationRoutes.AdminOrders}/${order.id}`}>
