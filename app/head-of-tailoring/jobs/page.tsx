@@ -9,6 +9,7 @@ import { BiRefresh } from "react-icons/bi"
 import Link from "next/link"
 import { getSession } from "next-auth/react"
 import { Briefcase, Calendar } from "lucide-react"
+import { fetchAllTailorJobs } from "@/app/api/apiClient"
 
 export default function ModernTable() {
   interface ProjectItem {
@@ -60,20 +61,10 @@ export default function ModernTable() {
     setIsRefreshing(true)
 
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      const response = await fetch("https://hildam.insightpublicis.com/api/tailorjoblists", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
+      const result = await fetchAllTailorJobs()
+      console.log('resldhf', result)
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch data")
-      }
-
-      const result = await response.json()
-      const formattedData = result.data.map((item: any) => ({
+      const formattedData = result.map((item: any) => ({
         id: item.id,
         order_id: item.order_id,
         itemData: item.item_name,

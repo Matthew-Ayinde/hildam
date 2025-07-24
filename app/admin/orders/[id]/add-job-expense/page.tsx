@@ -25,6 +25,7 @@ import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useRouter } from "next/navigation"
+import { createExpense, fetchOrderById } from "@/app/api/apiClient"
 
 interface ExpenseItem {
   id: string
@@ -51,6 +52,7 @@ interface OrderData {
 
 export default function AddExpensePage() {
   const params = useParams()
+  const orderId = params.id as string
   const id = params.id as string
 
   const router = useRouter()
@@ -87,40 +89,22 @@ export default function AddExpensePage() {
       setError(null)
 
       try {
-        const session = await getSession()
-        const token = session?.user?.token
+        
 
-        if (!token) {
-          setError("No authentication token found. Please log in.")
-          return
-        }
+        const result = await fetchOrderById(orderId)
 
-        const response = await fetch(`https://hildam.insightpublicis.com/api/orderslist/${id}`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        })
+        console.log('fetch invoice expense', result)
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch order data: ${response.status} ${response.statusText}`)
-        }
-
-        const result = await response.json()
-
-        if (result.message === "success" && result.data) {
-          const data: OrderData = result.data
+        const data: any = result
           setOrderInfo({
             orderId: data.order_id || `ORD-${id}`,
             customerName: data.customer_name || "",
             orderDescription: data.clothing_description || "",
             clothingName: data.clothing_name || "",
           })
+          console.log('orde ID', orderId)
           // setSuccess("Order data loaded successfully!")
-        } else {
-          throw new Error("Invalid response format or no data found")
-        }
+        
       } catch (error) {
         console.error("Error fetching order data:", error)
         setError(error instanceof Error ? error.message : "Failed to fetch order data")
@@ -159,24 +143,9 @@ export default function AddExpensePage() {
     try {
       console.log("Submitting expense data:", submitData)
 
-      // Replace this with your actual API endpoint for submitting expenses
-      const session = await getSession()
-      const token = session?.user?.token
+      const response = await createExpense(submitData)
+      console.log('resulf for create expense', response)
 
-      console.log(submitData)
-
-      const response = await fetch("https://hildam.insightpublicis.com/api/addexpense", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(submitData),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to submit expenses")
-      }
 
       setSuccess("Expenses submitted successfully!")
       router.push(`/admin/orders/${id}/create-payment`) // Redirect to order details page

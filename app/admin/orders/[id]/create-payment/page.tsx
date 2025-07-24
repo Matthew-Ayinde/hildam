@@ -11,10 +11,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2, DollarSign, Receipt, Percent, Tag } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { createPayment, fetchOrderById } from "@/app/api/apiClient"
 
 const Form = () => {
   const router = useRouter()
   const { id } = useParams()
+  const orderId = id as string
 
   const [orderLoading, setOrderLoading] = useState(true)
   const [formData, setFormData] = useState<{
@@ -40,20 +42,11 @@ const Form = () => {
     const fetchOrder = async () => {
       try {
         setOrderLoading(true)
-        const session = await getSession()
-        const token = session?.user?.token
-        if (!token) throw new Error("Access token not found.")
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/orderslist/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        if (!res.ok) throw new Error("Failed to fetch order.")
-        const json = await res.json()
+        const res = await fetchOrderById(orderId)
         setFormData((f) => ({
           ...f,
-          order_id: json.data.order_id,
+          order_id: res.order_id,
         }))
       } catch (err) {
         console.error(err)
@@ -92,34 +85,16 @@ const Form = () => {
         discount: formData.discount ? Number.parseFloat(formData.discount) : undefined, // Optional field
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/addpayment`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      })
+      const result = await createPayment(payload)
+      console.log('create payment result', result)
 
-      if (!response.ok) {
-        throw new Error("Failed to create payment.")
-      }
-
-      const result = (await response.json()) as {
-        status: string
-        data: { id: number }
-      }
-
-      if (result.status === "success") {
         setResponseMessage("Payment created successfully!")
         setMessageType("success")
         // Redirect after a short delay
         setTimeout(() => {
           router.push(`/admin/payments/${result.data.id}`)
         }, 1500)
-      } else {
-        throw new Error("Server returned error status")
-      }
+      
     } catch (error: any) {
       setResponseMessage(`Error: ${error.message}`)
       setMessageType("error")

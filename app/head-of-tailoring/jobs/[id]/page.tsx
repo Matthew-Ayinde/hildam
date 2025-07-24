@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { getSession } from "next-auth/react"
 import Link from "next/link"
 import { TbRulerMeasure2 } from "react-icons/tb";
+import { editTailorJob, fetchTailorJob, SendJobToClientManager } from "@/app/api/apiClient"
 
 export default function ShowCustomer() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false)
@@ -34,137 +35,7 @@ export default function ShowCustomer() {
   const [sentSuccess, setSentSuccess] = useState(false)
   const [isAssignSectionVisible, setIsAssignSectionVisible] = useState(false)
 
-  const [tailorOptions, setTailorOptions] = useState<
-    {
-      user_id: any
-      id: number
-      name: string
-      email: string
-    }[]
-  >([])
 
-  const [tailorsLoading, setTailorsLoading] = useState(false)
-  const [tailorsError, setTailorsError] = useState<string | null>(null)
-
-  const fetchTailors = async () => {
-    setTailorsLoading(true)
-    setTailorsError(null)
-    try {
-      const session = await getSession()
-      const token = session?.user?.token
-      if (!token) throw new Error("Not authenticated")
-
-      const res = await fetch("https://hildam.insightpublicis.com/api/listoftailors", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      if (!res.ok) {
-        throw new Error(`Server returned ${res.status}`)
-      }
-
-      const json = await res.json()
-      const list = (json.data as any[]).map((t) => ({
-        id: Number(t.id),
-        name: t.name,
-        email: t.email,
-        user_id: t.user_id,
-      }))
-
-      setTailorOptions(list)
-    } catch (err) {
-      setTailorsError(err instanceof Error ? err.message : "Unknown error")
-    } finally {
-      setTailorsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchTailors()
-  }, [])
-
-  const [assignedTailors, setAssignedTailors] = useState<{ name: string; email: string }[]>([])
-
-  const fetchAssignedTailors = async () => {
-    try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      const response = await fetch(`https://hildam.insightpublicis.com/api/tailorjoblists/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch assigned tailors")
-      }
-
-      const result = await response.json()
-      const { tailor_names, tailor_emails } = result.data
-
-      const tailors = tailor_names.map((name: any, index: string | number) => ({
-        name,
-        email: tailor_emails[index],
-      }))
-
-      setAssignedTailors(tailors)
-    } catch (error) {
-      console.error("Error fetching assigned tailors:", error)
-    }
-  }
-
-  const [selectedTailors, setSelectedTailors] = useState<number[]>([1, 2])
-  const [isAssigning, setIsAssigning] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-
-  const filteredTailors = tailorOptions.filter(
-    (t) =>
-      t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.email.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
-
-  const toggleTailor = (tailorId: number) => {
-    setSelectedTailors((prev) => (prev.includes(tailorId) ? prev.filter((id) => id !== tailorId) : [...prev, tailorId]))
-  }
-
-  const handleAssignTailors = async () => {
-    if (selectedTailors.length === 0) return
-    setIsAssigning(true)
-    try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-
-      const tailorIds = selectedTailors
-        .map((tid) => {
-          const t = tailorOptions.find((o) => o.id === tid)
-          return t ? t.user_id : null
-        })
-        .filter((u): u is number => u !== null)
-
-      const res = await fetch(`https://hildam.insightpublicis.com/api/edittailorjob/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ tailor_id: tailorIds }),
-      })
-      if (!res.ok) throw new Error("Failed to assign tailors")
-
-      const newlyAssigned = selectedTailors.map((tid) => {
-        const t = tailorOptions.find((o) => o.id === tid)!
-        return { id: t.id, name: t.name, email: t.email }
-      })
-      setAssignedTailors(newlyAssigned)
-
-      setUploadMessage("Tailors assigned successfully")
-      setIsAssignSectionVisible(false)
-    } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Unknown error")
-    } finally {
-      setIsAssigning(false)
-    }
-  }
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -193,6 +64,7 @@ export default function ShowCustomer() {
 
   const router = useRouter()
   const { id } = useParams()
+  const tailorId = id as string;
 
   useEffect(() => {
     if (uploadMessage) {
@@ -217,30 +89,19 @@ export default function ShowCustomer() {
     if (!selectedImage) return
 
     const formData = new FormData()
-    formData.append("design_image", selectedImage)
+    formData.append("design_image_path", selectedImage)
+    console.log('imagee', formData)
 
     setIsUploading(true)
     setUploadMessage(null)
     setUploadError(null)
 
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      const response = await fetch(`https://hildam.insightpublicis.com/api/edittailorjob/${id}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to upload image")
-      }
-
-      const result = await response.json()
-      setImagePath(result.data.image_path)
+      console.log('the formdata', formData)
+      const result = await editTailorJob(tailorId, formData)
+      console.log("Upload result:", result)
       setUploadMessage("Image uploaded successfully")
+      setImagePath(result.design_image_path)
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "An unknown error occurred")
     } finally {
@@ -256,20 +117,8 @@ export default function ShowCustomer() {
     setUploadError(null)
 
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      const response = await fetch(`https://hildam.insightpublicis.com/api/sendtoorder/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ image_path: imagePath }),
-      })
+      const response = await SendJobToClientManager(tailorId)
 
-      if (!response.ok) {
-        throw new Error("Failed to send image to project manager")
-      }
 
       setUploadMessage("Image sent to project manager successfully")
       setSentSuccess(true)
@@ -335,69 +184,53 @@ export default function ShowCustomer() {
     setError(null)
 
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      const response = await fetch(`https://hildam.insightpublicis.com/api/tailorjoblists/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch customer data")
-      }
-
-      const result = await response.json()
+      const result = await fetchTailorJob(tailorId)
+      
       console.log("customer details: ", result)
 
-      if (result.data) {
-        const mappedCustomer: Customer = {
-          fullName: result.data.customer_name,
-          age: result.data.age,
-          gender: result.data.gender,
+      if (result) {
+        const mappedCustomer: any = {
+          fullName: result.customer.name,
+          gender: result.customer.gender,
           date: new Date().toLocaleDateString(),
-          order_id: result.data.order_id,
-          address: result.data.address || "N/A",
-          bust: result.data.bust || 0,
-          waist: result.data.waist || 0,
-          hips: result.data.hips || 0,
-          shoulder_width: result.data.shoulder_width || 0,
-          neck: result.data.neck || 0,
-          arm_length: result.data.arm_length || 0,
-          back_length: result.data.back_length || 0,
-          front_length: result.data.front_length || 0,
-          customer_description: result.data.customer_description || "N/A",
-          clothing_name: result.data.clothing_name || "N/A",
-          clothing_description: result.data.clothing_description || "N/A",
-          high_bust: result.data.high_bust || 0,
-          tailor_image: result.data.tailor_image || null,
-          project_manager_approval: result.data.project_manager_approval || null,
-          client_manager_feedback: result.data.client_manager_feedback || null,
-          style_reference_images: result.data.style_reference_images || [],
-          client_manager_approval: result.data.client_manager_approval,
-          hip: result.data.hip || 0,
-          shoulder: result.data.shoulder || 0,
-          bustpoint: result.data.bustpoint || 0,
-          shoulder_to_underbust: result.data.shoulder_to_underbust || 0,
-          round_under_bust: result.data.round_under_bust || 0,
-          half_length: result.data.half_length || 0,
-          blouse_length: result.data.blouse_length || 0,
-          sleeve_length: result.data.sleeve_length || 0,
-          round_sleeve: result.data.round_sleeve || 0,
-          dress_length: result.data.dress_length || 0,
-          chest: result.data.chest || 0,
-          round_shoulder: result.data.round_shoulder || 0,
-          skirt_length: result.data.skirt_length || 0,
-          trousers_length: result.data.trousers_length || 0,
-          round_thigh: result.data.round_thigh || 0,
-          round_knee: result.data.round_knee || 0,
-          round_feet: result.data.round_feet || 0,
-          assigned_tailors: result.data.assigned_tailors || [],
+          order_id: result.tailoring.order_id,
+          bust: result.customer.bust || 0,
+          waist: result.customer.waist || 0,
+          hip: result.customer.hip || 0,
+          shoulder_width: result.customer.shoulder_width || 0,
+          neck: result.customer.neck || 0,
+          arm_length: result.customer.arm_length || 0,
+          back_length: result.customer.back_length || 0,
+          front_length: result.customer.front_length || 0,
+          customer_description: result.customer.customer_description || "N/A",
+          clothing_name: result.order.clothing_name || "N/A",
+          clothing_description: result.order.clothing_description || "N/A",
+          tailor_image: result.tailoring.design_image_path || null,
+          client_manager_approval: result.tailoring.client_manager_approval || null,
+          client_manager_feedback: result.tailoring.client_manager_feedback || null,
+          style_reference_images: result.order.style_reference_images || [],
+          // client_manager_approval: result.data.client_manager_approval,
+          // hip: result.data.hip || 0,
+          shoulder: result.customer.shoulder || 0,
+          bustpoint: result.customer.bustpoint || 0,
+          shoulder_to_underbust: result.customer.shoulder_to_underbust || 0,
+          round_under_bust: result.customer.round_under_bust || 0,
+          half_length: result.customer.half_length || 0,
+          blouse_length: result.customer.blouse_length || 0,
+          sleeve_length: result.customer.sleeve_length || 0,
+          round_sleeve: result.customer.round_sleeve || 0,
+          dress_length: result.customer.dress_length || 0,
+          chest: result.customer.chest || 0,
+          round_shoulder: result.customer.round_shoulder || 0,
+          skirt_length: result.customer.skirt_length || 0,
+          // trousers_length: result.data.trousers_length || 0,
+          // round_thigh: result.data.round_thigh || 0,
+          // round_knee: result.data.round_knee || 0,
+          // round_feet: result.data.round_feet || 0,
+          // assigned_tailors: result.data.assigned_tailors || [],
         }
         setCustomer(mappedCustomer)
 
-        fetchAssignedTailors()
-        setSelectedTailors((mappedCustomer.assigned_tailors ?? []).map((t) => t.id))
       } else {
         setCustomer(null)
       }
@@ -451,7 +284,7 @@ export default function ShowCustomer() {
 
   if (!customer) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-slate-50">
+      <div className="h-60 flex items-center justify-center bg-gradient-to-br from-gray-50 to-slate-50">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
           <p className="text-gray-500 text-xl">No customer data found</p>
         </motion.div>
@@ -682,157 +515,6 @@ export default function ShowCustomer() {
               </div>
             </motion.div>
 
-            {/* Assigned Tailors */}
-            <motion.div variants={fadeInUp} className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                  <div className="p-2 bg-green-100 rounded-xl">
-                    <FaUserTie className="text-green-600" />
-                  </div>
-                  Assigned Tailors
-                </h2>
-                <motion.button
-                  onClick={() => setIsAssignSectionVisible((prev) => !prev)}
-                  className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-medium transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <FaUserTie />
-                  {isAssignSectionVisible ? "Hide Assign" : "Assign Tailors"}
-                </motion.button>
-              </div>
-
-              {assignedTailors.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {assignedTailors.map((tailor, index) => (
-                    <motion.div
-                      key={index}
-                      className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-200 hover:shadow-md transition-all"
-                      variants={fadeInUp}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ y: -2 }}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 bg-green-100 rounded-full">
-                          <FaUserTie className="text-green-600 text-xl" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-gray-800">{tailor.name}</h3>
-                          <p className="text-green-600 text-sm">{tailor.email}</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <motion.div
-                  className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-2xl border-2 border-dashed border-gray-300 text-center"
-                  variants={fadeInUp}
-                >
-                  <FaUserTie className="text-4xl text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 font-medium text-xl">No tailors assigned yet</p>
-                  <p className="text-gray-400 text-sm mt-2">Click "Assign Tailors" to get started</p>
-                </motion.div>
-              )}
-            </motion.div>
-
-            {/* Assign Tailors Section */}
-            <AnimatePresence>
-              {isAssignSectionVisible && (
-                <motion.div
-                  className="mb-12 bg-gradient-to-br from-orange-50 to-amber-50 p-8 rounded-3xl border border-orange-200"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="flex items-center mb-6">
-                    <div className="p-3 bg-orange-100 rounded-full">
-                      <FaUserTie className="text-orange-500 text-2xl" />
-                    </div>
-                    <h2 className="ml-4 text-2xl font-bold text-gray-700">Assign Tailors to Order</h2>
-                  </div>
-
-                  {tailorsLoading && (
-                    <div className="text-center py-8">
-                      <Spinner />
-                      <p className="mt-4 text-gray-600">Loading tailors...</p>
-                    </div>
-                  )}
-
-                  {tailorsError && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-                      <IoMdCloseCircle className="text-red-500 text-4xl mx-auto mb-2" />
-                      <p className="text-red-600 font-medium">Error loading tailors: {tailorsError}</p>
-                      <button
-                        onClick={fetchTailors}
-                        className="mt-3 text-red-600 hover:text-red-700 underline font-medium"
-                      >
-                        Try Again
-                      </button>
-                    </div>
-                  )}
-
-                  {!tailorsLoading && !tailorsError && (
-                    <>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                        {filteredTailors.map((tailor) => {
-                          const isSelected = selectedTailors.includes(tailor.id)
-                          return (
-                            <motion.button
-                              key={tailor.id}
-                              onClick={() => toggleTailor(tailor.id)}
-                              className={`flex items-center justify-between p-6 border-2 rounded-2xl transition-all focus:outline-none ${
-                                isSelected
-                                  ? "bg-orange-100 border-orange-300 shadow-md"
-                                  : "bg-white hover:shadow-md border-gray-200 hover:border-orange-200"
-                              }`}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                            >
-                              <div className="text-left">
-                                <h3 className="text-gray-800 font-bold">{tailor.name}</h3>
-                                <p className="text-gray-500 text-sm">{tailor.email}</p>
-                              </div>
-                              {isSelected ? (
-                                <FaCheckCircle className="text-orange-500 text-2xl" />
-                              ) : (
-                                <FaRegCircle className="text-gray-300 text-2xl" />
-                              )}
-                            </motion.button>
-                          )
-                        })}
-                      </div>
-
-                      <motion.button
-                        onClick={handleAssignTailors}
-                        disabled={isAssigning || selectedTailors.length === 0}
-                        className={`w-full py-4 rounded-2xl text-white font-bold text-lg transition-all flex items-center justify-center gap-3 ${
-                          isAssigning || selectedTailors.length === 0
-                            ? "bg-gray-300 cursor-not-allowed"
-                            : "bg-orange-500 hover:bg-orange-600 shadow-lg hover:shadow-xl"
-                        }`}
-                        whileHover={!isAssigning && selectedTailors.length > 0 ? { scale: 1.02 } : {}}
-                        whileTap={!isAssigning && selectedTailors.length > 0 ? { scale: 0.98 } : {}}
-                      >
-                        {isAssigning ? (
-                          <>
-                            <Spinner />
-                            Assigning Tailors...
-                          </>
-                        ) : (
-                          <>
-                            <FaUserTie />
-                            Assign Selected Tailors ({selectedTailors.length})
-                          </>
-                        )}
-                      </motion.button>
-                    </>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
             {/* Image Upload Section */}
             {customer.tailor_image === null && (
               <motion.div
@@ -975,7 +657,7 @@ export default function ShowCustomer() {
                   </div>
 
                   <div className="flex items-center gap-4">
-                    {customer.client_manager_approval === "pending" && (
+                    {customer.client_manager_approval === null && (
                       <>
                         <div className="p-3 bg-yellow-100 rounded-full">
                           <IoMdCloseCircle className="text-yellow-600 text-2xl" />
@@ -986,7 +668,7 @@ export default function ShowCustomer() {
                         </div>
                       </>
                     )}
-                    {customer.client_manager_approval === "accepted" && (
+                    {customer.client_manager_approval === "approved" && (
                       <>
                         <div className="p-3 bg-green-100 rounded-full">
                           <IoMdCheckmarkCircle className="text-green-600 text-2xl" />

@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { getSession } from 'next-auth/react'
 import { useParams } from 'next/navigation'
+import { fetchPayment } from '@/app/api/apiClient'
 
 interface InvoiceData {
   id: string
@@ -48,50 +49,39 @@ export default function Invoice() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { id } = useParams();
+  const paymentId = id as string
 
   const fetchInvoiceData = async () => {
     setLoading(true)
     setError(null)
     try {
-      const session = await getSession();
-            const accessToken = session?.user?.token;
-            const response = await fetch(
-              `${process.env.NEXT_PUBLIC_BASE_URL}/payment/${id}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                },
-              }
-            );
-      if (!response.ok) {
-        throw new Error('Failed to fetch invoice data')
-      }
-      const result = await response.json()
-      if (result.data) {
+         const result = await fetchPayment(paymentId)
+      
+      if (result) {
         const data: InvoiceData = {
-          id: result.data.id,
-          order_id: result.data.order_id || 'N/A',
-          created_at: result.data.created_at || 'N/A',
-          updated_at: result.data.updated_at || 'N/A',
-          VAT: result.data.VAT || 'N/A',
-          discount: result.data.discount || 'N/A',
-          going_rate: result.data.going_rate || 'N/A',
-          total_amount_due: result.data.total_amount_due || 'N/A',
-          cumulative_total_amount: result.data.cumulative_total_amount || 'N/A',
-          amount_paid: result.data.amount_paid || 'N/A',
-          balance_remaining: result.data.balance_remaining || 'N/A',
-          payment_status: result.data.payment_status || 'N/A',
-          customer_name: result.data.customer_name || 'N/A',
-          customer_email: result.data.customer_email || 'N/A',
-          clothing_name: result.data.clothing_name || 'N/A',
-          clothing_description: result.data.clothing_description || 'N/A',
-          priority: result.data.priority || 'N/A',
-          order_status: result.data.order_status || 'N/A',
+          id: result.id,
+          order_id: result.order_id || 'N/A',
+          created_at: result.created_at || 'N/A',
+          updated_at: result.updated_at || 'N/A',
+          VAT: result.VAT || 'N/A',
+          discount: result.discount || 'N/A',
+          going_rate: result.going_rate || 'N/A',
+          total_amount_due: result.total_amount_due || 'N/A',
+          cumulative_total_amount: result.cumulative_total_amount || 'N/A',
+          amount_paid: result.amount_paid || 'N/A',
+          balance_remaining: result.balance_remaining || 'N/A',
+          payment_status: result.payment_status || 'N/A',
+          customer_name: result.customer_name || 'N/A',
+          customer_email: result.customer_email || 'N/A',
+          clothing_name: result.clothing_name || 'N/A',
+          clothing_description: result.clothing_description || 'N/A',
+          priority: result.priority || 'N/A',
+          order_status: result.order_status || 'N/A',
           // Billing information
-          name: result.data.name || 'N/A',
-          email: result.data.email || 'N/A',
-          phone_number: result.data.customer_phone_number || 'N/A',
-          address: result.data.address || 'No Address Provided',  
+          name: result.name || 'N/A',
+          email: result.email || 'N/A',
+          phone_number: result.customer_phone_number || 'N/A',
+          address: result.address || 'No Address Provided',  
         }
         setInvoiceData(data)
       } else {
@@ -148,7 +138,7 @@ export default function Invoice() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen flex flex-col items-center justify-center">
         <div
           ref={invoiceRef}
           className="w-full max-w-4xl bg-white p-10 rounded-xl shadow-2xl border border-gray-200 text-sm sm:text-base pb-80"

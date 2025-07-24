@@ -8,6 +8,7 @@ import { MdOutlineDeleteForever } from "react-icons/md"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { getSession } from "next-auth/react"
+import { fetchAllPayments } from "@/app/api/apiClient"
 
 export default function ModernPaymentTable() {
   interface Order {
@@ -17,7 +18,7 @@ export default function ModernPaymentTable() {
     created_at: string
     customer_name: string
     priority: string
-    cumulative_total_amount: string
+    total_amount_due: string
   }
 
   const [data, setData] = useState<Order[]>([])
@@ -28,9 +29,9 @@ export default function ModernPaymentTable() {
   const [error, setError] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [toastType, setToastType] = useState<"success" | "error" | null>(null)
+
   const rowsPerPage = 10
   const router = useRouter()
-
   const totalPages = Math.ceil(data.length / rowsPerPage)
 
   useEffect(() => {
@@ -38,27 +39,9 @@ export default function ModernPaymentTable() {
       try {
         setLoading(true)
         setError(null)
-        const session = await getSession()
-        const token = session?.user?.token
-        if (!token) throw new Error("No access token found")
-
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/allpayments`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const result = await response.json()
-        if (result.message !== "success") {
-          throw new Error("Failed to fetch data")
-        }
-
-        setData(result.data)
+        const response = await fetchAllPayments()
+        console.log("payment rsss", response)
+        setData(response)
       } catch (error) {
         if (error instanceof Error) {
           setError(error.message || "An unexpected error occurred")
@@ -75,8 +58,8 @@ export default function ModernPaymentTable() {
 
   const handleDelete = async (id: any) => {
     try {
-       const session = await getSession()
-        const token = session?.user?.token
+      const session = await getSession()
+      const token = session?.user?.token
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/deleteorder/${selectedUserId}`, {
         method: "DELETE",
@@ -86,6 +69,7 @@ export default function ModernPaymentTable() {
       })
 
       const result = await response.json()
+
       if (!response.ok) {
         throw new Error(result.message || "Failed to delete order")
       }
@@ -201,7 +185,7 @@ export default function ModernPaymentTable() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="w-full relative min-h-screen bg-gradient-to-br from-orange-50 to-white p-6"
+      className="w-full relative min-h-screen"
     >
       {/* Toast Notification */}
       <AnimatePresence>
@@ -257,6 +241,18 @@ export default function ModernPaymentTable() {
               Try Again
             </motion.button>
           </motion.div>
+        ) : data.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center justify-center py-20"
+          >
+            <div className="text-center">
+              <FaMoneyBill className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">No payments found</h3>
+              <p className="text-gray-500">There are no payment records to display at the moment.</p>
+            </div>
+          </motion.div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -294,14 +290,16 @@ export default function ModernPaymentTable() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm font-bold text-gray-900">
-                          {formatCurrency(Number.parseFloat(row.cumulative_total_amount))}
+                          {formatCurrency(Number.parseFloat(row.total_amount_due))}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
                           {getStatusIcon(row.payment_status)}
                           <span
-                            className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(row.payment_status)}`}
+                            className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(
+                              row.payment_status,
+                            )}`}
                           >
                             {row.payment_status || "Unknown"}
                           </span>
@@ -340,8 +338,8 @@ export default function ModernPaymentTable() {
           </div>
         )}
 
-        {/* Pagination */}
-        {!loading && !error && (
+        {/* Pagination - Only show when there's data */}
+        {!loading && !error && data.length > 0 && (
           <motion.div
             variants={itemVariants}
             className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between"

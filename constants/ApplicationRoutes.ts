@@ -30,6 +30,8 @@ export class ApplicationRoutes {
     static readonly AdminInventoryEdit = "/admin/inventory/edit";
     static readonly AdminInventoryRequests = "/admin/inventory/requests";
 
+    static readonly AdminPayments = '/admin/payments'
+
     static readonly AdminCalendar = "/admin/calendar";
 
     static readonly AdminJobExpenses = "/admin/expenses";

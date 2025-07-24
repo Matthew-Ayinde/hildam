@@ -5,7 +5,7 @@ import ModernPaymentTable from './PaymentTable'
 const page = () => {
   return (
     <div>
-        <IncomeExpenseChart />
+        {/* <IncomeExpenseChart /> */}
         <ModernPaymentTable />
     </div>
   )

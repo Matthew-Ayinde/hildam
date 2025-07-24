@@ -17,7 +17,6 @@ async function getUserHeaders() {
   const token = await getUserToken()
   return {
     Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
   }
 }
 
@@ -95,6 +94,23 @@ export async function fetchHeadOfTailoringList(): Promise<any> {
   const resp = await API.get(ApiRoutes.HeadOfTailoringList, { headers })
   return resp.data;
 }
+
+export async function acceptTailorImage(orderId: string): Promise<any> {
+  const headers = await getUserHeaders()
+
+  const resp = await API.put(`${ApiRoutes.AcceptTailorImage}/${orderId}`, {}, { headers })
+  return resp.data;
+}
+
+export async function rejectTailorImage(orderId: string, feedback: any): Promise<any> {
+  const headers = await getUserHeaders()
+
+  const resp = await API.put(`${ApiRoutes.RejectTailorImage}/${orderId}`, feedback, { headers })
+  return resp.data;
+}
+
+
+
 
 
 
@@ -177,3 +193,99 @@ export async function deleteUser(user: string): Promise<any> {
   const resp = await API.delete(`${ApiRoutes.DeleteUser}/${user}`, { headers });
   return resp;
 }
+
+
+
+
+
+
+
+
+
+
+    //#region Payments endpoint ---------------------------------
+export async function fetchAllPayments(): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(ApiRoutes.FetchAllPayments, { headers })
+  return resp.data.data;
+}
+
+export async function fetchPayment(paymentId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(`${ApiRoutes.FetchPayment}/${paymentId}`, { headers })
+  return resp.data.data;
+}
+
+export async function createPayment(payload: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(ApiRoutes.CreatePayment, payload, { headers });
+  return resp.data;
+}
+
+export async function editPayment(paymentId: string, formData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.put(`${ApiRoutes.EditPayment}/${paymentId}`, formData, { headers });
+  return resp.data;
+}
+
+export async function deletePayment(paymentId: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.delete(`${ApiRoutes.DeletePayment}/${paymentId}`, { headers });
+  return resp;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //#region Expenses endpoint ---------------------------------
+    export async function createExpense(submitData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(ApiRoutes.CreateExpense, submitData, { headers });
+  return resp.data;
+}
+
+
+
+
+
+
+
+
+    //#region Head of Tailoring endpoint ---------------------------------
+
+export async function fetchAllTailorJobs(): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(ApiRoutes.FetchAllTailorJobs, { headers })
+  return resp.data.data;
+}
+
+export async function fetchTailorJob(tailorJobId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(`${ApiRoutes.FetchTailorJob}/${tailorJobId}`, { headers })
+  console.log(resp)
+  return resp.data;
+}
+
+export async function editTailorJob(tailorJobId: string, formData: any): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.post(`${ApiRoutes.EditTailorJob}/${tailorJobId}`, formData, { headers })
+  return resp.data;
+}
+
+export async function SendJobToClientManager(tailorJobId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.put(`${ApiRoutes.SendJobToClientManager}/${tailorJobId}`, {}, { headers })
+  return resp.data;
+}
+
+

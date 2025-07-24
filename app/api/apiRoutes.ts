@@ -19,6 +19,14 @@ export class ApiRoutes {
 
 
 
+
+
+
+
+  
+
+
+
     //#region Orders endpoint ---------------------------------
 
     static FetchAllOrders: string = '/orders/all-orders';
@@ -27,6 +35,32 @@ export class ApiRoutes {
     static EditOrder: string = '/orders/edit-order';
     static DeleteOrder: string = '/orders/delete-order';
     static HeadOfTailoringList: string = '/orders/list-of-head-of-tailoring';
+    static AcceptTailorImage: string = '/orders/accept-tailor-style';
+    static RejectTailorImage: string = '/orders/reject-tailor-style';
+
+
+
+
+
+
+
+
+
+
+    //#region Payment endpoint ---------------------------------
+
+    static FetchAllPayments: string = '/payments/all-payments';
+    static FetchPayment: string = '/payments/payment';
+    static CreatePayment: string = '/payments/add-payment';
+    static EditPayment: string = '/payments/edit-payment';
+    static DeletePayment: string = '/payments/delete-payment';
+
+
+
+
+
+
+
 
 
 
@@ -53,4 +87,40 @@ export class ApiRoutes {
     static FetchUser: string = '/users/user';
 
 
+
+
+
+
+
+
+
+    //#region Expense endpoint ---------------------------------
+  static CreateExpense: string = '/job-expenses/add-expense'
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //#region Head of Tailoring endpoint ---------------------------------
+    static FetchAllTailorJobs: string = '/tailoring/all-tailoring-jobs';
+    static FetchTailorJob: string = '/tailoring/tailor-job'
+    static EditTailorJob: string = '/tailoring/update-tailor-job'
+    static SendJobToClientManager: string = 'tailoring/send-to-client-manager'
 }

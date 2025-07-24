@@ -11,6 +11,7 @@ import { getSession } from "next-auth/react";
 import { AiOutlineCalendar } from "react-icons/ai";
 import { MdOutlineReceiptLong } from "react-icons/md";
 import { FaUserCircle, FaRegCreditCard } from "react-icons/fa";
+import { fetchPayment } from "@/app/api/apiClient";
 
 interface Customer {
   id?: string;
@@ -69,65 +70,56 @@ export default function ShowCustomer() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { id } = useParams();
+  const paymentId = id as string
 
   const fetchCustomer = async () => {
     setLoading(true);
     setError(null);
     try {
-      const session = await getSession();
-      const accessToken = session?.user?.token;
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/payment/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch customer data");
-      }
-      const result = await response.json();
-      if (result.data) {
-        const mappedCustomer: Customer = {
-          id: result.data.id,
-          order_id: result.data.order_id || "N/A",
-          created_at: result.data.created_at || "N/A",
-          updated_at: result.data.updated_at || "N/A",
-          VAT: result.data.VAT || "N/A",
-          discount: result.data.discount || "N/A",
-          going_rate: result.data.going_rate || "N/A",
-          total_amount_due: result.data.total_amount_due || "N/A",
-          cumulative_total_amount: result.data.cumulative_total_amount || "N/A",
-          amount_paid: result.data.amount_paid || "N/A",
-          balance_remaining: result.data.balance_remaining || "N/A",
-          payment_status: result.data.payment_status || "N/A",
-          customer_name: result.data.customer_name || "N/A",
-          customer_email: result.data.customer_email || "N/A",
-          clothing_name: result.data.clothing_name || "N/A",
-          clothing_description: result.data.clothing_description || "N/A",
-          priority: result.data.priority || "N/A",
-          order_status: result.data.order_status || "N/A",
+      const result = await fetchPayment(paymentId)
+      console.log('result fo payment id', result)
+
+
+      if (result) {
+        const mappedCustomer: any = {
+          id: result.id,
+          order_id: result.order_id || "N/A",
+          created_at: result.created_at || "N/A",
+          updated_at: result.updated_at || "N/A",
+          VAT: result.VAT || "N/A",
+          discount: result.discount || "N/A",
+          going_rate: result.going_rate || "N/A",
+          total_amount_due: result.total_amount_due || "N/A",
+          cumulative_total_amount: result.cumulative_total_amount || "N/A",
+          amount_paid: result.amount_paid || "N/A",
+          balance_remaining: result.balance_remaining || "N/A",
+          payment_status: result.payment_status || "N/A",
+          customer_name: result.customer_name || "N/A",
+          customer_email: result.customer_email || "N/A",
+          clothing_name: result.clothing_name || "N/A",
+          clothing_description: result.clothing_description || "N/A",
+          priority: result.priority || "N/A",
+          order_status: result.order_status || "N/A",
           // Existing mapping
-          fullName: result.data.customer_name || "N/A",
-          phone_number: result.data.phone_number || "N/A",
-          payment_receipt: result.data.payment_receipt || "N/A",
-          phone: result.data.phone_number || "N/A",
+          fullName: result.customer_name || "N/A",
+          phone_number: result.phone_number || "N/A",
+          payment_receipt: result.payment_receipt || "N/A",
+          phone: result.phone_number || "N/A",
           date: new Date().toLocaleDateString(),
-          email: result.data.customer_email || "N/A",
-          address: result.data.address || "N/A",
-          bust: result.data.bust || 0,
-          waist: result.data.waist || 0,
-          hip: result.data.hips || 0,
-          shoulderWidth: result.data.shoulder_width || 0,
-          neck: result.data.neck || 0,
-          armLength: result.data.arm_length || 0,
-          backLength: result.data.back_length || 0,
-          frontLength: result.data.front_length || 0,
+          email: result.customer_email || "N/A",
+          address: result.address || "N/A",
+          bust: result.bust || 0,
+          waist: result.waist || 0,
+          hip: result.hips || 0,
+          shoulderWidth: result.shoulder_width || 0,
+          neck: result.neck || 0,
+          armLength: result.arm_length || 0,
+          backLength: result.back_length || 0,
+          frontLength: result.front_length || 0,
           project_manager_payment_method:
-            result.data.project_manager_payment_method || "N/A",
-          project_manager_amount: result.data.project_manager_amount || "N/A",
-          customer_description: result.data.customer_description || "N/A",
+            result.project_manager_payment_method || "N/A",
+          project_manager_amount: result.project_manager_amount || "N/A",
+          customer_description: result.customer_description || "N/A",
         };
         setCustomer(mappedCustomer);
       } else {
@@ -245,7 +237,7 @@ export default function ShowCustomer() {
             <p className="mt-1 text-gray-800">{customer.VAT}</p>
           </div>
           <div className="border-b pb-2">
-            <p className="text-sm text-gray-600">Discount</p>
+            <p className="text-sm text-gray-600">Discount (%)</p>
             <p className="mt-1 text-gray-800">{customer.discount}</p>
           </div>
           <div className="border-b pb-2">
@@ -260,13 +252,6 @@ export default function ShowCustomer() {
             <p className="mt-1 text-gray-800">
               <span className="inline mr-1 text-orange-500">₦</span>
               {customer.total_amount_due}
-            </p>
-          </div>
-          <div className="border-b pb-2">
-            <p className="text-sm text-gray-600">Cumulative Total</p>
-            <p className="mt-1 text-gray-800">
-              <span className="inline mr-1 text-orange-500">₦</span>
-              {customer.cumulative_total_amount}
             </p>
           </div>
           <div className="border-b pb-2">

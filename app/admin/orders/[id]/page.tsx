@@ -1,192 +1,209 @@
-"use client"
+"use client";
 
-import Spinner from "@/components/Spinner"
-import Link from "next/link"
-import { useRouter, useParams } from "next/navigation"
-import { useEffect, useState, useRef } from "react"
-import { jsPDF } from "jspdf"
-import html2canvas from "html2canvas"
+import Spinner from "@/components/Spinner";
+import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
-import { IoIosArrowBack, IoIosCheckmark, IoIosCheckmarkCircleOutline, IoIosClose, IoIosWarning } from "react-icons/io"
-import { motion, AnimatePresence } from "framer-motion"
-import { getSession } from "next-auth/react"
-import SkeletonLoader from "@/components/SkeletonLoader"
-import Image from "next/image"
-import { AiOutlineDownload } from "react-icons/ai"
-import { FiUser, FiCalendar, FiPackage, FiEdit3 } from "react-icons/fi"
-import { HiOutlineSparkles, HiOutlinePhotograph } from "react-icons/hi"
-import { MdOutlineRule, MdOutlineClose } from "react-icons/md"
-import { BsStars } from "react-icons/bs"
-import OrderPageError from "@/components/admin/OrderPageError"
-import { fetchOrderById } from "@/app/api/apiClient"
+import {
+  IoIosArrowBack,
+  IoIosCheckmark,
+  IoIosCheckmarkCircleOutline,
+  IoIosClose,
+  IoIosWarning,
+} from "react-icons/io";
+import { motion, AnimatePresence } from "framer-motion";
+import { getSession } from "next-auth/react";
+import SkeletonLoader from "@/components/SkeletonLoader";
+import Image from "next/image";
+import { AiOutlineDownload } from "react-icons/ai";
+import { FiUser, FiCalendar, FiPackage, FiEdit3 } from "react-icons/fi";
+import { HiOutlineSparkles, HiOutlinePhotograph } from "react-icons/hi";
+import { MdOutlineRule, MdOutlineClose } from "react-icons/md";
+import { BsStars } from "react-icons/bs";
+import OrderPageError from "@/components/admin/OrderPageError";
+import { fetchOrderById, rejectTailorImage, acceptTailorImage } from "@/app/api/apiClient";
+import { ApplicationRoutes } from "@/constants/ApplicationRoutes";
 
 export default function ShowCustomer() {
-  const [activeStyleImage, setActiveStyleImage] = useState<string | null>(null)
-  const targetRef = useRef<HTMLDivElement | null>(null)
-  const router = useRouter()
-  const { id } = useParams()
-  const orderId = id as string
-  const [isTailorJobModalOpen, setIsTailorJobModalOpen] = useState(false)
-  const [feedback, setFeedback] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [toast, setToast] = useState(false)
-  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
+  const [activeStyleImage, setActiveStyleImage] = useState<string | null>(null);
+  const targetRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
+  const { id } = useParams();
+  const orderId = id as string;
+  const [isTailorJobModalOpen, setIsTailorJobModalOpen] = useState(false);
+  const [toast, setToast] = useState(false);
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
 
-  const contentRef = useRef<HTMLDivElement | null>(null)
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const handleOpenStyleModal = (src: string) => {
-    setActiveStyleImage(src)
-    setIsCustomerModalOpen(true)
-  }
+    setActiveStyleImage(src);
+    setIsCustomerModalOpen(true);
+  };
   const handleCloseStyleModal = () => {
-    setActiveStyleImage(null)
-    setIsCustomerModalOpen(false)
-  }
+    setActiveStyleImage(null);
+    setIsCustomerModalOpen(false);
+  };
 
-  const handleOpenCloseModal = () => setIsCloseModalOpen(true)
-  const handleCancelClose = () => setIsCloseModalOpen(false)
+  const handleOpenCloseModal = () => setIsCloseModalOpen(true);
+  const handleCancelClose = () => setIsCloseModalOpen(false);
   const handleConfirmClose = async () => {
     try {
-      const session = await getSession()
-      const token = session?.user?.token
-      if (!token) throw new Error("No access token")
+      const session = await getSession();
+      const token = session?.user?.token;
+      if (!token) throw new Error("No access token");
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/closeorder/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      if (!response.ok) throw new Error("Failed to close order")
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/closeorder/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Failed to close order");
 
-      router.push("/admin/orders")
+      router.push(ApplicationRoutes.AdminOrders);
     } catch (err) {
-      console.error(err)
+      console.error(err);
     } finally {
-      setIsCloseModalOpen(false)
+      setIsCloseModalOpen(false);
     }
-  }
+  };
 
   interface Customer {
-    [x: string]: string | number | readonly string[] | undefined
-    gender: string
-    phone_number: string
-    created_at: string
-    customer_email: string
-    address: string
-    bust: number
-    waist: number
-    hip: number
-    shoulder: number
-    shoulder_to_underbust: number
-    bustpoint: number
-    round_under_bust: number
-    half_length: number
-    blouse_length: number
-    sleeve_length: number
-    round_sleeve: number
-    dress_length: number
-    chest: number
-    round_shoulder: number
-    skirt_length: number
-    trousers_length: number
-    round_thigh: number
-    round_knee: number
-    round_feet: number
-    clothing_description: string
-    clothing_name: string
-    style_reference_images: string[]
-    tailor_job_image: string
-    order_id: string
-    priority: string
-    order_status: string
-    customer_description: string
-    first_fitting_date: string
-    second_fitting_date: string
-    customer_name: string
-    manager_name: string
-    duration: number
-    style_approval: string
+    [x: string]: string | number | readonly string[] | undefined;
+    gender: string;
+    phone_number: string;
+    created_at: string;
+    customer_email: string;
+    address: string;
+    bust: number;
+    waist: number;
+    hip: number;
+    shoulder: number;
+    shoulder_to_underbust: number;
+    bustpoint: number;
+    round_under_bust: number;
+    half_length: number;
+    blouse_length: number;
+    sleeve_length: number;
+    round_sleeve: number;
+    dress_length: number;
+    chest: number;
+    round_shoulder: number;
+    skirt_length: number;
+    trousers_length: number;
+    round_thigh: number;
+    round_knee: number;
+    round_feet: number;
+    clothing_description: string;
+    clothing_name: string;
+    style_reference_images: string[];
+    tailor_job_image: string;
+    order_id: string;
+    priority: string;
+    order_status: string;
+    customer_description: string;
+    first_fitting_date: string;
+    second_fitting_date: string;
+    customer_name: string;
+    manager_name: string;
+    duration: number;
+    style_approval: string;
   }
 
-  const [customer, setCustomer] = useState<Customer | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false)
-  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
-  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false)
-  const [rejectFeedback, setRejectFeedback] = useState("")
-  const [approvePrice, setApprovePrice] = useState("")
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+  const [rejectFeedback, setRejectFeedback] = useState("");
+  const [approvePrice, setApprovePrice] = useState("");
 
   const handleScroll = () => {
-    targetRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+    targetRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const handleDownload = async () => {
-    if (!contentRef.current || !customer) return
-    setIsGeneratingPDF(true)
+    if (!contentRef.current || !customer) return;
+    setIsGeneratingPDF(true);
 
     try {
-      const canvas = await html2canvas(contentRef.current, { useCORS: true })
-      const imgData = canvas.toDataURL("image/png")
+      const canvas = await html2canvas(contentRef.current, { useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
 
-      const pdf = new jsPDF("p", "pt", "a4")
-      const pageWidth = pdf.internal.pageSize.getWidth()
-      const pageHeight = pdf.internal.pageSize.getHeight()
-      const marginX = 40  // Increased from 0 to add horizontal margins
-      const marginY = 40
+      const pdf = new jsPDF("p", "pt", "a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const marginX = 40; // Increased from 0 to add horizontal margins
+      const marginY = 40;
 
-      const availableWidth = pageWidth - marginX * 2
-      const availableHeight = pageHeight - marginY * 2
-      const imgWidth = availableWidth
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      const availableWidth = pageWidth - marginX * 2;
+      const availableHeight = pageHeight - marginY * 2;
+      const imgWidth = availableWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      const finalImgHeight = imgHeight > availableHeight ? availableHeight : imgHeight
-      const finalImgWidth = imgHeight > availableHeight ? (canvas.width * availableHeight) / canvas.height : imgWidth
+      const finalImgHeight =
+        imgHeight > availableHeight ? availableHeight : imgHeight;
+      const finalImgWidth =
+        imgHeight > availableHeight
+          ? (canvas.width * availableHeight) / canvas.height
+          : imgWidth;
 
-      const xOffset = marginX + (availableWidth - finalImgWidth) / 2
-      const yOffset = marginY + (availableHeight - finalImgHeight) / 2
+      const xOffset = marginX + (availableWidth - finalImgWidth) / 2;
+      const yOffset = marginY + (availableHeight - finalImgHeight) / 2;
 
-      pdf.addImage(imgData, "PNG", xOffset, yOffset, finalImgWidth, finalImgHeight)
-      pdf.save(`order-${customer.order_id}.pdf`)
+      pdf.addImage(
+        imgData,
+        "PNG",
+        xOffset,
+        yOffset,
+        finalImgWidth,
+        finalImgHeight
+      );
+      pdf.save(`order-${customer.order_id}.pdf`);
     } catch (err) {
-      console.error("PDF generation failed:", err)
+      console.error("PDF generation failed:", err);
     } finally {
-      setIsGeneratingPDF(false)
+      setIsGeneratingPDF(false);
     }
-  }
+  };
 
   const handleCustomerImageClick = () => {
     if (!isRejectModalOpen && !isApproveModalOpen) {
-      setIsCustomerModalOpen(true)
+      setIsCustomerModalOpen(true);
     }
-  }
+  };
 
   const handleTailorJobImageClick = () => {
     if (!isRejectModalOpen && !isApproveModalOpen) {
-      setIsTailorJobModalOpen(true)
+      setIsTailorJobModalOpen(true);
     }
-  }
+  };
 
   const handleCustomerCloseModal = () => {
-    setIsCustomerModalOpen(false)
-  }
+    setIsCustomerModalOpen(false);
+  };
 
   const fetchOrder = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
+      const result = await fetchOrderById(orderId);
 
-      const result = await fetchOrderById(orderId)
-
-      console.log("Fetched orderssssss data:", result)
-
+      console.log("Fetched orderssssss data:", result);
 
       if (result) {
-        const mappedCustomer: Customer = {
+        const mappedCustomer: any = {
           hip: result.customer.hip,
           waist: result.customer.waist,
           bust: result.customer.bust,
@@ -209,7 +226,7 @@ export default function ShowCustomer() {
           clothing_description: result.clothing_description,
           clothing_name: result.clothing_name,
           style_reference_images: result.style_reference_images,
-          tailor_job_image: result.tailor_uploaded_image,
+          tailor_job_image: result.tailoring.design_image_path,
           order_id: result.order_id,
           priority: result.priority,
           order_status: result.order_status,
@@ -224,138 +241,122 @@ export default function ShowCustomer() {
           address: result.address,
           manager_name: result.manager_name,
           duration: result.duration,
-          style_approval: result.style_approval,
-        }
-        setCustomer(mappedCustomer)
+          style_approval: result.tailoring.client_manager_approval,
+          style_approval_feedback: result.tailoring.client_manager_feedback
+        };
+        setCustomer(mappedCustomer);
       } else {
-        setCustomer(null)
+        setCustomer(null);
       }
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.message)
+        setError(err.message);
       } else {
-        setError("An unknown error occurred")
+        setError("An unknown error occurred");
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchOrder()
-  }, [id])
+    fetchOrder();
+  }, [id]);
 
   const handleOpenRejectModal = () => {
-    setIsCustomerModalOpen(false)
-    setIsApproveModalOpen(false)
-    setIsRejectModalOpen(true)
-  }
+    setIsCustomerModalOpen(false);
+    setIsApproveModalOpen(false);
+    setIsRejectModalOpen(true);
+  };
 
   const handleRejectConfirm = async () => {
+    const feedback = {
+      client_manager_feedback: rejectFeedback
+    }
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      if (!accessToken) throw new Error("No access token found")
+      
+      const response = await rejectTailorImage(orderId, feedback);
+      console.log('reject response', response)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/rejecttailorstyle/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ feedback: rejectFeedback }),
-      })
 
-      if (!response.ok) {
-        throw new Error("Failed to send rejection feedback")
-      }
+      setIsRejectModalOpen(false);
+      setRejectFeedback("");
 
-      setIsRejectModalOpen(false)
-      setRejectFeedback("")
+      setTimeout(() => {
+      router.push(ApplicationRoutes.AdminOrders)
+      }, 2000);
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
 
-    setIsTailorJobModalOpen(false)
-    setToast(true)
+    setIsTailorJobModalOpen(false);
+    setToast(true);
     setTimeout(() => {
-      setToast(false)
-    }, 3000)
-  }
+      setToast(false);
+    }, 3000);
+  };
 
   const handleOpenApproveModal = () => {
-    setIsApproveModalOpen(true)
-  }
+    setIsApproveModalOpen(true);
+  };
 
   const handleApproveConfirm = async () => {
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      if (!accessToken) throw new Error("No access token found")
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/accepttailorstyle/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
+      const response = await acceptTailorImage(orderId)
 
-      if (!response.ok) {
-        throw new Error("Failed to send approval price")
-      }
-
-      setIsApproveModalOpen(false)
-      setApprovePrice("")
-      router.push(`/admin/orders/${id}/add-job-expense`)
+      console.log('approve res', response)
+      setIsApproveModalOpen(false);
+      setApprovePrice("");
+      router.push(`/admin/orders/${id}/add-job-expense`);
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
-  }
+  };
 
   const formatDate = (dateString: string | number | Date) => {
-    if (!dateString) return ""
-    const date = new Date(dateString)
+    if (!dateString) return "";
+    const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
       month: "long",
       day: "numeric",
       year: "numeric",
-    })
-  }
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "completed":
       case "closed":
-        return "bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200"
+        return "bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200";
       case "processing":
-        return "bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 border-yellow-200"
+        return "bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 border-yellow-200";
       case "pending":
-        return "bg-gradient-to-r from-red-100 to-rose-100 text-red-700 border-red-200"
+        return "bg-gradient-to-r from-red-100 to-rose-100 text-red-700 border-red-200";
       default:
-        return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 border-gray-200"
+        return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 border-gray-200";
     }
-  }
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority?.toLowerCase()) {
       case "high":
-        return "bg-gradient-to-r from-red-100 to-rose-100 text-red-700 border-red-200"
+        return "bg-gradient-to-r from-red-100 to-rose-100 text-red-700 border-red-200";
       case "medium":
-        return "bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 border-yellow-200"
+        return "bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 border-yellow-200";
       case "low":
-        return "bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200"
+        return "bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200";
       default:
-        return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 border-gray-200"
+        return "bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 border-gray-200";
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="text-center text-gray-500 py-10">
         <SkeletonLoader />
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -363,11 +364,11 @@ export default function ShowCustomer() {
       <div className="text-center">
         <OrderPageError />
       </div>
-    )
+    );
   }
 
   if (!customer) {
-    return <div className="text-center text-gray-500 py-10">No data found</div>
+    return <div className="text-center text-gray-500 py-10">No data found</div>;
   }
 
   return (
@@ -404,8 +405,12 @@ export default function ShowCustomer() {
                 <FiPackage className="text-orange-600" size={20} />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-800">Order #{customer.order_id}</h1>
-                <p className="text-sm text-gray-600">Order Details & Management</p>
+                <h1 className="text-xl font-bold text-gray-800">
+                  Order #{customer.order_id}
+                </h1>
+                <p className="text-sm text-gray-600">
+                  Order Details & Management
+                </p>
               </div>
             </div>
           </div>
@@ -463,7 +468,9 @@ export default function ShowCustomer() {
             >
               <div className="flex items-center space-x-2">
                 <IoIosCheckmark size={20} />
-                <span className="font-medium">Style Rejected Successfully!</span>
+                <span className="font-medium">
+                  Style Rejected Successfully!
+                </span>
               </div>
             </motion.div>
           )}
@@ -485,13 +492,19 @@ export default function ShowCustomer() {
                     <FiUser className="text-white" size={24} />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-white">Order Information</h2>
-                    <p className="text-orange-100">Complete order details and customer information</p>
+                    <h2 className="text-2xl font-bold text-white">
+                      Order Information
+                    </h2>
+                    <p className="text-orange-100">
+                      Complete order details and customer information
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-orange-100 text-sm">Head of Tailoring</p>
-                  <p className="text-white font-semibold text-lg">{customer.manager_name}</p>
+                  <p className="text-white font-semibold text-lg">
+                    {customer.manager_name}
+                  </p>
                 </div>
               </div>
             </div>
@@ -499,13 +512,37 @@ export default function ShowCustomer() {
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                 {[
-                  { label: "Order ID", value: customer.order_id, icon: FiPackage },
-                  { label: "Cloth Name", value: customer.clothing_name, icon: HiOutlineSparkles },
-                  { label: "Customer Name", value: customer.customer_name, icon: FiUser },
+                  {
+                    label: "Order ID",
+                    value: customer.order_id,
+                    icon: FiPackage,
+                  },
+                  {
+                    label: "Cloth Name",
+                    value: customer.clothing_name,
+                    icon: HiOutlineSparkles,
+                  },
+                  {
+                    label: "Customer Name",
+                    value: customer.customer_name,
+                    icon: FiUser,
+                  },
                   { label: "Gender", value: customer.gender, icon: FiUser },
-                  { label: "Phone Number", value: customer.phone_number, icon: FiUser },
-                  { label: "Customer Email", value: customer.customer_email, icon: FiUser },
-                  { label: "Create Date", value: formatDate(customer.created_at), icon: FiCalendar },
+                  {
+                    label: "Phone Number",
+                    value: customer.phone_number,
+                    icon: FiUser,
+                  },
+                  {
+                    label: "Customer Email",
+                    value: customer.customer_email,
+                    icon: FiUser,
+                  },
+                  {
+                    label: "Create Date",
+                    value: formatDate(customer.created_at),
+                    icon: FiCalendar,
+                  },
                 ].map((field, index) => (
                   <motion.div
                     key={index}
@@ -536,7 +573,9 @@ export default function ShowCustomer() {
                     <span>Priority</span>
                   </label>
                   <div
-                    className={`inline-flex items-center px-4 py-2 rounded-xl border font-medium ${getPriorityColor(customer.priority)}`}
+                    className={`inline-flex items-center px-4 py-2 rounded-xl border font-medium ${getPriorityColor(
+                      customer.priority
+                    )}`}
                   >
                     {customer.priority}
                   </div>
@@ -547,7 +586,9 @@ export default function ShowCustomer() {
                     <span>Order Status</span>
                   </label>
                   <div
-                    className={`inline-flex items-center px-4 py-2 rounded-xl border font-medium ${getStatusColor(customer.order_status)}`}
+                    className={`inline-flex items-center px-4 py-2 rounded-xl border font-medium ${getStatusColor(
+                      customer.order_status
+                    )}`}
                   >
                     {customer.order_status}
                   </div>
@@ -599,8 +640,12 @@ export default function ShowCustomer() {
                     <HiOutlinePhotograph className="text-white" size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white">Style Reference Images</h3>
-                    <p className="text-purple-100">Customer's style inspiration and references</p>
+                    <h3 className="text-2xl font-bold text-white">
+                      Style Reference Images
+                    </h3>
+                    <p className="text-purple-100">
+                      Customer's style inspiration and references
+                    </p>
                   </div>
                 </div>
               </div>
@@ -634,8 +679,13 @@ export default function ShowCustomer() {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <HiOutlinePhotograph className="mx-auto text-gray-400 mb-4" size={48} />
-                    <p className="text-gray-500">No style reference images available</p>
+                    <HiOutlinePhotograph
+                      className="mx-auto text-gray-400 mb-4"
+                      size={48}
+                    />
+                    <p className="text-gray-500">
+                      No style reference images available
+                    </p>
                   </div>
                 )}
               </div>
@@ -655,8 +705,12 @@ export default function ShowCustomer() {
                   <MdOutlineRule className="text-white" size={24} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white">Measurements</h3>
-                  <p className="text-blue-100">Detailed body measurements for perfect fit</p>
+                  <h3 className="text-2xl font-bold text-white">
+                    Measurements
+                  </h3>
+                  <p className="text-blue-100">
+                    Detailed body measurements for perfect fit
+                  </p>
                 </div>
               </div>
             </div>
@@ -667,8 +721,14 @@ export default function ShowCustomer() {
                   { label: "Shoulder", value: customer.shoulder },
                   { label: "Bust", value: customer.bust },
                   { label: "Bust Point", value: customer.bustpoint },
-                  { label: "Shoulder to Underbust", value: customer.shoulder_to_underbust },
-                  { label: "Round Under Bust", value: customer.round_under_bust },
+                  {
+                    label: "Shoulder to Underbust",
+                    value: customer.shoulder_to_underbust,
+                  },
+                  {
+                    label: "Round Under Bust",
+                    value: customer.round_under_bust,
+                  },
                   { label: "Waist", value: customer.waist },
                   { label: "Half Length", value: customer.half_length },
                   { label: "Blouse Length", value: customer.blouse_length },
@@ -687,7 +747,9 @@ export default function ShowCustomer() {
                     transition={{ duration: 0.3, delay: index * 0.02 }}
                     className="group"
                   >
-                    <label className="block text-sm font-medium text-gray-700 mb-2">{measurement.label}</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {measurement.label}
+                    </label>
                     <div className="relative">
                       <input
                         type="text"
@@ -719,8 +781,12 @@ export default function ShowCustomer() {
                     <BsStars className="text-white" size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white">Tailor Style</h3>
-                    <p className="text-emerald-100">Proposed design from our tailoring team</p>
+                    <h3 className="text-2xl font-bold text-white">
+                      Tailor Style
+                    </h3>
+                    <p className="text-emerald-100">
+                      Proposed design from our tailoring team
+                    </p>
                   </div>
                 </div>
               </div>
@@ -729,30 +795,108 @@ export default function ShowCustomer() {
                 {customer.tailor_job_image === "" ? (
                   <div className="text-center py-12">
                     <BsStars className="mx-auto text-gray-400 mb-4" size={48} />
-                    <p className="text-gray-500">No tailor style image available yet</p>
+                    <p className="text-gray-500">
+                      No tailor style image available yet
+                    </p>
                   </div>
                 ) : (
-                  <div className="flex justify-center">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="cursor-pointer group"
-                      onClick={handleTailorJobImageClick}
-                    >
-                      <div className="relative overflow-hidden rounded-xl border-2 border-gray-200 group-hover:border-emerald-300 transition-all duration-200">
-                        <img
-                          src={customer.tailor_job_image || "/placeholder.svg"}
-                          alt="Tailor Job Style"
-                          className="w-32 h-32 object-cover group-hover:scale-110 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
-                          <BsStars
-                            className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                            size={24}
+                  <div>
+                    <div className="flex">
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="cursor-pointer group"
+                        onClick={handleTailorJobImageClick}
+                      >
+                        <div className="relative overflow-hidden rounded-xl border-2 border-gray-200 group-hover:border-emerald-300 transition-all duration-200">
+                          <img
+                            src={
+                              customer.tailor_job_image || "/placeholder.svg"
+                            }
+                            alt="Tailor Job Style"
+                            className="w-32 h-32 object-cover group-hover:scale-110 transition-transform duration-300"
                           />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
+                            <BsStars
+                              className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                              size={24}
+                            />
+                          </div>
                         </div>
+                      </motion.div>
+                    </div>
+
+                    {/* Approval Status and Buttons */}
+                    <div className="mt-4 space-y-3">
+                      {/* Current Status Display */}
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm font-medium text-gray-700">
+                          Status:
+                        </span>
+                        {customer.style_approval === "accepted" && (
+                          <div className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                            <IoIosCheckmark size={16} />
+                            <span>Approved</span>
+                          </div>
+                        )}
+                        {customer.style_approval === "rejected" && (
+                          <div>
+                            <div className="flex items-center space-x-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+                            <IoIosClose size={16} />
+                            <span>Rejected</span>
+                            <span className="ml-5">({customer.style_approval_feedback})</span>
+                          </div>
+                
+                          </div>
+                        )}
+                        {customer.style_approval === null && (
+                          <div className="flex items-center space-x-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+                            <IoIosWarning size={16} />
+                            <span>Pending Review</span>
+                          </div>
+                        )}
                       </div>
-                    </motion.div>
+
+                      {/* Action Buttons */}
+                      {customer.style_approval === null &&
+                        customer.order_status !== "closed" && (
+                          <div className="flex space-x-2">
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={handleOpenApproveModal}
+                              className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 text-sm font-medium"
+                            >
+                              <IoIosCheckmark size={16} />
+                              <span>Approve</span>
+                            </motion.button>
+
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={handleOpenRejectModal}
+                              className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-lg hover:from-red-600 hover:to-rose-700 transition-all duration-200 text-sm font-medium"
+                            >
+                              <IoIosClose size={16} />
+                              <span>Reject</span>
+                            </motion.button>
+                          </div>
+                        )}
+
+                      {/* Show action for approved status */}
+                      {customer.style_approval === "accepted" &&
+                        customer.order_status !== "closed" && (
+                          <Link href={`/admin/orders/${id}/add-job-expense`}>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:from-orange-600 hover:to-amber-600 transition-all duration-200 text-sm font-medium"
+                            >
+                              <span>Add Payment</span>
+                            </motion.button>
+                          </Link>
+                        )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -772,8 +916,12 @@ export default function ShowCustomer() {
                   <FiCalendar className="text-white" size={24} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white">Other Details</h3>
-                  <p className="text-indigo-100">Fitting dates and project timeline</p>
+                  <h3 className="text-2xl font-bold text-white">
+                    Other Details
+                  </h3>
+                  <p className="text-indigo-100">
+                    Fitting dates and project timeline
+                  </p>
                 </div>
               </div>
             </div>
@@ -787,7 +935,9 @@ export default function ShowCustomer() {
                   </label>
                   <input
                     type="text"
-                    value={formatDate(customer.first_fitting_date) || "Not scheduled"}
+                    value={
+                      formatDate(customer.first_fitting_date) || "Not scheduled"
+                    }
                     readOnly
                     className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"
                   />
@@ -799,7 +949,10 @@ export default function ShowCustomer() {
                   </label>
                   <input
                     type="text"
-                    value={formatDate(customer.second_fitting_date) || "Not scheduled"}
+                    value={
+                      formatDate(customer.second_fitting_date) ||
+                      "Not scheduled"
+                    }
                     readOnly
                     className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"
                   />
@@ -864,7 +1017,9 @@ export default function ShowCustomer() {
               transition={{ duration: 0.3 }}
             >
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-800">Style Reference</h3>
+                <h3 className="text-xl font-bold text-gray-800">
+                  Style Reference
+                </h3>
                 <button
                   onClick={handleCloseStyleModal}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -909,8 +1064,12 @@ export default function ShowCustomer() {
               </button>
 
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">Tailor Style Review</h3>
-                <p className="text-gray-600">Review and approve or reject the proposed design</p>
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                  Tailor Style Review
+                </h3>
+                <p className="text-gray-600">
+                  Review and approve or reject the proposed design
+                </p>
               </div>
 
               <div className="relative w-full h-[60vh] mb-6 rounded-xl bg-gray-100 overflow-hidden">
@@ -980,8 +1139,8 @@ export default function ShowCustomer() {
           <motion.div
             className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4"
             onClick={() => {
-              setIsRejectModalOpen(false)
-              setRejectFeedback("")
+              setIsRejectModalOpen(false);
+              setRejectFeedback("");
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -1000,8 +1159,12 @@ export default function ShowCustomer() {
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <IoIosClose className="text-red-600" size={32} />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Reject Style</h2>
-                <p className="text-gray-600">Please provide feedback for the rejection</p>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Reject Style
+                </h2>
+                <p className="text-gray-600">
+                  Please provide feedback for the rejection
+                </p>
               </div>
               <textarea
                 rows={4}
@@ -1013,8 +1176,8 @@ export default function ShowCustomer() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => {
-                    setIsRejectModalOpen(false)
-                    setRejectFeedback("")
+                    setIsRejectModalOpen(false);
+                    setRejectFeedback("");
                   }}
                   className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors duration-200"
                 >
@@ -1062,10 +1225,18 @@ export default function ShowCustomer() {
 
               <div className="flex flex-col items-center space-y-4 mb-6">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                  <IoIosCheckmarkCircleOutline className="text-green-600" size={32} />
+                  <IoIosCheckmarkCircleOutline
+                    className="text-green-600"
+                    size={32}
+                  />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">Approve Style</h2>
-                <p className="text-gray-600">You're about to approve this design and proceed to invoice generation.</p>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  Approve Style
+                </h2>
+                <p className="text-gray-600">
+                  You're about to approve this design and proceed to invoice
+                  generation.
+                </p>
               </div>
 
               <motion.button
@@ -1104,9 +1275,12 @@ export default function ShowCustomer() {
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
                   <IoIosWarning className="text-red-600" size={32} />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">Close Order</h2>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  Close Order
+                </h2>
                 <p className="text-gray-600">
-                  Are you sure you want to close this order? This action cannot be undone.
+                  Are you sure you want to close this order? This action cannot
+                  be undone.
                 </p>
               </div>
 
@@ -1131,5 +1305,5 @@ export default function ShowCustomer() {
         )}
       </AnimatePresence>
     </motion.div>
-  )
+  );
 }

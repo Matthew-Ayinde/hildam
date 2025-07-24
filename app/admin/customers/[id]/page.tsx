@@ -13,10 +13,12 @@ import { FiUser, FiCalendar, FiMail, FiPhone, FiMapPin, FiEdit3 } from "react-ic
 import { getSession } from "next-auth/react"
 import SkeletonLoader from "@/components/SkeletonLoader"
 import DataPageError from "@/components/admin/DataNotFound"
+import { fetchAllCustomers, fetchCustomer } from "@/app/api/apiClient"
 
 export default function ShowCustomer() {
   const router = useRouter()
   const { id } = useParams()
+  const customerId = id as string
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null)
   const [popupMessage, setPopupMessage] = useState<string | null>(null)
@@ -94,57 +96,46 @@ export default function ShowCustomer() {
     }
   }
 
-  const fetchCustomer = async () => {
+  const fetchCustomerById = async () => {
     setLoading(true)
     setError(null)
 
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      if (!accessToken) throw new Error("No access token found")
+      
+      const result = await fetchCustomer(customerId)
+      console.log("Fetched customer data:", result)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/customerslist/${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch customer data")
-      }
-
-      const result = await response.json()
-
-      if (result.data) {
+      if (result) {
         const mappedCustomer: Customer = {
-          fullName: result.data.name,
-          age: result.data.age,
-          gender: result.data.gender,
-          phone_number: result.data.phone_number || "N/A",
-          email: result.data.email || "N/A",
-          bust: result.data.bust || 0,
-          waist: result.data.waist || 0,
-          hip: result.data.hip || 0,
-          shoulder: result.data.shoulder || 0,
-          bustpoint: result.data.bustpoint || 0,
-          shoulder_to_underbust: result.data.shoulder_to_underbust || 0,
-          round_under_bust: result.data.round_under_bust || 0,
-          sleeve_length: result.data.sleeve_length || 0,
-          half_length: result.data.half_length || 0,
-          blouse_length: result.data.blouse_length || 0,
-          trousers_length: result.data.trousers_length || 0,
-          trouser_waist: result.data.trouser_waist || 0,
-          round_sleeve: result.data.round_sleeve || 0,
-          round_thigh: result.data.round_thigh || 0,
-          round_knee: result.data.round_knee || 0,
-          round_feet: result.data.round_feet || 0,
-          skirt_length: result.data.skirt_length || 0,
-          round_shoulder: result.data.round_shoulder || 0,
-          chest: result.data.chest || 0,
-          dress_length: result.data.dress_length || 0,
-          create_date: result.data.created_at,
-          address: result.data.address || "N/A",
-          customer_description: result.data.customer_description || "N/A",
+          fullName: result.name,
+          age: result.age,
+          gender: result.gender,
+          phone_number: result.phone_number || "N/A",
+          email: result.email || "N/A",
+          bust: result.bust || 0,
+          waist: result.waist || 0,
+          hip: result.hip || 0,
+          shoulder: result.shoulder || 0,
+          bustpoint: result.bustpoint || 0,
+          shoulder_to_underbust: result.shoulder_to_underbust || 0,
+          round_under_bust: result.round_under_bust || 0,
+          sleeve_length: result.sleeve_length || 0,
+          half_length: result.half_length || 0,
+          blouse_length: result.blouse_length || 0,
+          trousers_length: result.trousers_length || 0,
+          trouser_waist: result.trouser_waist || 0,
+          round_sleeve: result.round_sleeve || 0,
+          round_thigh: result.round_thigh || 0,
+          round_knee: result.round_knee || 0,
+          round_feet: result.round_feet || 0,
+          skirt_length: result.skirt_length || 0,
+          round_shoulder: result.round_shoulder || 0,
+          chest: result.chest || 0,
+          dress_length: result.dress_length || 0,
+          create_date: result.created_at,
+          address: result.address || "N/A",
+          customer_description: result.customer_description || "N/A",
         }
         setCustomer(mappedCustomer)
       } else {
@@ -162,7 +153,7 @@ export default function ShowCustomer() {
   }
 
   useEffect(() => {
-    fetchCustomer()
+    fetchCustomerById()
   }, [id])
 
   if (loading) {

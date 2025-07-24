@@ -489,7 +489,7 @@ const Form = () => {
                       name="manager_id"
                       value={formData.manager_id}
                       onChange={handleChange}
-                      // required
+                      required
                       className="w-full rounded-xl border border-gray-300 shadow-sm p-3 bg-white focus:ring-2 focus:ring-purple-200 focus:border-purple-400 transition-all duration-200"
                     >
                       <option value="">Select Head of Tailoring</option>

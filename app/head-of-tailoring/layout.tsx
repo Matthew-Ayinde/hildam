@@ -29,7 +29,7 @@ export default function RootLayout({
             <div className="lg:mx-10 mx-0 px-5 lg:px-0 min-h-screen h-full flex flex-col justify-between  w-full lg:w-3/4">
               <div>
               <div className="mb-5 lg:mt-0 mt-20">
-                <Topbar />
+                {/* <Topbar /> */}
               </div>
               <div className="pb-10">{children}</div>
               </div>
