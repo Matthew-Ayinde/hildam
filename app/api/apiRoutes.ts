@@ -105,6 +105,13 @@ export class ApiRoutes {
 
 
 
+  
+
+
+
+    //#region  endpoint ---------------------------------
+
+  static FetchAllTailorJobs: string = '/tailoring/all-tailor-jobs';
 
 
 
@@ -112,6 +119,13 @@ export class ApiRoutes {
 
 
 
+
+
+
+
+
+
+  
 
 
 

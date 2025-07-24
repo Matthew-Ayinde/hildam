@@ -23,7 +23,7 @@ export function QuickAppointmentCard({
     { type: "Wedding Consultation", duration: "2 hours", color: "bg-pink-100 text-pink-800 border-pink-200" },
     { type: "First Fitting", duration: "1 hour", color: "bg-orange-100 text-orange-800 border-orange-200" },
     { type: "Second Fitting", duration: "45 mins", color: "bg-blue-100 text-blue-800 border-blue-200" },
-    { type: "Final Fitting", duration: "30 mins", color: "bg-green-100 text-green-800 border-green-200" },
+    { type: "Collection/Pickup", duration: "30 mins", color: "bg-green-100 text-green-800 border-green-200" },
   ]
 
   return (
@@ -34,7 +34,6 @@ export function QuickAppointmentCard({
             <div className="w-16 h-16 mx-auto bg-gradient-to-br from-orange-100 to-orange-50 rounded-full flex items-center justify-center">
               <Plus className="w-8 h-8 text-orange-500" />
             </div>
-
             <div>
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Schedule New Appointment</h3>
               <p className="text-sm text-muted-foreground">
@@ -45,8 +44,12 @@ export function QuickAppointmentCard({
                   year: "numeric",
                 })}
               </p>
+              {existingAppointments.length > 0 && (
+                <p className="text-xs text-orange-600 mt-1">
+                  {existingAppointments.length} existing appointment{existingAppointments.length !== 1 ? "s" : ""}
+                </p>
+              )}
             </div>
-
             {!showQuickOptions ? (
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
@@ -55,6 +58,14 @@ export function QuickAppointmentCard({
                 >
                   <Calendar className="h-4 w-4 mr-2" />
                   Custom Appointment
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowQuickOptions(true)}
+                  className="border-orange-200 text-orange-600 hover:bg-orange-50"
+                >
+                  <Clock className="h-4 w-4 mr-2" />
+                  Quick Options
                 </Button>
               </div>
             ) : (

@@ -289,3 +289,17 @@ export async function SendJobToClientManager(tailorJobId: string): Promise<any> 
 }
 
 
+
+
+
+
+
+
+
+    //#region Calendar endpoint ---------------------------------
+
+export async function fetchCalendarData(tailorJobId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(`${ApiRoutes.FetchCalendarData}/${tailorJobId}`, { headers })
+  return resp.data;
+}

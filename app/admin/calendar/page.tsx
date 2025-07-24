@@ -1,9 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Calendar, ChevronLeft, ChevronRight, Filter, User, Package, Clock } from "lucide-react"
-
+import { Calendar, ChevronLeft, ChevronRight, Filter, User, Package, Clock, AlertCircle, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,103 +10,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AppointmentDialog } from "./AppointmentDialog"
 import { QuickAppointmentCard } from "./QuickAppointmentCard"
-
-// Sample order data with Naira currency
-const orders = [
-  {
-    id: "ORD-2023-001",
-    customer: "Jane Smith",
-    firstFitting: new Date(2025, 6, 15),
-    secondFitting: new Date(2025, 6, 28),
-    status: "Confirmed",
-    items: ["Wedding Dress", "Veil"],
-    totalAmount: "₦1,850.00",
-  },
-   {
-    id: "ORD-2023-024",
-    customer: "Jane Smith",
-    firstFitting: new Date(2025, 6, 15),
-    secondFitting: new Date(2025, 6, 28),
-    status: "Confirmed",
-    items: ["Wedding Dress", "Veil"],
-    totalAmount: "₦1,850.00",
-  },
-   {
-    id: "ORD-6023-001",
-    customer: "Jane Smith",
-    firstFitting: new Date(2025, 5, 15),
-    secondFitting: new Date(2025, 5, 28),
-    status: "Confirmed",
-    items: ["Wedding Dress", "Veil"],
-    totalAmount: "₦1,850.00",
-  },
-  {
-    id: "ORD-6023-0021",
-    customer: "Jane Smith",
-    firstFitting: new Date(2025, 5, 15),
-    secondFitting: new Date(2025, 5, 28),
-    status: "Confirmed",
-    items: ["Wedding Dress", "Veil"],
-    totalAmount: "₦1,850.00",
-  },
-  {
-    id: "ORD-2023-002",
-    customer: "Michael Johnson",
-    firstFitting: new Date(2025, 5, 18),
-    secondFitting: new Date(2025, 6, 2),
-    status: "In Progress",
-    items: ["Tuxedo", "Bow Tie"],
-    totalAmount: "₦950.00",
-  },
-  {
-    id: "ORD-2023-003",
-    customer: "Emily Davis",
-    firstFitting: new Date(2025, 5, 22),
-    secondFitting: new Date(2025, 6, 6),
-    status: "Confirmed",
-    items: ["Bridesmaid Dress"],
-    totalAmount: "₦450.00",
-  },
-  {
-    id: "ORD-2023-004",
-    customer: "Robert Wilson",
-    firstFitting: new Date(2025, 6, 5),
-    secondFitting: new Date(2025, 6, 19),
-    status: "Pending",
-    items: ["Suit", "Shirt", "Tie"],
-    totalAmount: "₦1,200.00",
-  },
-  {
-    id: "ORD-2023-005",
-    customer: "Sarah Thompson",
-    firstFitting: new Date(2025, 6, 8),
-    secondFitting: new Date(2025, 6, 22),
-    status: "Confirmed",
-    items: ["Evening Gown"],
-    totalAmount: "₦780.00",
-  },
-  // Add more orders for different years
-  {
-    id: "ORD-2023-006",
-    customer: "David Brown",
-    firstFitting: new Date(2023, 8, 12),
-    secondFitting: new Date(2023, 8, 26),
-    status: "Completed",
-    items: ["Business Suit"],
-    totalAmount: "₦1,100.00",
-  },
-  {
-    id: "ORD-2025-001",
-    customer: "Lisa Anderson",
-    firstFitting: new Date(2025, 2, 10),
-    secondFitting: new Date(2025, 2, 24),
-    status: "Scheduled",
-    items: ["Cocktail Dress"],
-    totalAmount: "₦650.00",
-  },
-]
+import { useCalendarData } from "./use-calendar-data"
 
 // Helper functions
 const getDaysInMonth = (year: number, month: number) => {
@@ -122,14 +28,10 @@ const getMonthName = (month: number) => {
   return new Date(0, month).toLocaleString("default", { month: "long" })
 }
 
-// Generate available years from orders
+// Generate available years (current year and next 2 years)
 const getAvailableYears = () => {
-  const years = new Set<number>()
-  orders.forEach((order) => {
-    years.add(order.firstFitting.getFullYear())
-    years.add(order.secondFitting.getFullYear())
-  })
-  return Array.from(years).sort((a, b) => b - a)
+  const currentYear = new Date().getFullYear()
+  return [currentYear - 1, currentYear, currentYear + 1, currentYear + 2]
 }
 
 export default function CalendarPage() {
@@ -137,14 +39,38 @@ export default function CalendarPage() {
   const [viewMode, setViewMode] = useState<"day" | "week" | "month" | "year">("month")
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
-  const [filterType, setFilterType] = useState<"all" | "first" | "second">("all")
+  const [filterType, setFilterType] = useState<"all" | "first" | "second" | "collection">("all")
   const [showAppointmentDialog, setShowAppointmentDialog] = useState(false)
-  const [appointments, setAppointments] = useState(orders)
 
-  // Appointment saving function
-  const handleSaveAppointment = (newAppointment: any) => {
-    setAppointments((prev) => [...prev, newAppointment])
-  }
+  const { orders, loading, error, fetchCalendarData, addAppointment, clearError } = useCalendarData()
+
+  // Fetch data when view parameters change
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (viewMode === "year") {
+          await fetchCalendarData({ year: selectedYear })
+        } else if (viewMode === "month") {
+          const monthString = `${selectedYear}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`
+          await fetchCalendarData({ month: monthString })
+        } else if (viewMode === "week") {
+          // Calculate ISO week number
+          const date = new Date(currentDate)
+          const yearStart = new Date(date.getFullYear(), 0, 1)
+          const weekNumber = Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + yearStart.getDay() + 1) / 7)
+          await fetchCalendarData({ week: `${selectedYear}-${weekNumber}` })
+        } else {
+          // For day view, fetch the month data
+          const monthString = `${selectedYear}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`
+          await fetchCalendarData({ month: monthString })
+        }
+      } catch (err) {
+        console.error("Failed to fetch calendar data:", err)
+      }
+    }
+
+    fetchData()
+  }, [viewMode, selectedYear, currentDate, fetchCalendarData])
 
   const currentYear = selectedYear
   const currentMonth = currentDate.getMonth()
@@ -152,20 +78,21 @@ export default function CalendarPage() {
   const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth)
 
   // Filter orders by selected year and filter type
-  const getFilteredOrders = () => {
-    return appointments.filter((order) => {
+  const getFilteredOrders = useCallback(() => {
+    return orders.filter((order) => {
       const orderYear =
-        order.firstFitting.getFullYear() === selectedYear || order.secondFitting.getFullYear() === selectedYear
+        order.firstFitting.getFullYear() === selectedYear ||
+        order.secondFitting.getFullYear() === selectedYear ||
+        order.collectionDate.getFullYear() === selectedYear
 
       if (!orderYear) return false
-
       if (filterType === "all") return true
       if (filterType === "first") return order.firstFitting.getFullYear() === selectedYear
       if (filterType === "second") return order.secondFitting.getFullYear() === selectedYear
-
+      if (filterType === "collection") return order.collectionDate.getFullYear() === selectedYear
       return true
     })
-  }
+  }, [orders, selectedYear, filterType])
 
   // Navigation functions
   const goToPrevious = () => {
@@ -205,21 +132,53 @@ export default function CalendarPage() {
   }
 
   // Check if a date has orders
-  const getOrdersForDate = (date: Date) => {
-    const filteredOrders = getFilteredOrders()
-    return filteredOrders.filter(
-      (order) =>
-        order.firstFitting.toDateString() === date.toDateString() ||
-        order.secondFitting.toDateString() === date.toDateString(),
-    )
+  const getOrdersForDate = useCallback(
+    (date: Date) => {
+      const filteredOrders = getFilteredOrders()
+      return filteredOrders.filter(
+        (order) =>
+          order.firstFitting.toDateString() === date.toDateString() ||
+          order.secondFitting.toDateString() === date.toDateString() ||
+          order.collectionDate.toDateString() === date.toDateString(),
+      )
+    },
+    [getFilteredOrders],
+  )
+
+  const getAppointmentType = (date: Date, order: any) => {
+    if (order.firstFitting.toDateString() === date.toDateString()) return "First"
+    if (order.secondFitting.toDateString() === date.toDateString()) return "Second"
+    if (order.collectionDate.toDateString() === date.toDateString()) return "Collection"
+    return "First"
   }
 
-  const isFirstFitting = (date: Date, order: any) => {
-    return order.firstFitting.toDateString() === date.toDateString()
+  // Handle appointment saving
+  const handleSaveAppointment = async (appointmentData: any) => {
+    try {
+      await addAppointment({
+        order_id: appointmentData.orderId,
+        collection_date: appointmentData.collectionDate,
+        first_fitting_date: appointmentData.firstFittingDate,
+        second_fitting_date: appointmentData.secondFittingDate,
+      })
+    } catch (err) {
+      console.error("Failed to save appointment:", err)
+    }
   }
 
   // Render calendar based on view mode
   const renderCalendarView = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-16">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-orange-500" />
+            <p className="text-muted-foreground">Loading calendar data...</p>
+          </div>
+        </div>
+      )
+    }
+
     switch (viewMode) {
       case "day":
         return renderDayView()
@@ -237,7 +196,6 @@ export default function CalendarPage() {
   // Day view
   const renderDayView = () => {
     const dayOrders = getOrdersForDate(currentDate)
-
     return (
       <div className="space-y-6">
         <div className="text-center">
@@ -245,7 +203,7 @@ export default function CalendarPage() {
             {currentDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </h2>
           <p className="text-muted-foreground mt-2">
-            {dayOrders.length} fitting{dayOrders.length !== 1 ? "s" : ""} scheduled
+            {dayOrders.length} appointment{dayOrders.length !== 1 ? "s" : ""} scheduled
           </p>
           <Button
             onClick={() => {
@@ -267,7 +225,7 @@ export default function CalendarPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <OrderCard order={order} isFitting={isFirstFitting(currentDate, order) ? "First" : "Second"} />
+                <OrderCard order={order} appointmentType={getAppointmentType(currentDate, order)} />
               </motion.div>
             ))}
           </div>
@@ -276,7 +234,7 @@ export default function CalendarPage() {
             <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center">
               <Calendar className="w-12 h-12 text-orange-400" />
             </div>
-            <p className="text-muted-foreground text-lg">No fittings scheduled for this day</p>
+            <p className="text-muted-foreground text-lg">No appointments scheduled for this day</p>
           </div>
         )}
       </div>
@@ -316,7 +274,6 @@ export default function CalendarPage() {
             </div>
           ))}
         </div>
-
         <div className="grid grid-cols-7 gap-4">
           {weekDays.map((date, index) => {
             const dateOrders = getOrdersForDate(date)
@@ -330,14 +287,22 @@ export default function CalendarPage() {
                         whileHover={{ scale: 1.02 }}
                         className={cn(
                           "text-xs p-2 rounded-lg cursor-pointer transition-all duration-200",
-                          isFirstFitting(date, order)
+                          getAppointmentType(date, order) === "First"
                             ? "bg-gradient-to-r from-orange-100 to-orange-50 border-l-4 border-orange-500 hover:shadow-sm"
-                            : "bg-gradient-to-r from-orange-50 to-orange-25 border-l-4 border-orange-300 hover:shadow-sm",
+                            : getAppointmentType(date, order) === "Second"
+                              ? "bg-gradient-to-r from-orange-50 to-orange-25 border-l-4 border-orange-300 hover:shadow-sm"
+                              : "bg-gradient-to-r from-green-100 to-green-50 border-l-4 border-green-500 hover:shadow-sm",
                         )}
                         onClick={() => setSelectedDate(date)}
                       >
                         <div className="font-semibold text-gray-800">{order.customer}</div>
-                        <div className="text-orange-600">{isFirstFitting(date, order) ? "1st" : "2nd"} Fitting</div>
+                        <div className="text-orange-600">
+                          {getAppointmentType(date, order) === "First"
+                            ? "1st Fitting"
+                            : getAppointmentType(date, order) === "Second"
+                              ? "2nd Fitting"
+                              : "Collection"}
+                        </div>
                       </motion.div>
                     ))}
                   </div>
@@ -346,7 +311,6 @@ export default function CalendarPage() {
             )
           })}
         </div>
-
         {selectedDate && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
             <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-orange-50/30">
@@ -354,10 +318,10 @@ export default function CalendarPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-xl bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
-                      {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })} Fittings
+                      {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })} Appointments
                     </CardTitle>
                     <CardDescription className="text-base">
-                      {getOrdersForDate(selectedDate).length} fitting
+                      {getOrdersForDate(selectedDate).length} appointment
                       {getOrdersForDate(selectedDate).length !== 1 ? "s" : ""} scheduled
                     </CardDescription>
                   </div>
@@ -377,7 +341,6 @@ export default function CalendarPage() {
                   onAddAppointment={() => setShowAppointmentDialog(true)}
                   existingAppointments={getOrdersForDate(selectedDate)}
                 />
-
                 {getOrdersForDate(selectedDate).length > 0 && (
                   <>
                     <div className="mb-4">
@@ -388,7 +351,7 @@ export default function CalendarPage() {
                         <OrderCard
                           key={order.id}
                           order={order}
-                          isFitting={isFirstFitting(selectedDate, order) ? "First" : "Second"}
+                          appointmentType={getAppointmentType(selectedDate, order)}
                         />
                       ))}
                     </div>
@@ -414,7 +377,6 @@ export default function CalendarPage() {
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(currentYear, currentMonth, i)
       const dateOrders = getOrdersForDate(date)
-
       days.push({
         day: i,
         date,
@@ -434,7 +396,6 @@ export default function CalendarPage() {
             </div>
           ))}
         </div>
-
         <div className="grid grid-cols-7 gap-2">
           {days.map((day, index) => {
             if (day === null) {
@@ -458,8 +419,6 @@ export default function CalendarPage() {
                 )}
                 onClick={() => {
                   setSelectedDate(day.date)
-                  // Remove the immediate dialog opening
-                  // setShowAppointmentDialog(true)
                 }}
               >
                 <div className="flex justify-between items-center mb-1">
@@ -488,9 +447,11 @@ export default function CalendarPage() {
                       key={order.id}
                       className={cn(
                         "text-xs p-1.5 truncate rounded-md font-medium transition-all duration-200",
-                        isFirstFitting(day.date, order)
+                        getAppointmentType(day.date, order) === "First"
                           ? "bg-gradient-to-r from-orange-200 to-orange-100 text-orange-800"
-                          : "bg-gradient-to-r from-orange-100 to-orange-50 text-orange-700",
+                          : getAppointmentType(day.date, order) === "Second"
+                            ? "bg-gradient-to-r from-orange-100 to-orange-50 text-orange-700"
+                            : "bg-gradient-to-r from-green-200 to-green-100 text-green-800",
                       )}
                     >
                       {order.customer.split(" ")[0]}
@@ -504,7 +465,6 @@ export default function CalendarPage() {
             )
           })}
         </div>
-
         {selectedDate && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
             <Card className="shadow-xl border-0 bg-gradient-to-br from-white via-orange-50/20 to-white">
@@ -515,7 +475,7 @@ export default function CalendarPage() {
                       {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                     </CardTitle>
                     <CardDescription className="text-base">
-                      {getOrdersForDate(selectedDate).length} fitting
+                      {getOrdersForDate(selectedDate).length} appointment
                       {getOrdersForDate(selectedDate).length !== 1 ? "s" : ""} scheduled
                     </CardDescription>
                   </div>
@@ -534,7 +494,6 @@ export default function CalendarPage() {
                   onAddAppointment={() => setShowAppointmentDialog(true)}
                   existingAppointments={getOrdersForDate(selectedDate)}
                 />
-
                 {getOrdersForDate(selectedDate).length > 0 && (
                   <>
                     <div className="mb-4">
@@ -548,10 +507,7 @@ export default function CalendarPage() {
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
                         >
-                          <OrderCard
-                            order={order}
-                            isFitting={isFirstFitting(selectedDate, order) ? "First" : "Second"}
-                          />
+                          <OrderCard order={order} appointmentType={getAppointmentType(selectedDate, order)} />
                         </motion.div>
                       ))}
                     </div>
@@ -571,9 +527,9 @@ export default function CalendarPage() {
       const monthOrders = getFilteredOrders().filter(
         (order) =>
           (order.firstFitting.getMonth() === i && order.firstFitting.getFullYear() === selectedYear) ||
-          (order.secondFitting.getMonth() === i && order.secondFitting.getFullYear() === selectedYear),
+          (order.secondFitting.getMonth() === i && order.secondFitting.getFullYear() === selectedYear) ||
+          (order.collectionDate.getMonth() === i && order.collectionDate.getFullYear() === selectedYear),
       )
-
       return {
         month: i,
         name: getMonthName(i),
@@ -607,7 +563,7 @@ export default function CalendarPage() {
                   {month.name}
                 </CardTitle>
                 <CardDescription className="text-base font-medium">
-                  {month.orders.length} fitting{month.orders.length !== 1 ? "s" : ""}
+                  {month.orders.length} appointment{month.orders.length !== 1 ? "s" : ""}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -624,6 +580,12 @@ export default function CalendarPage() {
                       {month.orders.filter((o) => o.secondFitting.getMonth() === month.month).length}
                     </Badge>
                   </div>
+                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-green-25 rounded-lg">
+                    <span className="text-sm font-medium text-green-700">Collections</span>
+                    <Badge variant="outline" className="border-green-300 text-green-600">
+                      {month.orders.filter((o) => o.collectionDate.getMonth() === month.month).length}
+                    </Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -637,6 +599,19 @@ export default function CalendarPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
       <div className="container mx-auto py-8 max-w-7xl">
         <div className="flex flex-col space-y-8">
+          {/* Error Alert */}
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="flex justify-between items-center">
+                {error}
+                <Button variant="outline" size="sm" onClick={clearError}>
+                  Dismiss
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
             <div className="flex items-center space-x-3">
@@ -650,23 +625,22 @@ export default function CalendarPage() {
                 <p className="text-muted-foreground">Manage your appointments with style</p>
               </div>
             </div>
-
             <div className="flex flex-wrap items-center gap-3">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={goToToday}
-                className="hover:bg-orange-50 hover:border-orange-300 transition-all duration-200"
+                className="hover:bg-orange-50 hover:border-orange-300 transition-all duration-200 bg-transparent"
               >
                 Today
               </Button>
-
               <div className="flex items-center">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={goToPrevious}
-                  className="rounded-r-none hover:bg-orange-50 hover:border-orange-300"
+                  className="rounded-r-none hover:bg-orange-50 hover:border-orange-300 bg-transparent"
+                  disabled={loading}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -674,12 +648,12 @@ export default function CalendarPage() {
                   variant="outline"
                   size="icon"
                   onClick={goToNext}
-                  className="rounded-l-none border-l-0 hover:bg-orange-50 hover:border-orange-300"
+                  className="rounded-l-none border-l-0 hover:bg-orange-50 hover:border-orange-300 bg-transparent"
+                  disabled={loading}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-
               <Select
                 value={selectedYear.toString()}
                 onValueChange={(value) => setSelectedYear(Number.parseInt(value))}
@@ -695,16 +669,19 @@ export default function CalendarPage() {
                   ))}
                 </SelectContent>
               </Select>
-
-              <Select value={filterType} onValueChange={(value: "all" | "first" | "second") => setFilterType(value)}>
+              <Select
+                value={filterType}
+                onValueChange={(value: "all" | "first" | "second" | "collection") => setFilterType(value)}
+              >
                 <SelectTrigger className="w-36 hover:border-orange-300 transition-colors">
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Fittings</SelectItem>
+                  <SelectItem value="all">All Appointments</SelectItem>
                   <SelectItem value="first">First Fittings</SelectItem>
                   <SelectItem value="second">Second Fittings</SelectItem>
+                  <SelectItem value="collection">Collections</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -737,7 +714,6 @@ export default function CalendarPage() {
                     Year
                   </TabsTrigger>
                 </TabsList>
-
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent mt-4 md:mt-0">
                   {viewMode === "year"
                     ? selectedYear
@@ -748,7 +724,6 @@ export default function CalendarPage() {
                         : currentDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                 </h2>
               </div>
-
               <div className="p-6">
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -777,17 +752,33 @@ export default function CalendarPage() {
 }
 
 // Enhanced Order card component
-function OrderCard({ order, isFitting }: { order: any; isFitting: "First" | "Second" }) {
+function OrderCard({ order, appointmentType }: { order: any; appointmentType: "First" | "Second" | "Collection" }) {
+  const getAppointmentDate = () => {
+    if (appointmentType === "First") return order.firstFitting
+    if (appointmentType === "Second") return order.secondFitting
+    return order.collectionDate
+  }
+
+  const getAppointmentColor = () => {
+    if (appointmentType === "First") return "border-l-orange-500 hover:border-orange-300"
+    if (appointmentType === "Second") return "border-l-orange-300 hover:border-orange-200"
+    return "border-l-green-500 hover:border-green-300"
+  }
+
+  const getBadgeStyle = () => {
+    if (appointmentType === "First") return "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md"
+    if (appointmentType === "Second") return "text-orange-600 border-orange-300 bg-orange-50"
+    return "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md"
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -2 }}
       className={cn(
-        "rounded-xl overflow-hidden shadow-lg border-2 transition-all duration-300 hover:shadow-xl bg-white",
-        isFitting === "First"
-          ? "border-l-4 border-l-orange-500 hover:border-orange-300"
-          : "border-l-4 border-l-orange-300 hover:border-orange-200",
+        "rounded-xl overflow-hidden shadow-lg border-2 transition-all duration-300 hover:shadow-xl bg-white border-l-4",
+        getAppointmentColor(),
       )}
     >
       <div className="p-5">
@@ -797,27 +788,18 @@ function OrderCard({ order, isFitting }: { order: any; isFitting: "First" | "Sec
             <p className="text-sm text-muted-foreground font-medium">{order.id}</p>
           </div>
           <Badge
-            variant={isFitting === "First" ? "default" : "outline"}
-            className={cn(
-              "font-semibold px-3 py-1",
-              isFitting === "First"
-                ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md"
-                : "text-orange-600 border-orange-300 bg-orange-50",
-            )}
+            variant={appointmentType === "First" || appointmentType === "Collection" ? "default" : "outline"}
+            className={cn("font-semibold px-3 py-1", getBadgeStyle())}
           >
-            {isFitting} Fitting
+            {appointmentType === "Collection" ? "Collection" : `${appointmentType} Fitting`}
           </Badge>
         </div>
-
         <Separator className="my-4" />
-
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
             <Clock className="h-4 w-4 text-orange-500" />
             <span className="font-medium">
-              {isFitting === "First"
-                ? order.firstFitting.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                : order.secondFitting.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+              {getAppointmentDate().toLocaleDateString("en-US", { month: "short", day: "numeric" })}
             </span>
           </div>
           <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
