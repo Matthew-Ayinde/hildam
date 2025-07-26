@@ -15,6 +15,8 @@ import LogoutButton from "../LogoutMobile";
 import { useRouter } from "next/navigation";
 import { AiOutlineCheck } from "react-icons/ai";
 import { FiBell } from "react-icons/fi";
+import { Calendar } from "lucide-react";
+import { FaMoneyBillWave } from 'react-icons/fa'; // Font Awesome money icon
 import { MdOutlineDashboard } from "react-icons/md";
 
 type Notification = {
@@ -80,7 +82,7 @@ const sidebarItems = [
   {
     id: 9,
     text: "Calendar",
-    icon: <MdOutlineInventory2 />,
+    icon: <Calendar className="w-4 h-4" />,
     prefix: "/admin/calendar",
     links: [
       { name: "Fitting Dates", href: "/admin/calendar" },
@@ -89,7 +91,7 @@ const sidebarItems = [
   {
     id: 6,
     text: "Expenses",
-    icon: <MdOutlineInventory2 />,
+    icon: <FaMoneyBillWave />,
     prefix: "/admin/expense",
     links: [
       { name: "Job Expenses", href: "/admin/expenses" },
@@ -107,6 +109,8 @@ const sidebarItems = [
     ],
   },
 ];
+
+
 
 const Sidebar = () => {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;

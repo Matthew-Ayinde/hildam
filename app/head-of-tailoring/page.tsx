@@ -1,5 +1,5 @@
 import React from 'react'
-import TailorJobLists from "@/components/admin/TailorJobLists";
+import TailorJobLists from "./TailorJobLists";
 
 const page = () => {
   return (

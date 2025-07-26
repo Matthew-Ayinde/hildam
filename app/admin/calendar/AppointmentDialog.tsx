@@ -13,12 +13,12 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { CalendarIcon, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { addCalendarDate } from "@/app/api/apiClient"
 
 interface AppointmentDialogProps {
   open: boolean
@@ -30,11 +30,10 @@ interface AppointmentDialogProps {
 export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppointment }: AppointmentDialogProps) {
   const [formData, setFormData] = useState({
     orderId: "",
-    appointmentType: "first" as "first" | "second" | "collection",
     firstFittingDate: selectedDate || new Date(),
     secondFittingDate: selectedDate ? new Date(selectedDate.getTime() + 7 * 24 * 60 * 60 * 1000) : new Date(),
     collectionDate: selectedDate ? new Date(selectedDate.getTime() + 14 * 24 * 60 * 60 * 1000) : new Date(),
-    time: "",
+    
   })
 
   const [loading, setLoading] = useState(false)
@@ -42,31 +41,33 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedDate || !formData.orderId) return
+
 
     setLoading(true)
     setError(null)
 
     try {
       const appointmentData = {
-        orderId: formData.orderId,
-        appointmentType: formData.appointmentType,
+        order_id: formData.orderId,
         firstFittingDate: formData.firstFittingDate.toISOString().split("T")[0],
         secondFittingDate: formData.secondFittingDate.toISOString().split("T")[0],
         collectionDate: formData.collectionDate.toISOString().split("T")[0],
-        time: formData.time,
+        
       }
 
-      await onSaveAppointment(appointmentData)
+
+      console.log("Submitting appointment data:", appointmentData)
+
+      const res = await addCalendarDate(appointmentData)
+      console.log("Appointment created successfully:", res)
 
       // Reset form
       setFormData({
         orderId: "",
-        appointmentType: "first",
         firstFittingDate: selectedDate || new Date(),
         secondFittingDate: selectedDate ? new Date(selectedDate.getTime() + 7 * 24 * 60 * 60 * 1000) : new Date(),
         collectionDate: selectedDate ? new Date(selectedDate.getTime() + 14 * 24 * 60 * 60 * 1000) : new Date(),
-        time: "",
+      
       })
 
       onOpenChange(false)
@@ -140,25 +141,6 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="appointmentType">Primary Appointment Type</Label>
-            <Select
-              value={formData.appointmentType}
-              onValueChange={(value: "first" | "second" | "collection") =>
-                setFormData((prev) => ({ ...prev, appointmentType: value }))
-              }
-              disabled={loading}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="first">First Fitting</SelectItem>
-                <SelectItem value="second">Second Fitting</SelectItem>
-                <SelectItem value="collection">Collection/Pickup</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <DatePicker
@@ -183,32 +165,9 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
             placeholder="Select collection date"
           />
 
-          <div className="space-y-2">
-            <Label htmlFor="time">Appointment Time</Label>
-            <Select
-              value={formData.time || ""}
-              onValueChange={(value) => setFormData((prev) => ({ ...prev, time: value }))}
-              disabled={loading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select time" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="09:00">9:00 AM</SelectItem>
-                <SelectItem value="10:00">10:00 AM</SelectItem>
-                <SelectItem value="11:00">11:00 AM</SelectItem>
-                <SelectItem value="12:00">12:00 PM</SelectItem>
-                <SelectItem value="13:00">1:00 PM</SelectItem>
-                <SelectItem value="14:00">2:00 PM</SelectItem>
-                <SelectItem value="15:00">3:00 PM</SelectItem>
-                <SelectItem value="16:00">4:00 PM</SelectItem>
-                <SelectItem value="17:00">5:00 PM</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+            <Button type="submit" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
               Cancel
             </Button>
             <Button

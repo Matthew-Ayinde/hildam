@@ -5,6 +5,7 @@ import { ChevronRight, ChevronLeft, Eye, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { getSession } from "next-auth/react"
+import { deleteJobExpense, fetchAllJobExpenses } from "@/app/api/apiClient"
 
 export default function ExpenseTable() {
   interface Expense {
@@ -46,26 +47,15 @@ export default function ExpenseTable() {
 
   const fetchData = async () => {
     setIsLoading(true)
+
+
     try {
-      const session = await getSession()
-      const token = session?.user?.token
-      if (!token) throw new Error("No authentication token found.")
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/getexpenses`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
-      if (!res.ok) throw new Error("Failed to fetch expenses.")
+      const res = await fetchAllJobExpenses()
+      console.log('rress', res)
 
-      const json = await res.json()
-      if (json.data && Array.isArray(json.data)) {
-        setData(json.data)
-      } else {
-        setData([])
-      }
+      setData(res)
+      
     } catch (err) {
       console.error(err)
       setPopupMessage("Error fetching expenses")
@@ -92,18 +82,9 @@ export default function ExpenseTable() {
   const handleDelete = async () => {
     if (!selectedExpenseId) return
     try {
-      const session = await getSession()
-      const token = session?.user?.token
-      if (!token) throw new Error("Authentication token not found")
+        const jobExpenseId = selectedExpenseId
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/deleteexpense/${selectedExpenseId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      if (!res.ok) throw new Error("Failed to delete expense")
+      const res = await deleteJobExpense(jobExpenseId)
 
       setData((prev) => prev.filter((e) => e.id !== selectedExpenseId))
       setPopupMessage("Expense successfully deleted")
@@ -114,6 +95,7 @@ export default function ExpenseTable() {
       setTimeout(() => setPopupMessage(null), 5000)
     } finally {
       setIsPopupOpen(false)
+      setTimeout(() => setPopupMessage(null), 5000)
     }
   }
 

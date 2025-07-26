@@ -13,7 +13,39 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AppointmentDialog } from "./AppointmentDialog"
 import { QuickAppointmentCard } from "./QuickAppointmentCard"
-import { useCalendarData } from "./use-calendar-data"
+import { fetchAllDates } from "@/app/api/apiClient"
+
+// Types
+interface Order {
+  id: string
+  customer: string
+  items: string[]
+  firstFitting: Date
+  secondFitting: Date
+  collectionDate: Date
+}
+
+interface YearlyData {
+  month: string
+  first_fitting_count: number
+  second_fitting_count: number
+  collection_count: number
+}
+
+interface MonthlyOrder {
+  customer_name: string
+  order_id: string
+  clothing_name: string
+  first_fitting_date: string | null
+  second_fitting_date: string | null
+  collection_date: string | null
+}
+
+interface MonthlyData {
+  date: string
+  orders: MonthlyOrder[]
+  total: number
+}
 
 // Helper functions
 const getDaysInMonth = (year: number, month: number) => {
@@ -28,10 +60,87 @@ const getMonthName = (month: number) => {
   return new Date(0, month).toLocaleString("default", { month: "long" })
 }
 
+// Check if a date is in the past (before today)
+const isPastDate = (date: Date) => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // Reset time to start of day
+  const checkDate = new Date(date)
+  checkDate.setHours(0, 0, 0, 0) // Reset time to start of day
+  return checkDate < today
+}
+
 // Generate available years (current year and next 2 years)
 const getAvailableYears = () => {
   const currentYear = new Date().getFullYear()
   return [currentYear - 1, currentYear, currentYear + 1, currentYear + 2]
+}
+
+// Custom hook for calendar data
+const useCalendarData = () => {
+  const [orders, setOrders] = useState<Order[]>([])
+  const [yearlyData, setYearlyData] = useState<YearlyData[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const parseMonthlyDataToOrders = (data: MonthlyData[]): Order[] => {
+    const orders: Order[] = []
+    data.forEach((dayData) => {
+      dayData.orders.forEach((orderData) => {
+        const order: Order = {
+          id: orderData.order_id,
+          customer: orderData.customer_name,
+          items: [orderData.clothing_name],
+          firstFitting: orderData.first_fitting_date ? new Date(orderData.first_fitting_date) : new Date(),
+          secondFitting: orderData.second_fitting_date ? new Date(orderData.second_fitting_date) : new Date(),
+          collectionDate: orderData.collection_date ? new Date(orderData.collection_date) : new Date(),
+        }
+        orders.push(order)
+      })
+    })
+    return orders
+  }
+
+  const fetchCalendarData = useCallback(async (payload: string) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetchAllDates(payload)
+      if (response.success) {
+        if (response.type === "year") {
+          setYearlyData(response.data)
+          setOrders([]) // Clear orders for year view
+        } else if (response.type === "month") {
+          const parsedOrders = parseMonthlyDataToOrders(response.data)
+          setOrders(parsedOrders)
+          setYearlyData([]) // Clear yearly data for month view
+        }
+      } else {
+        setError("Failed to fetch calendar data")
+      }
+    } catch (err) {
+      setError("Network error occurred")
+      console.error("Failed to fetch calendar data:", err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const addAppointment = async (appointmentData: any) => {
+    // Implementation for adding appointment
+    console.log("Adding appointment:", appointmentData)
+  }
+
+  const clearError = () => setError(null)
+
+  return {
+    orders,
+    yearlyData,
+    loading,
+    error,
+    fetchCalendarData,
+    addAppointment,
+    clearError,
+  }
 }
 
 export default function CalendarPage() {
@@ -42,33 +151,36 @@ export default function CalendarPage() {
   const [filterType, setFilterType] = useState<"all" | "first" | "second" | "collection">("all")
   const [showAppointmentDialog, setShowAppointmentDialog] = useState(false)
 
-  const { orders, loading, error, fetchCalendarData, addAppointment, clearError } = useCalendarData()
+  const { orders, yearlyData, loading, error, fetchCalendarData, addAppointment, clearError } = useCalendarData()
 
   // Fetch data when view parameters change
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (viewMode === "year") {
-          await fetchCalendarData({ year: selectedYear })
+          const payload = `year=${selectedYear}`
+          await fetchCalendarData(payload)
         } else if (viewMode === "month") {
           const monthString = `${selectedYear}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`
-          await fetchCalendarData({ month: monthString })
+          const payload = `month=${monthString}`
+          await fetchCalendarData(payload)
         } else if (viewMode === "week") {
           // Calculate ISO week number
           const date = new Date(currentDate)
           const yearStart = new Date(date.getFullYear(), 0, 1)
           const weekNumber = Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + yearStart.getDay() + 1) / 7)
-          await fetchCalendarData({ week: `${selectedYear}-${weekNumber}` })
+          const payload = `week=${weekNumber}`
+          await fetchCalendarData(payload)
         } else {
           // For day view, fetch the month data
           const monthString = `${selectedYear}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`
-          await fetchCalendarData({ month: monthString })
+          const payload = `month=${monthString}`
+          await fetchCalendarData(payload)
         }
       } catch (err) {
         console.error("Failed to fetch calendar data:", err)
       }
     }
-
     fetchData()
   }, [viewMode, selectedYear, currentDate, fetchCalendarData])
 
@@ -86,10 +198,12 @@ export default function CalendarPage() {
         order.collectionDate.getFullYear() === selectedYear
 
       if (!orderYear) return false
+
       if (filterType === "all") return true
       if (filterType === "first") return order.firstFitting.getFullYear() === selectedYear
       if (filterType === "second") return order.secondFitting.getFullYear() === selectedYear
       if (filterType === "collection") return order.collectionDate.getFullYear() === selectedYear
+
       return true
     })
   }, [orders, selectedYear, filterType])
@@ -196,6 +310,8 @@ export default function CalendarPage() {
   // Day view
   const renderDayView = () => {
     const dayOrders = getOrdersForDate(currentDate)
+    const isCurrentDatePast = isPastDate(currentDate)
+
     return (
       <div className="space-y-6">
         <div className="text-center">
@@ -205,16 +321,21 @@ export default function CalendarPage() {
           <p className="text-muted-foreground mt-2">
             {dayOrders.length} appointment{dayOrders.length !== 1 ? "s" : ""} scheduled
           </p>
-          <Button
-            onClick={() => {
-              setSelectedDate(currentDate)
-              setShowAppointmentDialog(true)
-            }}
-            className="mt-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
-          >
-            <Calendar className="h-4 w-4 mr-2" />
-            Add Appointment
-          </Button>
+          {!isCurrentDatePast && (
+            <Button
+              onClick={() => {
+                setSelectedDate(currentDate)
+                setShowAppointmentDialog(true)
+              }}
+              className="mt-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Add Appointment
+            </Button>
+          )}
+          {isCurrentDatePast && (
+            <p className="text-sm text-muted-foreground mt-4 italic">Cannot create appointments for past dates</p>
+          )}
         </div>
         {dayOrders.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
@@ -325,14 +446,16 @@ export default function CalendarPage() {
                       {getOrdersForDate(selectedDate).length !== 1 ? "s" : ""} scheduled
                     </CardDescription>
                   </div>
-                  <Button
-                    onClick={() => setShowAppointmentDialog(true)}
-                    size="sm"
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Add
-                  </Button>
+                  {!isPastDate(selectedDate) && (
+                    <Button
+                      onClick={() => setShowAppointmentDialog(true)}
+                      size="sm"
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Add
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -340,6 +463,7 @@ export default function CalendarPage() {
                   selectedDate={selectedDate}
                   onAddAppointment={() => setShowAppointmentDialog(true)}
                   existingAppointments={getOrdersForDate(selectedDate)}
+                  isPastDate={isPastDate(selectedDate)}
                 />
                 {getOrdersForDate(selectedDate).length > 0 && (
                   <>
@@ -403,6 +527,7 @@ export default function CalendarPage() {
             }
 
             const isToday = day.date.toDateString() === new Date().toDateString()
+            const isDatePast = isPastDate(day.date)
 
             return (
               <motion.div
@@ -416,6 +541,7 @@ export default function CalendarPage() {
                   day.date.toDateString() === selectedDate?.toDateString()
                     ? "ring-2 ring-orange-400 ring-offset-2"
                     : "",
+                  isDatePast ? "opacity-75" : "",
                 )}
                 onClick={() => {
                   setSelectedDate(day.date)
@@ -428,6 +554,7 @@ export default function CalendarPage() {
                       isToday
                         ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md"
                         : "text-gray-700 hover:bg-orange-100",
+                      isDatePast ? "text-gray-400" : "",
                     )}
                   >
                     {day.day}
@@ -473,19 +600,24 @@ export default function CalendarPage() {
                   <div>
                     <CardTitle className="text-2xl bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
                       {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                      {isPastDate(selectedDate) && (
+                        <span className="text-sm text-muted-foreground ml-2 font-normal">(Past Date)</span>
+                      )}
                     </CardTitle>
                     <CardDescription className="text-base">
                       {getOrdersForDate(selectedDate).length} appointment
                       {getOrdersForDate(selectedDate).length !== 1 ? "s" : ""} scheduled
                     </CardDescription>
                   </div>
-                  <Button
-                    onClick={() => setShowAppointmentDialog(true)}
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Add Appointment
-                  </Button>
+                  {!isPastDate(selectedDate) && (
+                    <Button
+                      onClick={() => setShowAppointmentDialog(true)}
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Add Appointment
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="pt-6">
@@ -493,6 +625,7 @@ export default function CalendarPage() {
                   selectedDate={selectedDate}
                   onAddAppointment={() => setShowAppointmentDialog(true)}
                   existingAppointments={getOrdersForDate(selectedDate)}
+                  isPastDate={isPastDate(selectedDate)}
                 />
                 {getOrdersForDate(selectedDate).length > 0 && (
                   <>
@@ -521,21 +654,16 @@ export default function CalendarPage() {
     )
   }
 
-  // Year view
+  // Year view - Updated to use API data
   const renderYearView = () => {
-    const months = Array.from({ length: 12 }, (_, i) => {
-      const monthOrders = getFilteredOrders().filter(
-        (order) =>
-          (order.firstFitting.getMonth() === i && order.firstFitting.getFullYear() === selectedYear) ||
-          (order.secondFitting.getMonth() === i && order.secondFitting.getFullYear() === selectedYear) ||
-          (order.collectionDate.getMonth() === i && order.collectionDate.getFullYear() === selectedYear),
-      )
-      return {
-        month: i,
-        name: getMonthName(i),
-        orders: monthOrders,
-      }
-    })
+    const months = yearlyData.map((monthData, index) => ({
+      month: index,
+      name: monthData.month,
+      firstFittingCount: monthData.first_fitting_count,
+      secondFittingCount: monthData.second_fitting_count,
+      collectionCount: monthData.collection_count,
+      totalCount: monthData.first_fitting_count + monthData.second_fitting_count + monthData.collection_count,
+    }))
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -563,27 +691,25 @@ export default function CalendarPage() {
                   {month.name}
                 </CardTitle>
                 <CardDescription className="text-base font-medium">
-                  {month.orders.length} appointment{month.orders.length !== 1 ? "s" : ""}
+                  {month.totalCount} appointment{month.totalCount !== 1 ? "s" : ""}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center p-3 bg-gradient-to-r from-orange-50 to-orange-25 rounded-lg">
                     <span className="text-sm font-medium text-orange-800">First Fittings</span>
-                    <Badge className="bg-orange-500 text-white">
-                      {month.orders.filter((o) => o.firstFitting.getMonth() === month.month).length}
-                    </Badge>
+                    <Badge className="bg-orange-500 text-white">{month.firstFittingCount}</Badge>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-gradient-to-r from-orange-25 to-orange-50 rounded-lg">
                     <span className="text-sm font-medium text-orange-700">Second Fittings</span>
                     <Badge variant="outline" className="border-orange-300 text-orange-600">
-                      {month.orders.filter((o) => o.secondFitting.getMonth() === month.month).length}
+                      {month.secondFittingCount}
                     </Badge>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-green-25 rounded-lg">
                     <span className="text-sm font-medium text-green-700">Collections</span>
                     <Badge variant="outline" className="border-green-300 text-green-600">
-                      {month.orders.filter((o) => o.collectionDate.getMonth() === month.month).length}
+                      {month.collectionCount}
                     </Badge>
                   </div>
                 </div>

@@ -1,19 +1,17 @@
 "use client"
 
-import { useState, useMemo } from "react"
-
-import { FaNairaSign } from "react-icons/fa6";
+import { useState, useMemo, useEffect } from "react"
+import { FaNairaSign } from "react-icons/fa6"
 import {
   Plus,
   TrendingUp,
-  Download,
   Search,
   Target,
   AlertTriangle,
   CheckCircle,
   Calendar,
   PieChartIcon,
-  BarChart3,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -33,158 +31,330 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
+import { useToast } from "@/hooks/use-toast"
+import { createBudget } from "@/app/api/apiClient"
 
-// Budget categories
+// Updated budget categories to match API
 const budgetCategories = [
-  { value: "materials", label: "Raw Materials", color: "#f97316", icon: "🧵" },
-  { value: "equipment", label: "Equipment & Tools", color: "#3b82f6", icon: "🔧" },
-  { value: "utilities", label: "Utilities", color: "#10b981", icon: "⚡" },
-  { value: "labor", label: "Labor & Wages", color: "#8b5cf6", icon: "👥" },
-  { value: "supplies", label: "Office Supplies", color: "#f59e0b", icon: "📦" },
+  { value: "raw_materials", label: "Raw Materials", color: "#f97316", icon: "🧵" },
+  { value: "equipment_and_tools", label: "Equipment & Tools", color: "#3b82f6", icon: "🔧" },
+  { value: "office_supplies", label: "Office Supplies", color: "#f59e0b", icon: "📦" },
   { value: "maintenance", label: "Maintenance", color: "#ef4444", icon: "🔨" },
-  { value: "marketing", label: "Marketing", color: "#ec4899", icon: "📢" },
-  { value: "transport", label: "Transportation", color: "#06b6d4", icon: "🚗" },
+  { value: "transportation", label: "Transportation", color: "#06b6d4", icon: "🚗" },
+  { value: "welfare", label: "Welfare", color: "#8b5cf6", icon: "👥" },
   { value: "other", label: "Other", color: "#6b7280", icon: "📋" },
 ]
 
-// Sample budget periods
-const initialBudgets = [
-  {
-    id: 1,
-    period: "weekly",
-    startDate: "2024-01-22",
-    endDate: "2024-01-28",
-    totalBudget: 150000,
-    name: "Week 4 - January 2024",
-  },
-  {
-    id: 2,
-    period: "monthly",
-    startDate: "2024-01-01",
-    endDate: "2024-01-31",
-    totalBudget: 500000,
-    name: "January 2024",
-  },
-]
+// Types based on API structure
+interface Budget {
+  id: number
+  name: string
+  period_type: "weekly" | "monthly"
+  start_date: string
+  end_date: string
+  total_amount: number
+  carry_over?: boolean
+  carried_over_from_id?: number
+  created_at: string
+  updated_at: string
+}
 
-// Sample expenses
-const initialExpenses = [
-  {
-    id: 1,
-    budgetId: 1,
-    date: "2024-01-24",
-    category: "materials",
-    amount: 25000.0,
-    description: "Silk fabric for premium orders",
-  },
-  {
-    id: 2,
-    budgetId: 1,
-    date: "2024-01-24",
-    category: "supplies",
-    amount: 4500.0,
-    description: "Threads and notions",
-  },
-  {
-    id: 3,
-    budgetId: 1,
-    date: "2024-01-25",
-    category: "utilities",
-    amount: 8000.0,
-    description: "Electricity bill",
-  },
-  {
-    id: 4,
-    budgetId: 1,
-    date: "2024-01-26",
-    category: "labor",
-    amount: 15000.0,
-    description: "Weekly wages for assistants",
-  },
-  {
-    id: 5,
-    budgetId: 2,
-    date: "2024-01-15",
-    category: "materials",
-    amount: 45000.0,
-    description: "Bulk fabric purchase",
-  },
-  {
-    id: 6,
-    budgetId: 2,
-    date: "2024-01-20",
-    category: "equipment",
-    amount: 35000.0,
-    description: "New sewing machine maintenance",
-  },
-]
+interface Expense {
+  id: number
+  budget_id: number
+  expense_date: string
+  amount: number
+  category: string
+  description: string
+  created_at: string
+  updated_at: string
+}
+
+interface BudgetBreakdown {
+  total_budget: number
+  total_spent: number
+  total_remaining: number
+  spent_percent: number
+  remaining_percent: number
+  category_expenses: Array<{
+    category: string
+    total: number
+    percent: number
+  }>
+  expenses: Expense[]
+}
+
+// API functions
+const API_BASE_URL = "/api/v1/daily-expenses"
+
+const apiCall = async (endpoint: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem("authToken") // Adjust based on your auth implementation
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.status}`)
+  }
+
+  return response.json()
+}
 
 export default function OperationalBudgetTracker() {
-  const [budgets, setBudgets] = useState(initialBudgets)
-  const [expenses, setExpenses] = useState(initialExpenses)
-  const [selectedBudgetId, setSelectedBudgetId] = useState(1)
+  const [budgets, setBudgets] = useState<Budget[]>([])
+  const [budgetBreakdown, setBudgetBreakdown] = useState<BudgetBreakdown | null>(null)
+  const [selectedBudgetId, setSelectedBudgetId] = useState<number | null>(null)
   const [isAddExpenseDialogOpen, setIsAddExpenseDialogOpen] = useState(false)
   const [isAddBudgetDialogOpen, setIsAddBudgetDialogOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterCategory, setFilterCategory] = useState("all")
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const { toast } = useToast()
 
   const [newExpense, setNewExpense] = useState({
-    date: new Date().toISOString().split("T")[0],
+    expense_date: new Date().toISOString().split("T")[0],
     category: "",
     amount: "",
     description: "",
   })
 
   const [newBudget, setNewBudget] = useState({
-    period: "weekly",
-    startDate: "",
-    endDate: "",
-    totalBudget: "",
+    period_type: "weekly" as "weekly" | "monthly",
+    start_date: "",
+    end_date: "",
+    total_amount: "",
     name: "",
+    carry_over: false,
+    carried_over_from_id: undefined as number | undefined,
   })
+
+  // Fetch budgets on component mount
+  useEffect(() => {
+    fetchBudgets()
+  }, [])
+
+  // Fetch budget breakdown when selected budget changes
+  useEffect(() => {
+    if (selectedBudgetId) {
+      fetchBudgetBreakdown(selectedBudgetId)
+    }
+  }, [selectedBudgetId])
+ 
+  const fetchBudgets = async () => {
+    try {
+      setLoading(true)
+      // Note: You'll need to implement a get budgets endpoint or modify this
+      // For now, assuming you have a way to fetch budgets
+      const response = await apiCall("/budgets") // This endpoint needs to be implemented
+      setBudgets(response.data || [])
+
+      if (response.data && response.data.length > 0 && !selectedBudgetId) {
+        setSelectedBudgetId(response.data[0].id)
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch budgets",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchBudgetBreakdown = async (budgetId: number) => {
+    try {
+      const response = await apiCall(`/budget-breakdown?budget_id=${budgetId}`)
+      setBudgetBreakdown(response.data)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch budget breakdown",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleAddExpense = async () => {
+    if (!selectedBudgetId || !newExpense.category || !newExpense.amount || !newExpense.description) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      setSubmitting(true)
+      await apiCall("/create-expense", {
+        method: "POST",
+        body: JSON.stringify({
+          budget_id: selectedBudgetId,
+          expense_date: newExpense.expense_date,
+          amount: Number.parseFloat(newExpense.amount),
+          category: newExpense.category,
+          description: newExpense.description,
+        }),
+      })
+
+      setNewExpense({
+        expense_date: new Date().toISOString().split("T")[0],
+        category: "",
+        amount: "",
+        description: "",
+      })
+      setIsAddExpenseDialogOpen(false)
+
+      // Refresh budget breakdown
+      if (selectedBudgetId) {
+        await fetchBudgetBreakdown(selectedBudgetId)
+      }
+
+      toast({
+        title: "Success",
+        description: "Expense added successfully",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add expense",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleAddBudget = async () => {
+    if (
+      !newBudget.period_type ||
+      !newBudget.start_date ||
+      !newBudget.end_date ||
+      !newBudget.total_amount ||
+      !newBudget.name
+    ) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      setSubmitting(true)
+
+      const payload = {
+        name: newBudget.name,
+          period_type: newBudget.period_type,
+          start_date: newBudget.start_date,
+          end_date: newBudget.end_date,
+          total_amount: Number.parseFloat(newBudget.total_amount),
+          // carry_over: newBudget.carry_over,
+          // carried_over_from_id: newBudget.carried_over_from_id
+      }
+
+      console.log("Creating budget with payload:", payload)
+      const response = await createBudget(payload)
+      console.log("Budget created:", response)
+
+      setNewBudget({
+        period_type: "weekly",
+        start_date: "",
+        end_date: "",
+        total_amount: "",
+        name: "",
+        carry_over: false,
+        carried_over_from_id: undefined,
+      })
+      setIsAddBudgetDialogOpen(false)
+
+      // Refresh budgets and select the new one
+      await fetchBudgets()
+      if (response.data?.id) {
+        setSelectedBudgetId(response.data.id)
+      }
+
+      toast({
+        title: "Success",
+        description: "Budget created successfully",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create budget",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleDeleteExpense = async (expenseId: number) => {
+    try {
+      await apiCall(`/delete-expense/${expenseId}`, {
+        method: "DELETE",
+      })
+
+      // Refresh budget breakdown
+      if (selectedBudgetId) {
+        await fetchBudgetBreakdown(selectedBudgetId)
+      }
+
+      toast({
+        title: "Success",
+        description: "Expense deleted successfully",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete expense",
+        variant: "destructive",
+      })
+    }
+  }
 
   const selectedBudget = budgets.find((b) => b.id === selectedBudgetId)
-  const budgetExpenses = expenses.filter((expense) => expense.budgetId === selectedBudgetId)
+  const filteredExpenses =
+    budgetBreakdown?.expenses?.filter((expense) => {
+      const matchesSearch = expense.description.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesCategory = filterCategory === "all" || expense.category === filterCategory
+      return matchesSearch && matchesCategory
+    }) || []
 
-  // Filter expenses
-  const filteredExpenses = budgetExpenses.filter((expense) => {
-    const matchesSearch =
-      expense.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = filterCategory === "all" || expense.category === filterCategory
-    return matchesSearch && matchesCategory
-  })
-
-  // Calculate budget analytics
+  // Calculate budget analytics from API data
   const budgetAnalytics = useMemo(() => {
-    if (!selectedBudget) return null
+    if (!selectedBudget || !budgetBreakdown) return null
 
-    const totalSpent = budgetExpenses.reduce((sum, expense) => sum + expense.amount, 0)
-    const remaining = selectedBudget.totalBudget - totalSpent
-    const spentPercentage = (totalSpent / selectedBudget.totalBudget) * 100
-
-    // Category breakdown
+    // Category breakdown with enhanced data
     const categoryBreakdown = budgetCategories
       .map((category) => {
-        const categoryExpenses = budgetExpenses.filter((expense) => expense.category === category.value)
-        const categoryTotal = categoryExpenses.reduce((sum, expense) => sum + expense.amount, 0)
-        const categoryPercentage =
-          selectedBudget.totalBudget > 0 ? (categoryTotal / selectedBudget.totalBudget) * 100 : 0
+        const apiCategory = budgetBreakdown.category_expenses.find((cat) => cat.category === category.value)
+        const categoryExpenses = budgetBreakdown.expenses.filter((expense) => expense.category === category.value)
 
         return {
           ...category,
-          spent: categoryTotal,
-          percentage: categoryPercentage,
+          spent: apiCategory?.total || 0,
+          percentage: apiCategory?.percent || 0,
           count: categoryExpenses.length,
         }
       })
       .filter((category) => category.spent > 0)
 
-    // Daily spending trend (for charts)
-    const dailySpending = budgetExpenses.reduce(
+    // Daily spending trend
+    const dailySpending = budgetBreakdown.expenses.reduce(
       (acc, expense) => {
-        const date = expense.date
+        const date = expense.expense_date
         if (!acc[date]) {
           acc[date] = 0
         }
@@ -202,54 +372,15 @@ export default function OperationalBudgetTracker() {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
     return {
-      totalBudget: selectedBudget.totalBudget,
-      totalSpent,
-      remaining,
-      spentPercentage,
+      totalBudget: budgetBreakdown.total_budget,
+      totalSpent: budgetBreakdown.total_spent,
+      remaining: budgetBreakdown.total_remaining,
+      spentPercentage: budgetBreakdown.spent_percent,
       categoryBreakdown,
       trendData,
-      status: spentPercentage > 90 ? "critical" : spentPercentage > 75 ? "warning" : "good",
+      status: budgetBreakdown.spent_percent > 90 ? "critical" : budgetBreakdown.spent_percent > 75 ? "warning" : "good",
     }
-  }, [selectedBudget, budgetExpenses])
-
-  const handleAddExpense = () => {
-    if (newExpense.category && newExpense.amount && newExpense.description) {
-      const expense = {
-        id: expenses.length + 1,
-        budgetId: selectedBudgetId,
-        ...newExpense,
-        amount: Number.parseFloat(newExpense.amount),
-      }
-      setExpenses([expense, ...expenses])
-      setNewExpense({
-        date: new Date().toISOString().split("T")[0],
-        category: "",
-        amount: "",
-        description: "",
-      })
-      setIsAddExpenseDialogOpen(false)
-    }
-  }
-
-  const handleAddBudget = () => {
-    if (newBudget.period && newBudget.startDate && newBudget.endDate && newBudget.totalBudget && newBudget.name) {
-      const budget = {
-        id: budgets.length + 1,
-        ...newBudget,
-        totalBudget: Number.parseFloat(newBudget.totalBudget),
-      }
-      setBudgets([...budgets, budget])
-      setNewBudget({
-        period: "weekly",
-        startDate: "",
-        endDate: "",
-        totalBudget: "",
-        name: "",
-      })
-      setIsAddBudgetDialogOpen(false)
-      setSelectedBudgetId(budget.id)
-    }
-  }
+  }, [selectedBudget, budgetBreakdown])
 
   const formatCurrency = (amount: number) => {
     return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -281,6 +412,17 @@ export default function OperationalBudgetTracker() {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Loading budget data...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -295,7 +437,7 @@ export default function OperationalBudgetTracker() {
           <div className="flex gap-3">
             <Dialog open={isAddBudgetDialogOpen} onOpenChange={setIsAddBudgetDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2 hover:bg-indigo-50 border-indigo-200">
+                <Button variant="outline" className="gap-2 hover:bg-indigo-50 border-indigo-200 bg-transparent">
                   <Target className="h-4 w-4" />
                   New Budget
                 </Button>
@@ -318,14 +460,15 @@ export default function OperationalBudgetTracker() {
                       className="mt-1"
                     />
                   </div>
-
                   <div>
                     <Label htmlFor="period" className="text-sm font-medium">
                       Budget Period
                     </Label>
                     <Select
-                      value={newBudget.period}
-                      onValueChange={(value) => setNewBudget({ ...newBudget, period: value })}
+                      value={newBudget.period_type}
+                      onValueChange={(value: "weekly" | "monthly") =>
+                        setNewBudget({ ...newBudget, period_type: value })
+                      }
                     >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select period" />
@@ -336,7 +479,6 @@ export default function OperationalBudgetTracker() {
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="start-date" className="text-sm font-medium">
@@ -345,8 +487,8 @@ export default function OperationalBudgetTracker() {
                       <Input
                         id="start-date"
                         type="date"
-                        value={newBudget.startDate}
-                        onChange={(e) => setNewBudget({ ...newBudget, startDate: e.target.value })}
+                        value={newBudget.start_date}
+                        onChange={(e) => setNewBudget({ ...newBudget, start_date: e.target.value })}
                         className="mt-1"
                       />
                     </div>
@@ -357,13 +499,12 @@ export default function OperationalBudgetTracker() {
                       <Input
                         id="end-date"
                         type="date"
-                        value={newBudget.endDate}
-                        onChange={(e) => setNewBudget({ ...newBudget, endDate: e.target.value })}
+                        value={newBudget.end_date}
+                        onChange={(e) => setNewBudget({ ...newBudget, end_date: e.target.value })}
                         className="mt-1"
                       />
                     </div>
                   </div>
-
                   <div>
                     <Label htmlFor="total-budget" className="text-sm font-medium">
                       Total Budget Amount (₦)
@@ -373,24 +514,69 @@ export default function OperationalBudgetTracker() {
                       type="number"
                       step="0.01"
                       placeholder="0.00"
-                      value={newBudget.totalBudget}
-                      onChange={(e) => setNewBudget({ ...newBudget, totalBudget: e.target.value })}
+                      value={newBudget.total_amount}
+                      onChange={(e) => setNewBudget({ ...newBudget, total_amount: e.target.value })}
                       className="mt-1"
                     />
                   </div>
-
+                  {budgets.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="carry-over"
+                          checked={newBudget.carry_over}
+                          onChange={(e) => setNewBudget({ ...newBudget, carry_over: e.target.checked })}
+                          className="rounded"
+                        />
+                        <Label htmlFor="carry-over" className="text-sm font-medium">
+                          Carry over unspent funds from previous budget
+                        </Label>
+                      </div>
+                      {newBudget.carry_over && (
+                        <div>
+                          <Label htmlFor="previous-budget" className="text-sm font-medium">
+                            Previous Budget
+                          </Label>
+                          <Select
+                            value={newBudget.carried_over_from_id?.toString() || ""}
+                            onValueChange={(value) =>
+                              setNewBudget({ ...newBudget, carried_over_from_id: Number.parseInt(value) })
+                            }
+                          >
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select previous budget" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {budgets.map((budget) => (
+                                <SelectItem key={budget.id} value={budget.id.toString()}>
+                                  {budget.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <Button
                     onClick={handleAddBudget}
+                    disabled={submitting}
                     className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
                   >
+                    {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                     Create Budget
                   </Button>
                 </div>
               </DialogContent>
             </Dialog>
+
             <Dialog open={isAddExpenseDialogOpen} onOpenChange={setIsAddExpenseDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 gap-2 shadow-lg">
+                <Button
+                  className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 gap-2 shadow-lg"
+                  disabled={!selectedBudgetId}
+                >
                   <Plus className="h-4 w-4" />
                   Add Expense
                 </Button>
@@ -409,8 +595,8 @@ export default function OperationalBudgetTracker() {
                       <Input
                         id="expense-date"
                         type="date"
-                        value={newExpense.date}
-                        onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
+                        value={newExpense.expense_date}
+                        onChange={(e) => setNewExpense({ ...newExpense, expense_date: e.target.value })}
                         className="mt-1"
                       />
                     </div>
@@ -429,7 +615,6 @@ export default function OperationalBudgetTracker() {
                       />
                     </div>
                   </div>
-
                   <div>
                     <Label htmlFor="expense-category" className="text-sm font-medium">
                       Category
@@ -454,7 +639,6 @@ export default function OperationalBudgetTracker() {
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div>
                     <Label htmlFor="expense-description" className="text-sm font-medium">
                       Description
@@ -468,16 +652,12 @@ export default function OperationalBudgetTracker() {
                       rows={3}
                     />
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    
-                   
-                  </div>
-
                   <Button
                     onClick={handleAddExpense}
+                    disabled={submitting}
                     className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
                   >
+                    {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                     Add Expense
                   </Button>
                 </div>
@@ -497,24 +677,33 @@ export default function OperationalBudgetTracker() {
                   <p className="text-slate-600">Select a budget period to manage</p>
                 </div>
               </div>
-              <Select value={selectedBudgetId.toString()} onValueChange={(value) => setSelectedBudgetId(Number(value))}>
-                <SelectTrigger className="w-full lg:w-80 border-blue-200 focus:border-blue-400">
-                  <SelectValue placeholder="Select budget period" />
-                </SelectTrigger>
-                <SelectContent>
-                  {budgets.map((budget) => (
-                    <SelectItem key={budget.id} value={budget.id.toString()}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{budget.name}</span>
-                        <span className="text-xs text-slate-500">
-                          {new Date(budget.startDate).toLocaleDateString()} -{" "}
-                          {new Date(budget.endDate).toLocaleDateString()} • {formatCurrency(budget.totalBudget)}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {budgets.length > 0 ? (
+                <Select
+                  value={selectedBudgetId?.toString() || ""}
+                  onValueChange={(value) => setSelectedBudgetId(Number(value))}
+                >
+                  <SelectTrigger className="w-full lg:w-80 border-blue-200 focus:border-blue-400">
+                    <SelectValue placeholder="Select budget period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {budgets.map((budget) => (
+                      <SelectItem key={budget.id} value={budget.id.toString()}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{budget.name}</span>
+                          <span className="text-xs text-slate-500">
+                            {new Date(budget.start_date).toLocaleDateString()} -{" "}
+                            {new Date(budget.end_date).toLocaleDateString()} • {formatCurrency(budget.total_amount)}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="text-slate-500 text-center py-4">
+                  <p>No budgets found. Create your first budget to get started.</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -530,7 +719,7 @@ export default function OperationalBudgetTracker() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">{formatCurrency(budgetAnalytics.totalBudget)}</div>
-                  <p className="text-xs text-blue-200">{selectedBudget?.period} budget</p>
+                  <p className="text-xs text-blue-200">{selectedBudget?.period_type} budget</p>
                 </CardContent>
               </Card>
 
@@ -558,12 +747,21 @@ export default function OperationalBudgetTracker() {
                 </CardContent>
               </Card>
 
-            
+              <Card className={`border-0 shadow-lg ${getStatusColor(budgetAnalytics.status)}`}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Budget Status</CardTitle>
+                  {getStatusIcon(budgetAnalytics.status)}
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold capitalize">{budgetAnalytics.status}</div>
+                  <Progress value={budgetAnalytics.spentPercentage} className="mt-2" />
+                </CardContent>
+              </Card>
             </div>
 
             {/* Charts Section */}
             <Tabs defaultValue="categories" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 lg:w-96">
+              <TabsList className="grid w-full grid-cols-1 lg:w-96">
                 <TabsTrigger value="categories" className="gap-2">
                   <PieChartIcon className="h-4 w-4" />
                   Categories
@@ -680,8 +878,6 @@ export default function OperationalBudgetTracker() {
                   </Card>
                 </div>
               </TabsContent>
-
-             
             </Tabs>
           </>
         )}
@@ -733,6 +929,7 @@ export default function OperationalBudgetTracker() {
                       <TableHead className="font-semibold text-slate-700">Category</TableHead>
                       <TableHead className="font-semibold text-slate-700">Description</TableHead>
                       <TableHead className="text-right font-semibold text-slate-700">Amount</TableHead>
+                      <TableHead className="text-right font-semibold text-slate-700">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -741,7 +938,7 @@ export default function OperationalBudgetTracker() {
                       return (
                         <TableRow key={expense.id} className="hover:bg-blue-50/30 transition-colors">
                           <TableCell className="font-medium text-slate-800">
-                            {new Date(expense.date).toLocaleDateString("en-NG", {
+                            {new Date(expense.expense_date).toLocaleDateString("en-NG", {
                               month: "short",
                               day: "numeric",
                             })}
@@ -762,6 +959,16 @@ export default function OperationalBudgetTracker() {
                           <TableCell className="text-slate-700 max-w-xs truncate">{expense.description}</TableCell>
                           <TableCell className="text-right font-semibold text-slate-800">
                             {formatCurrency(expense.amount)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteExpense(expense.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              Delete
+                            </Button>
                           </TableCell>
                         </TableRow>
                       )

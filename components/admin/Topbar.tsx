@@ -11,6 +11,7 @@ import Link from "next/link"
 import { IoNotificationsOutline, IoChevronDownOutline, IoCheckmarkDoneOutline, IoMailOutline } from "react-icons/io5"
 import { HiOutlineBell, HiOutlineInboxIn, HiOutlineUserCircle, HiOutlineClock } from "react-icons/hi"
 import { FiMessageSquare } from "react-icons/fi"
+import { fetchAllNotifications, readAllNotification, readNotification } from "@/app/api/apiClient"
 
 type Notification = {
   id: string
@@ -18,6 +19,7 @@ type Notification = {
   link: string
   read: string
   created_at: string
+  action_type: string
 }
 
 const Topbar = () => {
@@ -66,26 +68,15 @@ const Topbar = () => {
         throw new Error("No token found, please log in.")
       }
 
-      const response = await fetch(`${baseUrl}/allnotifications`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const response = await fetchAllNotifications()
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch notifications")
-      }
+      console.log("Notifications response:", response)
 
-      const data = await response.json()
-      if (data.status === "success") {
         // Limit to latest 30 notifications
-        const latestNotifications = data.data.slice(0, 30)
+        const latestNotifications = response.slice(0, 30)
         setNotifications(latestNotifications)
         setUnreadCount(latestNotifications.filter((notif: any) => notif.read === "0").length)
-      } else {
-        throw new Error("Cannot fetch notifications")
-      }
+      
     } catch (error) {
       console.error("Error fetching notifications:", error)
       setError("Cannot fetch notifications")
@@ -122,33 +113,24 @@ const Topbar = () => {
     setDropdownOpen(false)
 
     try {
-      const session = await getSession()
-      const token = session?.user?.token
-      if (!token) {
-        throw new Error("No token found, please log in.")
-      }
+      
 
-      await fetch(`${baseUrl}/readnotification/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ message, link }),
-      })
+      const resp = await readNotification(id)
+      console.log("Notification marked as read:", resp)
 
       setNotifications((prev) => prev.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif)))
       setUnreadCount((prev) => prev - 1)
+      
 
       const linking_id = link.split("/").pop()
-      if (link.includes("orderslist")) {
+      if (link.includes("orders")) {
         router.push("/admin/orders/" + linking_id)
       }
       if (link.includes("payments")) {
         router.push("/admin/payments/" + linking_id)
       }
-      if (link.includes("inventory")) {
-        router.push("/admin/inventory/")
+      if (link.includes("job-expenses")) {
+        router.push("/admin/job-expenses/" + linking_id)
       }
       // if (link.includes("tailorjoblist")) {
       //   router.push("/admin/joblists/tailorjoblists/jobs/" + linking_id)
@@ -166,19 +148,10 @@ const Topbar = () => {
 
   const markAllAsRead = async () => {
     try {
-      const session = await getSession()
-      const token = session?.user?.token
-      if (!token) {
-        throw new Error("No token found, please log in.")
-      }
+      setDropdownOpen(false)
 
-      await fetch(`${baseUrl}/readallnotification`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      await readAllNotification()
+      console.log("All notifications marked as read")
 
       setNotifications((prev) => prev.map((notif) => ({ ...notif, read: "1" })))
       setUnreadCount(0)

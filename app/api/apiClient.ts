@@ -261,6 +261,81 @@ export async function deletePayment(paymentId: string): Promise<any> {
 
 
 
+
+
+
+
+
+
+
+
+      //#region Daily Expense endpoint ---------------------------------
+export async function createBudget(submitData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(ApiRoutes.CreateBudget, submitData, { headers });
+  return resp.data;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      //#region Job Expense endpoint ---------------------------------
+export async function createJobExpense(submitData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(ApiRoutes.CreateJobExpense, submitData, { headers });
+  return resp.data;
+}
+
+export async function fetchAllJobExpenses(): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(ApiRoutes.FetchAllJobExpenses, { headers })
+  return resp.data.data;
+}
+
+export async function fetchJobExpense(jobExpenseId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(`${ApiRoutes.FetchJobExpense}/${jobExpenseId}`, { headers })
+  return resp.data.data
+}
+
+export async function editJobExpense(jobExpenseId: string, form: any): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.put(`${ApiRoutes.EditJobExpense}/${jobExpenseId}`, form, { headers })
+  return resp.data;
+}
+
+export async function deleteJobExpense(jobExpenseId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.delete(`${ApiRoutes.DeleteJobExpense}/${jobExpenseId}`, { headers })
+  return resp.data;
+}
+
+
+
+
+
+
+
+
+
     //#region Head of Tailoring endpoint ---------------------------------
 
 export async function fetchAllTailorJobs(): Promise<any> {
@@ -298,8 +373,44 @@ export async function SendJobToClientManager(tailorJobId: string): Promise<any> 
 
     //#region Calendar endpoint ---------------------------------
 
-export async function fetchCalendarData(tailorJobId: string): Promise<any> {
+export async function fetchAllDates(payload: string): Promise<any> {
   const headers = await getUserHeaders()
-  const resp = await API.get(`${ApiRoutes.FetchCalendarData}/${tailorJobId}`, { headers })
+  console.log("Fetching all dates with payload:", payload);
+  const resp = await API.get(`${ApiRoutes.FetchAllDates}?${payload}`, { headers })
+  console.log("Response from fetchAllDates APICLIENT:", resp.data);
+  return resp.data;
+}
+
+export async function addCalendarDate(appointmentData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.put(ApiRoutes.AddCalendarDate, appointmentData, { headers });
+  console.log("Response from addCalendarDate APICLIENT:", resp.data);
+  return resp.data;
+}
+
+
+
+
+
+
+
+
+    //#region Notifications endpoint ---------------------------------
+export async function fetchAllNotifications(): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(ApiRoutes.FetchAllNotifications, { headers });
+  return resp.data.data;
+}
+
+export async function readNotification(id: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.put(`${ApiRoutes.ReadNotification}/${id}`, {}, { headers }); 
+  console.log("Response from readNotification APICLIENT:", resp);
+  return resp;
+}
+
+export async function readAllNotification(): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.put(ApiRoutes.ReadAllNotifications, {}, { headers }); 
   return resp.data;
 }

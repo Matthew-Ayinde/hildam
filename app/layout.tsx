@@ -1,48 +1,31 @@
+import type React from "react"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import "./globals.css"
+import AuthSessionProvider from "@/components/SessionProvider"
+import Providers from "@/components/providers"
 
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
-import { Play } from "next/font/google";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import Providers  from "@/components/providers"
-import AuthWrapper from "@/components/AuthWrapper"
-
-const play = Play({ subsets: ["latin"], weight: ["400", "700"] });
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Hildam Couture",
-  description: "A Fashion Stylist Website",
-};
+  description: "Tailoring Management System",
+}
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  // Get the user's session on the server
-  const session = await getServerSession(authOptions);
-
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased text-black bg-[#f9f7f7]`}
-      >
-        <Providers>
-          <AuthWrapper>{children}</AuthWrapper>
-        </Providers>
+      <body className={inter.className}>
+        <AuthSessionProvider>
+          <Providers>
+          {children}
+          </Providers>
+          </AuthSessionProvider>
       </body>
     </html>
-  );
+  )
 }

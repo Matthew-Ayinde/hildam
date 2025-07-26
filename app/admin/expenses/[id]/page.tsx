@@ -11,9 +11,11 @@ import { GiWaterDrop, GiTakeMyMoney } from "react-icons/gi";
 import { MdMiscellaneousServices, MdConstruction } from "react-icons/md";
 import { FaHome } from "react-icons/fa";
 import { TbCurrencyNaira } from "react-icons/tb";
+import { fetchJobExpense } from "@/app/api/apiClient";
 
 export default function ShowExpensePage() {
   const { id } = useParams();
+  const jobExpenseId = id as string;
   const router = useRouter();
 
   interface Expense {
@@ -50,24 +52,11 @@ export default function ShowExpensePage() {
     const fetchExpense = async () => {
       setIsLoading(true);
       try {
-        const session = await getSession();
-        const token = session?.user?.token;
-        if (!token) throw new Error("Authentication token not found.");
 
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/getexpense/${id}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (!res.ok) throw new Error("Failed to fetch expense.");
+        const res = await fetchJobExpense(jobExpenseId);
+        console.log('Expense fetch response:', res);
 
-        const json = await res.json();
-        setExpense(json.data);
+        setExpense(res);
       } catch (err: any) {
         console.error(err);
         setError(err.message || "Error loading expense");

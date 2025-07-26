@@ -82,6 +82,7 @@ class ApiService {
   > {
     try {
       const searchParams = new URLSearchParams()
+      console.log("Fetching fitting dates with params:", searchParams)
 
       if (params.year) searchParams.append("year", params.year.toString())
       if (params.month) searchParams.append("month", params.month)
@@ -92,6 +93,7 @@ class ApiService {
         headers: this.getAuthHeaders(),
       })
 
+      
       return await this.handleResponse<DayData[] | MonthData[]>(response)
     } catch (error) {
       console.error("Error fetching fitting dates:", error)

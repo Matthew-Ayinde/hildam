@@ -105,27 +105,76 @@ export class ApiRoutes {
 
 
 
+
+
+
+
+
+
+
+
+
+
+      //#region Calendar endpoint ---------------------------------
+    static FetchAllDates: string = '/orders/get-fitting-dates';
+    static AddCalendarDate: string = '/orders/add-calendar-date';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      //#region Daily Expense endpoint ---------------------------------
+    static CreateBudget: string = '/daily-expenses/create-budget';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      //#region Job Expense endpoint ---------------------------------
+  static CreateJobExpense: string = '/job-expenses/add-expense'
+  static FetchAllJobExpenses: string = '/job-expenses/all-expenses'
+  static FetchJobExpense: string = '/job-expenses/expense'
+  static EditJobExpense: string = '/job-expenses/edit-expense'
+  static DeleteJobExpense: string = '/job-expenses/delete-expense'
+
+
+
+
+
+
+
+
+
+
   
 
-
-
-    //#region  endpoint ---------------------------------
-
-  static FetchAllTailorJobs: string = '/tailoring/all-tailor-jobs';
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
 
 
 
@@ -137,4 +186,28 @@ export class ApiRoutes {
     static FetchTailorJob: string = '/tailoring/tailor-job'
     static EditTailorJob: string = '/tailoring/update-tailor-job'
     static SendJobToClientManager: string = 'tailoring/send-to-client-manager'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //#region Notifications endpoint ---------------------------------
+  static FetchAllNotifications: string = '/notifications/all-notifications';
+  static ReadNotification: string = '/notifications/read-notification';
+  static ReadAllNotifications: string = '/notifications/read-all-notifications';
+
+
+
+
+
+
 }

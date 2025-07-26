@@ -9,6 +9,7 @@ import { FiPackage, FiHash, FiSend } from "react-icons/fi"
 import { IoSparklesOutline } from "react-icons/io5"
 import Spinner from "@/components/Spinner"
 import { useParams } from "next/navigation"
+import { fetchAllInventories } from "@/app/api/apiClient"
 
 interface InventoryItem {
   id: string
@@ -52,20 +53,12 @@ export default function InventoryPage() {
   useEffect(() => {
     async function fetchInventory() {
       try {
-        const session = await getSession()
-        const accessToken = session?.user?.token
-        if (!accessToken) {
-          console.error("Access token not found. You may need to sign in.")
-          setDataLoading(false)
-          return
-        }
 
-        const res = await fetch("https://hildam.insightpublicis.com/api/inventory", {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        })
-        const data: InventoryResponse = await res.json()
+        const data: any = await fetchAllInventories()
 
-        const items: InventoryItem[] = data.data.map((item) => ({
+        console.log("Fetched Inventory Data:", data)
+
+        const items: InventoryItem[] = data.map((item: any) => ({
           ...item,
           item_quantity: Number.parseInt(item.item_quantity, 10),
         }))

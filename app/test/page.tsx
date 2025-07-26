@@ -1,90 +1,124 @@
 "use client"
 
-// pages/login.tsx
-import { useState, FormEvent } from 'react';
+import { useSession, signIn, signOut } from "next-auth/react"
+import { useState } from "react"
+import Link from "next/link"
 
-interface LoginResponse {
-  token?: string;
-  message?: string;
-  [key: string]: any;
-}
+export default function TestLoginPage() {
+  const { data: session, status } = useSession()
+  const [testCredentials, setTestCredentials] = useState({
+    email: "admin@gmail.com",
+    password: "Password123!",
+  })
 
-export default function LoginPage() {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string>('');
-  const [message, setMessage] = useState<string>('');
+  const handleTestLogin = async () => {
+    const result = await signIn("credentials", {
+      redirect: false,
+      email: testCredentials.email,
+      password: testCredentials.password,
+    })
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setMessage('');
-
-    try {
-      const res = await fetch('https://api.hildamcouture.com/api/v1/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      console.log('res from server', res)
-
-      const data: LoginResponse = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
-      setMessage('Login successful!');
-      console.log('Response:', data);
-      // Optional: Save token to localStorage/cookies here
-    } catch (err: any) {
-      setError(err.message);
+    if (result?.error) {
+      alert("Login failed: " + result.error)
+    } else {
+      alert("Login successful!")
     }
-  };
+  }
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false })
+    alert("Logged out successfully!")
+  }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow-md w-full max-w-sm"
-      >
-        <h2 className="text-2xl font-bold mb-4">Login</h2>
+    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-2xl font-bold text-center mb-6">Login Test Page</h1>
 
-        {error && <p className="text-red-500 mb-2">{error}</p>}
-        {message && <p className="text-green-500 mb-2">{message}</p>}
+        {/* Session Status */}
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <h2 className="text-lg font-semibold mb-2">Session Status</h2>
+          <p className="text-sm">
+            <strong>Status:</strong> {status}
+          </p>
+          {session && (
+            <div className="mt-2 text-sm">
+              <p>
+                <strong>Name:</strong> {session.user?.name}
+              </p>
+              <p>
+                <strong>Email:</strong> {session.user?.email}
+              </p>
+              <p>
+                <strong>Role:</strong> {(session.user as any)?.role}
+              </p>
+            </div>
+          )}
+        </div>
 
-        <label className="block mb-2">
-          <span className="text-gray-700">Email</span>
-          <input
-            type="email"
-            className="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </label>
+        {/* Test Credentials */}
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold mb-2">Test Credentials</h2>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <input
+                type="email"
+                value={testCredentials.email}
+                onChange={(e) => setTestCredentials({ ...testCredentials, email: e.target.value })}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <input
+                type="password"
+                value={testCredentials.password}
+                onChange={(e) => setTestCredentials({ ...testCredentials, password: e.target.value })}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+              />
+            </div>
+          </div>
+        </div>
 
-        <label className="block mb-4">
-          <span className="text-gray-700">Password</span>
-          <input
-            type="password"
-            className="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          {!session ? (
+            <>
+              <button
+                onClick={handleTestLogin}
+                className="w-full bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+              >
+                Test Login with Credentials Above
+              </button>
+              <Link
+                href="/login"
+                className="block w-full bg-blue-500 text-white py-2 px-4 rounded-md text-center hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Go to Login Page
+              </Link>
+            </>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            >
+              Logout
+            </button>
+          )}
+        </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-        >
-          Login
-        </button>
-      </form>
+        {/* API Documentation Reference */}
+        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+          <h3 className="text-sm font-semibold text-blue-800 mb-2">API Documentation Notes:</h3>
+          <ul className="text-xs text-blue-700 space-y-1">
+            <li>• Endpoint: POST /api/v1/auth/login</li>
+            <li>• Token expires after 8 hours</li>
+            <li>• Password must be 8+ chars with letters, numbers, and special chars</li>
+            <li>• Returns: token, name, email, role</li>
+          </ul>
+        </div>
+      </div>
     </div>
-  );
+  )
 }

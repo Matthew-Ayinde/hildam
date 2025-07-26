@@ -30,12 +30,12 @@ export const authOptions = {
             throw new Error(response.message || "Login failed")
           }
 
-          // Calculate expiration time (23 hours from now)
-          const expirationTime = Math.floor(Date.now() / 1000) + 23 * 60 * 60
+          // Calculate expiration time (8 hours from now as per API docs)
+          const expirationTime = Math.floor(Date.now() / 1000) + 8 * 60 * 60
 
           // Return user details from the API response
           return {
-            id: response.data.email, // Using email as ID since no user_id is provided
+            id: response.data.email, // Using email as ID
             name: response.data.name,
             email: response.data.email,
             role: response.data.role,
