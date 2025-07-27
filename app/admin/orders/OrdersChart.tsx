@@ -104,10 +104,11 @@ const OrdersAnalyticsChart = () => {
       if (timeRange === "weekly" && dateRange?.from && dateRange?.to) {
         const startDate = format(dateRange.from, "yyyy-MM-dd")
         const endDate = format(dateRange.to, "yyyy-MM-dd")
-        url = `https://hildam.insightpublicis.com/api/chart-information?type=weekly&start_date=${startDate}&end_date=${endDate}`
+        url = `https://api.hildamcouture.com/api/v1/orders/chart-information?type=weekly&start_date=${startDate}&end_date=${endDate}`
       } else if (timeRange === "monthly") {
         const month = format(selectedMonth, "yyyy-MM")
-        url = `https://hildam.insightpublicis.com/api/chart-information?type=monthly&month=${month}`
+        url = `https://api.hildamcouture.com/api/v1/orders/chart-information?type=monthly&month=${month}`
+        console.log("Fetching monthly data for:", month)
       }
 
       const response = await fetch(url, {

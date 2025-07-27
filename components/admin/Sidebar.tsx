@@ -1,31 +1,36 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { FaUsers, FaShoppingCart, FaBoxes, FaUser } from "react-icons/fa";
-import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
-import Image from "next/image";
-import { MdDashboard } from "react-icons/md";
-import { usePathname } from "next/navigation";
-import { HiMenuAlt3, HiX } from "react-icons/hi";
-import { IoNotifications } from "react-icons/io5";
-import { MdOutlinePayment } from "react-icons/md";
-import { MdOutlineInventory2 } from "react-icons/md";
-import LogoutButton from "../LogoutMobile";
-import { useRouter } from "next/navigation";
-import { AiOutlineCheck } from "react-icons/ai";
-import { FiBell } from "react-icons/fi";
-import { Calendar } from "lucide-react";
-import { FaMoneyBillWave } from 'react-icons/fa'; // Font Awesome money icon
-import { MdOutlineDashboard } from "react-icons/md";
+import { useState, useEffect, useRef } from "react"
+import Link from "next/link"
+import { FaUsers, FaShoppingCart, FaUser, FaMoneyBillWave } from "react-icons/fa"
+import { IoIosArrowDown, IoMdNotificationsOutline } from "react-icons/io"
+import { IoCheckmarkDoneOutline, IoNotificationsOutline } from "react-icons/io5"
+import Image from "next/image"
+import { MdDashboard, MdOutlinePayment, MdOutlineInventory2 } from "react-icons/md"
+import { usePathname } from "next/navigation"
+import { HiMenuAlt3, HiX, HiOutlineBell, HiOutlineClock } from "react-icons/hi"
+import LogoutButton from "../LogoutMobile"
+import { useRouter } from "next/navigation"
+import { Calendar } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { FiMessageSquare } from "react-icons/fi"
+import { HiOutlineInboxIn } from "react-icons/hi"
+import { IoMailOutline } from "react-icons/io5"
 
 type Notification = {
-  id: string;
-  message: string;
-  link: string;
-  read: string;
-  created_at: string;
-};
+  id: string
+  message: string
+  link: string
+  read: string
+  created_at: string
+}
+
+interface SidebarProps {
+  notifications?: Notification[]
+  unreadCount?: number
+  onMarkAsRead?: (id: string, message: string, link: string) => void
+  onMarkAllAsRead?: () => void
+}
 
 const sidebarItems = [
   {
@@ -34,8 +39,8 @@ const sidebarItems = [
     icon: <FaUsers />,
     prefix: "/admin/customers",
     links: [
-      { name: "List", href: "/admin/customers" },
-      { name: "Create", href: "/admin/customers/create" },
+      { name: "All Customers", href: "/admin/customers" },
+      { name: "Add Customer", href: "/admin/customers/create" },
     ],
   },
   {
@@ -44,28 +49,17 @@ const sidebarItems = [
     icon: <FaShoppingCart />,
     prefix: "/admin/orders",
     links: [
-      { name: "List", href: "/admin/orders" },
+      { name: "All Orders", href: "/admin/orders" },
       { name: "Create Order", href: "/admin/orders/create" },
     ],
   },
-  // {
-  //   id: 3,
-  //   text: "Job Lists",
-  //   icon: <FaBoxes />,
-  //   prefix: "/admin/joblists/",
-  //   links: [
-  //     // { name: "Projects", href: "/admin/joblists/projects" },
-  //     { name: "Tailor Jobs", href: "/admin/joblists/tailorjoblists" },
-  //   ],
-  // },
   {
     id: 4,
     text: "Payments",
     icon: <MdOutlinePayment />,
     prefix: "/admin/payments",
     links: [
-      { name: "List", href: "/admin/payments" },
-      // { name: "Create", href: "/admin/payments/create" },
+      { name: "All Payments", href: "/admin/payments" }
     ],
   },
   {
@@ -74,9 +68,9 @@ const sidebarItems = [
     icon: <MdOutlineInventory2 />,
     prefix: "/admin/inventory",
     links: [
-      { name: "List", href: "/admin/inventory" },
-      { name: "Create", href: "/admin/inventory/create" },
-      { name: "View Requests", href: "/admin/inventory/requests" },
+      { name: "All Items", href: "/admin/inventory" },
+      { name: "Add Item", href: "/admin/inventory/create" },
+      { name: "Requests", href: "/admin/inventory/requests" }
     ],
   },
   {
@@ -85,7 +79,7 @@ const sidebarItems = [
     icon: <Calendar className="w-4 h-4" />,
     prefix: "/admin/calendar",
     links: [
-      { name: "Fitting Dates", href: "/admin/calendar" },
+      { name: "Schedule", href: "/admin/calendar" },
     ],
   },
   {
@@ -95,7 +89,7 @@ const sidebarItems = [
     prefix: "/admin/expense",
     links: [
       { name: "Job Expenses", href: "/admin/expenses" },
-      { name: "Operational Expenses", href: "/admin/expenses/daily-expenses" },
+      { name: "Daily Expenses", href: "/admin/expenses/daily-expenses" },
     ],
   },
   {
@@ -104,375 +98,413 @@ const sidebarItems = [
     icon: <FaUser />,
     prefix: "/admin/users",
     links: [
-      { name: "List", href: "/admin/users" },
-      { name: "Create", href: "/admin/users/create" },
+      { name: "All Users", href: "/admin/users" },
+      { name: "Add User", href: "/admin/users/create" },
     ],
   },
-];
+]
 
+const Sidebar = ({ notifications = [], unreadCount = 0, onMarkAsRead, onMarkAllAsRead }: SidebarProps) => {
+  const router = useRouter()
+  const pathname = usePathname()
+  const [openMenus, setOpenMenus] = useState<{ [key: number]: boolean }>({})
+  const [isSidebarOpen, setSidebarOpen] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement | null>(null)
 
-
-const Sidebar = () => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-
-  const router = useRouter();
-  const pathname = usePathname();
-  const [error, setError] = useState<string | null>(null);
-  const [openMenus, setOpenMenus] = useState<{ [key: number]: boolean }>({});
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  // Create a ref for the dropdown
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
-
-  const isActive = (prefix: string) => pathname.startsWith(prefix);
+  const isActive = (prefix: string) => pathname.startsWith(prefix)
 
   const toggleMenu = (id: number) => {
     setOpenMenus((prev) => ({
       ...prev,
       [id]: !prev[id],
-    }));
-  };
+    }))
+  }
 
   const toggleSidebar = () => {
-    setSidebarOpen((prev) => !prev);
-  };
+    setSidebarOpen((prev) => !prev)
+  }
 
   const closeSidebar = () => {
-    setSidebarOpen(false);
-  };
+    setSidebarOpen(false)
+  }
 
-  const fetchNotifications = async () => {
-    try {
-      setError(null);
-      const token = sessionStorage.getItem("access_token");
-      if (!token) throw new Error("No access token found");
-
-      const response = await fetch(`${baseUrl}/allnotifications`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch notifications");
-      }
-
-      const data = await response.json();
-      if (data.status === "success") {
-        setNotifications(data.data);
-        setUnreadCount(
-          data.data.filter((notif: any) => notif.read === "0").length
-        );
-      } else {
-        throw new Error("Cannot fetch notifications");
-      }
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-      setError("Cannot fetch notifications");
+  const handleMarkAsRead = (id: string, message: string, link: string) => {
+    if (onMarkAsRead) {
+      onMarkAsRead(id, message, link)
     }
-  };
+    setDropdownOpen(false)
+    closeSidebar()
+  }
 
+  const handleMarkAllAsRead = () => {
+    if (onMarkAllAsRead) {
+      onMarkAllAsRead()
+    }
+    setDropdownOpen(false)
+  }
+
+  const formatTimeAgo = (dateString: string) => {
+    const now = new Date()
+    const date = new Date(dateString)
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
+
+    if (diffInMinutes < 1) return "Just now"
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`
+    return `${Math.floor(diffInMinutes / 1440)}d ago`
+  }
+
+  const getNotificationIcon = (message: string) => {
+    if (message.toLowerCase().includes("order")) {
+      return <HiOutlineInboxIn className="text-blue-400" size={16} />
+    } else if (message.toLowerCase().includes("payment")) {
+      return <IoMailOutline className="text-green-400" size={16} />
+    } else if (message.toLowerCase().includes("inventory")) {
+      return <HiOutlineClock className="text-purple-400" size={16} />
+    } else {
+      return <FiMessageSquare className="text-orange-400" size={16} />
+    }
+  }
+
+  // Auto-expand active menu on large screens
   useEffect(() => {
-    fetchNotifications();
-  }, []);
-
-  const markAsRead = async (id: string, message: string, link: string) => {
-    try {
-      const token = sessionStorage.getItem("access_token");
-      if (!token) throw new Error("No access token found");
-
-      await fetch(`${baseUrl}/readnotification/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ message, link }),
-      });
-
-      setNotifications((prev) =>
-        prev.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif))
-      );
-      setUnreadCount((prev) => prev - 1);
-      setDropdownOpen(false);
-
-      const linking_id = link.split("/").pop();
-      if (link.includes("orderslist")) {
-        router.push("/admin/orders/" + linking_id);
+    sidebarItems.forEach((item) => {
+      if (isActive(item.prefix)) {
+        setOpenMenus((prev) => ({ ...prev, [item.id]: true }))
       }
-      if (link.includes("projectlist")) {
-        router.push("/admin/joblists/projects/" + linking_id);
-      }
-      if (link.includes("tailorjoblist")) {
-        router.push("/admin/joblists/tailorjoblists/" + linking_id);
-      }
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-    }
-  };
+    })
+  }, [pathname])
 
-  const markAllAsRead = async () => {
-    try {
-      const token = sessionStorage.getItem("access_token");
-      if (!token) throw new Error("No access token found");
-
-      await fetch(`${baseUrl}/readallnotification`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // Immediately clear notifications from the state
-      setNotifications([]);
-      setUnreadCount(0); // Reset unread count
-    } catch (error) {
-      console.error("Error marking all notifications as read:", error);
-    }
-
-    setDropdownOpen(false);
-  };
-
-  // Effect to handle clicks outside the dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setDropdownOpen(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false)
       }
-    };
+    }
 
-    // Add event listener
-    document.addEventListener("mousedown", handleClickOutside);
-
-    // Cleanup event listener on component unmount
+    document.addEventListener("mousedown", handleClickOutside)
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [dropdownRef]);
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [dropdownRef])
 
   return (
     <>
-      <div className="lg:hidden fixed top-0 w-full bg-[#262d34] text-white flex justify-between items-center px-4 py-3 z-50 shadow-md">
-        <div className="flex items-center">
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            width={40}
-            height={40}
-            className="w-10 h-10"
-          />
-          <div className="ml-2 text-white font-bold text-lg">
-            HildaM Couture
+      {/* Mobile Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="lg:hidden fixed top-0 w-full bg-gradient-to-r from-[#262d34] to-[#1a1f24] text-white flex justify-between items-center px-4 py-4 z-50 shadow-lg backdrop-blur-sm"
+      >
+        <motion.div className="flex items-center" whileHover={{ scale: 1.02 }}>
+          <div className="w-10 h-10 rounded-lg overflow-hidden bg-orange-500 p-1">
+            <Image src="/logo.png" alt="Logo" width={40} height={40} className="w-full h-full object-contain" />
           </div>
-        </div>
-        <div className="flex flex-row space-x-1 items-center">
-          <div
-            className="relative w-12 h-12 flex items-center justify-center cursor-pointer"
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            ref={dropdownRef}
-          >
-            <IoNotifications size={20} />
-            {unreadCount > 0 && (
-              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
-                {unreadCount}
-              </span>
-            )}
-            {dropdownOpen && (
-              <div className="absolute top-10 -right-10 w-80 bg-white rounded-2xl shadow-xl z-50 border border-gray-200 p-3 mt-2">
-                <div className="max-h-72 overflow-y-auto">
+          <div className="ml-3">
+            <div className="text-white font-bold text-lg">HildaM Couture</div>
+            <div className="text-orange-300 text-xs font-medium">Admin Panel</div>
+          </div>
+        </motion.div>
+
+        <div className="flex items-center gap-3">
+          {/* Mobile Notifications */}
+          <div className="relative" ref={dropdownRef}>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="relative p-2.5 text-white hover:text-orange-300 hover:bg-white/10 rounded-xl transition-all duration-200"
+            >
+              <IoNotificationsOutline size={22} />
+              {unreadCount > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center font-bold shadow-lg"
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </motion.span>
+              )}
+            </motion.button>
+
+            {/* Mobile Notifications Dropdown */}
+            <AnimatePresence>
+              {dropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute top-full right-0 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 mt-3 z-50 overflow-hidden"
+                >
                   {/* Header */}
-                  <div className="p-4 border-b border-gray-200 font-semibold text-gray-700 flex justify-between items-center">
-                    <div className="flex items-center gap-2 text-lg">
-                      <FiBell className="text-orange-500 text-xl" />
-                      <span>Notifications</span>
+                  <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-4 py-4 text-white">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <HiOutlineBell size={20} />
+                        <h3 className="font-semibold">Notifications</h3>
+                      </div>
+                      {unreadCount > 0 && (
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={handleMarkAllAsRead}
+                          className="text-xs bg-white/20 hover:bg-white/30 px-2.5 py-1.5 rounded-full font-medium transition-colors"
+                        >
+                          <span className="flex items-center gap-1">
+                            <IoCheckmarkDoneOutline size={12} />
+                            Mark all
+                          </span>
+                        </motion.button>
+                      )}
                     </div>
-                    {unreadCount > 0 && (
-                      <button
-                        onClick={() => markAllAsRead()}
-                        className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-all"
-                      >
-                        <AiOutlineCheck className="text-lg" />
-                        Mark All
-                      </button>
-                    )}
+                    <p className="text-sm text-orange-50 mt-1">
+                      {unreadCount > 0 ? `${unreadCount} unread` : "All caught up!"}
+                    </p>
                   </div>
 
-                  {/* No notifications message */}
-                  {unreadCount === 0 && (
-                    <div className="p-4 text-gray-600 text-center">
-                      No unread notifications
-                    </div>
-                  )}
-
-                  {/* Notification Items - Only unread notifications */}
-                  {notifications
-                    .filter((notif) => notif.read === "0")
-                    .slice(0, 4)
-                    .map((notification) => (
-                      <div
-                        key={notification.id}
-                        className="p-3 text-sm flex justify-between items-center hover:bg-gray-100 cursor-pointer text-orange-600 border-b border-gray-200 rounded-lg transition-all duration-200"
-                        onClick={() =>
-                          markAsRead(
-                            notification.id,
-                            notification.message,
-                            notification.link
-                          )
-                        }
-                      >
-                        <span className="max-w-[90%] text-sm">
-                          {notification.message}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(notification.created_at).toLocaleString()}
-                        </span>
+                  {/* Notifications List */}
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center">
+                        <div className="bg-orange-50 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                          <HiOutlineBell className="text-orange-400" size={24} />
+                        </div>
+                        <p className="text-gray-600 font-medium text-sm">No notifications</p>
+                        <p className="text-gray-400 text-xs mt-1">You're all caught up!</p>
                       </div>
-                    ))}
+                    ) : (
+                      notifications.slice(0, 5).map((notification) => (
+                        <motion.div
+                          key={notification.id}
+                          whileHover={{ backgroundColor: "#f9fafb" }}
+                          onClick={() => handleMarkAsRead(notification.id, notification.message, notification.link)}
+                          className={`flex items-start gap-3 p-4 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${
+                            notification.read === "0" ? "bg-orange-50" : ""
+                          }`}
+                        >
+                          <div
+                            className={`mt-1 p-2 rounded-full ${notification.read === "0" ? "bg-orange-100" : "bg-gray-100"}`}
+                          >
+                            {getNotificationIcon(notification.message)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p
+                              className={`text-sm leading-relaxed ${notification.read === "0" ? "font-medium text-gray-900" : "text-gray-700"}`}
+                            >
+                              {notification.message}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="flex items-center gap-1 text-xs text-gray-400">
+                                <HiOutlineClock size={10} />
+                                {formatTimeAgo(notification.created_at)}
+                              </span>
+                            </div>
+                          </div>
+                          {notification.read === "0" && (
+                            <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                          )}
+                        </motion.div>
+                      ))
+                    )}
 
-                  {/* See More Button */}
-                  {notifications.filter((notif) => notif.read === "0").length >
-                    4 && (
-                    <div className="flex justify-center p-3">
-                      <Link
-                        href="/notifications"
-                        className="text-white text-sm font-medium px-6 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 transition-all duration-300"
-                      >
-                        See More
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+                    {notifications.length > 5 && (
+                      <div className="p-3 border-t border-gray-100 bg-gray-50">
+                        <Link href="/admin/notifications">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-orange-600 hover:text-orange-700 font-semibold shadow-sm hover:shadow-md transition-all"
+                            onClick={() => setDropdownOpen(false)}
+                          >
+                            See all notifications
+                          </motion.button>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          <button
+
+          {/* Menu Toggle */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={toggleSidebar}
-            className="text-3xl text-white focus:outline-none"
+            className="p-2.5 text-white hover:text-orange-300 hover:bg-white/10 rounded-xl transition-all duration-200"
           >
-            {isSidebarOpen ? <HiX /> : <HiMenuAlt3 />}
-          </button>
+            {isSidebarOpen ? <HiX size={22} /> : <HiMenuAlt3 size={22} />}
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity duration-300"
-          onClick={closeSidebar}
-        />
-      )}
-
-      <div
-        className={`fixed top-0 left-0 h-full bg-[#262d34] text-[#A5A8AB] shadow-lg overflow-y-auto z-50 transition-transform duration-300 lg:w-[250px] ${
-          isSidebarOpen
-            ? "translate-x-0 w-3/4"
-            : "-translate-x-full lg:translate-x-0"
-        }`}
-      >
-        <div className="mx-9 mt-10">
-          <div className="flex items-center">
-            <div className="w-10 h-10">
-              <Image
-                src="/logo.png"
-                alt="Logo"
-                width={300}
-                height={300}
-                className="w-full h-full"
-              />
-            </div>
-            <div className="ml-2 text-white font-bold text-lg">
-              HildaM Couture
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-10 mb-0 text-sm mx-9 text-gray-400">GENERAL</div>
-
-        <div className="relative mt-5 mx-4">
-          <div
-            className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
-              pathname === "/admin" ? "opacity-100" : "opacity-0"
-            }`}
-          ></div>
-          <Link
-            href="/admin"
-            className={`flex items-center space-x-3 px-4 py-2 text-base font-medium transition-all duration-300 ${
-              pathname === "/admin" ? "text-[#ff6c2f]" : "text-[#A5A8AB]"
-            }`}
+      {/* Overlay */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
             onClick={closeSidebar}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed top-0 left-0 h-full bg-gradient-to-b from-[#262d34] to-[#1a1f24] text-[#A5A8AB] shadow-2xl overflow-y-auto z-50 transition-all duration-300 w-80 lg:w-[280px] ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
+      >
+        {/* Logo Section */}
+        <motion.div
+          className="mx-6 mt-8 mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="flex items-center">
+            <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-orange-500 to-orange-600 p-2 shadow-lg">
+              <Image src="/logo.png" alt="Logo" width={48} height={48} className="w-full h-full object-contain" />
+            </div>
+            <div className="ml-3">
+              <div className="text-white font-bold text-xl">HildaM Couture</div>
+              <div className="text-orange-300 text-sm font-medium">Admin Panel</div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* General Section */}
+        <div className="mb-6 px-6">
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">General</div>
+
+          {/* Dashboard Link */}
+          <motion.div
+            className="relative mb-2"
+            whileHover={{ x: 4 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
           >
-            <MdDashboard />
-            <span>Dashboard</span>
-          </Link>
+            <div
+              className={`absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-orange-500 to-orange-600 rounded-r-full transition-opacity duration-300 ${
+                pathname === "/admin" ? "opacity-100" : "opacity-0"
+              }`}
+            ></div>
+            <Link
+              href="/admin"
+              className={`flex items-center space-x-3 px-4 py-3 text-base font-medium rounded-xl transition-all duration-300 ${
+                pathname === "/admin"
+                  ? "text-orange-400 bg-gradient-to-r from-orange-500/10 to-orange-600/5 shadow-lg"
+                  : "text-[#A5A8AB] hover:text-orange-400 hover:bg-white/5"
+              }`}
+              onClick={closeSidebar}
+            >
+              <MdDashboard className={`text-lg ${pathname === "/admin" ? "text-orange-400" : ""}`} />
+              <span>Dashboard</span>
+            </Link>
+          </motion.div>
         </div>
 
-        <ul className="space-y-1 mt-3 mb-10 px-4">
-          {sidebarItems.map((item) => {
-            const isMenuOpen = openMenus[item.id] || isActive(item.prefix);
+        {/* Navigation Items */}
+        <div className="px-4 pb-20">
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 px-2">Management</div>
 
-            return (
-              <li key={item.id} className="relative">
-                <div className="relative">
-                  <div
-                    className={`absolute left-0 top-0 h-full w-[2px] bg-[#ff6c2f] transition-opacity duration-300 ${
-                      isActive(item.prefix) ? "opacity-100" : "opacity-0"
-                    }`}
-                  ></div>
-                  <button
-                    onClick={() => toggleMenu(item.id)}
-                    className={`flex w-full items-center justify-between py-2 px-4 text-left text-base font-medium transition-all duration-300 ${
-                      isActive(item.prefix)
-                        ? "text-[#ff6c2f]"
-                        : "text-[#A5A8AB]"
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      {item.icon}
-                      <span>{item.text}</span>
-                    </div>
-                    {isMenuOpen ? <IoIosArrowUp /> : <IoIosArrowDown />}
-                  </button>
-                </div>
-
-                <ul
-                  className={`ml-8 mt-2 space-y-2 overflow-hidden transition-all duration-500 ${
-                    isMenuOpen ? "max-h-40" : "max-h-0"
-                  }`}
+          <ul className="space-y-2">
+            {sidebarItems.map((item, index) => {
+              const isMenuOpen = openMenus[item.id] || isActive(item.prefix)
+              return (
+                <motion.li
+                  key={item.id}
+                  className="relative"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 + index * 0.05 }}
                 >
-                  {item.links.map((subItem) => (
-                    <li key={subItem.name}>
-                      <Link
-                        href={subItem.href}
-                        className={`block px-4 py-2 text-base transition-all duration-300 ${
-                          pathname === subItem.href
-                            ? "text-[#ff6c2f] bg-transparent"
-                            : "text-[#A5A8AB] hover:text-[#ff6c2f]"
-                        }`}
-                        onClick={closeSidebar}
-                      >
-                        {subItem.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            );
-          })}
+                  <div className="relative">
+                    <div
+                      className={`absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-orange-500 to-orange-600 rounded-r-full transition-opacity duration-300 ${
+                        isActive(item.prefix) ? "opacity-100" : "opacity-0"
+                      }`}
+                    ></div>
+                    <motion.button
+                      whileHover={{ x: 4 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => toggleMenu(item.id)}
+                      className={`flex w-full items-center justify-between py-3 px-4 text-left text-base font-medium rounded-xl transition-all duration-300 ${
+                        isActive(item.prefix)
+                          ? "text-orange-400 bg-gradient-to-r from-orange-500/10 to-orange-600/5 shadow-lg"
+                          : "text-[#A5A8AB] hover:text-orange-400 hover:bg-white/5"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span className={`text-lg ${isActive(item.prefix) ? "text-orange-400" : ""}`}>{item.icon}</span>
+                        <span>{item.text}</span>
+                      </div>
+                      <motion.div animate={{ rotate: isMenuOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                        <IoIosArrowDown className="text-sm" />
+                      </motion.div>
+                    </motion.button>
+                  </div>
 
-          <div className="relative lg:hidden flex justify-center">
-            <LogoutButton />
-          </div>
-        </ul>
+                  <AnimatePresence>
+                    {isMenuOpen && (
+                      <motion.ul
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="ml-6 mt-2 space-y-1 overflow-hidden border-l border-gray-600/30 pl-4"
+                      >
+                        {item.links.map((subItem) => (
+                          <motion.li
+                            key={subItem.name}
+                            whileHover={{ x: 4 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                          >
+                            <Link
+                              href={subItem.href}
+                              className={`block px-3 py-2.5 text-sm rounded-lg transition-all duration-300 ${
+                                pathname === subItem.href
+                                  ? "text-orange-400 bg-gradient-to-r from-orange-500/10 to-orange-600/5 font-medium shadow-md"
+                                  : "text-[#A5A8AB] hover:text-orange-400 hover:bg-white/5"
+                              }`}
+                              onClick={closeSidebar}
+                            >
+                              <span className="flex items-center">
+                                <span
+                                  className={`w-2 h-2 rounded-full mr-3 ${pathname === subItem.href ? "bg-orange-400" : "bg-gray-500"}`}
+                                ></span>
+                                {subItem.name}
+                              </span>
+                            </Link>
+                          </motion.li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence>
+                </motion.li>
+              )
+            })}
+          </ul>
+
+          {/* Mobile Logout */}
+          <motion.div
+            className="lg:hidden mt-8 px-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <div className="border-t border-gray-600 pt-6">
+              <LogoutButton />
+            </div>
+          </motion.div>
+        </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

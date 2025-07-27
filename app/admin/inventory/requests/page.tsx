@@ -15,6 +15,7 @@ import {
 import { TiDelete } from "react-icons/ti"
 import { HiOutlineExclamationTriangle } from "react-icons/hi2"
 import { getSession } from "next-auth/react"
+import { acceptStoreRequest, fetchAllStoreRequests, rejectStoreRequest } from "@/app/api/apiClient"
 
 // Extend the NextAuth session type
 declare module "next-auth" {
@@ -70,28 +71,18 @@ export default function ModernInventoryTable() {
           throw new Error("No token found, please log in.")
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/allstorerequests`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        })
+        const result = await fetchAllStoreRequests()
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch data")
-        }
 
-        const result = await response.json()
-        if (result.data && Array.isArray(result.data)) {
-          const filteredData: Customer[] = result.data.map((item: any) => ({
+        if (result && Array.isArray(result)) {
+          const filteredData: Customer[] = result.map((item: any) => ({
             id: item.id,
             itemName: item.items_name,
             color: item.requested_color || "N/A",
-            requestedQty: Number(item.requested_quantities),
+            requestedQty: Number(item.items_quantities),
             headOfTailoring: item.requested_by_name,
             status: item.status,
-            orderId: item.order_id_for_the_job,
+            orderId: item.order_id,
             date: new Date(item.created_at).toLocaleDateString("en-US", {
               year: "numeric",
               month: "2-digit",
@@ -115,6 +106,7 @@ export default function ModernInventoryTable() {
   }, [])
 
   const handleReject = async (id: string) => {
+    const orderId = id
     if (!selectedCustomerId) return
 
     try {
@@ -124,21 +116,7 @@ export default function ModernInventoryTable() {
         throw new Error("Authentication token not found")
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/rejectrequestfororderid/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-
-          body: JSON.stringify({
-            "feedback": "Request cannot be granted",
-          }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to reject request")
-      }
+      const response = await rejectStoreRequest(orderId)
 
       setData((prevData) => prevData.filter((customer) => customer.id !== selectedCustomerId))
 
@@ -154,24 +132,11 @@ export default function ModernInventoryTable() {
   }
 
   const handleApprove = async (id: string) => {
+    const orderId = id
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      if (!accessToken) {
-        throw new Error("Authentication token not found")
-      }
+      const response = await acceptStoreRequest(orderId)
+      console.log('ess', response)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/acceptrequestfororderid/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to approve request")
-      }
 
       setData((prevData) =>
         prevData.map((customer) => (customer.id === id ? { ...customer, status: "approved" } : customer)),

@@ -137,6 +137,11 @@ export class ApiRoutes {
 
       //#region Daily Expense endpoint ---------------------------------
     static CreateBudget: string = '/daily-expenses/create-budget';
+    static GetAllBudgets: string = '/daily-expenses/all-budgets';
+  static GetBudget: string = '/daily-expenses/budget';
+  static CreateOperationalExpense = "/daily-expenses/create-expense"
+  static GetBudgetBreakdown: string = '/daily-expenses/budget-breakdown?budget_id';
+static DeleteExpense: string = '/daily-expenses/delete-expense';
 
 
 
@@ -148,6 +153,21 @@ export class ApiRoutes {
 
 
 
+
+
+
+
+
+
+
+
+      //#region Store Requests endpoint ---------------------------------
+
+  static FetchAllStoreRequests: string = '/store-requests/all-store-requests';
+  static FetchStoreRequest: string = '/store-requests/store-request';
+  static AcceptStoreRequest: string = '/store-requests/accept-store-requests-by-order';
+  static RejectStoreRequest: string = '/store-requests/reject-store-requests-by-order';
+  static DeleteStoreRequest: string = '/store-requests/delete-store-request';
 
 
 
@@ -186,6 +206,7 @@ export class ApiRoutes {
     static FetchTailorJob: string = '/tailoring/tailor-job'
     static EditTailorJob: string = '/tailoring/update-tailor-job'
     static SendJobToClientManager: string = 'tailoring/send-to-client-manager'
+    static RequestInventory: string = '/tailoring/request-inventory'
 
 
 
@@ -209,5 +230,21 @@ export class ApiRoutes {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //#region Budget endpoint ---------------------------------
+  
 
 }

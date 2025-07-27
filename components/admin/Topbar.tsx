@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation"
 import { getSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-
 import { IoNotificationsOutline, IoChevronDownOutline, IoCheckmarkDoneOutline, IoMailOutline } from "react-icons/io5"
 import { HiOutlineBell, HiOutlineInboxIn, HiOutlineUserCircle, HiOutlineClock } from "react-icons/hi"
 import { FiMessageSquare } from "react-icons/fi"
@@ -22,9 +21,12 @@ type Notification = {
   action_type: string
 }
 
-const Topbar = () => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+interface TopbarProps {
+  onNotificationUpdate?: (notifications: Notification[], unreadCount: number) => void
+}
 
+const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
   const [userName, setUserName] = useState("CEO")
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
@@ -36,27 +38,20 @@ const Topbar = () => {
   const router = useRouter()
 
   useEffect(() => {
-    const fetchNotifications = async () => {
+    const fetchUserData = async () => {
       const session = await getSession()
       const token = session?.user?.token
+      const name = session?.user?.name || "CEO"
+
+
       if (!token) {
         throw new Error("No token found, please log in.")
       }
-      if (token) {
-        try {
-          const base64Url = token.split(".")[1]
-          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
-          const payload = JSON.parse(atob(base64))
-          if (payload?.name) {
-            setUserName(payload.name)
-          }
-        } catch (error) {
-          console.error("Error decoding token:", error)
-        }
-      }
+      
+      setUserName(name.charAt(0).toUpperCase() + name.slice(1))
+      
     }
-
-    fetchNotifications()
+    fetchUserData()
   }, [])
 
   const fetchNotifications = async () => {
@@ -64,19 +59,23 @@ const Topbar = () => {
       setError(null)
       const session = await getSession()
       const token = session?.user?.token
+
       if (!token) {
         throw new Error("No token found, please log in.")
       }
 
       const response = await fetchAllNotifications()
 
-      console.log("Notifications response:", response)
+      // Limit to latest 30 notifications
+      const latestNotifications = response.slice(0, 30)
+      setNotifications(latestNotifications)
+      const unread = latestNotifications.filter((notif: any) => notif.read === "0").length
+      setUnreadCount(unread)
 
-        // Limit to latest 30 notifications
-        const latestNotifications = response.slice(0, 30)
-        setNotifications(latestNotifications)
-        setUnreadCount(latestNotifications.filter((notif: any) => notif.read === "0").length)
-      
+      // Notify parent component (sidebar) about notification updates
+      if (onNotificationUpdate) {
+        onNotificationUpdate(latestNotifications, unread)
+      }
     } catch (error) {
       console.error("Error fetching notifications:", error)
       setError("Cannot fetch notifications")
@@ -85,11 +84,9 @@ const Topbar = () => {
 
   useEffect(() => {
     fetchNotifications()
-
     const intervalId = setInterval(() => {
       fetchNotifications()
     }, 2000)
-
     return () => clearInterval(intervalId)
   }, [])
 
@@ -102,7 +99,6 @@ const Topbar = () => {
         setProfileDropdownOpen(false)
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside)
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
@@ -111,20 +107,26 @@ const Topbar = () => {
 
   const markAsRead = async (id: string, message: string, link: string) => {
     setDropdownOpen(false)
-
     try {
-      
-
       const resp = await readNotification(id)
       console.log("Notification marked as read:", resp)
 
-      setNotifications((prev) => prev.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif)))
-      setUnreadCount((prev) => prev - 1)
-      
+      const updatedNotifications = notifications.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif))
+      setNotifications(updatedNotifications)
+      const newUnreadCount = unreadCount - 1
+      setUnreadCount(newUnreadCount)
+
+      // Update parent component
+      if (onNotificationUpdate) {
+        onNotificationUpdate(updatedNotifications, newUnreadCount)
+      }
 
       const linking_id = link.split("/").pop()
       if (link.includes("orders")) {
         router.push("/admin/orders/" + linking_id)
+      }
+      if (link.includes("inventory")) {
+        router.push("/admin/inventory/" + linking_id)
       }
       if (link.includes("payments")) {
         router.push("/admin/payments/" + linking_id)
@@ -132,9 +134,6 @@ const Topbar = () => {
       if (link.includes("job-expenses")) {
         router.push("/admin/job-expenses/" + linking_id)
       }
-      // if (link.includes("tailorjoblist")) {
-      //   router.push("/admin/joblists/tailorjoblists/jobs/" + linking_id)
-      // }
       if (link.includes("storerequest")) {
         router.push("/admin/inventory/requests/")
       }
@@ -149,12 +148,17 @@ const Topbar = () => {
   const markAllAsRead = async () => {
     try {
       setDropdownOpen(false)
+      const resp = await readAllNotification()
+      console.log("All notifications marked as read", resp)
 
-      await readAllNotification()
-      console.log("All notifications marked as read")
-
-      setNotifications((prev) => prev.map((notif) => ({ ...notif, read: "1" })))
+      const updatedNotifications = notifications.map((notif) => ({ ...notif, read: "1" }))
+      setNotifications(updatedNotifications)
       setUnreadCount(0)
+
+      // Update parent component
+      if (onNotificationUpdate) {
+        onNotificationUpdate(updatedNotifications, 0)
+      }
     } catch (error) {
       console.error("Error marking all notifications as read:", error)
     }
@@ -226,8 +230,8 @@ const Topbar = () => {
             </div>
           </div>
 
-          {/* Right Side - Notifications & Profile */}
-          <div className="flex items-center gap-4">
+          {/* Right Side - Notifications & Profile - Hidden on mobile */}
+          <div className="hidden lg:flex items-center gap-4">
             {/* Notifications */}
             <div className="relative" ref={dropdownRef}>
               <motion.button
@@ -305,7 +309,6 @@ const Topbar = () => {
                           <div className="bg-gray-50 px-6 py-3 sticky top-0 z-10">
                             <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{date}</p>
                           </div>
-
                           {notifs.map((notif) => (
                             <motion.div
                               key={notif.id}
@@ -316,14 +319,17 @@ const Topbar = () => {
                               }`}
                             >
                               <div
-                                className={`mt-1 p-2.5 rounded-full ${notif.read === "0" ? "bg-orange-100" : "bg-gray-100"}`}
+                                className={`mt-1 p-2.5 rounded-full ${
+                                  notif.read === "0" ? "bg-orange-100" : "bg-gray-100"
+                                }`}
                               >
                                 {getNotificationIcon(notif.message)}
                               </div>
-
                               <div className="flex-1">
                                 <p
-                                  className={`text-sm leading-relaxed ${notif.read === "0" ? "font-medium text-gray-900" : "text-gray-700"}`}
+                                  className={`text-sm leading-relaxed ${
+                                    notif.read === "0" ? "font-medium text-gray-900" : "text-gray-700"
+                                  }`}
                                 >
                                   {notif.message}
                                 </p>
@@ -334,7 +340,6 @@ const Topbar = () => {
                                   </span>
                                 </div>
                               </div>
-
                               {notif.read === "0" && (
                                 <div className="w-2.5 h-2.5 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
                               )}
@@ -408,10 +413,9 @@ const Topbar = () => {
                         </div>
                       </div>
                     </div>
-
                     <div className="py-2">
                       <Link href="/admin/users" passHref>
-                        <button 
+                        <button
                           className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
                           onClick={() => setProfileDropdownOpen(false)}
                         >
@@ -420,7 +424,6 @@ const Topbar = () => {
                         </button>
                       </Link>
                     </div>
-
                     <div className="py-2 border-t border-gray-100">
                       <div className="px-5 py-3">
                         <LogoutButton />

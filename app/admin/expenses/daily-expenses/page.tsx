@@ -34,7 +34,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
 import { useToast } from "@/hooks/use-toast"
-import { createBudget } from "@/app/api/apiClient"
+import { createBudget, createOperationalExpense, DeleteExpense, fetchAllBudgets, GetBudgetBreakdown } from "@/app/api/apiClient"
 
 // Updated budget categories to match API
 const budgetCategories = [
@@ -152,13 +152,11 @@ export default function OperationalBudgetTracker() {
   const fetchBudgets = async () => {
     try {
       setLoading(true)
-      // Note: You'll need to implement a get budgets endpoint or modify this
-      // For now, assuming you have a way to fetch budgets
-      const response = await apiCall("/budgets") // This endpoint needs to be implemented
-      setBudgets(response.data || [])
+      const response = await fetchAllBudgets()  
+      setBudgets(response || [])
 
-      if (response.data && response.data.length > 0 && !selectedBudgetId) {
-        setSelectedBudgetId(response.data[0].id)
+      if (response && response.length > 0 && !selectedBudgetId) {
+        setSelectedBudgetId(response[0].id)
       }
     } catch (error) {
       toast({
@@ -173,8 +171,8 @@ export default function OperationalBudgetTracker() {
 
   const fetchBudgetBreakdown = async (budgetId: number) => {
     try {
-      const response = await apiCall(`/budget-breakdown?budget_id=${budgetId}`)
-      setBudgetBreakdown(response.data)
+      const response = await GetBudgetBreakdown(budgetId.toString())
+      setBudgetBreakdown(response)
     } catch (error) {
       toast({
         title: "Error",
@@ -196,16 +194,15 @@ export default function OperationalBudgetTracker() {
 
     try {
       setSubmitting(true)
-      await apiCall("/create-expense", {
-        method: "POST",
-        body: JSON.stringify({
-          budget_id: selectedBudgetId,
+      const payload = {
+        budget_id: selectedBudgetId,
           expense_date: newExpense.expense_date,
           amount: Number.parseFloat(newExpense.amount),
           category: newExpense.category,
           description: newExpense.description,
-        }),
-      })
+      }
+    const resp = await createOperationalExpense(payload)
+    console.log('edd', resp)
 
       setNewExpense({
         expense_date: new Date().toISOString().split("T")[0],
@@ -302,9 +299,8 @@ export default function OperationalBudgetTracker() {
 
   const handleDeleteExpense = async (expenseId: number) => {
     try {
-      await apiCall(`/delete-expense/${expenseId}`, {
-        method: "DELETE",
-      })
+      const resp = await DeleteExpense(expenseId.toString())
+      console.log('delete expense', resp)
 
       // Refresh budget breakdown
       if (selectedBudgetId) {

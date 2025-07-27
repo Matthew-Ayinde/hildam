@@ -9,7 +9,8 @@ import { FiPackage, FiHash, FiSend } from "react-icons/fi"
 import { IoSparklesOutline } from "react-icons/io5"
 import Spinner from "@/components/Spinner"
 import { useParams } from "next/navigation"
-import { fetchAllInventories } from "@/app/api/apiClient"
+import { fetchAllInventories, requestInventory } from "@/app/api/apiClient"
+import {useRouter} from 'next/navigation'
 
 interface InventoryItem {
   id: string
@@ -39,8 +40,10 @@ type Errors = {
 }
 
 export default function InventoryPage() {
+  const router = useRouter()
   const params = useParams()
   const id = params.id as string
+  const tailorJobId = id || ""
 
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([])
   const [dataLoading, setDataLoading] = useState<boolean>(true)
@@ -152,18 +155,14 @@ export default function InventoryPage() {
         return
       }
 
-      const response = await fetch(`https://hildam.insightpublicis.com/api/requestinventory/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ items: itemsToRequest }),
-      })
+      const payload = { items: itemsToRequest }
 
-      if (!response.ok) throw new Error(`Server error: ${await response.text()}`)
+      const response = await requestInventory(tailorJobId, payload)
 
       setSuccessMsg("Inventory request submitted successfully!")
+      setTimeout(() => {
+        router.push(`/head-of-tailoring/jobs/${tailorJobId}`)
+      }, 2000)
       setRequests(Object.keys(requests).reduce((acc, key) => ({ ...acc, [key]: 0 }), {} as Requests))
       setErrors({})
     } catch (err) {

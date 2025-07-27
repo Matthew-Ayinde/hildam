@@ -1,4 +1,5 @@
 interface ApiResponse<T> {
+  order: boolean
   success: boolean
   message?: string
   data?: T

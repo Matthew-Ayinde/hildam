@@ -81,7 +81,7 @@ export default function Invoice() {
           name: result.name || 'N/A',
           email: result.email || 'N/A',
           phone_number: result.customer_phone_number || 'N/A',
-          address: result.address || 'No Address Provided',  
+          address: result.address || '16, Oduduwa way',  
         }
         setInvoiceData(data)
       } else {
@@ -184,16 +184,14 @@ export default function Invoice() {
                 <p>{invoiceData.address || 'No address provided'}</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-gray-800 text-right">
+            <div className="grid grid-cols-2 gap-2 text-gray-800 text-right mb-10">
               <div className="space-y-2">
                 <p className="font-medium">Invoice No:</p>
                 <p className="font-medium">Date:</p>
-                <p className="font-medium">Due Date:</p>
               </div>
               <div className="space-y-2">
                 <p>{invoiceData.order_id}</p>
                 <p>{formatDate(invoiceData.created_at)}</p>
-                <p>{formatDate(invoiceData.updated_at)}</p>
               </div>
             </div>
           </div>
@@ -205,7 +203,7 @@ export default function Invoice() {
               <div>
                 <div className="grid grid-cols-3 text-right font-semibold">
                   <div>Amount</div>
-                  <div>Discount</div>
+                  <div>Discount(%)</div>
                   <div>Total</div>
                 </div>
               </div>
@@ -215,31 +213,29 @@ export default function Invoice() {
               <div>
                 <div className="grid grid-cols-3 text-right text-gray-800">
                   <div>₦{invoiceData.total_amount_due}</div>
-                  <div>₦{invoiceData.discount}</div>
-                  <div>₦{invoiceData.cumulative_total_amount}</div>
+                  <div>{invoiceData.discount}</div>
+                  <div>₦{invoiceData.total_amount_due}</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <hr className="border-t border-gray-300 my-6" />
+          <hr className="border-t border-gray-300 my-6 mt-10 mb-20" />
 
           {/* Totals */}
-          <div className="flex flex-col sm:flex-row justify-between">
+          <div className="flex flex-col sm:flex-row justify-between mt-10">
             <div className="w-full sm:w-1/2"></div>
             <div className="w-full sm:w-1/2">
               <div className="grid grid-cols-2 gap-2 text-gray-800 text-right mb-4">
                 <div className="space-y-2">
                   <p>VAT:</p>
-                  <p>Discount:</p>
+                  <p>Discount(%):</p>
                   <p>Total:</p>
-                  <p>Paid:</p>
                 </div>
                 <div className="space-y-2">
                   <p>₦{invoiceData.VAT}</p>
-                  <p>₦{invoiceData.discount}</p>
-                  <p>₦{invoiceData.cumulative_total_amount}</p>
-                  <p>₦{invoiceData.amount_paid}</p>
+                  <p>{invoiceData.discount}</p>
+                  <p>₦{invoiceData.total_amount_due}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 text-right bg-orange-500 text-white py-3 px-4 rounded">

@@ -276,8 +276,31 @@ export async function createBudget(submitData: any): Promise<any> {
   return resp.data;
 }
 
+export async function fetchAllBudgets(): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(ApiRoutes.GetAllBudgets, { headers });
+  return resp.data.data;
+}
 
+export async function createOperationalExpense(payload: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(ApiRoutes.CreateOperationalExpense, payload, { headers });
+  console.log('create optional expense', resp)
+  return resp.data.data
+}
 
+export async function GetBudgetBreakdown(budgetId: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(`${ApiRoutes.GetBudgetBreakdown}=${budgetId}`, { headers });
+  console.log('get budget breakdown', resp)
+  return resp.data.data;
+}
+
+export async function DeleteExpense(expenseId: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.delete(`${ApiRoutes.DeleteExpense}/${expenseId}`, { headers });
+  return resp.data;
+}
 
 
 
@@ -360,6 +383,56 @@ export async function editTailorJob(tailorJobId: string, formData: any): Promise
 export async function SendJobToClientManager(tailorJobId: string): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.put(`${ApiRoutes.SendJobToClientManager}/${tailorJobId}`, {}, { headers })
+  return resp.data;
+}
+
+export async function requestInventory(tailorJobId: string, payload: any): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.post(`${ApiRoutes.RequestInventory}/${tailorJobId}`, payload, { headers })
+  console.log("Response from requestInventory APICLIENT:", resp.data);
+  return resp.data;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+      //#region Store Requests endpoint ---------------------------------
+export async function fetchAllStoreRequests(): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(ApiRoutes.FetchAllStoreRequests, { headers })
+  return resp.data.data;
+}
+
+export async function fetchStoreRequest(storeRequestId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(`${ApiRoutes.FetchStoreRequest}/${storeRequestId}`, { headers })
+  return resp.data.data;
+}
+
+export async function acceptStoreRequest(orderId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.post(`${ApiRoutes.AcceptStoreRequest}/${orderId}`, {}, { headers })
+  return resp.data;
+}
+
+export async function rejectStoreRequest(orderId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const payload = { feedback: 'rejected' }
+  const resp = await API.post(`${ApiRoutes.RejectStoreRequest}/${orderId}`, {payload}, { headers })
+  return resp.data;
+}
+
+export async function deleteStoreRequest(storeRequestId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.delete(`${ApiRoutes.DeleteStoreRequest}/${storeRequestId}`, { headers })
   return resp.data;
 }
 

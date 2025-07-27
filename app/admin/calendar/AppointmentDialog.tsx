@@ -49,9 +49,9 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
     try {
       const appointmentData = {
         order_id: formData.orderId,
-        firstFittingDate: formData.firstFittingDate.toISOString().split("T")[0],
-        secondFittingDate: formData.secondFittingDate.toISOString().split("T")[0],
-        collectionDate: formData.collectionDate.toISOString().split("T")[0],
+        first_fittingDate: formData.firstFittingDate.toISOString().split("T")[0],
+        second_fittingDate: formData.secondFittingDate.toISOString().split("T")[0],
+        collection_date: formData.collectionDate.toISOString().split("T")[0],
         
       }
 
