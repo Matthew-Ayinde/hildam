@@ -170,7 +170,7 @@ export default function AddExpensePage() {
     },
   }
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,

@@ -55,7 +55,7 @@ export default function TailorDashboard() {
     },
   }
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
@@ -67,7 +67,7 @@ export default function TailorDashboard() {
     },
   }
 
-  const cardVariants = {
+  const cardVariants: any = {
     hidden: { scale: 0.95, opacity: 0 },
     visible: {
       scale: 1,

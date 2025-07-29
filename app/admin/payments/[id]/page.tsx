@@ -163,7 +163,7 @@ export default function ShowCustomer() {
     return <div className="text-center text-gray-500 py-10">No data found</div>;
   }
 
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,

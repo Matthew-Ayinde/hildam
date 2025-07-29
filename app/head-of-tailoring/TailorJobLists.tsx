@@ -46,7 +46,7 @@ export default function TailorDashboard() {
   const rowsPerPage = 6
   const totalPages = Math.ceil(filteredData.length / rowsPerPage)
 
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -56,7 +56,7 @@ export default function TailorDashboard() {
     },
   }
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
@@ -68,7 +68,7 @@ export default function TailorDashboard() {
     },
   }
 
-  const cardVariants = {
+  const cardVariants: any = {
     hidden: { scale: 0.95, opacity: 0 },
     visible: {
       scale: 1,
