@@ -19,6 +19,7 @@ import { BiPackage } from "react-icons/bi"
 import { getSession } from "next-auth/react"
 import { deleteInventory, fetchAllInventories } from "@/app/api/apiClient"
 import { ApplicationRoutes } from "@/constants/ApplicationRoutes"
+import Link from "next/link"
 
 // Spinner component
 const Spinner = () => (
@@ -150,7 +151,7 @@ export default function ModernInventoryTable() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 flex items-center justify-center">
+      <div className="py-20">
         <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
           <Spinner />
           <p className="mt-4 text-orange-600 font-medium">Loading inventory...</p>
@@ -161,23 +162,19 @@ export default function ModernInventoryTable() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 flex items-center justify-center">
+      <div className="mt-10">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           className="text-center p-8 bg-white rounded-2xl shadow-lg"
         >
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <IoTrashOutline className="text-red-500 text-2xl" />
-          </div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">Error Loading Data</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium transition-colors duration-200"
+          
+          <h3 className="text-xl font-semibold text-gray-800 mb-6">Get Started by adding a new inventory item</h3>
+          <Link href={`/admin/inventory/create`}
+            className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium transition-colors duration-200 mt-3"
           >
-            Try Again
-          </button>
+            Add Inventory Item
+          </Link>
         </motion.div>
       </div>
     )

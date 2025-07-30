@@ -6,10 +6,12 @@ import React, { useEffect, useState } from "react";
 import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { editCustomer, fetchCustomer } from "@/app/api/apiClient";
 
-export default function EditCustomer() {
+export default function EditCustomerPage() {
   const router = useRouter();
   const { id } = useParams();
+  const customerId = id as string;
 
   interface Customer {
     name: string;
@@ -73,57 +75,45 @@ export default function EditCustomer() {
     customer_description: "",
   });
 
-  const fetchCustomer = async () => {
+
+
+  const fetchCustomerData = async () => {
     setLoading(true);
     setError("");
 
     try {
-      const session = await getSession(); // Get session from NextAuth
-      const accessToken = session?.user?.token; // Access token from session
-      if (!accessToken) throw new Error("No access token found");
+    
+      const result = await fetchCustomer(customerId)
+      console.log("Fetched customer data:", result);
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/customerslist/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch customer data");
-      }
-
-      const result = await response.json();
-      setCustomer(result.data);
+      setCustomer(result);
       setFormData({
-        name: result.data.name,
-        age: result.data.age,
-        phone_number: result.data.phone_number,
-        gender: result.data.gender,
-        email: result.data.email,
-        bust: result.data.bust,
-        shoulder_to_underbust: result.data.shoulder_to_underbust,
-        round_under_bust: result.data.round_under_bust,
-        sleeve_length: result.data.sleeve_length,
-        half_length: result.data.half_length,
-        blouse_length: result.data.blouse_length,
-        round_sleeve: result.data.round_sleeve,
-        dress_length: result.data.dress_length,
-        chest: result.data.chest,
-        round_shoulder: result.data.round_shoulder,
-        skirt_length: result.data.skirt_length,
-        trousers_length: result.data.trousers_length,
-        round_thigh: result.data.round_thigh,
-        round_knee: result.data.round_knee,
-        round_feet: result.data.round_feet,
-        hip: result.data.hip,
-        shoulder: result.data.shoulder,
-        bustpoint: result.data.bust,
-        waist: result.data.waist,
-        address: result.data.address,
-        customer_description: result.data.customer_description,
+        name: result.name,
+        age: result.age,
+        phone_number: result.phone_number,
+        gender: result.gender,
+        email: result.email,
+        bust: result.bust,
+        shoulder_to_underbust: result.shoulder_to_underbust,
+        round_under_bust: result.round_under_bust,
+        sleeve_length: result.sleeve_length,
+        half_length: result.half_length,
+        blouse_length: result.blouse_length,
+        round_sleeve: result.round_sleeve,
+        dress_length: result.dress_length,
+        chest: result.chest,
+        round_shoulder: result.round_shoulder,
+        skirt_length: result.skirt_length,
+        trousers_length: result.trousers_length,
+        round_thigh: result.round_thigh,
+        round_knee: result.round_knee,
+        round_feet: result.round_feet,
+        hip: result.hip,
+        shoulder: result.shoulder,
+        bustpoint: result.bust,
+        waist: result.waist,
+        address: result.address,
+        customer_description: result.customer_description,
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -148,25 +138,9 @@ export default function EditCustomer() {
     setError("");
 
     try {
-      const session = await getSession(); // Get session from NextAuth
-      const accessToken = session?.user?.token; // Access token from session
-      if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/editcustomer/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update customer data");
-      }
+      const response = await editCustomer(customerId, formData);
+      console.log("Customer updated successfully:", response);
 
       router.push(`/admin/customers/${id}`);
     } catch (err) {
@@ -179,7 +153,7 @@ export default function EditCustomer() {
   };
 
   useEffect(() => {
-    fetchCustomer();
+    fetchCustomerData();
   }, [id]);
 
   if (loading) {
@@ -194,7 +168,7 @@ export default function EditCustomer() {
     return (
       <div className="text-center text-red-500 py-10">
         Error: {error}
-        <button onClick={fetchCustomer} className="text-blue-500 underline">
+        <button onClick={fetchCustomerData} className="text-blue-500 underline">
           Retry
         </button>
       </div>

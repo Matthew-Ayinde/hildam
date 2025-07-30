@@ -1,15 +1,13 @@
 "use client"
 
 import type React from "react"
-
 import { useCallback, useEffect, useState } from "react"
 import Spinner from "@/components/Spinner"
 import SkeletonLoader from "@/components/SkeletonLoader"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { IoIosArrowBack, IoMdClose, IoMdAdd, IoMdTrash } from "react-icons/io"
-import { FiCalendar, FiUser, FiPhone, FiMail, FiMapPin } from "react-icons/fi"
-import { getSession } from "next-auth/react"
+import { FiCalendar, FiUser } from "react-icons/fi"
 import { motion, AnimatePresence } from "framer-motion"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
@@ -28,30 +26,8 @@ interface Customer {
   clothing_description: string
   order_status: string
   priority: string
-  shoulder_width: number
-  phone_number: string
   email: string
-  bust: number
   address: string
-  waist: number
-  hip: number
-  neck: number
-  shoulder: number
-  bustpoint: number
-  shoulder_to_underbust: number
-  round_under_bust: number
-  half_length: number
-  blouse_length: number
-  sleeve_length: number
-  round_sleeve: number
-  dress_length: number
-  chest: number
-  round_shoulder: number
-  skirt_length: number
-  trousers_length: number
-  round_thigh: number
-  round_knee: number
-  round_feet: number
   style_reference_images: string[]
   created_at: string
   manager_id: string
@@ -65,11 +41,9 @@ export default function EditCustomer() {
   const [projectManagers, setProjectManagers] = useState<ProjectManager[]>([])
   const [loadingManagers, setLoadingManagers] = useState(true)
   const [errorManagers, setErrorManagers] = useState("")
-
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0)
   const [loadingImage, setLoadingImage] = useState(false)
-
   const router = useRouter()
   const { id } = useParams()
   const orderId = id as string
@@ -78,7 +52,6 @@ export default function EditCustomer() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>("")
   const [successMessage, setSuccessMessage] = useState<string>("")
-
   const [firstFittingDate, setFirstFittingDate] = useState<Date | null>(null)
   const [secondFittingDate, setSecondFittingDate] = useState<Date | null>(null)
 
@@ -87,33 +60,12 @@ export default function EditCustomer() {
     age: "",
     phone_number: "",
     email: "",
-    bust: 0,
     address: "",
-    waist: 0,
-    hip: 0,
-    neck: 0,
-    shoulder: 0,
-    bustpoint: 0,
-    shoulder_to_underbust: 0,
-    round_under_bust: 0,
-    half_length: 0,
-    blouse_length: 0,
-    sleeve_length: 0,
-    round_sleeve: 0,
-    dress_length: 0,
-    chest: 0,
-    round_shoulder: 0,
-    skirt_length: 0,
-    trousers_length: 0,
-    round_thigh: 0,
-    round_knee: 0,
-    round_feet: 0,
     style_reference_images: [],
     created_at: "",
     manager_id: "",
     manager_name: "",
     order_status: "",
-    shoulder_width: 0,
     clothing_name: "",
     clothing_description: "",
     priority: "",
@@ -126,41 +78,23 @@ export default function EditCustomer() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [previewUrls, setPreviewUrls] = useState<string[]>([])
 
-  // Helper Functions
-  const parseInputValue = (name: string, value: string) => {
-    const numericFields = [
-      "bust",
-      "waist",
-      "hip",
-      "neck",
-      "shoulder",
-      "bustpoint",
-      "shoulder_to_underbust",
-      "round_under_bust",
-      "half_length",
-      "blouse_length",
-      "sleeve_length",
-      "round_sleeve",
-      "dress_length",
-      "chest",
-      "round_shoulder",
-      "skirt_length",
-      "trousers_length",
-      "round_thigh",
-      "round_knee",
-      "round_feet",
-      "shoulder_width",
-    ]
-    return numericFields.includes(name) ? Number.parseFloat(value) || 0 : value
-  }
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    const parsedValue = parseInputValue(name, value)
+
     setFormData((prev) => ({
       ...prev,
-      [name]: parsedValue,
+      [name]: value,
     }))
+
+    // Update manager_name when manager_id changes
+    if (name === "manager_id") {
+      const selectedManager = projectManagers.find((manager) => manager.id === value)
+      setFormData((prev) => ({
+        ...prev,
+        manager_id: value,
+        manager_name: selectedManager ? selectedManager.name : "",
+      }))
+    }
   }
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,7 +102,6 @@ export default function EditCustomer() {
     if (files && files.length > 0) {
       const newFiles = Array.from(files)
       const newPreviewUrls = newFiles.map((file) => URL.createObjectURL(file))
-
       setSelectedFiles((prev) => [...prev, ...newFiles])
       setPreviewUrls((prev) => [...prev, ...newPreviewUrls])
     }
@@ -177,7 +110,6 @@ export default function EditCustomer() {
   const removeImage = (index: number) => {
     setPreviewUrls((prev) => prev.filter((_, i) => i !== index))
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
-
     // Also remove from formData if it's an existing image
     if (index < formData.style_reference_images.length) {
       setFormData((prev) => ({
@@ -201,44 +133,21 @@ export default function EditCustomer() {
     setLoading(true)
     setError("")
     try {
-
       const data = await fetchOrderById(orderId)
-
       console.log("Fetched order data:", data)
-
       setCustomer(data)
-      setFormData({
+
+      const customerFormData = {
         name: data.customer_name,
         age: data.age,
         phone_number: data.phone_number,
         email: data.customer_email,
-        bust: data.bust,
         address: data.address,
-        waist: data.waist,
-        hip: data.hip,
-        neck: data.neck,
-        shoulder: data.shoulder,
-        bustpoint: data.bustpoint,
-        shoulder_to_underbust: data.shoulder_to_underbust,
-        round_under_bust: data.round_under_bust,
-        half_length: data.half_length,
-        blouse_length: data.blouse_length,
-        sleeve_length: data.sleeve_length,
-        round_sleeve: data.round_sleeve,
-        dress_length: data.dress_length,
-        chest: data.chest,
-        round_shoulder: data.round_shoulder,
-        skirt_length: data.skirt_length,
-        trousers_length: data.trousers_length,
-        round_thigh: data.round_thigh,
-        round_knee: data.round_knee,
-        round_feet: data.round_feet,
         style_reference_images: data.style_reference_images || [],
         created_at: data.created_at,
         order_status: data.order_status,
-        shoulder_width: data.shoulder_width,
         manager_id: data.manager_id,
-        manager_name: data.tailoring.manager.name,
+        manager_name: data.tailoring?.manager?.name || "",
         clothing_name: data.clothing_name,
         clothing_description: data.clothing_description,
         priority: data.priority,
@@ -246,10 +155,10 @@ export default function EditCustomer() {
         first_fitting_date: data.first_fitting_date || "Not available",
         second_fitting_date: data.second_fitting_date || "Not available",
         duration: data.duration || "",
-      })
+      }
 
+      setFormData(customerFormData)
       setPreviewUrls(data.style_reference_images || [])
-
       setFirstFittingDate(data.first_fitting_date ? new Date(data.first_fitting_date) : null)
       setSecondFittingDate(data.second_fitting_date ? new Date(data.second_fitting_date) : null)
     } catch (err) {
@@ -257,16 +166,14 @@ export default function EditCustomer() {
     } finally {
       setLoading(false)
     }
-  }, [id])
+  }, [orderId])
 
   const fetchProjectManagers = useCallback(async () => {
     setLoadingManagers(true)
     setErrorManagers("")
     try {
-     
       const response = await fetchHeadOfTailoringList()
       console.log("Fetched project managers:", response)
-
       setProjectManagers(response.head_of_tailoring)
     } catch (err) {
       setErrorManagers(err instanceof Error ? err.message : "An unknown error occurred")
@@ -274,6 +181,19 @@ export default function EditCustomer() {
       setLoadingManagers(false)
     }
   }, [])
+
+  // Update manager_name when projectManagers are loaded and we have a manager_id
+  useEffect(() => {
+    if (projectManagers.length > 0 && formData.manager_id && !formData.manager_name) {
+      const selectedManager = projectManagers.find((manager) => manager.id === formData.manager_id)
+      if (selectedManager) {
+        setFormData((prev) => ({
+          ...prev,
+          manager_name: selectedManager.name,
+        }))
+      }
+    }
+  }, [projectManagers, formData.manager_id, formData.manager_name])
 
   useEffect(() => {
     fetchCustomer()
@@ -286,16 +206,16 @@ export default function EditCustomer() {
     setSuccessMessage("")
 
     try {
-      
-
       const formDataToSend = new FormData()
 
       if (firstFittingDate) {
         formDataToSend.append("first_fitting_date", firstFittingDate.toISOString().split("T")[0])
       }
+
       if (secondFittingDate) {
         formDataToSend.append("second_fitting_date", secondFittingDate.toISOString().split("T")[0])
       }
+
       formDataToSend.append("duration", formData.duration + "")
 
       // Append new files
@@ -312,10 +232,8 @@ export default function EditCustomer() {
       })
 
       console.log("Form data to send:", formDataToSend)
-
       const response = await editOrder(orderId, formDataToSend)
       console.log("Edit order response:", response)
-
 
       setSuccessMessage("Order updated successfully!")
       setTimeout(() => router.push("/admin/orders"), 2000)
@@ -380,7 +298,6 @@ export default function EditCustomer() {
             <IoIosArrowBack className="mr-2 group-hover:-translate-x-1 transition-transform" size={24} />
             <span className="font-medium">Back to Orders</span>
           </Link>
-
           <h1 className="text-3xl font-bold text-gray-800 mt-4 mb-2">Edit Order</h1>
           <p className="text-gray-600">Update order details and measurements</p>
         </motion.div>
@@ -399,7 +316,6 @@ export default function EditCustomer() {
                 Basic Information
               </h2>
             </div>
-
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="space-y-2">
@@ -412,7 +328,7 @@ export default function EditCustomer() {
                     className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-gray-600 focus:outline-none"
                   />
                 </div>
-        
+
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">Clothing Name</label>
                   <input
@@ -469,8 +385,21 @@ export default function EditCustomer() {
                   </select>
                 </div>
 
+                {/* Display selected manager name */}
+                {formData.manager_name && (
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-gray-700">Selected Manager</label>
+                    <input
+                      type="text"
+                      value={formData.manager_name}
+                      disabled
+                      className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-gray-600 focus:outline-none"
+                    />
+                  </div>
+                )}
+
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">Head of Tailoring</label>
+                  <label className="block text-sm font-semibold text-gray-700">Change Head of Tailoring</label>
                   <select
                     name="manager_id"
                     value={formData.manager_id || ""}
@@ -489,6 +418,8 @@ export default function EditCustomer() {
                     ))}
                   </select>
                 </div>
+
+                
               </div>
             </div>
           </motion.div>
@@ -503,7 +434,6 @@ export default function EditCustomer() {
             <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6">
               <h2 className="text-xl font-bold text-white">Style Reference Images</h2>
             </div>
-
             <div className="p-6">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
                 {previewUrls.map((url, index) => (
@@ -546,58 +476,6 @@ export default function EditCustomer() {
             </div>
           </motion.div>
 
-          {/* Measurements Card */}
-          {/* <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl shadow-xl border border-orange-100 overflow-hidden"
-          >
-            <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6">
-              <h2 className="text-xl font-bold text-white">Measurements</h2>
-            </div>
-
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  { label: "Blouse Length", name: "blouse_length" },
-                  { label: "Bust", name: "bust" },
-                  { label: "Bust Point", name: "bustpoint" },
-                  { label: "Chest", name: "chest" },
-                  { label: "Dress Length", name: "dress_length" },
-                  { label: "Half Length", name: "half_length" },
-                  { label: "Hip", name: "hip" },
-                  { label: "Round Shoulder", name: "round_shoulder" },
-                  { label: "Round Sleeve", name: "round_sleeve" },
-                  { label: "Round Under Bust", name: "round_under_bust" },
-                  { label: "Shoulder", name: "shoulder" },
-                  { label: "Shoulder to Underbust", name: "shoulder_to_underbust" },
-                  { label: "Skirt Length", name: "skirt_length" },
-                  { label: "Sleeve Length", name: "sleeve_length" },
-                  { label: "Waist", name: "waist" },
-                ].map((measurement, index) => (
-                  <motion.div
-                    key={measurement.name}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 + index * 0.05 }}
-                    className="space-y-2"
-                  >
-                    <label className="block text-sm font-semibold text-gray-700">{measurement.label}</label>
-                    <input
-                      type="text"
-                      name={measurement.name}
-                      value={formData[measurement.name as keyof typeof formData] || ""}
-                      onChange={handleInputChange}
-                      placeholder="0"
-                      className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div> */}
-
           {/* Fitting Details Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -611,7 +489,6 @@ export default function EditCustomer() {
                 Fitting Schedule
               </h2>
             </div>
-
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
@@ -699,7 +576,6 @@ export default function EditCustomer() {
                     <IoMdClose size={24} />
                   </button>
                 </div>
-
                 {loadingImage ? (
                   <div className="flex justify-center py-8">
                     <Spinner />
@@ -717,7 +593,6 @@ export default function EditCustomer() {
                     />
                   </div>
                 )}
-
                 {previewUrls.length > 1 && (
                   <div className="flex justify-center mt-4 space-x-2">
                     {previewUrls.map((_, index) => (

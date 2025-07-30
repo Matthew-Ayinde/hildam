@@ -50,6 +50,18 @@ export async function deleteCustomer(payload: string): Promise<any> {
   return resp;
 }
 
+export async function editCustomer(customerId: string, formData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.put(`${ApiRoutes.EditCustomer}/${customerId}`, formData, { headers });
+  return resp.data;
+}
+
+export async function fetchCustomerChart(selectedYear: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(`${ApiRoutes.FetchCustomerChart}?year=${selectedYear}`, { headers })
+  console.log("Customer chart data:", resp.data)
+  return resp.data;
+}
 
 
 
@@ -109,6 +121,14 @@ export async function rejectTailorImage(orderId: string, feedback: any): Promise
   return resp.data;
 }
 
+
+
+export async function closeOrder(orderId: string): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.put(`${ApiRoutes.CloseOrder}/${orderId}`, {}, { headers })
+  console.log("close order data:", resp)
+  return resp.data
+}
 
 
 
@@ -391,6 +411,12 @@ export async function requestInventory(tailorJobId: string, payload: any): Promi
   const resp = await API.post(`${ApiRoutes.RequestInventory}/${tailorJobId}`, payload, { headers })
   console.log("Response from requestInventory APICLIENT:", resp.data);
   return resp.data;
+}
+
+export async function fetchAllInventoryRequests(): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(ApiRoutes.FetchAllInventoryRequests, { headers })
+  return resp.data.data;
 }
 
 

@@ -121,25 +121,34 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
         onNotificationUpdate(updatedNotifications, newUnreadCount)
       }
 
+
+
       const linking_id = link.split("/").pop()
+      if (link.includes("customers")) {
+        router.push("/admin/customers/" + linking_id)
+      }
       if (link.includes("orders")) {
         router.push("/admin/orders/" + linking_id)
       }
-      if (link.includes("inventory")) {
+      if (link.includes("inventories")) {
         router.push("/admin/inventory/" + linking_id)
       }
       if (link.includes("payments")) {
         router.push("/admin/payments/" + linking_id)
       }
       if (link.includes("job-expenses")) {
-        router.push("/admin/job-expenses/" + linking_id)
+        router.push("/admin/expenses/" + linking_id)
       }
-      if (link.includes("storerequest")) {
+      if (link.includes("daily-expenses")) {
+        router.push("/admin/expenses/daily-expenses")
+      }
+      if (link.includes("store-requests")) {
         router.push("/admin/inventory/requests/")
       }
       if (link.includes("expenses")) {
         router.push("/admin/expenses/" + linking_id)
       }
+       
     } catch (error) {
       console.error("Error marking notification as read:", error)
     }

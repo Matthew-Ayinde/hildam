@@ -2,22 +2,23 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { FiPackage, FiUser, FiCalendar, FiCheck, FiX, FiClock, FiRefreshCw, FiSearch } from "react-icons/fi"
+import { FiPackage, FiUser, FiCalendar, FiCheck, FiX, FiClock, FiSearch } from "react-icons/fi"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {getSession} from "next-auth/react"
+import { getSession } from "next-auth/react"
+import { fetchAllInventoryRequests } from "@/app/api/apiClient"
 
 interface StoreRequest {
   id: string
   items_name: string
-  requested_quantities: string
+  items_quantities: string // Corrected from requested_quantities
   requested_color: string | null
   requested_by_user_id: string
   requested_by_name: string
   status: "approved" | "rejected" | "pending"
-  order_id_for_the_job: string
+  order_id: string // Corrected from order_id_for_the_job
   created_at: string
   updated_at: string
   accepted_at: string | null
@@ -37,22 +38,12 @@ export default function StoreRequestsDashboard() {
   const [statusFilter, setStatusFilter] = useState<"all" | "approved" | "rejected">("all")
 
   const fetchData = async () => {
-    const session = await getSession()
-    const token = session?.user?.token
     try {
       setLoading(true)
-      const response = await fetch("https://hildam.insightpublicis.com/api/allstorerequestsbyorderi", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      if (!response.ok) {
-        throw new Error("Failed to fetch data")
-      }
-      const result: ApiResponse = await response.json()
-      setData(result.data)
+      const result = await fetchAllInventoryRequests()
+      console.log("Fetched data:", result)
+
+      setData(result)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred")
@@ -104,16 +95,12 @@ export default function StoreRequestsDashboard() {
           request.items_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           request.requested_by_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           orderId.toLowerCase().includes(searchTerm.toLowerCase())
-
         const matchesStatus = statusFilter === "all" || request.status === statusFilter
-
         return matchesSearch && matchesStatus
       })
-
       if (filteredRequests.length > 0) {
         acc[orderId] = filteredRequests
       }
-
       return acc
     },
     {} as Record<string, StoreRequest[]>,
@@ -147,20 +134,16 @@ export default function StoreRequestsDashboard() {
   if (error) {
     return (
       <div className="max-w-7xl mx-auto p-6 flex items-center justify-center h-[300px]">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="text-center"
-      >
-        <h2 className="text-2xl font-semibold text-gray-700">
-          You haven&apos;t made any requests
-        </h2>
-        <p className="mt-2 text-gray-500">
-          Once you do, they&apos;ll show up here.
-        </p>
-      </motion.div>
-    </div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center"
+        >
+          <h2 className="text-2xl font-semibold text-gray-700">You haven&apos;t made any requests</h2>
+          <p className="mt-2 text-gray-500">Once you do, they&apos;ll show up here.</p>
+        </motion.div>
+      </div>
     )
   }
 
@@ -193,7 +176,6 @@ export default function StoreRequestsDashboard() {
               </div>
             </CardContent>
           </Card>
-
           <Card className="bg-white shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -207,7 +189,6 @@ export default function StoreRequestsDashboard() {
               </div>
             </CardContent>
           </Card>
-
           <Card className="bg-white shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -334,7 +315,7 @@ export default function StoreRequestsDashboard() {
                                   <div className="flex items-center gap-1">
                                     <span className="font-medium">Qty:</span>
                                     <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
-                                      {request.requested_quantities}
+                                      {request.items_quantities}
                                     </span>
                                   </div>
                                   {request.requested_color && (
@@ -348,13 +329,11 @@ export default function StoreRequestsDashboard() {
                                   <div className="flex items-center gap-1">
                                     <FiUser className="w-3 h-3" />
                                     <span>{request.requested_by_name}</span>
-                                    <span className="text-gray-400">({request.requested_by_user_id})</span>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-
                           <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
                             <div className="text-sm text-gray-600">
                               <div className="flex items-center gap-1 mb-1">
@@ -374,7 +353,6 @@ export default function StoreRequestsDashboard() {
                                 </div>
                               )}
                             </div>
-
                             <Badge className={`${getStatusColor(request.status)} flex items-center gap-1 px-3 py-1`}>
                               {getStatusIcon(request.status)}
                               <span className="capitalize font-medium">{request.status}</span>

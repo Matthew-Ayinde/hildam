@@ -24,7 +24,7 @@ import { HiOutlineSparkles, HiOutlinePhotograph } from "react-icons/hi";
 import { MdOutlineRule, MdOutlineClose } from "react-icons/md";
 import { BsStars } from "react-icons/bs";
 import OrderPageError from "@/components/admin/OrderPageError";
-import { fetchOrderById, rejectTailorImage, acceptTailorImage } from "@/app/api/apiClient";
+import { fetchOrderById, rejectTailorImage, acceptTailorImage, closeOrder } from "@/app/api/apiClient";
 import { ApplicationRoutes } from "@/constants/ApplicationRoutes";
 
 export default function ShowCustomer() {
@@ -53,21 +53,10 @@ export default function ShowCustomer() {
   const handleCancelClose = () => setIsCloseModalOpen(false);
   const handleConfirmClose = async () => {
     try {
-      const session = await getSession();
-      const token = session?.user?.token;
-      if (!token) throw new Error("No access token");
+    
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/closeorder/${id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!response.ok) throw new Error("Failed to close order");
+      const response = await closeOrder(orderId);
+      console.log('close order response', response)
 
       router.push(ApplicationRoutes.AdminOrders);
     } catch (err) {
@@ -239,7 +228,7 @@ export default function ShowCustomer() {
           gender: result.customer.gender,
           phone_number: result.customer.phone_number,
           address: result.address,
-          manager_name: result.manager_name,
+          manager_name: result.tailoring.manager.name || "Not Assigned",
           duration: result.duration,
           style_approval: result.tailoring.client_manager_approval,
           style_approval_feedback: result.tailoring.client_manager_feedback

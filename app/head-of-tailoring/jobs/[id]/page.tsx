@@ -288,23 +288,21 @@ export default function ShowCustomer() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-50">
+      <div className="md:py-40 py-20 flex items-center justify-center bg-gradient-to-br from-red-50 to-pink-50">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center bg-white p-8 rounded-2xl shadow-lg"
         >
           <IoMdCloseCircle className="text-red-500 text-6xl mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            Error Loading Data
+          <h2 className="text-2xl font-bold text-gray-800 mb-8">
+            This Job could not be found
           </h2>
-          <p className="text-red-500 mb-4">{error}</p>
-          <button
-            onClick={fetchCustomer}
+          <Link href={`/head-of-tailoring`}
             className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
           >
-            Try Again
-          </button>
+            Go to Dashboard
+          </Link>
         </motion.div>
       </div>
     );

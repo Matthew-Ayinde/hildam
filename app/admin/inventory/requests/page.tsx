@@ -135,6 +135,7 @@ export default function ModernInventoryTable() {
     const orderId = id
     try {
       const response = await acceptStoreRequest(orderId)
+
       console.log('ess', response)
 
 
@@ -142,13 +143,13 @@ export default function ModernInventoryTable() {
         prevData.map((customer) => (customer.id === id ? { ...customer, status: "approved" } : customer)),
       )
 
-      setPopupMessage("Request successfully approved")
       setTimeout(() => setPopupMessage(null), 5000)
     } catch (error) {
       console.error("Error approving request:", error)
-      setPopupMessage("Error approving request")
-      setTimeout(() => setPopupMessage(null), 5000)
+      // setPopupMessage("Error approving request")
     }
+          setPopupMessage("Request successfully approved")
+    setTimeout(() => setPopupMessage(null), 5000)
   }
 
   // Filter data based on selected status and search term

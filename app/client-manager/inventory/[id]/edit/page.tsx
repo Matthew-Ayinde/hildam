@@ -7,11 +7,13 @@ import { useEffect, useState } from "react";
 import { getSession } from "next-auth/react";
 import Link from "next/link";
 import {motion} from "framer-motion";
+import { editInventory, fetchInventory } from "@/app/api/apiClient";
 
 export default function EditCustomer() {
 
   const router = useRouter();
   const { id } = useParams();
+  const inventoryId = id as string;
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,33 +33,17 @@ export default function EditCustomer() {
     setError(null);
 
     try {
-      const session = await getSession(); // Get session from NextAuth
-      const token = session?.user?.token;
 
-      if (!token) {
-        throw new Error("Unauthorized");
-      }
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const result = await fetchInventory(inventoryId);
+      console.log('eeedd', result);
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch customer data");
-      }
-
-      const result = await response.json();
-      setCustomer(result.data);
+      setCustomer(result);
       setFormData({
-        item_name: result.data.item_name,
-        item_quantity: result.data.item_quantity,
-        price_purchased: result.data.price_purchased,
-        unit: result.data.unit,
-        color: result.data.color,
+        item_name: result.item_name,
+        item_quantity: result.item_quantity,
+        price_purchased: result.price_purchased,
+        unit: result.unit,
+        color: result.color,
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -82,27 +68,11 @@ export default function EditCustomer() {
     setError(null);
 
     try {
-      const session = await getSession();
-      const token = session?.user?.token;
 
-      if (!token) {
-        throw new Error("Unauthorized");
-      }
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/inventory/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error("Failed to update customer data");
-      }
+      const response = await editInventory(inventoryId, formData);
+
+      console.log('response', response);
 
       // Show confirmation message
       setConfirmationMessage("Inventory item updated");
@@ -207,7 +177,7 @@ export default function EditCustomer() {
         {/* Unit */}
         <div>
           <label className="block text-gray-800 font-bold mb-2">
-            Unit
+            Description
           </label>
           <input
             type="text"

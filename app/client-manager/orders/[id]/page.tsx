@@ -189,7 +189,7 @@ export default function ShowCustomer() {
           gender: result.data.gender,
           phone_number: result.data.phone_number,
           address: result.data.address,
-          manager_name: result.data.manager_name,
+          manager_name: result.tailoring.manager.name || "Not Assigned",
           duration: result.data.duration,
           style_approval: result.data.style_approval,
         };

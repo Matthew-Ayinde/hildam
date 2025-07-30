@@ -170,7 +170,7 @@ export default function Table() {
         </div>
       </motion.div>
 
-      {/* <CustomerAnalyticsChart /> */}
+      <CustomerAnalyticsChart />
 
       {/* Main Table Card */}
       <motion.div

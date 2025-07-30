@@ -15,6 +15,9 @@ export class ApiRoutes {
   static FetchCustomer: string = '/customers/customer' 
   static AddCustomer: string = '/customers/add-customer'
   static DeleteCustomer: string = '/customers/delete-customer'
+  static EditCustomer: string = '/customers/edit-customer'
+
+  static FetchCustomerChart: string = '/customers/customer-chart'
 
 
 
@@ -37,6 +40,7 @@ export class ApiRoutes {
     static HeadOfTailoringList: string = '/orders/list-of-head-of-tailoring';
     static AcceptTailorImage: string = '/orders/accept-tailor-style';
     static RejectTailorImage: string = '/orders/reject-tailor-style';
+    static CloseOrder: string = '/orders/close-order';
 
 
 
@@ -207,6 +211,8 @@ static DeleteExpense: string = '/daily-expenses/delete-expense';
     static EditTailorJob: string = '/tailoring/update-tailor-job'
     static SendJobToClientManager: string = 'tailoring/send-to-client-manager'
     static RequestInventory: string = '/tailoring/request-inventory'
+    static FetchAllInventoryRequests: string = '/tailoring/grouped-store-requests'
+    static FetchInventoryRequest: string = '/tailoring/inventory-request'
 
 
 
