@@ -167,7 +167,7 @@ export default function ShowCustomer() {
     clothing_name: string;
     clothing_description: string;
     high_bust: number;
-    tailor_image?: string;
+    tailor_image: string;
     project_manager_approval?: string;
     style_reference_images?: string[];
     store_requests?: StoreRequest[];
@@ -763,7 +763,7 @@ export default function ShowCustomer() {
                 <div className="flex items-center gap-6 mb-6">
                   <div className="relative group">
                     <Image
-                      src={customer.tailor_image || "/placeholder.svg"}
+                      src={customer.tailor_image}
                       alt="Submitted design"
                       width={120}
                       height={120}

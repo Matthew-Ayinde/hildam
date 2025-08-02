@@ -21,7 +21,7 @@ type Notification = {
   id: string
   message: string
   link: string
-  read: string
+  is_read: boolean
   created_at: string
 }
 
@@ -281,17 +281,17 @@ const Sidebar = ({ notifications = [], unreadCount = 0, onMarkAsRead, onMarkAllA
                           whileHover={{ backgroundColor: "#f9fafb" }}
                           onClick={() => handleMarkAsRead(notification.id, notification.message, notification.link)}
                           className={`flex items-start gap-3 p-4 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${
-                            notification.read === "0" ? "bg-orange-50" : ""
+                            notification.is_read === false ? "bg-orange-50" : ""
                           }`}
                         >
                           <div
-                            className={`mt-1 p-2 rounded-full ${notification.read === "0" ? "bg-orange-100" : "bg-gray-100"}`}
+                            className={`mt-1 p-2 rounded-full ${notification.is_read === false ? "bg-orange-100" : "bg-gray-100"}`}
                           >
                             {getNotificationIcon(notification.message)}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p
-                              className={`text-sm leading-relaxed ${notification.read === "0" ? "font-medium text-gray-900" : "text-gray-700"}`}
+                              className={`text-sm leading-relaxed ${notification.is_read === false ? "font-medium text-gray-900" : "text-gray-700"}`}
                             >
                               {notification.message}
                             </p>
@@ -302,7 +302,7 @@ const Sidebar = ({ notifications = [], unreadCount = 0, onMarkAsRead, onMarkAllA
                               </span>
                             </div>
                           </div>
-                          {notification.read === "0" && (
+                          {notification.is_read === false && (
                             <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
                           )}
                         </motion.div>
@@ -409,7 +409,7 @@ const Sidebar = ({ notifications = [], unreadCount = 0, onMarkAsRead, onMarkAllA
         </div>
 
         {/* Navigation Items */}
-        <div className="px-4 pb-20">
+        <div className="px-4 pb-10">
           <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 px-2">Management</div>
 
           <ul className="space-y-2">
@@ -490,7 +490,37 @@ const Sidebar = ({ notifications = [], unreadCount = 0, onMarkAsRead, onMarkAllA
             })}
           </ul>
 
-          {/* Mobile Logout */}
+        </div>
+
+                <div className="mb-6 px-6 pb-10">
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Roles</div>
+
+          {/* Dashboard Link */}
+          <motion.div
+            className="relative mb-2"
+            whileHover={{ x: 4 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          >
+            <div
+              className={`absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-orange-500 to-orange-600 rounded-r-full transition-opacity duration-300 ${
+                pathname === "/admin" ? "opacity-100" : "opacity-0"
+              }`}
+            ></div>
+            <Link
+              href="/admin/h-o-t"
+              className={`flex items-center space-x-3 px-4 py-3 text-base font-medium rounded-xl transition-all duration-300 ${
+                pathname === "/admin/h-o-t"
+                  ? "text-orange-400 bg-gradient-to-r from-orange-500/10 to-orange-600/5 shadow-lg"
+                  : "text-[#A5A8AB] hover:text-orange-400 hover:bg-white/5"
+              }`}
+              onClick={closeSidebar}
+            >
+              <MdDashboard className={`text-lg ${pathname === "/admin/h-o-t" ? "text-orange-400" : ""}`} />
+              <span>Head of Tailoring</span>
+            </Link>
+          </motion.div>
+
+                    {/* Mobile Logout */}
           <motion.div
             className="lg:hidden mt-8 px-2"
             initial={{ opacity: 0 }}

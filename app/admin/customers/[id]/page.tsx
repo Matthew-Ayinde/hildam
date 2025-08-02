@@ -13,7 +13,7 @@ import { FiUser, FiCalendar, FiMail, FiPhone, FiMapPin, FiEdit3 } from "react-ic
 import { getSession } from "next-auth/react"
 import SkeletonLoader from "@/components/SkeletonLoader"
 import DataPageError from "@/components/admin/DataNotFound"
-import { fetchAllCustomers, fetchCustomer } from "@/app/api/apiClient"
+import { deleteCustomer, fetchAllCustomers, fetchCustomer } from "@/app/api/apiClient"
 
 export default function ShowCustomer() {
   const router = useRouter()
@@ -64,23 +64,9 @@ export default function ShowCustomer() {
     if (!selectedCustomerId) return
 
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      if (!accessToken) {
-        throw new Error("Authentication token not found")
-      }
+      const payload = selectedCustomerId
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/deletecustomer/${selectedCustomerId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to delete customer")
-      }
+      const response = await deleteCustomer(payload)
 
       setPopupMessage("Customer successfully deleted")
       setMessageType("success")

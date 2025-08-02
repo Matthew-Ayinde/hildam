@@ -273,7 +273,9 @@ const Form = () => {
         payload.append("style_reference_images[]", file)
       })
 
-      const response = await createOrder(formData)
+      console.log('payload', formData)
+
+      const response = await createOrder(payload)
       console.log('create order', response)
 
   

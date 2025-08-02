@@ -24,7 +24,12 @@ import { HiOutlineSparkles, HiOutlinePhotograph } from "react-icons/hi";
 import { MdOutlineRule, MdOutlineClose } from "react-icons/md";
 import { BsStars } from "react-icons/bs";
 import OrderPageError from "@/components/admin/OrderPageError";
-import { fetchOrderById, rejectTailorImage, acceptTailorImage, closeOrder } from "@/app/api/apiClient";
+import {
+  fetchOrderById,
+  rejectTailorImage,
+  acceptTailorImage,
+  closeOrder,
+} from "@/app/api/apiClient";
 import { ApplicationRoutes } from "@/constants/ApplicationRoutes";
 
 export default function ShowCustomer() {
@@ -53,10 +58,8 @@ export default function ShowCustomer() {
   const handleCancelClose = () => setIsCloseModalOpen(false);
   const handleConfirmClose = async () => {
     try {
-    
-
       const response = await closeOrder(orderId);
-      console.log('close order response', response)
+      console.log("close order response", response);
 
       router.push(ApplicationRoutes.AdminOrders);
     } catch (err) {
@@ -106,6 +109,8 @@ export default function ShowCustomer() {
     manager_name: string;
     duration: number;
     style_approval: string;
+    collection_date: string;
+    has_payment: string
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -223,6 +228,7 @@ export default function ShowCustomer() {
           created_at: result.created_at,
           first_fitting_date: result.first_fitting_date,
           second_fitting_date: result.second_fitting_date,
+          collection_date: result.collection_date,
           customer_name: result.customer_name,
           customer_email: result.customer.email,
           gender: result.customer.gender,
@@ -231,7 +237,8 @@ export default function ShowCustomer() {
           manager_name: result.tailoring.manager.name || "Not Assigned",
           duration: result.duration,
           style_approval: result.tailoring.client_manager_approval,
-          style_approval_feedback: result.tailoring.client_manager_feedback
+          style_approval_feedback: result.tailoring.client_manager_feedback,
+          has_payment: result.has_payment,
         };
         setCustomer(mappedCustomer);
       } else {
@@ -260,19 +267,17 @@ export default function ShowCustomer() {
 
   const handleRejectConfirm = async () => {
     const feedback = {
-      client_manager_feedback: rejectFeedback
-    }
+      client_manager_feedback: rejectFeedback,
+    };
     try {
-      
       const response = await rejectTailorImage(orderId, feedback);
-      console.log('reject response', response)
-
+      console.log("reject response", response);
 
       setIsRejectModalOpen(false);
       setRejectFeedback("");
 
       setTimeout(() => {
-      router.push(ApplicationRoutes.AdminOrders)
+        router.push(ApplicationRoutes.AdminOrders);
       }, 2000);
     } catch (err) {
       console.error(err);
@@ -291,10 +296,9 @@ export default function ShowCustomer() {
 
   const handleApproveConfirm = async () => {
     try {
+      const response = await acceptTailorImage(orderId);
 
-      const response = await acceptTailorImage(orderId)
-
-      console.log('approve res', response)
+      console.log("approve res", response);
       setIsApproveModalOpen(false);
       setApprovePrice("");
       router.push(`/admin/orders/${id}/add-job-expense`);
@@ -831,11 +835,12 @@ export default function ShowCustomer() {
                         {customer.style_approval === "rejected" && (
                           <div>
                             <div className="flex items-center space-x-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
-                            <IoIosClose size={16} />
-                            <span>Rejected</span>
-                            <span className="ml-5">({customer.style_approval_feedback})</span>
-                          </div>
-                
+                              <IoIosClose size={16} />
+                              <span>Rejected</span>
+                              <span className="ml-5">
+                                ({customer.style_approval_feedback})
+                              </span>
+                            </div>
                           </div>
                         )}
                         {customer.style_approval === null && (
@@ -873,13 +878,12 @@ export default function ShowCustomer() {
                         )}
 
                       {/* Show action for approved status */}
-                      {customer.style_approval === "accepted" &&
-                        customer.order_status !== "closed" && (
-                          <Link href={`/admin/orders/${id}/add-job-expense`}>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:from-orange-600 hover:to-amber-600 transition-all duration-200 text-sm font-medium"
+                      {customer.style_approval === "accepted" && customer.has_payment === "0" && customer.order_status !== "closed" && (
+                        <Link href={`/admin/orders/${id}/add-job-expense`}>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                              className="flex items-center space-x-1 px-4 mt-5 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:from-orange-600 hover:to-amber-600 transition-all duration-200 text-sm font-medium"
                             >
                               <span>Add Payment</span>
                             </motion.button>
@@ -954,6 +958,20 @@ export default function ShowCustomer() {
                   <input
                     type="text"
                     value={customer.duration ?? "Not specified"}
+                    readOnly
+                    className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                    <FiCalendar className="text-indigo-500" size={16} />
+                    <span>Collection Date</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={
+                      formatDate(customer.collection_date) || "Not scheduled"
+                    }
                     readOnly
                     className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"
                   />
@@ -1092,7 +1110,7 @@ export default function ShowCustomer() {
                   </>
                 )}
 
-                {customer.style_approval === "accepted" && (
+                {customer.style_approval === "accepted" && customer.has_payment === "0" && customer.order_status !== "closed" && (
                   <div className="text-center">
                     <div className="flex items-center justify-center space-x-2 text-green-600 font-semibold text-lg mb-4">
                       <IoIosCheckmark size={24} />
@@ -1223,7 +1241,7 @@ export default function ShowCustomer() {
                   Approve Style
                 </h2>
                 <p className="text-gray-600">
-                  You're about to approve this design and proceed to invoice
+                  You're about to approve this design and proceed to payments
                   generation.
                 </p>
               </div>
@@ -1234,7 +1252,7 @@ export default function ShowCustomer() {
                 onClick={handleApproveConfirm}
                 className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-semibold"
               >
-                Confirm & Generate Invoice
+                Confirm & Create Payment
               </motion.button>
             </motion.div>
           </motion.div>

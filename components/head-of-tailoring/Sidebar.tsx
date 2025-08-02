@@ -9,7 +9,7 @@ import Image from "next/image"
 import { MdDashboard, MdOutlinePayment, MdOutlineInventory2 } from "react-icons/md"
 import { usePathname } from "next/navigation"
 import { HiMenuAlt3, HiX, HiOutlineBell, HiOutlineClock } from "react-icons/hi"
-import LogoutButton from "../LogoutMobile"
+import LogoutButton from "@/components/LogoutMobile"
 import { useRouter } from "next/navigation"
 import { Calendar } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -21,7 +21,7 @@ type Notification = {
   id: string
   message: string
   link: string
-  read: string
+  is_read: boolean
   created_at: string
 }
 
@@ -231,17 +231,17 @@ const Sidebar = ({ notifications = [], unreadCount = 0, onMarkAsRead, onMarkAllA
                           whileHover={{ backgroundColor: "#f9fafb" }}
                           onClick={() => handleMarkAsRead(notification.id, notification.message, notification.link)}
                           className={`flex items-start gap-3 p-4 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${
-                            notification.read === "0" ? "bg-orange-50" : ""
+                            notification.is_read === false ? "bg-orange-50" : ""
                           }`}
                         >
                           <div
-                            className={`mt-1 p-2 rounded-full ${notification.read === "0" ? "bg-orange-100" : "bg-gray-100"}`}
+                            className={`mt-1 p-2 rounded-full ${notification.is_read === false ? "bg-orange-100" : "bg-gray-100"}`}
                           >
                             {getNotificationIcon(notification.message)}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p
-                              className={`text-sm leading-relaxed ${notification.read === "0" ? "font-medium text-gray-900" : "text-gray-700"}`}
+                              className={`text-sm leading-relaxed ${notification.is_read === false ? "font-medium text-gray-900" : "text-gray-700"}`}
                             >
                               {notification.message}
                             </p>
@@ -252,7 +252,7 @@ const Sidebar = ({ notifications = [], unreadCount = 0, onMarkAsRead, onMarkAllA
                               </span>
                             </div>
                           </div>
-                          {notification.read === "0" && (
+                          {notification.is_read === false && (
                             <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
                           )}
                         </motion.div>

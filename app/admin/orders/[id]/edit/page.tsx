@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import { fetchOrderById, editOrder, fetchHeadOfTailoringList } from "@/app/api/apiClient"
+import { Button } from "@/components/ui/button" // Import shadcn Button
 
 interface ProjectManager {
   id: string
@@ -19,21 +20,23 @@ interface ProjectManager {
 }
 
 interface Customer {
-  name: string
+  name: string // Maps to customer_name from API
   age: string
   order_id: string
   clothing_name: string
   clothing_description: string
   order_status: string
   priority: string
-  email: string
+  email: string // Maps to customer_email from API
   address: string
   style_reference_images: string[]
   created_at: string
   manager_id: string
-  manager_name: string
+  phone_number: string // Added based on usage
+  tailoring?: { manager?: { name: string } } // Added for manager_name access
   first_fitting_date: string | null
   second_fitting_date: string | null
+  collection_date: string // Added for collection date
   duration: string
 }
 
@@ -43,25 +46,25 @@ export default function EditCustomer() {
   const [errorManagers, setErrorManagers] = useState("")
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0)
-  const [loadingImage, setLoadingImage] = useState(false)
+  const [loadingImage, setLoadingImage] = useState(false) // This state is not currently used, but kept for consistency
   const router = useRouter()
   const { id } = useParams()
   const orderId = id as string
-
-  const [customer, setCustomer] = useState<Customer | null>(null)
+  const [customer, setCustomer] = useState<Customer | null>(null) // Store original customer data for reference
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>("")
   const [successMessage, setSuccessMessage] = useState<string>("")
   const [firstFittingDate, setFirstFittingDate] = useState<Date | null>(null)
   const [secondFittingDate, setSecondFittingDate] = useState<Date | null>(null)
-
+  const [collectionDate, setCollectionDate] = useState<Date | null>(null)
+  const [showManagerDropdown, setShowManagerDropdown] = useState(false) // New state for dropdown visibility
   const [formData, setFormData] = useState({
     name: "",
     age: "",
     phone_number: "",
     email: "",
     address: "",
-    style_reference_images: [],
+    style_reference_images: [] as string[], // This will hold URLs of existing images to keep
     created_at: "",
     manager_id: "",
     manager_name: "",
@@ -70,22 +73,17 @@ export default function EditCustomer() {
     clothing_description: "",
     priority: "",
     order_id: "",
-    first_fitting_date: "",
-    second_fitting_date: "",
     duration: "",
   })
-
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [previewUrls, setPreviewUrls] = useState<string[]>([])
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]) // This will hold new image files
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]) // This holds all URLs for display (existing + new blob URLs)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }))
-
     // Update manager_name when manager_id changes
     if (name === "manager_id") {
       const selectedManager = projectManagers.find((manager) => manager.id === value)
@@ -107,15 +105,21 @@ export default function EditCustomer() {
     }
   }
 
-  const removeImage = (index: number) => {
-    setPreviewUrls((prev) => prev.filter((_, i) => i !== index))
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
-    // Also remove from formData if it's an existing image
-    if (index < formData.style_reference_images.length) {
+  const removeImage = (indexToRemove: number) => {
+    const initialExistingImagesCount = customer?.style_reference_images?.length || 0
+    setPreviewUrls((prev) => prev.filter((_, i) => i !== indexToRemove))
+
+    if (indexToRemove < initialExistingImagesCount) {
+      // This is an existing image that was fetched from the backend
       setFormData((prev) => ({
         ...prev,
-        style_reference_images: prev.style_reference_images.filter((_, i) => i !== index),
+        style_reference_images: prev.style_reference_images.filter((_, i) => i !== indexToRemove),
       }))
+    } else {
+      // This is a newly added image (from selectedFiles)
+      // Adjust the index for selectedFiles array
+      const selectedFilesIndex = indexToRemove - initialExistingImagesCount
+      setSelectedFiles((prev) => prev.filter((_, i) => i !== selectedFilesIndex))
     }
   }
 
@@ -135,15 +139,14 @@ export default function EditCustomer() {
     try {
       const data = await fetchOrderById(orderId)
       console.log("Fetched order data:", data)
-      setCustomer(data)
-
+      setCustomer(data) // Store the original customer data
       const customerFormData = {
         name: data.customer_name,
         age: data.age,
         phone_number: data.phone_number,
         email: data.customer_email,
         address: data.address,
-        style_reference_images: data.style_reference_images || [],
+        style_reference_images: data.style_reference_images || [], // Initial existing images
         created_at: data.created_at,
         order_status: data.order_status,
         manager_id: data.manager_id,
@@ -152,15 +155,14 @@ export default function EditCustomer() {
         clothing_description: data.clothing_description,
         priority: data.priority,
         order_id: data.order_id,
-        first_fitting_date: data.first_fitting_date || "Not available",
-        second_fitting_date: data.second_fitting_date || "Not available",
         duration: data.duration || "",
       }
-
       setFormData(customerFormData)
-      setPreviewUrls(data.style_reference_images || [])
+      setPreviewUrls(data.style_reference_images || []) // Set initial preview URLs from existing images
       setFirstFittingDate(data.first_fitting_date ? new Date(data.first_fitting_date) : null)
       setSecondFittingDate(data.second_fitting_date ? new Date(data.second_fitting_date) : null)
+      setCollectionDate(data.collection_date ? new Date(data.collection_date) : null)
+
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred")
     } finally {
@@ -193,7 +195,7 @@ export default function EditCustomer() {
         }))
       }
     }
-  }, [projectManagers, formData.manager_id, formData.manager_name])
+  }, [projectManagers, formData.manager_id, formData.manager_name]) // [^1]
 
   useEffect(() => {
     fetchCustomer()
@@ -205,36 +207,113 @@ export default function EditCustomer() {
     setError("")
     setSuccessMessage("")
 
+    if (!customer) {
+      setError("Original customer data not loaded. Cannot save changes.")
+      return
+    }
+
     try {
       const formDataToSend = new FormData()
+      let hasChanges = false
 
-      if (firstFittingDate) {
-        formDataToSend.append("first_fitting_date", firstFittingDate.toISOString().split("T")[0])
+      // 1. Compare and append only changed basic fields
+      const fieldMappings = {
+        name: "name", // formData.name vs customer.name
+        age: "age",
+        phone_number: "phone_number",
+        email: "email", // formData.email vs customer.email
+        address: "address",
+        order_status: "order_status",
+        clothing_name: "clothing_name",
+        clothing_description: "clothing_description",
+        priority: "priority",
+        manager_id: "manager_id",
+        duration: "duration",
       }
 
-      if (secondFittingDate) {
-        formDataToSend.append("second_fitting_date", secondFittingDate.toISOString().split("T")[0])
-      }
+      for (const key in fieldMappings) {
+        const formKey = key as keyof typeof formData
+        const customerKey = fieldMappings[key as keyof typeof fieldMappings] as keyof Customer
 
-      formDataToSend.append("duration", formData.duration + "")
+        let formValue = formData[formKey]
+        let customerValue = customer[customerKey]
 
-      // Append new files
-      selectedFiles.forEach((file, index) => {
-        formDataToSend.append(`style_reference_images[${index}]`, file)
-      })
-
-      Object.keys(formData).forEach((key) => {
-        if (key === "style_reference_images") {
-          // Skip - handled above
-        } else if (!["first_fitting_date", "second_fitting_date", "duration"].includes(key)) {
-          formDataToSend.append(key, formData[key as keyof typeof formData] + "")
+        // Special handling for duration: ensure string for comparison and FormData append
+        if (formKey === "duration") {
+          formValue = String(formValue)
+          customerValue = String(customerValue)
         }
-      })
 
-      console.log("Form data to send:", formDataToSend)
+        if (formValue !== customerValue) {
+          formDataToSend.append(formKey, formValue + "") // Ensure string
+          hasChanges = true
+        }
+      }
+
+      // 2. Handle fitting dates
+      const originalFirstFittingDateStr = customer.first_fitting_date
+        ? new Date(customer.first_fitting_date).toISOString().split("T")[0]
+        : ""
+      const currentFirstFittingDateStr = firstFittingDate ? firstFittingDate.toISOString().split("T")[0] : ""
+
+      if (currentFirstFittingDateStr !== originalFirstFittingDateStr) {
+        formDataToSend.append("first_fitting_date", currentFirstFittingDateStr)
+        hasChanges = true
+      }
+
+      const originalSecondFittingDateStr = customer.second_fitting_date
+        ? new Date(customer.second_fitting_date).toISOString().split("T")[0]
+        : ""
+      const currentSecondFittingDateStr = secondFittingDate ? secondFittingDate.toISOString().split("T")[0] : ""
+
+      if (currentSecondFittingDateStr !== originalSecondFittingDateStr) {
+        formDataToSend.append("second_fitting_date", currentSecondFittingDateStr)
+        hasChanges = true
+      }
+
+      // Handle collection date
+      const originalCollectionDateStr = customer.collection_date
+        ? new Date(customer.collection_date).toISOString().split("T")[0]
+        : ""
+      const currentCollectionDateStr = collectionDate ? collectionDate.toISOString().split("T")[0] : ""
+
+      if (currentCollectionDateStr !== originalCollectionDateStr) {
+        formDataToSend.append("collection_date", currentCollectionDateStr)
+        hasChanges = true
+      }
+
+      // 3. Handle image changes
+      const originalImages = customer.style_reference_images || []
+      const currentKeptImages = formData.style_reference_images // These are the existing images that were NOT removed
+
+      // Check if the set of existing images has changed (removed or reordered)
+      const existingImagesChanged =
+        originalImages.length !== currentKeptImages.length ||
+        !originalImages.every((url) => currentKeptImages.includes(url))
+
+      // Check if new images were added
+      const newImagesAdded = selectedFiles.length > 0
+
+      if (existingImagesChanged || newImagesAdded) {
+        // If any image changes, send the full updated list of existing images to keep
+        // and any new files. The backend should handle replacing the old list.
+        currentKeptImages.forEach((url, index) => {
+          formDataToSend.append(`existing_style_reference_images[${index}]`, url)
+        })
+        selectedFiles.forEach((file, index) => {
+          formDataToSend.append(`style_reference_images[${index}]`, file)
+        })
+        hasChanges = true
+      }
+
+      if (!hasChanges) {
+        setSuccessMessage("No changes detected.")
+        setTimeout(() => setSuccessMessage(""), 2000) // Clear message after 2 seconds
+        return // Exit if no changes
+      }
+
       const response = await editOrder(orderId, formDataToSend)
       console.log("Edit order response:", response)
-
       setSuccessMessage("Order updated successfully!")
       setTimeout(() => router.push("/admin/orders"), 2000)
     } catch (err) {
@@ -244,7 +323,7 @@ export default function EditCustomer() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-50 to-white">
         <SkeletonLoader />
       </div>
     )
@@ -252,16 +331,16 @@ export default function EditCustomer() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-50 to-white">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center bg-white p-8 rounded-2xl shadow-xl border border-red-100"
+          className="rounded-2xl border border-red-100 bg-white p-8 text-center shadow-xl"
         >
-          <div className="text-red-500 text-lg mb-4">Error: {error}</div>
+          <div className="mb-4 text-lg text-red-500">Error: {error}</div>
           <button
             onClick={fetchCustomer}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors"
+            className="rounded-lg bg-orange-500 px-6 py-2 text-white transition-colors hover:bg-orange-600"
           >
             Retry
           </button>
@@ -280,9 +359,9 @@ export default function EditCustomer() {
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
-              className="fixed top-5 left-0 right-0 flex justify-center z-50"
+              className="fixed left-0 right-0 top-5 z-50 flex justify-center"
             >
-              <div className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl shadow-lg">
+              <div className="rounded-xl bg-gradient-to-r from-green-500 to-green-600 px-6 py-3 text-white shadow-lg">
                 {successMessage}
               </div>
             </motion.div>
@@ -293,12 +372,12 @@ export default function EditCustomer() {
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="mb-8">
           <Link
             href="/admin/orders"
-            className="inline-flex items-center text-orange-600 hover:text-orange-700 transition-colors group"
+            className="group inline-flex items-center text-orange-600 transition-colors hover:text-orange-700"
           >
-            <IoIosArrowBack className="mr-2 group-hover:-translate-x-1 transition-transform" size={24} />
+            <IoIosArrowBack className="mr-2 transition-transform group-hover:-translate-x-1" size={24} />
             <span className="font-medium">Back to Orders</span>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-800 mt-4 mb-2">Edit Order</h1>
+          <h1 className="mb-2 mt-4 text-3xl font-bold text-gray-800">Edit Order</h1>
           <p className="text-gray-600">Update order details and measurements</p>
         </motion.div>
 
@@ -308,16 +387,15 @@ export default function EditCustomer() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl shadow-xl border border-orange-100 overflow-hidden"
+            className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-xl"
           >
             <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6">
-              <h2 className="text-xl font-bold text-white flex items-center">
-                <FiUser className="mr-3" />
-                Basic Information
+              <h2 className="flex items-center text-xl font-bold text-white">
+                <FiUser className="mr-3" /> Basic Information
               </h2>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">Order ID</label>
                   <input
@@ -325,10 +403,9 @@ export default function EditCustomer() {
                     name="order_id"
                     value={formData.order_id}
                     disabled
-                    className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-gray-600 focus:outline-none"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-gray-600 focus:outline-none"
                   />
                 </div>
-
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">Clothing Name</label>
                   <input
@@ -336,17 +413,16 @@ export default function EditCustomer() {
                     name="clothing_name"
                     value={formData.clothing_name}
                     onChange={handleInputChange}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
+                    className="w-full rounded-xl border border-gray-200 p-3 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                   />
                 </div>
-
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">Priority</label>
                   <select
                     name="priority"
                     value={formData.priority}
                     onChange={handleInputChange}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white"
+                    className="w-full rounded-xl border border-gray-200 bg-white p-3 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                   >
                     <option value="" disabled>
                       Select Priority
@@ -356,7 +432,6 @@ export default function EditCustomer() {
                     <option value="low">🟢 Low</option>
                   </select>
                 </div>
-
                 <div className="space-y-2 md:col-span-3">
                   <label className="block text-sm font-semibold text-gray-700">Clothing Description</label>
                   <textarea
@@ -364,17 +439,16 @@ export default function EditCustomer() {
                     rows={3}
                     value={formData.clothing_description}
                     onChange={handleInputChange}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all resize-none"
+                    className="w-full resize-none rounded-xl border border-gray-200 p-3 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                   />
                 </div>
-
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">Order Status</label>
                   <select
                     name="order_status"
                     value={formData.order_status}
                     onChange={handleInputChange}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white"
+                    className="w-full rounded-xl border border-gray-200 bg-white p-3 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                   >
                     <option value="" disabled>
                       Select Status
@@ -384,42 +458,54 @@ export default function EditCustomer() {
                     <option value="completed">✅ Completed</option>
                   </select>
                 </div>
-
-                {/* Display selected manager name */}
-                {formData.manager_name && (
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">Selected Manager</label>
+                {/* Display selected manager name and Change button */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">Head of Tailoring</label>
+                  <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      value={formData.manager_name}
+                      value={formData.manager_name || "Not assigned"}
                       disabled
-                      className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-gray-600 focus:outline-none"
+                      className="flex-1 rounded-xl border border-gray-200 bg-gray-50 p-3 text-gray-600 focus:outline-none"
                     />
+                    <Button
+                      type="button"
+                      onClick={() => setShowManagerDropdown(!showManagerDropdown)}
+                      className="rounded-xl bg-orange-500 px-4 py-2 text-white transition-colors hover:bg-orange-600"
+                    >
+                      {showManagerDropdown ? "Cancel" : "Change"}
+                    </Button>
                   </div>
-                )}
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">Change Head of Tailoring</label>
-                  <select
-                    name="manager_id"
-                    value={formData.manager_id || ""}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white"
-                    disabled={loadingManagers}
-                    required
-                  >
-                    <option value="" disabled>
-                      {loadingManagers ? "Loading..." : errorManagers ? "Error loading" : "Select Manager"}
-                    </option>
-                    {projectManagers.map((manager) => (
-                      <option key={manager.id} value={manager.id}>
-                        {manager.name}
-                      </option>
-                    ))}
-                  </select>
                 </div>
-
-                
+                {/* Conditionally render Change Head of Tailoring dropdown */}
+                {showManagerDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-2"
+                  >
+                    <label className="block text-sm font-semibold text-gray-700">Change Head of Tailoring</label>
+                    <select
+                      name="manager_id"
+                      value={formData.manager_id || ""}
+                      onChange={handleInputChange}
+                      className="w-full rounded-xl border border-gray-200 bg-white p-3 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                      disabled={loadingManagers}
+                      required
+                    >
+                      <option value="" disabled>
+                        {loadingManagers ? "Loading..." : errorManagers ? "Error loading" : "Select Manager"}
+                      </option>
+                      {projectManagers.map((manager) => (
+                        <option key={manager.id} value={manager.id}>
+                          {manager.name}
+                        </option>
+                      ))}
+                    </select>
+                  </motion.div>
+                )}
               </div>
             </div>
           </motion.div>
@@ -429,47 +515,46 @@ export default function EditCustomer() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl shadow-xl border border-orange-100 overflow-hidden"
+            className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-xl"
           >
             <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6">
               <h2 className="text-xl font-bold text-white">Style Reference Images</h2>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+              <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
                 {previewUrls.map((url, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.1 }}
-                    className="relative group"
+                    className="group relative"
                   >
-                    <div className="aspect-square rounded-xl overflow-hidden border-2 border-gray-200 hover:border-orange-300 transition-colors cursor-pointer">
+                    <div className="aspect-square cursor-pointer overflow-hidden rounded-xl border-2 border-gray-200 transition-colors hover:border-orange-300">
                       <img
                         src={url || "/placeholder.svg"}
                         alt={`Style reference ${index + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         onClick={() => openImageModal(index)}
                       />
                     </div>
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100"
                     >
                       <IoMdTrash size={16} />
                     </button>
                   </motion.div>
                 ))}
-
                 {/* Add Image Button */}
                 <motion.label
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="aspect-square border-2 border-dashed border-orange-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-orange-500 hover:bg-orange-50 transition-all group"
+                  className="group flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-orange-300 transition-all hover:border-orange-500 hover:bg-orange-50"
                 >
-                  <IoMdAdd className="text-orange-400 group-hover:text-orange-600 mb-2" size={32} />
-                  <span className="text-sm text-orange-600 font-medium">Add Image</span>
+                  <IoMdAdd className="mb-2 text-orange-400 group-hover:text-orange-600" size={32} />
+                  <span className="font-medium text-orange-600">Add Image</span>
                   <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
                 </motion.label>
               </div>
@@ -481,16 +566,15 @@ export default function EditCustomer() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-2xl shadow-xl border border-orange-100 overflow-hidden"
+            className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-xl"
           >
             <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6">
-              <h2 className="text-xl font-bold text-white flex items-center">
-                <FiCalendar className="mr-3" />
-                Fitting Schedule
+              <h2 className="flex items-center text-xl font-bold text-white">
+                <FiCalendar className="mr-3" /> Fitting Schedule
               </h2>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">First Fitting Date</label>
                   <DatePicker
@@ -503,11 +587,10 @@ export default function EditCustomer() {
                     }}
                     dateFormat="yyyy-MM-dd"
                     placeholderText="Select date"
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
+                    className="w-full rounded-xl border border-gray-200 p-3 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                     minDate={new Date()}
                   />
                 </div>
-
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">Second Fitting Date</label>
                   <DatePicker
@@ -515,11 +598,10 @@ export default function EditCustomer() {
                     onChange={(date) => setSecondFittingDate(date)}
                     dateFormat="yyyy-MM-dd"
                     placeholderText="Select date"
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
+                    className="w-full rounded-xl border border-gray-200 p-3 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                     minDate={firstFittingDate || new Date()}
                   />
                 </div>
-
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">Duration (days)</label>
                   <input
@@ -528,9 +610,20 @@ export default function EditCustomer() {
                     placeholder="Enter number of days"
                     value={formData.duration}
                     onChange={handleInputChange}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
+                    className="w-full rounded-xl border border-gray-200 p-3 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">Collection Date</label>
+                  <DatePicker
+                    selected={collectionDate}
+                    onChange={(date) => setCollectionDate(date)}
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="Select date"
+                    className="w-full rounded-xl border border-gray-200 p-3 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                    minDate={secondFittingDate || firstFittingDate || new Date()}
+                  />
+                  </div>
               </div>
             </div>
           </motion.div>
@@ -546,7 +639,7 @@ export default function EditCustomer() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit"
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition-all duration-300"
+              className="rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-8 py-4 font-bold text-white shadow-lg transition-all duration-300 hover:from-orange-600 hover:to-orange-700"
             >
               Save Changes
             </motion.button>
@@ -560,19 +653,19 @@ export default function EditCustomer() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
               onClick={closeImageModal}
             >
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
-                className="bg-white rounded-2xl p-6 max-w-4xl max-h-[90vh] overflow-auto"
+                className="max-h-[90vh] max-w-4xl overflow-auto rounded-2xl bg-white p-6"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-xl font-bold text-gray-800">Style Reference {selectedImageIndex + 1}</h3>
-                  <button onClick={closeImageModal} className="text-gray-500 hover:text-gray-700 transition-colors">
+                  <button onClick={closeImageModal} className="text-gray-500 transition-colors hover:text-gray-700">
                     <IoMdClose size={24} />
                   </button>
                 </div>
@@ -585,21 +678,21 @@ export default function EditCustomer() {
                     <img
                       src={previewUrls[selectedImageIndex] || "/placeholder.svg"}
                       alt={`Style reference ${selectedImageIndex + 1}`}
-                      className="max-w-full max-h-[70vh] object-contain rounded-xl"
+                      className="max-h-[70vh] max-w-full rounded-xl object-contain"
                       onError={(e) => {
-                        e.currentTarget.src = ""
+                        e.currentTarget.src = "/placeholder.svg" // Fallback to a generic placeholder
                         e.currentTarget.alt = "Image failed to load"
                       }}
                     />
                   </div>
                 )}
                 {previewUrls.length > 1 && (
-                  <div className="flex justify-center mt-4 space-x-2">
+                  <div className="mt-4 flex justify-center space-x-2">
                     {previewUrls.map((_, index) => (
                       <button
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
-                        className={`w-3 h-3 rounded-full transition-colors ${
+                        className={`h-3 w-3 rounded-full transition-colors ${
                           index === selectedImageIndex ? "bg-orange-500" : "bg-gray-300"
                         }`}
                       />

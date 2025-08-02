@@ -63,6 +63,36 @@ export async function fetchCustomerChart(selectedYear: string): Promise<any> {
   return resp.data;
 }
 
+export async function importCustomerData(selectedFile: File): Promise<any> {
+  const headers = await getUserHeaders();
+  const formData = new FormData();
+  formData.append('file', selectedFile);
+
+  const resp = await API.post(ApiRoutes.ImportCustomerData, formData, {
+    headers: {
+      ...headers,
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  
+  return resp.data;
+} 
+
+export async function exportCustomerData(): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(ApiRoutes.ExportCustomerData, {
+    headers: {
+      ...headers,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  console.log("Exported customer data:", resp.data);
+  return resp.data;
+
+}
+
+
 
 
 
@@ -89,14 +119,15 @@ export async function deleteOrder(orderId: string): Promise<any> {
   return resp;
 }
 
-export async function createOrder(formData: any): Promise<any> {
+export async function createOrder(payload: any): Promise<any> {
   const headers = await getUserHeaders();
-  const resp = await API.post(ApiRoutes.CreateOrder, formData, { headers });
+  const resp = await API.post(ApiRoutes.CreateOrder, payload, { headers });
   return resp.data;
 }
 
 export async function editOrder(orderId: string, formData: any): Promise<any> {
   const headers = await getUserHeaders();
+  console.log("Form data to send:", formData) // Debugging line
   const resp = await API.post(`${ApiRoutes.EditOrder}/${orderId}`, formData, { headers });
   return resp.data;
 }
@@ -254,8 +285,12 @@ export async function deletePayment(paymentId: string): Promise<any> {
   return resp;
 }
 
-
-
+export async function fetchPaymentChartInformation(selectedType: string, selectedValue: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(`${ApiRoutes.FetchPaymentChart}?type=${selectedType}&value=${selectedValue}`, {headers})
+  console.log('payment res', resp.data)
+  return resp.data
+}
 
 
 

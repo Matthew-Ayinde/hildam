@@ -15,7 +15,7 @@ type Notification = {
   id: string
   message: string
   link: string
-  read: string
+  is_read: boolean
   created_at: string
   action_type: string
 }
@@ -38,7 +38,7 @@ export default function ClientLayout({ children }: Props) {
 
       const resp = await readNotification(id)
       console.log("Notification marked as read:", resp)
-    const updatedNotifications = notifications.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif))
+    const updatedNotifications = notifications.map((notif) => (notif.id === id ? { ...notif, is_read: true } : notif))
     setNotifications(updatedNotifications)
     setUnreadCount((prev) => prev - 1)
 
@@ -55,7 +55,7 @@ export default function ClientLayout({ children }: Props) {
 
       const resp = await readAllNotification()
       console.log("All notifications marked as read", resp)
-    const updatedNotifications = notifications.map((notif) => ({ ...notif, read: "1" }))
+    const updatedNotifications = notifications.map((notif) => ({ ...notif, is_read: true }))
     setNotifications(updatedNotifications)
     setUnreadCount(0)
   }

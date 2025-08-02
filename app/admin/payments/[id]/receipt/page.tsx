@@ -56,6 +56,7 @@ export default function Receipt() {
     setError(null)
     try {
       const result = await fetchPayment(paymentId)
+      console.log('Fetched receipt data:', result)
       if (result) {
         const data: ReceiptData = {
           id: result.id,
@@ -80,7 +81,7 @@ export default function Receipt() {
           name: result.name || 'N/A',
           email: result.email || 'N/A',
           phone_number: result.customer_phone_number || 'N/A',
-          address: result.address || '16, Oduduwa way, ikeja', // Default address if not provided
+          address: result.customer_address || '16, Oduduwa way, ikeja', // Default address if not provided
         }
         setReceiptData(data)
       } else {
@@ -180,7 +181,7 @@ export default function Receipt() {
             <div className="flex items-start space-x-8">
               <div className="text-xl font-bold text-gray-700">Bill to</div>
               <div className="text-gray-800">
-                <p>{receiptData.address}</p>
+                <p className='max-w-[250px]'>{receiptData.address}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-gray-800 text-right">
@@ -230,16 +231,18 @@ export default function Receipt() {
                   <p>VAT(%):</p>
                   <p>Discount(%):</p>
                   <p>Paid:</p>
+                  <p>Balance:</p>
                 </div>
                 <div className="space-y-2">
                   <p>{receiptData.VAT}</p>
                   <p>{receiptData.discount}</p>
-                  <p>₦{receiptData.total_amount_due}</p>
+                  <p>₦{receiptData.amount_paid}</p>
+                  <p>₦{receiptData.balance_remaining}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 text-right bg-orange-500 text-white py-3 px-4 rounded">
                 <div className="font-bold">Amount Paid:</div>
-                <div className="font-bold">₦{receiptData.balance_remaining}</div>
+                <div className="font-bold">₦{receiptData.amount_paid}</div>
               </div>
             </div>
           </div>

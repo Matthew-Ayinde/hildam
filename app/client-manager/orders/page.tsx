@@ -10,7 +10,7 @@ import Spinner from "@/components/Spinner"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { getSession } from "next-auth/react"
-// import OrdersAnalyticsChart from "./OrdersChart"
+import OrdersAnalyticsChart from "./OrdersChart"
 import { deleteOrder, fetchOrderslist } from "@/app/api/apiClient"
 
 

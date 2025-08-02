@@ -238,7 +238,7 @@ export default function ShowExpensePage() {
             className="flex justify-end m-5"
           >
             {/* <button
-              onClick={() => router.push(`/admin/expenses/${id}/edit`)}
+              onClick={() => router.push(`/client-manager/expenses/${id}/edit`)}
               className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
             >
               <div className="text-orange-500 mr-3 text-3xl">₦</div>

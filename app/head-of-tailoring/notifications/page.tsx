@@ -28,7 +28,7 @@ type Notification = {
   id: string
   message: string
   link: string
-  read: string
+  is_read: boolean
   created_at: string
   type?: string // Derived from message content
 }
@@ -131,9 +131,9 @@ export default function NotificationsPage() {
 
     // Apply read/unread filter
     if (filterRead === "read") {
-      filtered = filtered.filter((notif) => notif.read === "1")
+      filtered = filtered.filter((notif) => notif.is_read === true)
     } else if (filterRead === "unread") {
-      filtered = filtered.filter((notif) => notif.read === "0")
+      filtered = filtered.filter((notif) => notif.is_read === false)
     }
 
     // Apply search query
@@ -162,7 +162,7 @@ export default function NotificationsPage() {
 
 
       // Update local state
-      setNotifications((prev) => prev.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif)))
+      setNotifications((prev) => prev.map((notif) => (notif.id === id ? { ...notif, is_read: true } : notif)))
     } catch (error) {
       console.error("Error marking notification as read:", error)
     }
@@ -180,7 +180,7 @@ export default function NotificationsPage() {
       await readAllNotification()
 
       // Update local state
-      setNotifications((prev) => prev.map((notif) => ({ ...notif, read: "1" })))
+      setNotifications((prev) => prev.map((notif) => ({ ...notif, is_read: true })))
     } catch (error) {
       console.error("Error marking all notifications as read:", error)
     }
@@ -249,7 +249,7 @@ export default function NotificationsPage() {
     currentPage * itemsPerPage,
   )
 
-  const unreadCount = notifications.filter((notif) => notif.read === "0").length
+const unreadCount = notifications.filter((notif) => notif.is_read === false).length
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
@@ -414,11 +414,11 @@ export default function NotificationsPage() {
               key={notification.id}
               variants={itemVariants}
               className={`bg-white rounded-xl shadow-sm border ${
-                notification.read === "0" ? "border-orange-200 ring-1 ring-orange-100" : "border-gray-100"
+                notification.is_read === false ? "border-orange-200 ring-1 ring-orange-100" : "border-gray-100"
               } p-5 transition-all hover:shadow-md`}
             >
               <div className="flex gap-4">
-                <div className={`p-3 rounded-full ${notification.read === "0" ? "bg-orange-100" : "bg-gray-100"}`}>
+                <div className={`p-3 rounded-full ${notification.is_read === false ? "bg-orange-100" : "bg-gray-100"}`}>
                   {getNotificationIcon(notification.type || "other")}
                 </div>
 
@@ -436,7 +436,7 @@ export default function NotificationsPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-500">{formatTimeAgo(notification.created_at)}</span>
 
-                      {notification.read === "0" && (
+                      {notification.is_read === false && (
                         <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200">
                           New
                         </Badge>
@@ -446,7 +446,7 @@ export default function NotificationsPage() {
 
                   <p
                     className={`text-sm sm:text-base ${
-                      notification.read === "0" ? "font-medium text-gray-900" : "text-gray-700"
+                      notification.is_read === false ? "font-medium text-gray-900" : "text-gray-700"
                     }`}
                   >
                     {notification.message}
@@ -465,7 +465,7 @@ export default function NotificationsPage() {
                       View details
                     </Button>
 
-                    {notification.read === "0" && (
+                    {notification.is_read === false && (
                       <Button
                         size="sm"
                         variant="outline"

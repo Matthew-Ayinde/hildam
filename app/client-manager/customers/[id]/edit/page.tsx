@@ -6,10 +6,12 @@ import React, { useEffect, useState } from "react";
 import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { editCustomer, fetchCustomer } from "@/app/api/apiClient";
 
-export default function EditCustomer() {
+export default function EditCustomerPage() {
   const router = useRouter();
   const { id } = useParams();
+  const customerId = id as string;
 
   interface Customer {
     name: string;
@@ -37,6 +39,8 @@ export default function EditCustomer() {
     bustpoint: number;
     waist: number;
     shoulder: number;
+    address: string;
+    customer_description: string;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -67,57 +71,49 @@ export default function EditCustomer() {
     shoulder: "",
     bustpoint: "",
     waist: "",
+    address: "",
+    customer_description: "",
   });
 
-  const fetchCustomer = async () => {
+
+
+  const fetchCustomerData = async () => {
     setLoading(true);
     setError("");
 
     try {
-      const session = await getSession(); // Get session from NextAuth
-      const accessToken = session?.user?.token; // Access token from session
-      if (!accessToken) throw new Error("No access token found");
+    
+      const result = await fetchCustomer(customerId)
+      console.log("Fetched customer data:", result);
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/customerslist/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch customer data");
-      }
-
-      const result = await response.json();
-      setCustomer(result.data);
+      setCustomer(result);
       setFormData({
-        name: result.data.name,
-        age: result.data.age,
-        phone_number: result.data.phone_number,
-        gender: result.data.gender,
-        email: result.data.email,
-        bust: result.data.bust,
-        shoulder_to_underbust: result.data.shoulder_to_underbust,
-        round_under_bust: result.data.round_under_bust,
-        sleeve_length: result.data.sleeve_length,
-        half_length: result.data.half_length,
-        blouse_length: result.data.blouse_length,
-        round_sleeve: result.data.round_sleeve,
-        dress_length: result.data.dress_length,
-        chest: result.data.chest,
-        round_shoulder: result.data.round_shoulder,
-        skirt_length: result.data.skirt_length,
-        trousers_length: result.data.trousers_length,
-        round_thigh: result.data.round_thigh,
-        round_knee: result.data.round_knee,
-        round_feet: result.data.round_feet,
-        hip: result.data.hip,
-        shoulder: result.data.shoulder,
-        bustpoint: result.data.bust,
-        waist: result.data.waist,
+        name: result.name,
+        age: result.age,
+        phone_number: result.phone_number,
+        gender: result.gender,
+        email: result.email,
+        bust: result.bust,
+        shoulder_to_underbust: result.shoulder_to_underbust,
+        round_under_bust: result.round_under_bust,
+        sleeve_length: result.sleeve_length,
+        half_length: result.half_length,
+        blouse_length: result.blouse_length,
+        round_sleeve: result.round_sleeve,
+        dress_length: result.dress_length,
+        chest: result.chest,
+        round_shoulder: result.round_shoulder,
+        skirt_length: result.skirt_length,
+        trousers_length: result.trousers_length,
+        round_thigh: result.round_thigh,
+        round_knee: result.round_knee,
+        round_feet: result.round_feet,
+        hip: result.hip,
+        shoulder: result.shoulder,
+        bustpoint: result.bust,
+        waist: result.waist,
+        address: result.address,
+        customer_description: result.customer_description,
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -142,25 +138,9 @@ export default function EditCustomer() {
     setError("");
 
     try {
-      const session = await getSession(); // Get session from NextAuth
-      const accessToken = session?.user?.token; // Access token from session
-      if (!accessToken) throw new Error("No access token found");
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/editcustomer/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update customer data");
-      }
+      const response = await editCustomer(customerId, formData);
+      console.log("Customer updated successfully:", response);
 
       router.push(`/client-manager/customers/${id}`);
     } catch (err) {
@@ -173,7 +153,7 @@ export default function EditCustomer() {
   };
 
   useEffect(() => {
-    fetchCustomer();
+    fetchCustomerData();
   }, [id]);
 
   if (loading) {
@@ -188,7 +168,7 @@ export default function EditCustomer() {
     return (
       <div className="text-center text-red-500 py-10">
         Error: {error}
-        <button onClick={fetchCustomer} className="text-blue-500 underline">
+        <button onClick={fetchCustomerData} className="text-blue-500 underline">
           Retry
         </button>
       </div>
@@ -196,26 +176,23 @@ export default function EditCustomer() {
   }
 
   const measurements = [
-    { label: "Bust", key: "bust" },
-    { label: "Waist", key: "waist" },
-    { label: "Hip", key: "hip" },
-    { label: "Shoulder", key: "shoulder" },
-    { label: "Bust Point", key: "bustpoint" },
-    { label: "Shoulder to Underbust", key: "shoulder_to_underbust" },
-    { label: "Round Under Bust", key: "round_under_bust" },
-    { label: "Sleeve Length", key: "sleeve_length" },
-    { label: "Half Length", key: "half_length" },
     { label: "Blouse Length", key: "blouse_length" },
-    { label: "Round Sleeve", key: "round_sleeve" },
-    { label: "Dress Length", key: "dress_length" },
+    { label: "Bust", key: "bust" },
+    { label: "Bust Point", key: "bustpoint" },
     { label: "Chest", key: "chest" },
+    { label: "Dress Length(Long, 3/4, Short)", key: "dress_length" },
+    { label: "Half Length", key: "half_length" },
+    { label: "Hip", key: "hip" },
     { label: "Round Shoulder", key: "round_shoulder" },
-    { label: "Skirt Length", key: "skirt_length" },
-    { label: "Trouser Length", key: "trousers_length" },
-    { label: "Round Thigh", key: "round_thigh" },
-    { label: "Round Knee", key: "round_knee" },
-    { label: "Round Feet", key: "round_feet" },
+    { label: "Round Sleeve(Arm, Below Elbow, Wrist)", key: "round_sleeve" },
+    { label: "Round Under Bust", key: "round_under_bust" },
+    { label: "Shoulder", key: "shoulder" },
+    { label: "Shoulder to Underbust", key: "shoulder_to_underbust" },
+    { label: "Skirt Length(Long, 3/4, Short)", key: "skirt_length" },
+    { label: "Sleeve Length(Long, Quarter, Short)", key: "sleeve_length" },
+    { label: "Waist", key: "waist" },
   ];
+  
 
   return (
     <motion.div
@@ -301,14 +278,42 @@ export default function EditCustomer() {
             value={formData.email}
             readOnly
             onChange={handleInputChange}
-            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 bg-gray-50"
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 "
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+      <div className="mt-3">
+          <label className="block text-gray-700 font-bold mb-1">
+            Address
+          </label>
+          <textarea
+            rows={2} 
+            name="address"
+            value={formData.address}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 "
+          />
+        </div>
+
+      <div className="mt-3">
+          <label className="block text-gray-700 font-bold mb-1">
+            Customer Description
+          </label>
+          <textarea
+            rows={2} 
+            name="customer_description"
+            value={formData.customer_description}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 "
           />
         </div>
       </div>
 
       {/* Measurements Section */}
       <div className="mt-10">
-        <h3 className="block text-xl font-bold text-gray-800 mb-3">
+        <h3 className="block text-2xl font-bold text-gray-800 mb-3">
           Measurements
         </h3>
         <div className="mb-4">

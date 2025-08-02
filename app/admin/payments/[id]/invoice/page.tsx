@@ -56,6 +56,7 @@ export default function Invoice() {
     setError(null)
     try {
          const result = await fetchPayment(paymentId)
+         console.log('Fetched invoice data:', result)
       
       if (result) {
         const data: InvoiceData = {
@@ -81,7 +82,7 @@ export default function Invoice() {
           name: result.name || 'N/A',
           email: result.email || 'N/A',
           phone_number: result.customer_phone_number || 'N/A',
-          address: result.address || '16, Oduduwa way',  
+          address: result.customer_address || '16, Oduduwa way',  
         }
         setInvoiceData(data)
       } else {
@@ -181,7 +182,7 @@ export default function Invoice() {
             <div className="flex items-start space-x-8">
               <div className="text-xl font-bold text-gray-700">Bill to</div>
               <div className="text-gray-800">
-                <p>{invoiceData.address || 'No address provided'}</p>
+                <p className='max-w-[250px]'>{invoiceData.address || 'No address provided'}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-gray-800 text-right mb-10">
@@ -212,7 +213,7 @@ export default function Invoice() {
               <div className="text-gray-800">{invoiceData.clothing_name}</div>
               <div>
                 <div className="grid grid-cols-3 text-right text-gray-800">
-                  <div>₦{invoiceData.total_amount_due}</div>
+                  <div>₦{invoiceData.going_rate}</div>
                   <div>{invoiceData.discount}</div>
                   <div>₦{invoiceData.total_amount_due}</div>
                 </div>
@@ -228,19 +229,19 @@ export default function Invoice() {
             <div className="w-full sm:w-1/2">
               <div className="grid grid-cols-2 gap-2 text-gray-800 text-right mb-4">
                 <div className="space-y-2">
-                  <p>VAT:</p>
+                  <p>VAT(%):</p>
                   <p>Discount(%):</p>
                   <p>Total:</p>
                 </div>
                 <div className="space-y-2">
-                  <p>₦{invoiceData.VAT}</p>
+                  <p>{invoiceData.VAT}</p>
                   <p>{invoiceData.discount}</p>
                   <p>₦{invoiceData.total_amount_due}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 text-right bg-orange-500 text-white py-3 px-4 rounded">
                 <div className="font-bold">Balance Due:</div>
-                <div className="font-bold">₦{invoiceData.balance_remaining}</div>
+                <div className="font-bold">₦{invoiceData.total_amount_due}</div>
               </div>
             </div>
           </div>

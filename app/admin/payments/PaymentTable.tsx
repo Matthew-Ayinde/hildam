@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { getSession } from "next-auth/react"
 import { fetchAllPayments } from "@/app/api/apiClient"
+import PaymentChart from "@/app/admin/payments/PaymentChart"
 
 export default function ModernPaymentTable() {
   interface Order {
@@ -207,6 +208,8 @@ export default function ModernPaymentTable() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <PaymentChart />
 
       {/* Main Table Container */}
       <motion.div

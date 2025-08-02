@@ -28,8 +28,6 @@ interface ExpenseForm {
   purchase_costs: string;
   labour: string;
   rent: string;
-  total_tailor_commission_percentage: string;
-  total_tailor_commission_amount: string;
 }
 
 const SUMMARY_FIELDS: FieldConfig[] = [
@@ -43,9 +41,7 @@ const BREAKDOWN_FIELDS: FieldConfig[] = [
   { name: 'purchase_costs', label: 'Purchase Costs (₦)', type: 'number', icon: <FiShoppingCart size={18} /> },
   { name: 'labour', label: 'Labour (₦)', type: 'number', icon: <FiUsers size={18} /> },
   { name: 'rent', label: 'Rent (₦)', type: 'number', icon: <FiHome size={18} /> },
-  { name: 'total_tailor_commission_percentage', label: 'Commission (%)', type: 'number', icon: <FiPercent size={18} /> },
-  { name: 'total_tailor_commission_amount', label: 'Commission Amount (₦)', type: 'number', icon: <TbCurrencyNaira size={18} />, readOnly: true },
-];
+ ];
 
 // Reusable input component
 function Field({ config, value, onChange }: { config: FieldConfig; value: string; onChange: (name: keyof ExpenseForm, value: string) => void; }) {
@@ -100,8 +96,7 @@ export default function AddExpensePage() {
   const { id } = useParams();
   const [form, setForm] = useState<ExpenseForm>({
     order_id: '', total_amount: '', balance_remaining: '',
-    utilities: '', services: '', purchase_costs: '', labour: '', rent: '',
-    total_tailor_commission_percentage: '0', total_tailor_commission_amount: '0',
+    utilities: '', services: '', purchase_costs: '', labour: '', rent: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
@@ -139,14 +134,6 @@ export default function AddExpensePage() {
     fetchPayment();
   }, [id]);
 
-  // Auto-calculate commission amount
-  useEffect(() => {
-    const amt = parseFloat(form.total_amount) || 0;
-    const pct = parseFloat(form.total_tailor_commission_percentage) || 0;
-    const calc = ((amt * pct) / 100).toFixed(2);
-    setForm(prev => ({ ...prev, total_tailor_commission_amount: calc }));
-  }, [form.total_amount, form.total_tailor_commission_percentage]);
-
   const handleChange = useCallback((name: keyof ExpenseForm, value: string) => {
     setForm(prev => ({ ...prev, [name]: value }));
   }, []);
@@ -169,7 +156,6 @@ export default function AddExpensePage() {
       setForm({
         order_id: '', total_amount: '', balance_remaining: '',
         utilities: '', services: '', purchase_costs: '', labour: '', rent: '',
-        total_tailor_commission_percentage: '0', total_tailor_commission_amount: '0',
       });
     } catch (err: any) {
       setNotification(err.message || 'Error adding expense');
@@ -182,7 +168,7 @@ export default function AddExpensePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-1 px-1 ">
       {notification && (
         <motion.div
           className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-5 py-3 rounded-lg shadow-xl z-50"
@@ -197,7 +183,7 @@ export default function AddExpensePage() {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden"
+        className="mx-auto bg-white rounded-xl shadow-2xl overflow-hidden"
       >
         <header className="flex items-center justify-between bg-orange-500 text-white px-6 py-4">
           <div className="flex items-center space-x-4">
@@ -206,7 +192,7 @@ export default function AddExpensePage() {
           </div>
         </header>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="lg:p-8 p-2 space-y-6">
           <FormSection title="Summary" fields={SUMMARY_FIELDS} form={form} onChange={handleChange} />
           <FormSection title="Expense Breakdown" fields={BREAKDOWN_FIELDS} form={form} onChange={handleChange} />
           <div className="flex justify-end">

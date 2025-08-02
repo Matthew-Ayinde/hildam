@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { useEffect, useState, useRef } from "react"
-import LogoutButton from "../Logout"
+import LogoutButton from "@/components/Logout"
 import { useRouter } from "next/navigation"
 import { getSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -16,7 +16,7 @@ type Notification = {
   id: string
   message: string
   link: string
-  read: string
+  is_read: boolean
   created_at: string
   action_type: string
 }
@@ -57,19 +57,15 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
   const fetchNotifications = async () => {
     try {
       setError(null)
-      const session = await getSession()
-      const token = session?.user?.token
-
-      if (!token) {
-        throw new Error("No token found, please log in.")
-      }
+     
 
       const response = await fetchAllNotifications()
+      console.log("Fetched notifications:", response)
 
       // Limit to latest 30 notifications
       const latestNotifications = response.slice(0, 30)
       setNotifications(latestNotifications)
-      const unread = latestNotifications.filter((notif: any) => notif.read === "0").length
+      const unread = latestNotifications.filter((notif: any) => notif.is_read === false).length
       setUnreadCount(unread)
 
       // Notify parent component (sidebar) about notification updates
@@ -105,13 +101,13 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
     }
   }, [])
 
-  const markAsRead = async (id: string, message: string, link: string) => {
+  const markAsRead = async (id: string, message: string, link: string, action_type: string) => {
     setDropdownOpen(false)
     try {
       const resp = await readNotification(id)
       console.log("Notification marked as read:", resp)
 
-      const updatedNotifications = notifications.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif))
+      const updatedNotifications = notifications.map((notif) => (notif.id === id ? { ...notif, is_read: true } : notif))
       setNotifications(updatedNotifications)
       const newUnreadCount = unreadCount - 1
       setUnreadCount(newUnreadCount)
@@ -124,29 +120,35 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
 
 
       const linking_id = link.split("/").pop()
-      if (link.includes("customers")) {
+      if (link.includes("customers") && !action_type.includes('delete')) {
         router.push("/client-manager/customers/" + linking_id)
       }
-      if (link.includes("orders")) {
+      if (link.includes("orders") && !action_type.includes('delete')) {
         router.push("/client-manager/orders/" + linking_id)
       }
-      if (link.includes("inventories")) {
+      if (link.includes("inventories") && !action_type.includes('delete')) {
         router.push("/client-manager/inventory/" + linking_id)
       }
-      if (link.includes("payments")) {
+      if (link.includes("payments") && !action_type.includes('delete')) {
         router.push("/client-manager/payments/" + linking_id)
       }
-      if (link.includes("job-expenses")) {
+      if (link.includes("job-expenses") && !action_type.includes('delete')) {
         router.push("/client-manager/expenses/" + linking_id)
       }
       if (link.includes("daily-expenses")) {
         router.push("/client-manager/expenses/daily-expenses")
       }
       if (link.includes("store-requests")) {
-        router.push("/client-manager/inventory/requests/")
+        router.push("/client-manager/inventory/requests")
       }
-      if (link.includes("expenses")) {
+      if (link.includes("tailoring")) {
+        router.push("/client-manager/h-o-t/jobs/" + linking_id)
+      }
+      if (link.includes("expenses") && !action_type.includes('delete')) {
         router.push("/client-manager/expenses/" + linking_id)
+      }
+      if (link.includes("users") && !action_type.includes('delete')) {
+        router.push("/client-manager/users/" + linking_id)
       }
        
     } catch (error) {
@@ -160,7 +162,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
       const resp = await readAllNotification()
       console.log("All notifications marked as read", resp)
 
-      const updatedNotifications = notifications.map((notif) => ({ ...notif, read: "1" }))
+      const updatedNotifications = notifications.map((notif) => ({ ...notif, is_read: true }))
       setNotifications(updatedNotifications)
       setUnreadCount(0)
 
@@ -298,8 +300,12 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                     {/* Notifications List */}
                     <div className="max-h-[450px] overflow-y-auto">
                       {error && (
-                        <div className="p-6 text-center">
-                          <p className="text-red-500 text-sm">{error}</p>
+                        <div className="p-8 text-center">
+                          <div className="bg-orange-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                            <HiOutlineBell className="text-orange-400" size={28} />
+                          </div>
+                          <p className="text-gray-600 font-medium">No notifications</p>
+                          <p className="text-gray-400 text-sm mt-1">You're all caught up!</p>
                         </div>
                       )}
 
@@ -322,14 +328,14 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                             <motion.div
                               key={notif.id}
                               whileHover={{ backgroundColor: "#f9fafb" }}
-                              onClick={() => markAsRead(notif.id, notif.message, notif.link)}
+                              onClick={() => markAsRead(notif.id, notif.message, notif.link, notif.action_type)}
                               className={`flex items-start gap-4 px-6 py-4 cursor-pointer border-b border-gray-50 last:border-b-0 transition-colors ${
-                                notif.read === "0" ? "bg-orange-50" : ""
+                                notif.is_read === false ? "bg-orange-50" : ""
                               }`}
                             >
                               <div
                                 className={`mt-1 p-2.5 rounded-full ${
-                                  notif.read === "0" ? "bg-orange-100" : "bg-gray-100"
+                                  notif.is_read === false ? "bg-orange-100" : "bg-gray-100"
                                 }`}
                               >
                                 {getNotificationIcon(notif.message)}
@@ -337,7 +343,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                               <div className="flex-1">
                                 <p
                                   className={`text-sm leading-relaxed ${
-                                    notif.read === "0" ? "font-medium text-gray-900" : "text-gray-700"
+                                    notif.is_read === false ? "font-medium text-gray-900" : "text-gray-700"
                                   }`}
                                 >
                                   {notif.message}
@@ -349,7 +355,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                                   </span>
                                 </div>
                               </div>
-                              {notif.read === "0" && (
+                              {notif.is_read === false && (
                                 <div className="w-2.5 h-2.5 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
                               )}
                             </motion.div>
@@ -422,17 +428,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                         </div>
                       </div>
                     </div>
-                    <div className="py-2">
-                      <Link href="/client-manager/users" passHref>
-                        <button
-                          className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
-                          onClick={() => setProfileDropdownOpen(false)}
-                        >
-                          <HiOutlineUserCircle size={20} />
-                          <span>Your Profile</span>
-                        </button>
-                      </Link>
-                    </div>
+                   
                     <div className="py-2 border-t border-gray-100">
                       <div className="px-5 py-3">
                         <LogoutButton />

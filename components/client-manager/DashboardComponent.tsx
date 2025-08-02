@@ -146,7 +146,7 @@ export default function Table() {
         ))}
       </div>
 
-      {/* <Last7Days /> */}
+      <Last7Days />
 
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
         <div className="mx-2 font-bold text-gray-500 text-xl my-3 flex flex-row justify-between items-center">

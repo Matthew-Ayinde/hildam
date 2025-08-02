@@ -59,7 +59,8 @@ export default function Table() {
       setData((prevData) => prevData.filter((customer) => customer.id !== selectedCustomerId))
       setPopupMessage("Customer successfully deleted")
       setMessageType("success")
-      setTimeout(() => setPopupMessage(null), 3000)
+      setTimeout(() => window.location.reload(), 2000)
+      // setTimeout(() => setPopupMessage(null), 3000)
     } catch (error) {
       console.error("Error deleting customer:", error)
       setPopupMessage("Error deleting customer")
@@ -127,7 +128,7 @@ export default function Table() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="w-full space-y-6"
+      className="w-full space-y-6 md:px-0"
     >
       {/* Toast Notification */}
       <AnimatePresence>

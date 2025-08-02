@@ -18,62 +18,70 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
-import { addCalendarDate } from "@/app/api/apiClient"
+import { addCalendarDate } from "@/app/api/apiClient" // Assuming this path is correct
 
 interface AppointmentDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  selectedDate: Date | null
+  selectedDate: Date | null // Keep as Date | null for initial selection if any
   onSaveAppointment: (appointment: any) => Promise<void>
 }
 
 export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppointment }: AppointmentDialogProps) {
   const [formData, setFormData] = useState({
     orderId: "",
-    firstFittingDate: selectedDate || new Date(),
-    secondFittingDate: selectedDate ? new Date(selectedDate.getTime() + 7 * 24 * 60 * 60 * 1000) : new Date(),
-    collectionDate: selectedDate ? new Date(selectedDate.getTime() + 14 * 24 * 60 * 60 * 1000) : new Date(),
-    
+    firstFittingDate: null as Date | null, // Default to null
+    secondFittingDate: null as Date | null, // Default to null
+    collectionDate: null as Date | null, // Default to null
   })
-
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-
     setLoading(true)
     setError(null)
 
     try {
-      const appointmentData = {
+      const appointmentData: {
+        order_id: string
+        first_fitting_date?: string
+        second_fitting_date?: string
+        collection_date?: string
+      } = {
         order_id: formData.orderId,
-        first_fittingDate: formData.firstFittingDate.toISOString().split("T")[0],
-        second_fittingDate: formData.secondFittingDate.toISOString().split("T")[0],
-        collection_date: formData.collectionDate.toISOString().split("T")[0],
-        
       }
 
+      // Use format(date, "yyyy-MM-dd") to get the local date string
+      if (formData.firstFittingDate) {
+        appointmentData.first_fitting_date = format(formData.firstFittingDate, "yyyy-MM-dd")
+      }
+      if (formData.secondFittingDate) {
+        appointmentData.second_fitting_date = format(formData.secondFittingDate, "yyyy-MM-dd")
+      }
+      if (formData.collectionDate) {
+        appointmentData.collection_date = format(formData.collectionDate, "yyyy-MM-dd")
+      }
 
       console.log("Submitting appointment data:", appointmentData)
-
       const res = await addCalendarDate(appointmentData)
       console.log("Appointment created successfully:", res)
 
       // Reset form
       setFormData({
         orderId: "",
-        firstFittingDate: selectedDate || new Date(),
-        secondFittingDate: selectedDate ? new Date(selectedDate.getTime() + 7 * 24 * 60 * 60 * 1000) : new Date(),
-        collectionDate: selectedDate ? new Date(selectedDate.getTime() + 14 * 24 * 60 * 60 * 1000) : new Date(),
-      
+        firstFittingDate: null,
+        secondFittingDate: null,
+        collectionDate: null,
       })
-
       onOpenChange(false)
+      // Call onSaveAppointment if needed, passing the response or relevant data
+      await onSaveAppointment(res)
+      window.location.reload() // Reload to reflect changes in the calendar
     } catch (err: any) {
-      const data = err.response.data.message.order_id[0]
-      setError(`${data}`)
+      // More robust error handling
+      const errorMessage = err.response?.data?.message?.order_id?.[0] || err.message || "An unexpected error occurred."
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -85,8 +93,8 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
     label,
     placeholder,
   }: {
-    date: Date
-    onDateChange: (date: Date) => void
+    date: Date | null // Allow null for date
+    onDateChange: (date: Date | null) => void // Allow null for date change
     label: string
     placeholder: string
   }) => (
@@ -103,7 +111,12 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <Calendar mode="single" selected={date} onSelect={(date) => date && onDateChange(date)} initialFocus />
+          <Calendar
+            mode="single"
+            selected={date || undefined} // Calendar's selected prop expects Date | undefined
+            onSelect={(newDate) => onDateChange(newDate || null)} // Pass null if newDate is undefined (e.g., clearing selection)
+            initialFocus
+          />
         </PopoverContent>
       </Popover>
     </div>
@@ -126,9 +139,7 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
             })}
           </DialogDescription>
         </DialogHeader>
-
         {error && <div className="bg-red-50 border border-red-200 rounded-md p-3 text-red-700 text-sm">{error}</div>}
-
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="orderId">Order ID</Label>
@@ -141,8 +152,6 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
               disabled={loading}
             />
           </div>
-
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <DatePicker
               date={formData.firstFittingDate}
@@ -150,7 +159,6 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
               label="First Fitting Date"
               placeholder="Select first fitting date"
             />
-
             <DatePicker
               date={formData.secondFittingDate}
               onDateChange={(date) => setFormData((prev) => ({ ...prev, secondFittingDate: date }))}
@@ -158,17 +166,14 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
               placeholder="Select second fitting date"
             />
           </div>
-
           <DatePicker
             date={formData.collectionDate}
             onDateChange={(date) => setFormData((prev) => ({ ...prev, collectionDate: date }))}
             label="Collection Date"
             placeholder="Select collection date"
           />
-
-
           <DialogFooter>
-            <Button type="submit" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
               Cancel
             </Button>
             <Button

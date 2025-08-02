@@ -168,7 +168,7 @@ export default function Table() {
                 <td className="px-4 py-2 text-sm border-b">{row.date}</td>
                 <td className="px-4 py-2 text-sm border-b">
                   <div className="flex flex-row">
-                    <Link href={`/client-manager/joblists/tailorjoblists/jobs/${row.id}`} className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2">
+                    <Link href={`/admin/joblists/tailorjoblists/jobs/${row.id}`} className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg flex space-x-2">
                       <IoEyeOutline size={20} />
                       <div>View</div>
                     </Link>

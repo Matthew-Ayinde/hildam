@@ -136,42 +136,51 @@ const [selectedTailors, setSelectedTailors] = useState<number[]>([1, 2]);
     };
 
     
-
-const handleAssignTailors = async () => {
-  if (selectedTailors.length === 0) return;
-  setIsAssigning(true);
-  try {
-    const session = await getSession();
-    const accessToken = session?.user?.token;
-
-    // Prepare the tailor IDs to send
-    const tailorIds = selectedTailors.map(tailorId => {
-      const tailor = tailorOptions.find(t => t.id === tailorId);
-      return tailor ? tailor.user_id : null; // Get user_id for each selected tailor
-    }).filter(id => id !== null); // Filter out any null values
-
-    const res = await fetch(
-      `https://hildam.insightpublicis.com/api/edittailorjob/${id}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`
-        },
-        body: JSON.stringify({ tailor_id: tailorIds }) // Send the user_ids
-      }
-    );
-
-    if (!res.ok) throw new Error("Failed to assign tailors");
-    setUploadMessage("Tailors assigned successfully");
-  } catch (err) {
-    setUploadError(err instanceof Error ? err.message : "Unknown error");
-  } finally {
-    setIsAssigning(false);
-  }
-
+    const handleAssignTailors = async () => {
+      if (selectedTailors.length === 0) return;
+      setIsAssigning(true);
+      try {
+        const session = await getSession();
+        const accessToken = session?.user?.token;
     
-};
+        const tailorIds = selectedTailors
+          .map(tid => {
+            const t = tailorOptions.find(o => o.id === tid);
+            return t ? t.user_id : null;
+          })
+          .filter((u): u is number => u !== null);
+    
+        const res = await fetch(
+          `https://hildam.insightpublicis.com/api/edittailorjob/${id}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ tailor_id: tailorIds }),
+          }
+        );
+        if (!res.ok) throw new Error("Failed to assign tailors");
+    
+        // 🔥 NEW: Update assignedTailors state locally
+        const newlyAssigned = selectedTailors.map(tid => {
+          const t = tailorOptions.find(o => o.id === tid)!;
+          return { id: t.id, name: t.name, email: t.email };
+        });
+        setAssignedTailors(newlyAssigned);
+    
+        setUploadMessage("Tailors assigned successfully");
+        // 🔥 OPTIONAL: auto-hide the assign section
+        setIsAssignSectionVisible(false);
+    
+      } catch (err) {
+        setUploadError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setIsAssigning(false);
+      }
+    };
+    
 
     const fadeInUp = {
       hidden: { opacity: 0, y: 20 },
@@ -284,7 +293,7 @@ const handleAssignTailors = async () => {
         setIsSending(false);
       }
 
-      router.push("/client-manager/joblists/tailorjoblists/jobs");
+      router.push("/admin/joblists/tailorjoblists/jobs");
     };
 
     interface Customer {
@@ -482,7 +491,7 @@ const handleAssignTailors = async () => {
           transition={{ duration: 0.5 }}
         >
           <Link
-            href="/client-manager/joblists/tailorjoblists/jobs"
+            href="/admin/joblists/tailorjoblists/jobs"
             className="hover:text-orange-700 text-orange-500 flex flex-row items-center mb-2"
           >
             <IoIosArrowBack size={30} />
@@ -556,7 +565,22 @@ const handleAssignTailors = async () => {
                 className="w-full border border-gray-300 text-[#5d7186] text-sm rounded p-2 bg-gray-50"
               />
             </motion.div>
-            <motion.div
+            {customer.style_reference_images === null ? (
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={fadeInUp}
+                transition={{ duration: 0.5, delay: 0.6 }}
+              >
+                <div className="w-full mx-auto p-6 bg-white rounded-2xl shadow-md">
+                  <label className="block text-gray-700 font-bold">
+                    Customer Style
+                  </label>
+                  <div className="text-sm my-2">No style reference images</div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
               initial="hidden"
               animate="visible"
               variants={fadeInUp}
@@ -596,6 +620,7 @@ const handleAssignTailors = async () => {
                 )}
               </div>
             </motion.div>
+            )}
           </div>
           <motion.div
             className="w-full"
@@ -609,105 +634,23 @@ const handleAssignTailors = async () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
-                { label: "Bust", value: customer.bust, id: "bust" },
-                { label: "Waist", value: customer.waist, id: "waist" },
-                { label: "Hips", value: customer.hips, id: "hips" },
-                {
-                  label: "Shoulder Width",
-                  value: customer.shoulder_width,
-                  id: "shoulder_width",
-                },
-                { label: "Neck", value: customer.neck, id: "neck" },
-                {
-                  label: "Arm Length",
-                  value: customer.arm_length,
-                  id: "arm_length",
-                },
-                {
-                  label: "Back Length",
-                  value: customer.back_length,
-                  id: "back_length",
-                },
-                {
-                  label: "Front Length",
-                  value: customer.front_length,
-                  id: "front_length",
-                },
-                { label: "High Bust", value: customer.high_bust, id: "highBust" },
-                { label: "Hip", value: customer.hip, id: "hip" },
-                { label: "Shoulder", value: customer.shoulder, id: "shoulder" },
-                {
-                  label: "Bust Point",
-                  value: customer.bustpoint,
-                  id: "bustpoint",
-                },
-                {
-                  label: "Shoulder to Underbust",
-                  value: customer.shoulder_to_underbust,
-                  id: "shoulder_to_underbust",
-                },
-                {
-                  label: "Round Under Bust",
-                  value: customer.round_under_bust,
-                  id: "round_under_bust",
-                },
-                {
-                  label: "Half Length",
-                  value: customer.half_length,
-                  id: "half_length",
-                },
-                {
-                  label: "Blouse Length",
-                  value: customer.blouse_length,
-                  id: "blouse_length",
-                },
-                {
-                  label: "Sleeve Length",
-                  value: customer.sleeve_length,
-                  id: "sleeve_length",
-                },
-                {
-                  label: "Round Sleeve",
-                  value: customer.round_sleeve,
-                  id: "round_sleeve",
-                },
-                {
-                  label: "Dress Length",
-                  value: customer.dress_length,
-                  id: "dress_length",
-                },
-                { label: "Chest", value: customer.chest, id: "chest" },
-                {
-                  label: "Round Shoulder",
-                  value: customer.round_shoulder,
-                  id: "round_shoulder",
-                },
-                {
-                  label: "Skirt Length",
-                  value: customer.skirt_length,
-                  id: "skirt_length",
-                },
-                {
-                  label: "Trousers Length",
-                  value: customer.trousers_length,
-                  id: "trousers_length",
-                },
-                {
-                  label: "Round Thigh",
-                  value: customer.round_thigh,
-                  id: "round_thigh",
-                },
-                {
-                  label: "Round Knee",
-                  value: customer.round_knee,
-                  id: "round_knee",
-                },
-                {
-                  label: "Round Feet",
-                  value: customer.round_feet,
-                  id: "round_feet",
-                },
-              ].map((measurement, index) => (
+  { label: "Blouse Length", value: customer.blouse_length, id: "blouse_length" },
+  { label: "Bust", value: customer.bust, id: "bust" },
+  { label: "Bust Point", value: customer.bustpoint, id: "bustpoint" },
+  { label: "Chest", value: customer.chest, id: "chest" },
+  { label: "Dress Length(Long, 3/4, Short)", value: customer.dress_length, id: "dress_length" },
+  { label: "Half Length", value: customer.half_length, id: "half_length" },
+  { label: "Hip", value: customer.hip, id: "hip" },
+  { label: "Round Shoulder", value: customer.round_shoulder, id: "round_shoulder" },
+  { label: "Round Sleeve(Arm, Below Elbow, Wrist)", value: customer.round_sleeve, id: "round_sleeve" },
+  { label: "Round Under Bust", value: customer.round_under_bust, id: "round_under_bust" },
+  { label: "Shoulder", value: customer.shoulder, id: "shoulder" },
+  { label: "Shoulder To Underbust", value: customer.shoulder_to_underbust, id: "shoulder_to_underbust" },
+  { label: "Skirt Length(Long, 3/4, Short)", value: customer.skirt_length, id: "skirt_length" },
+  { label: "Sleeve Length(Long, Quarter, Short)", value: customer.sleeve_length, id: "sleeve_length" },
+  { label: "Waist", value: customer.waist, id: "waist" }
+]
+.map((measurement, index) => (
                 <motion.div
                   key={index}
                   initial="hidden"
@@ -738,7 +681,7 @@ const handleAssignTailors = async () => {
         </form>
 
         <motion.div
-  className="mt-8 p-6 bg-white rounded-3xl shadow-lg"
+  className="mt-8 px-3 py-5"
   initial="hidden"
   animate="visible"
   variants={fadeInUp}
@@ -753,12 +696,6 @@ const handleAssignTailors = async () => {
       Tailors
     </h2>
   </div>
-  {/* <div className="flex space-x-3 whitespace-nowrap">
-      <div className="font-bold text-xl text-gray-700">Tailor Commission:</div>
-      <div className="flex space-x-2 font-normal items-center text-xl text-gray-700">
-        <span>₦</span><span>commission_amount</span>
-      </div>
-  </div> */}
   </div>
 
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 my-5 gap-6">
@@ -1003,7 +940,7 @@ const handleAssignTailors = async () => {
 
         {customer.tailor_image !== null && (
           <>
-            <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">
+            <div className="w-full mx-auto min-h-full p-6">
               <motion.div
                 className="font-bold text-xl mt-5 text-gray-700"
                 initial="hidden"
@@ -1071,7 +1008,7 @@ const handleAssignTailors = async () => {
                   items necessary to complete your job
                 </h1>
                 <Link
-                  href={`/client-manager/joblists/tailorjoblists/jobs/${id}/request-inventory`}
+                  href={`/admin/joblists/tailorjoblists/jobs/${id}/request-inventory`}
                   className=""
                 >
                   <button className="bg-orange-500 text-white px-4 py-2 rounded">

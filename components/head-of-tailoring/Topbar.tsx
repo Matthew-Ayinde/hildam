@@ -16,7 +16,7 @@ type Notification = {
   id: string
   message: string
   link: string
-  read: string
+  is_read: boolean
   created_at: string
   action_type: string
 }
@@ -69,7 +69,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
       // Limit to latest 30 notifications
       const latestNotifications = response.slice(0, 30)
       setNotifications(latestNotifications)
-      const unread = latestNotifications.filter((notif: any) => notif.read === "0").length
+      const unread = latestNotifications.filter((notif: any) => notif.is_read === false).length
       setUnreadCount(unread)
 
       // Notify parent component (sidebar) about notification updates
@@ -111,7 +111,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
       const resp = await readNotification(id)
       console.log("Notification marked as read:", resp)
 
-      const updatedNotifications = notifications.map((notif) => (notif.id === id ? { ...notif, read: "1" } : notif))
+      const updatedNotifications = notifications.map((notif) => (notif.id === id ? { ...notif, is_read: true } : notif))
       setNotifications(updatedNotifications)
       const newUnreadCount = unreadCount - 1
       setUnreadCount(newUnreadCount)
@@ -125,18 +125,6 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
       if (link.includes("tailoring")) {
         router.push("/head-of-tailoring/jobs/" + linking_id)
       }
-      if (link.includes("payments")) {
-        router.push("/admin/payments/" + linking_id)
-      }
-      if (link.includes("job-expenses")) {
-        router.push("/admin/job-expenses/" + linking_id)
-      }
-      if (link.includes("storerequest")) {
-        router.push("/admin/inventory/requests/")
-      }
-      if (link.includes("expenses")) {
-        router.push("/admin/expenses/" + linking_id)
-      }
     } catch (error) {
       console.log("Error marking notification as read:", error)
     }
@@ -148,7 +136,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
       const resp = await readAllNotification()
       console.log("All notifications marked as read", resp)
 
-      const updatedNotifications = notifications.map((notif) => ({ ...notif, read: "1" }))
+      const updatedNotifications = notifications.map((notif) => ({ ...notif, is_read: true }))
       setNotifications(updatedNotifications)
       setUnreadCount(0)
 
@@ -312,12 +300,12 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                               whileHover={{ backgroundColor: "#f9fafb" }}
                               onClick={() => markAsRead(notif.id, notif.message, notif.link)}
                               className={`flex items-start gap-4 px-6 py-4 cursor-pointer border-b border-gray-50 last:border-b-0 transition-colors ${
-                                notif.read === "0" ? "bg-orange-50" : ""
+                                notif.is_read === false ? "bg-orange-50" : ""
                               }`}
                             >
                               <div
                                 className={`mt-1 p-2.5 rounded-full ${
-                                  notif.read === "0" ? "bg-orange-100" : "bg-gray-100"
+                                  notif.is_read === false ? "bg-orange-100" : "bg-gray-100"
                                 }`}
                               >
                                 {getNotificationIcon(notif.message)}
@@ -325,7 +313,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                               <div className="flex-1">
                                 <p
                                   className={`text-sm leading-relaxed ${
-                                    notif.read === "0" ? "font-medium text-gray-900" : "text-gray-700"
+                                    notif.is_read === false ? "font-medium text-gray-900" : "text-gray-700"
                                   }`}
                                 >
                                   {notif.message}
@@ -337,7 +325,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                                   </span>
                                 </div>
                               </div>
-                              {notif.read === "0" && (
+                              {notif.is_read === false && (
                                 <div className="w-2.5 h-2.5 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
                               )}
                             </motion.div>

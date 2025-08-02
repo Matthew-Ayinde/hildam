@@ -23,7 +23,7 @@ export default function DashboardPage() {
         router.replace("/admin")
         break
       case "client manager":
-        router.replace("/client-manager/orders")
+        router.replace("/client-manager")
         break
       case "head of tailoring":
         router.replace("/head-of-tailoring")

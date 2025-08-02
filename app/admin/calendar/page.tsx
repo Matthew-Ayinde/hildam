@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Calendar, ChevronLeft, ChevronRight, Filter, User, Package, Clock, AlertCircle, Loader2 } from "lucide-react"
+import { Calendar, ChevronLeft, ChevronRight, Filter, User, Package, Clock, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,7 +10,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AppointmentDialog } from "./AppointmentDialog"
 import { QuickAppointmentCard } from "./QuickAppointmentCard"
 import { fetchAllDates } from "@/app/api/apiClient"
@@ -20,9 +19,9 @@ interface Order {
   id: string
   customer: string
   items: string[]
-  firstFitting: Date
-  secondFitting: Date
-  collectionDate: Date
+  firstFitting: Date | null // Allow null
+  secondFitting: Date | null // Allow null
+  collectionDate: Date | null // Allow null
 }
 
 interface YearlyData {
@@ -47,7 +46,6 @@ interface MonthlyData {
   total: number
 }
 
-// Helper functions
 const getDaysInMonth = (year: number, month: number) => {
   return new Date(year, month + 1, 0).getDate()
 }
@@ -90,9 +88,9 @@ const useCalendarData = () => {
           id: orderData.order_id,
           customer: orderData.customer_name,
           items: [orderData.clothing_name],
-          firstFitting: orderData.first_fitting_date ? new Date(orderData.first_fitting_date) : new Date(),
-          secondFitting: orderData.second_fitting_date ? new Date(orderData.second_fitting_date) : new Date(),
-          collectionDate: orderData.collection_date ? new Date(orderData.collection_date) : new Date(),
+          firstFitting: orderData.first_fitting_date ? new Date(orderData.first_fitting_date) : null, // Set to null
+          secondFitting: orderData.second_fitting_date ? new Date(orderData.second_fitting_date) : null, // Set to null
+          collectionDate: orderData.collection_date ? new Date(orderData.collection_date) : null, // Set to null
         }
         orders.push(order)
       })
@@ -105,12 +103,14 @@ const useCalendarData = () => {
     setError(null)
     try {
       const response = await fetchAllDates(payload)
+      console.log("payloadd", payload)
       if (response.success) {
         if (response.type === "year") {
           setYearlyData(response.data)
           setOrders([]) // Clear orders for year view
         } else if (response.type === "month") {
           const parsedOrders = parseMonthlyDataToOrders(response.data)
+          console.log("Parsed Orders:", parsedOrders)
           setOrders(parsedOrders)
           setYearlyData([]) // Clear yearly data for month view
         }
@@ -189,24 +189,8 @@ export default function CalendarPage() {
   const daysInMonth = getDaysInMonth(currentYear, currentMonth)
   const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth)
 
-  // Filter orders by selected year and filter type
-  const getFilteredOrders = useCallback(() => {
-    return orders.filter((order) => {
-      const orderYear =
-        order.firstFitting.getFullYear() === selectedYear ||
-        order.secondFitting.getFullYear() === selectedYear ||
-        order.collectionDate.getFullYear() === selectedYear
-
-      if (!orderYear) return false
-
-      if (filterType === "all") return true
-      if (filterType === "first") return order.firstFitting.getFullYear() === selectedYear
-      if (filterType === "second") return order.secondFitting.getFullYear() === selectedYear
-      if (filterType === "collection") return order.collectionDate.getFullYear() === selectedYear
-
-      return true
-    })
-  }, [orders, selectedYear, filterType])
+  // Removed getFilteredOrders as its logic is now integrated into getOrdersForDate
+  // const getFilteredOrders = useCallback(...)
 
   // Navigation functions
   const goToPrevious = () => {
@@ -245,25 +229,48 @@ export default function CalendarPage() {
     setSelectedYear(today.getFullYear())
   }
 
-  // Check if a date has orders
+  // Check if a date has orders - MODIFIED
   const getOrdersForDate = useCallback(
     (date: Date) => {
-      const filteredOrders = getFilteredOrders()
-      return filteredOrders.filter(
-        (order) =>
-          order.firstFitting.toDateString() === date.toDateString() ||
-          order.secondFitting.toDateString() === date.toDateString() ||
-          order.collectionDate.toDateString() === date.toDateString(),
-      )
+      // `orders` already contains data relevant to the current month/week/day view
+      return orders.filter((order) => {
+        const isFirstFitting = order.firstFitting && order.firstFitting.toDateString() === date.toDateString()
+        const isSecondFitting = order.secondFitting && order.secondFitting.toDateString() === date.toDateString()
+        const isCollectionDate = order.collectionDate && order.collectionDate.toDateString() === date.toDateString()
+
+        let matchesDate = false
+        let appointmentTypeForDate: "First" | "Second" | "Collection" | null = null
+
+        if (isFirstFitting) {
+          matchesDate = true
+          appointmentTypeForDate = "First"
+        } else if (isSecondFitting) {
+          matchesDate = true
+          appointmentTypeForDate = "Second"
+        } else if (isCollectionDate) {
+          matchesDate = true
+          appointmentTypeForDate = "Collection"
+        }
+
+        if (!matchesDate) return false // No appointment for this specific date on this date
+
+        // Apply filterType based on the *actual* appointment type for this date
+        if (filterType === "all") return true
+        if (filterType === "first" && appointmentTypeForDate === "First") return true
+        if (filterType === "second" && appointmentTypeForDate === "Second") return true
+        if (filterType === "collection" && appointmentTypeForDate === "Collection") return true
+
+        return false // If filterType doesn't match the appointment type for this date
+      })
     },
-    [getFilteredOrders],
+    [orders, filterType],
   )
 
-  const getAppointmentType = (date: Date, order: any) => {
-    if (order.firstFitting.toDateString() === date.toDateString()) return "First"
-    if (order.secondFitting.toDateString() === date.toDateString()) return "Second"
-    if (order.collectionDate.toDateString() === date.toDateString()) return "Collection"
-    return "First"
+  const getAppointmentType = (date: Date, order: Order) => {
+    if (order.firstFitting && order.firstFitting.toDateString() === date.toDateString()) return "First"
+    if (order.secondFitting && order.secondFitting.toDateString() === date.toDateString()) return "Second"
+    if (order.collectionDate && order.collectionDate.toDateString() === date.toDateString()) return "Collection"
+    return "First" // Default, though ideally this case shouldn't be hit if getOrdersForDate is correct
   }
 
   // Handle appointment saving
@@ -292,7 +299,6 @@ export default function CalendarPage() {
         </div>
       )
     }
-
     switch (viewMode) {
       case "day":
         return renderDayView()
@@ -311,7 +317,6 @@ export default function CalendarPage() {
   const renderDayView = () => {
     const dayOrders = getOrdersForDate(currentDate)
     const isCurrentDatePast = isPastDate(currentDate)
-
     return (
       <div className="space-y-6">
         <div className="text-center">
@@ -329,8 +334,7 @@ export default function CalendarPage() {
               }}
               className="mt-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
             >
-              <Calendar className="h-4 w-4 mr-2" />
-              Add Appointment
+              <Calendar className="h-4 w-4 mr-2" /> Add Appointment
             </Button>
           )}
           {isCurrentDatePast && (
@@ -367,13 +371,11 @@ export default function CalendarPage() {
     const startOfWeek = new Date(currentDate)
     const day = currentDate.getDay()
     startOfWeek.setDate(currentDate.getDate() - day)
-
     const weekDays = Array.from({ length: 7 }, (_, i) => {
       const date = new Date(startOfWeek)
       date.setDate(startOfWeek.getDate() + i)
       return date
     })
-
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-7 gap-4">
@@ -452,8 +454,7 @@ export default function CalendarPage() {
                       size="sm"
                       className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
                     >
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Add
+                      <Calendar className="h-4 w-4 mr-2" /> Add
                     </Button>
                   )}
                 </div>
@@ -492,8 +493,7 @@ export default function CalendarPage() {
   // Month view
   const renderMonthView = () => {
     const days = []
-    const blankDays = Array(firstDayOfMonth).fill(null)
-
+    const blankDays = Array(firstDayOfMonth).fill(null) // [^2]
     // Add blank days for the start of the month
     days.push(...blankDays)
 
@@ -525,10 +525,8 @@ export default function CalendarPage() {
             if (day === null) {
               return <div key={`blank-${index}`} className="h-28 rounded-xl bg-gray-50/50"></div>
             }
-
             const isToday = day.date.toDateString() === new Date().toDateString()
             const isDatePast = isPastDate(day.date)
-
             return (
               <motion.div
                 key={`day-${day.day}`}
@@ -569,7 +567,7 @@ export default function CalendarPage() {
                   )}
                 </div>
                 <div className="space-y-1 overflow-hidden">
-                  {day.orders.slice(0, 2).map((order: any) => (
+                  {day.orders.slice(0, 2).map((order: Order) => (
                     <div
                       key={order.id}
                       className={cn(
@@ -614,8 +612,7 @@ export default function CalendarPage() {
                       onClick={() => setShowAppointmentDialog(true)}
                       className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
                     >
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Add Appointment
+                      <Calendar className="h-4 w-4 mr-2" /> Add Appointment
                     </Button>
                   )}
                 </div>
@@ -725,8 +722,6 @@ export default function CalendarPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
       <div className="container mx-auto py-8 max-w-7xl">
         <div className="flex flex-col space-y-8">
-        
-
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
             <div className="flex items-center space-x-3">
@@ -801,7 +796,6 @@ export default function CalendarPage() {
               </Select>
             </div>
           </div>
-
           {/* Main Content */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as any)} className="w-full">
@@ -867,7 +861,7 @@ export default function CalendarPage() {
 }
 
 // Enhanced Order card component
-function OrderCard({ order, appointmentType }: { order: any; appointmentType: "First" | "Second" | "Collection" }) {
+function OrderCard({ order, appointmentType }: { order: Order; appointmentType: "First" | "Second" | "Collection" }) {
   const getAppointmentDate = () => {
     if (appointmentType === "First") return order.firstFitting
     if (appointmentType === "Second") return order.secondFitting
@@ -885,6 +879,8 @@ function OrderCard({ order, appointmentType }: { order: any; appointmentType: "F
     if (appointmentType === "Second") return "text-orange-600 border-orange-300 bg-orange-50"
     return "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md"
   }
+
+  const appointmentDate = getAppointmentDate()
 
   return (
     <motion.div
@@ -914,7 +910,9 @@ function OrderCard({ order, appointmentType }: { order: any; appointmentType: "F
           <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
             <Clock className="h-4 w-4 text-orange-500" />
             <span className="font-medium">
-              {getAppointmentDate().toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+              {appointmentDate
+                ? appointmentDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                : "N/A"}
             </span>
           </div>
           <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">

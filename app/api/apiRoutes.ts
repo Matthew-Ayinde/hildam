@@ -19,6 +19,9 @@ export class ApiRoutes {
 
   static FetchCustomerChart: string = '/customers/customer-chart'
 
+  static ImportCustomerData: string = '/customers/import-customer-data'
+  static ExportCustomerData: string = '/customers/export-customer-data'
+
 
 
 
@@ -58,6 +61,7 @@ export class ApiRoutes {
     static CreatePayment: string = '/payments/add-payment';
     static EditPayment: string = '/payments/edit-payment';
     static DeletePayment: string = '/payments/delete-payment';
+    static FetchPaymentChart: string = '/payments/payment-chart-information';
 
 
 

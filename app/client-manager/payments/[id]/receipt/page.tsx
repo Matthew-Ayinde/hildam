@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { getSession } from 'next-auth/react'
 import { useParams } from 'next/navigation'
+import { fetchPayment } from '@/app/api/apiClient'
 
 interface ReceiptData {
   id: string
@@ -48,50 +49,39 @@ export default function Receipt() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { id } = useParams()
+  const paymentId = id as string
 
   const fetchReceiptData = async () => {
     setLoading(true)
     setError(null)
     try {
-      const session = await getSession()
-      const accessToken = session?.user?.token
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/payment/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      )
-      if (!response.ok) {
-        throw new Error('Failed to fetch receipt data')
-      }
-      const result = await response.json()
-      if (result.data) {
+      const result = await fetchPayment(paymentId)
+      console.log('Fetched receipt data:', result)
+      if (result) {
         const data: ReceiptData = {
-          id: result.data.id,
-          order_id: result.data.order_id || 'N/A',
-          created_at: result.data.created_at || 'N/A',
-          updated_at: result.data.updated_at || 'N/A',
-          VAT: result.data.VAT || 'N/A',
-          discount: result.data.discount || 'N/A',
-          going_rate: result.data.going_rate || 'N/A',
-          total_amount_due: result.data.total_amount_due || 'N/A',
-          cumulative_total_amount: result.data.cumulative_total_amount || 'N/A',
-          amount_paid: result.data.amount_paid || 'N/A',
-          balance_remaining: result.data.balance_remaining || 'N/A',
-          payment_status: result.data.payment_status || 'N/A',
-          customer_name: result.data.customer_name || 'N/A',
-          customer_email: result.data.customer_email || 'N/A',
-          clothing_name: result.data.clothing_name || 'N/A',
-          clothing_description: result.data.clothing_description || 'N/A',
-          priority: result.data.priority || 'N/A',
-          order_status: result.data.order_status || 'N/A',
+          id: result.id,
+          order_id: result.order_id || 'N/A',
+          created_at: result.created_at || 'N/A',
+          updated_at: result.updated_at || 'N/A',
+          VAT: result.VAT || 'N/A',
+          discount: result.discount || 'N/A',
+          going_rate: result.going_rate || 'N/A',
+          total_amount_due: result.total_amount_due || 'N/A',
+          cumulative_total_amount: result.cumulative_total_amount || 'N/A',
+          amount_paid: result.amount_paid || 'N/A',
+          balance_remaining: result.balance_remaining || 'N/A',
+          payment_status: result.payment_status || 'N/A',
+          customer_name: result.customer_name || 'N/A',
+          customer_email: result.customer_email || 'N/A',
+          clothing_name: result.clothing_name || 'N/A',
+          clothing_description: result.clothing_description || 'N/A',
+          priority: result.priority || 'N/A',
+          order_status: result.order_status || 'N/A',
           // Billing information
-          name: result.data.name || 'N/A',
-          email: result.data.email || 'N/A',
-          phone_number: result.data.customer_phone_number || 'N/A',
-          address: result.data.address || 'No address provided',
+          name: result.name || 'N/A',
+          email: result.email || 'N/A',
+          phone_number: result.customer_phone_number || 'N/A',
+          address: result.customer_address || '16, Oduduwa way, ikeja', // Default address if not provided
         }
         setReceiptData(data)
       } else {
@@ -151,7 +141,7 @@ export default function Receipt() {
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
         <div
           ref={receiptRef}
-          className="w-full max-w-4xl bg-white p-10 rounded-xl shadow-2xl border border-gray-200 text-sm sm:text-base"
+          className="w-full max-w-4xl bg-white p-10 rounded-xl shadow-2xl border border-gray-200 text-sm sm:text-base pb-80"
         >
           {/* Header */}
           <div className="mb-8">
@@ -191,34 +181,30 @@ export default function Receipt() {
             <div className="flex items-start space-x-8">
               <div className="text-xl font-bold text-gray-700">Bill to</div>
               <div className="text-gray-800">
-                <p>{receiptData.address}</p>
+                <p className='max-w-[250px]'>{receiptData.address}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-gray-800 text-right">
               <div className="space-y-2">
                 <p className="font-medium">Invoice No:</p>
                 <p className="font-medium">Date:</p>
-                <p className="font-medium">Terms:</p>
-                <p className="font-medium">Due Date:</p>
               </div>
               <div className="space-y-2">
                 <p>{receiptData.order_id}</p>
                 <p>{formatDate(receiptData.created_at)}</p>
-                <p>Net 30</p>
-                <p>{formatDate(receiptData.updated_at)}</p>
               </div>
             </div>
           </div>
 
           {/* Items Table */}
-          <div className="mb-6">
+          <div className="mb-6 mt-14">
             <div className="grid grid-cols-2 items-center bg-orange-500 text-white py-3 px-4 rounded-t-lg">
               <div className="font-semibold">Description</div>
               <div>
                 <div className="grid grid-cols-3 text-right font-semibold">
-                  <div>Quantity</div>
-                  <div>Rate</div>
-                  <div>Amount</div>
+                  <div>VAT(%)</div>
+                  <div>Discount(%)</div>
+                  <div>Total</div>
                 </div>
               </div>
             </div>
@@ -226,8 +212,8 @@ export default function Receipt() {
               <div className="text-gray-800">{receiptData.clothing_name}</div>
               <div>
                 <div className="grid grid-cols-3 text-right text-gray-800">
-                  <div>1</div>
-                  <div>{receiptData.going_rate}</div>
+                  <div>{receiptData.VAT}</div>
+                  <div>{receiptData.discount}</div>
                   <div>₦{receiptData.total_amount_due}</div>
                 </div>
               </div>
@@ -237,28 +223,26 @@ export default function Receipt() {
           <hr className="border-t border-gray-300 my-6" />
 
           {/* Totals */}
-          <div className="flex flex-col sm:flex-row justify-between">
+          <div className="flex flex-col sm:flex-row justify-between mt-20">
             <div className="w-full sm:w-1/2"></div>
             <div className="w-full sm:w-1/2">
               <div className="grid grid-cols-2 gap-2 text-gray-800 text-right mb-4">
                 <div className="space-y-2">
-                  <p>Subtotal:</p>
-                  <p>VAT (10%):</p>
-                  <p>Discount:</p>
-                  <p>Total:</p>
+                  <p>VAT(%):</p>
+                  <p>Discount(%):</p>
                   <p>Paid:</p>
+                  <p>Balance:</p>
                 </div>
                 <div className="space-y-2">
-                  <p>₦{receiptData.going_rate}</p>
-                  <p>₦{receiptData.VAT}</p>
-                  <p>₦{receiptData.discount}</p>
-                  <p>₦{receiptData.cumulative_total_amount}</p>
+                  <p>{receiptData.VAT}</p>
+                  <p>{receiptData.discount}</p>
                   <p>₦{receiptData.amount_paid}</p>
+                  <p>₦{receiptData.balance_remaining}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 text-right bg-orange-500 text-white py-3 px-4 rounded">
                 <div className="font-bold">Amount Paid:</div>
-                <div className="font-bold">₦{receiptData.balance_remaining}</div>
+                <div className="font-bold">₦{receiptData.amount_paid}</div>
               </div>
             </div>
           </div>

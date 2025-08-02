@@ -9,10 +9,13 @@ import { FiDollarSign } from "react-icons/fi";
 import { AiOutlineBarChart } from "react-icons/ai";
 import { motion } from "framer-motion";
 import { getSession } from "next-auth/react";
+import { editPayment, fetchPayment } from "@/app/api/apiClient";
+import { ApplicationRoutes } from "@/constants/ApplicationRoutes";
 
 export default function EditCustomer() {
   const router = useRouter();
   const { id } = useParams();
+  const paymentId = id as string
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -29,22 +32,13 @@ export default function EditCustomer() {
     setLoading(true);
     setError("");
     try {
-      const session = await getSession();
-      const token = session?.user?.token;
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/payment/${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (!res.ok) throw new Error("Failed to fetch payment data");
-      const { data } = await res.json();
+      const res = await fetchPayment(paymentId)
       setFormData({
-        order_id: data.order_id,
-        payment_status: data.payment_status,
-        total_amount_due: data.total_amount_due,
-        amount_paid: data.amount_paid,
-        balance_remaining: data.balance_remaining,
+        order_id: res.order_id,
+        payment_status: res.payment_status,
+        total_amount_due: res.total_amount_due,
+        amount_paid: res.amount_paid,
+        balance_remaining: res.balance_remaining,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -63,22 +57,10 @@ export default function EditCustomer() {
     setError("");
     setSuccessMessage("");
     try {
-      const session = await getSession();
-      const token = session?.user?.token;
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/editpayment/${id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-      if (!res.ok) throw new Error("Failed to update payment data");
+      const res = await editPayment(paymentId, formData)
       setSuccessMessage("Payment updated successfully!");
-      setTimeout(() => router.push("/client-manager/payments"), 2000);
+      console.log('payment edit', res)
+      setTimeout(() => router.push(ApplicationRoutes.ClientManagerPayments), 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     }
@@ -154,6 +136,7 @@ export default function EditCustomer() {
               name="total_amount_due"
               value={formData.total_amount_due}
               onChange={handleInputChange}
+              disabled
               className="w-full border border-gray-300 rounded-lg p-3"
               placeholder="0.00"
               step="0.01"
