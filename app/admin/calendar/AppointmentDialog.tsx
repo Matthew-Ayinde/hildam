@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -18,7 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
-import { addCalendarDate } from "@/app/api/apiClient" // Assuming this path is correct
+import { addCalendarDate, fetchAllCustomers } from "@/app/api/apiClient" // Assuming this path is correct
 
 interface AppointmentDialogProps {
   open: boolean
@@ -37,6 +37,24 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const fetchCustomerData = async () => {
+    try {
+      const customer = await fetchAllCustomers()
+
+        console.log("Fetched customer data:", customer)
+       
+    } catch (err: any) {
+      console.error("Error fetching customer data:", err)
+      setError(err.message || "Failed to fetch customer data.")
+    }
+  }
+
+  // Fetch customer data when orderId changes
+  useEffect(() => {
+    fetchCustomerData()
+  }, [])
+  
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -140,6 +158,8 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
           </DialogDescription>
         </DialogHeader>
         {error && <div className="bg-red-50 border border-red-200 rounded-md p-3 text-red-700 text-sm">{error}</div>}
+        
+        
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="orderId">Order ID</Label>
@@ -193,6 +213,7 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
           </DialogFooter>
         </form>
       </DialogContent>
+
     </Dialog>
   )
 }

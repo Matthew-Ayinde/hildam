@@ -40,6 +40,8 @@ interface PaymentChartData {
   period: string
   total_income: number
   total_expenses: number
+  total_daily_expenses: number
+  total_job_expenses: number
   total_profit: number
   profit_margin: number
   breakdown: any
@@ -182,7 +184,7 @@ export default function PaymentChart() {
               <Card className="p-4 flex items-center justify-between bg-red-50 border-red-200">
                 <div>
                   <p className="text-sm text-red-700 font-medium">Total Expenses</p>
-                  <h4 className="text-2xl font-bold text-red-800">{formatCurrency(chartData.total_expenses)}</h4>
+                  <h4 className="text-2xl font-bold text-red-800">{formatCurrency(chartData.total_daily_expenses)}</h4>
                 </div>
                 <FaMoneyBillWave className="text-red-500 text-3xl" />
               </Card>
@@ -229,7 +231,7 @@ export default function PaymentChart() {
                 />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Bar dataKey="total_income" fill="var(--color-income)" radius={4} />
-                <Bar dataKey="total_expenses" fill="var(--color-expenses)" radius={4} />
+                <Bar dataKey="total_daily_expenses" fill="var(--color-expenses)" radius={4} />
               </BarChart>
             </ChartContainer>
           </>
