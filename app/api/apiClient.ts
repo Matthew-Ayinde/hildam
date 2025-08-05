@@ -515,6 +515,14 @@ export async function fetchAllDates(payload: string): Promise<any> {
   return resp.data;
 }
 
+export async function fetchAllDatesHot(payload: string): Promise<any> {
+  const headers = await getUserHeaders()
+  console.log("Fetching all dates with payload:", payload);
+  const resp = await API.get(`${ApiRoutes.FetchAllDatesHot}?${payload}`, { headers })
+  console.log("Response from fetchAllDatesHot  APICLIENT:", resp.data);
+  return resp.data;
+}
+
 export async function addCalendarDate(appointmentData: any): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.put(ApiRoutes.AddCalendarDate, appointmentData, { headers });
@@ -530,9 +538,15 @@ export async function addCalendarDate(appointmentData: any): Promise<any> {
 
 
     //#region Notifications endpoint ---------------------------------
-export async function fetchAllNotifications(): Promise<any> {
+export async function fetchAllNotifications(itemsPerPage: number, currentPage: number): Promise<any> {
   const headers = await getUserHeaders();
-  const resp = await API.get(ApiRoutes.FetchAllNotifications, { headers });
+  const resp = await API.get(`${ApiRoutes.FetchAllNotifications}?per_page=${itemsPerPage}&page=${currentPage}`, { headers });
+  return resp.data.data;
+}
+
+export async function fetchAllNotificationsTopbar(): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(`${ApiRoutes.FetchAllNotifications}?per_page=15&page=1`, { headers });
   return resp.data.data;
 }
 

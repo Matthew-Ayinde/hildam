@@ -125,6 +125,7 @@ export class ApiRoutes {
 
       //#region Calendar endpoint ---------------------------------
     static FetchAllDates: string = '/orders/get-fitting-dates';
+    static FetchAllDatesHot: string = '/tailoring/get-fitting-dates';
     static AddCalendarDate: string = '/orders/add-calendar-date';
 
 

@@ -41,15 +41,6 @@ interface OrderInfo {
   clothingName: string
 }
 
-interface OrderData {
-  id: string
-  customer_name: string
-  clothing_name: string
-  clothing_description: string
-  order_id: string
-  // ... other fields from the API response
-}
-
 export default function AddExpensePage() {
   const params = useParams()
   const orderId = params.id as string
@@ -137,7 +128,9 @@ export default function AddExpensePage() {
       order_id: orderInfo.orderId,
       utilities: expenses.find((expense) => expense.id === "utilities")?.amount || 0,
       labour: expenses.find((expense) => expense.id === "labour")?.amount || 0,
-      service: expenses.find((expense) => expense.id === "service")?.amount || 0,
+      services: expenses.find((expense) => expense.id === "service")?.amount || 0,
+      purchase_costs: expenses.find((expense) => expense.id === "purchase")?.amount || 0,
+      rent: expenses.find((expense) => expense.id === "rent")?.amount || 0,
     }
 
     try {

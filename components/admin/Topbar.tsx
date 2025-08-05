@@ -10,7 +10,7 @@ import Link from "next/link"
 import { IoNotificationsOutline, IoChevronDownOutline, IoCheckmarkDoneOutline, IoMailOutline } from "react-icons/io5"
 import { HiOutlineBell, HiOutlineInboxIn, HiOutlineUserCircle, HiOutlineClock } from "react-icons/hi"
 import { FiMessageSquare } from "react-icons/fi"
-import { fetchAllNotifications, readAllNotification, readNotification } from "@/app/api/apiClient"
+import { fetchAllNotifications, fetchAllNotificationsTopbar, readAllNotification, readNotification } from "@/app/api/apiClient"
 
 type Notification = {
   id: string
@@ -59,11 +59,10 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
       setError(null)
      
 
-      const response = await fetchAllNotifications()
-      console.log("Fetched notifications:", response)
+      const response = await fetchAllNotificationsTopbar()
 
       // Limit to latest 30 notifications
-      const latestNotifications = response.slice(0, 30)
+      const latestNotifications = response.data.slice(0, 30)
       setNotifications(latestNotifications)
       const unread = latestNotifications.filter((notif: any) => notif.is_read === false).length
       setUnreadCount(unread)
@@ -82,7 +81,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
     fetchNotifications()
     const intervalId = setInterval(() => {
       fetchNotifications()
-    }, 2000)
+    }, 5000)
     return () => clearInterval(intervalId)
   }, [])
 

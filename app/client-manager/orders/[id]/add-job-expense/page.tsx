@@ -138,6 +138,8 @@ export default function AddExpensePage() {
       utilities: expenses.find((expense) => expense.id === "utilities")?.amount || 0,
       labour: expenses.find((expense) => expense.id === "labour")?.amount || 0,
       service: expenses.find((expense) => expense.id === "service")?.amount || 0,
+      purchase_costs: expenses.find((expense) => expense.id === "purchase")?.amount || 0,
+      rent: expenses.find((expense) => expense.id === "rent")?.amount || 0,
     }
 
     try {

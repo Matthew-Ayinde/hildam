@@ -51,6 +51,15 @@ const sidebarItems = [
     links: [
       { name: "All Requests", href: "/head-of-tailoring/inventory-requests" }
     ],
+  },
+  {
+    id: 3,
+    text: "Calendar",
+    icon: <Calendar className="w-4 h-4" />,
+    prefix: "/head-of-tailoring/calendar",
+    links: [
+      { name: "Schedule", href: "/head-of-tailoring/calendar" },
+    ],
   }
 ]
 

@@ -1,8 +1,6 @@
 "use client"
 
-import React from "react"
-
-import { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { getSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import {
@@ -13,7 +11,6 @@ import {
   HiOutlineCheck,
   HiOutlineChevronLeft,
   HiOutlineChevronRight,
-  HiOutlineExclamation,
 } from "react-icons/hi"
 import { IoMailOutline, IoCheckmarkDoneOutline } from "react-icons/io5"
 import { FiMessageSquare } from "react-icons/fi"
@@ -27,24 +24,25 @@ import { fetchAllNotifications, readAllNotification, readNotification } from "@/
 type Notification = {
   id: string
   message: string
-  link: string
-  is_read: boolean
+  link: string | null // Updated to allow null
+  is_read: boolean // API sends boolean
   created_at: string
   type?: string // Derived from message content
+  read?: string // Added for robustness if 'is_read' is not always present or boolean
 }
 
 export default function NotificationsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
-
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([])
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL // Kept as it was in original code
+  const [notifications, setNotifications] = useState<Notification[]>([]) // Holds current page's data from API
+  const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]) // Holds filtered data of current page
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const itemsPerPage = 20
+  const [totalNotificationsCount, setTotalNotificationsCount] = useState(0) // New state for total count
+  const itemsPerPage = 10 // Changed to 10 as per API response example
 
   // Filters
   const [filterType, setFilterType] = useState<string>("all")
@@ -61,56 +59,9 @@ export default function NotificationsPage() {
       },
     },
   }
-
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
-  }
-
-  useEffect(() => {
-    fetchNotifications()
-  }, [])
-
-  useEffect(() => {
-    applyFilters()
-  }, [notifications, filterType, filterRead, searchQuery])
-
-  useEffect(() => {
-    setTotalPages(Math.ceil(filteredNotifications.length / itemsPerPage))
-    // Reset to first page when filters change
-    if (currentPage > Math.ceil(filteredNotifications.length / itemsPerPage)) {
-      setCurrentPage(1)
-    }
-  }, [filteredNotifications])
-
-  const fetchNotifications = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const session = await getSession()
-      const token = session?.user?.token
-
-      if (!token) {
-        throw new Error("No token found, please log in.")
-      }
-
-      const data = await fetchAllNotifications()
-      console.log("Fetched notifications:", data)
-
-      const processedNotifications = data.map((notif: Notification) => ({
-          ...notif,
-          type: getNotificationType(notif.message)
-        }))
-
-      setNotifications(processedNotifications)
-      setFilteredNotifications(processedNotifications)
-    } catch (error) {
-      console.error("Error fetching notifications:", error)
-      setError(error instanceof Error ? error.message : "An unknown error occurred")
-    } finally {
-      setLoading(false)
-    }
   }
 
   const getNotificationType = (message: string): string => {
@@ -121,47 +72,72 @@ export default function NotificationsPage() {
     return "other"
   }
 
-  const applyFilters = () => {
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const session = await getSession()
+      const token = session?.user?.token
+      if (!token) {
+        throw new Error("No token found, please log in.")
+      }
+      const resp = await fetchAllNotifications(itemsPerPage, currentPage)
+      console.log("Fetched notifications response:", resp)
+
+      const data = resp.data // Access the 'data' array within the 'data' object
+      const processedNotifications = data.map((notif: Notification) => ({
+        ...notif,
+        // Prioritize 'is_read' if it's a boolean, otherwise use 'read' string
+        is_read: typeof notif.is_read === "boolean" ? notif.is_read : notif.read === "1",
+        type: getNotificationType(notif.message),
+      }))
+      setNotifications(processedNotifications)
+      setCurrentPage(resp.current_page)
+      setTotalPages(resp.last_page)
+      setTotalNotificationsCount(resp.total)
+    } catch (error) {
+      console.error("Error fetching notifications:", error)
+      setError(error instanceof Error ? error.message : "An unknown error occurred")
+    } finally {
+      setLoading(false)
+    }
+  }, [currentPage, itemsPerPage]) // Dependencies for useCallback
+
+  useEffect(() => {
+    fetchNotifications()
+  }, [fetchNotifications]) // Trigger fetch when fetchNotifications changes (due to currentPage/itemsPerPage)
+
+  useEffect(() => {
+    // Apply filters to the notifications fetched for the current page
     let filtered = [...notifications]
 
     // Apply type filter
     if (filterType !== "all") {
       filtered = filtered.filter((notif) => notif.type === filterType)
     }
-
     // Apply read/unread filter
     if (filterRead === "read") {
-      filtered = filtered.filter((notif) => notif.is_read ===true)
+      filtered = filtered.filter((notif) => notif.is_read === true)
     } else if (filterRead === "unread") {
       filtered = filtered.filter((notif) => notif.is_read === false)
     }
-
     // Apply search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter((notif) => notif.message.toLowerCase().includes(query))
     }
-
     setFilteredNotifications(filtered)
-  }
+  }, [notifications, filterType, filterRead, searchQuery]) // Dependencies for filtering
 
   const markAsRead = async (id: string) => {
     try {
       const session = await getSession()
       const token = session?.user?.token
-
       if (!token) {
         throw new Error("No token found, please log in.")
       }
-
-      const notification = notifications.find((n) => n.id === id)
-
-      if (!notification) return
-
       await readNotification(id)
-
-
-      // Update local state
+      // Update local state to reflect the change immediately
       setNotifications((prev) => prev.map((notif) => (notif.id === id ? { ...notif, is_read: true } : notif)))
     } catch (error) {
       console.error("Error marking notification as read:", error)
@@ -172,15 +148,12 @@ export default function NotificationsPage() {
     try {
       const session = await getSession()
       const token = session?.user?.token
-
       if (!token) {
         throw new Error("No token found, please log in.")
       }
-
       await readAllNotification()
-
-      // Update local state
-      setNotifications((prev) => prev.map((notif) => ({ ...notif, is_read: true })))
+      // After marking all as read on the backend, refetch the current page to update UI
+      fetchNotifications()
     } catch (error) {
       console.error("Error marking all notifications as read:", error)
     }
@@ -190,7 +163,6 @@ export default function NotificationsPage() {
     const now = new Date()
     const date = new Date(dateString)
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
-
     if (diffInMinutes < 1) return "Just now"
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`
@@ -244,10 +216,8 @@ export default function NotificationsPage() {
     }
   }
 
-  const paginatedNotifications = filteredNotifications.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  )
+  // paginatedNotifications is now just filteredNotifications, as pagination is handled by API
+  const paginatedNotifications = filteredNotifications
 
   const unreadCount = notifications.filter((notif) => notif.is_read === false).length
 
@@ -268,7 +238,6 @@ export default function NotificationsPage() {
                 : "All caught up!"}
             </p>
           </div>
-
           {unreadCount > 0 && (
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -281,7 +250,6 @@ export default function NotificationsPage() {
             </motion.button>
           )}
         </div>
-
         {/* Filters */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -305,7 +273,6 @@ export default function NotificationsPage() {
                 />
               </div>
             </div>
-
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="w-full sm:w-48">
                 <Select value={filterType} onValueChange={setFilterType}>
@@ -321,7 +288,6 @@ export default function NotificationsPage() {
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="w-full sm:w-48">
                 <Select value={filterRead} onValueChange={setFilterRead}>
                   <SelectTrigger className="w-full">
@@ -334,7 +300,6 @@ export default function NotificationsPage() {
                   </SelectContent>
                 </Select>
               </div>
-
               <Button
                 variant="outline"
                 onClick={() => {
@@ -350,11 +315,10 @@ export default function NotificationsPage() {
           </div>
         </motion.div>
       </motion.div>
-
       {/* Notifications List */}
       {loading ? (
         <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
+          {[...Array(itemsPerPage)].map((_, i) => (
             <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex gap-4">
               <Skeleton className="h-12 w-12 rounded-full" />
               <div className="space-y-2 flex-1">
@@ -365,14 +329,11 @@ export default function NotificationsPage() {
           ))}
         </div>
       ) : error ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="rounded-xl p-6 text-center"
-        >
-          <h3 className="text-lg font-medium text-gray-800 mb-1">No notifications found</h3>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-xl p-6 text-center">
+          <h3 className="text-lg font-medium text-gray-800 mb-1">Error loading notifications</h3>
+          <p className="text-gray-500">{error}</p>
         </motion.div>
-      ) : filteredNotifications.length === 0 ? (
+      ) : totalNotificationsCount === 0 ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -387,7 +348,6 @@ export default function NotificationsPage() {
               ? "Try changing your filters to see more results."
               : "You're all caught up! No notifications to display."}
           </p>
-
           {(searchQuery || filterType !== "all" || filterRead !== "all") && (
             <Button
               variant="outline"
@@ -416,7 +376,6 @@ export default function NotificationsPage() {
                 <div className={`p-3 rounded-full ${notification.is_read === false ? "bg-orange-100" : "bg-gray-100"}`}>
                   {getNotificationIcon(notification.type || "other")}
                 </div>
-
                 <div className="flex-1">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2">
@@ -427,10 +386,8 @@ export default function NotificationsPage() {
                       </span>
                       <span className="text-xs text-gray-500">{formatDate(notification.created_at)}</span>
                     </div>
-
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-500">{formatTimeAgo(notification.created_at)}</span>
-
                       {notification.is_read === false && (
                         <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200">
                           New
@@ -438,7 +395,6 @@ export default function NotificationsPage() {
                       )}
                     </div>
                   </div>
-
                   <p
                     className={`text-sm sm:text-base ${
                       notification.is_read === false ? "font-medium text-gray-900" : "text-gray-700"
@@ -446,20 +402,18 @@ export default function NotificationsPage() {
                   >
                     {notification.message}
                   </p>
-
                   <div className="mt-4 flex flex-col sm:flex-row gap-2">
                     <Button
                       size="sm"
                       onClick={() => {
                         // Handle navigation logic here
-                        const linking_id = notification.link.split("/").pop()
-                        // You can add your navigation logic here
+                        const linking_id = notification.link?.split("/").pop() // Use optional chaining for link
+                        // You can add your navigation logic here, e.g., router.push(notification.link)
                       }}
                       className="bg-orange-500 hover:bg-orange-600"
                     >
                       View details
                     </Button>
-
                     {notification.is_read === false && (
                       <Button
                         size="sm"
@@ -476,16 +430,14 @@ export default function NotificationsPage() {
               </div>
             </motion.div>
           ))}
-
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-between items-center mt-6 bg-white rounded-xl shadow-sm border border-gray-100 p-4">
               <div className="text-sm text-gray-500">
                 Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-                {Math.min(currentPage * itemsPerPage, filteredNotifications.length)} of {filteredNotifications.length}{" "}
+                {Math.min(currentPage * itemsPerPage, totalNotificationsCount)} of {totalNotificationsCount}{" "}
                 notifications
               </div>
-
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
@@ -495,7 +447,6 @@ export default function NotificationsPage() {
                 >
                   <HiOutlineChevronLeft size={16} />
                 </Button>
-
                 <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1)
                     .filter((page) => {
@@ -516,7 +467,6 @@ export default function NotificationsPage() {
                       </React.Fragment>
                     ))}
                 </div>
-
                 <Button
                   variant="outline"
                   size="icon"
