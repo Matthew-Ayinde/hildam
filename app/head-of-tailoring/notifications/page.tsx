@@ -82,7 +82,6 @@ export default function NotificationsPage() {
         throw new Error("No token found, please log in.")
       }
       const resp = await fetchAllNotifications(itemsPerPage, currentPage)
-      console.log("Fetched notifications response:", resp)
 
       const data = resp.data // Access the 'data' array within the 'data' object
       const processedNotifications = data.map((notif: Notification) => ({

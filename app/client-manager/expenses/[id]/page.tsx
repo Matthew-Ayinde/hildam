@@ -54,7 +54,6 @@ export default function ShowExpensePage() {
       try {
 
         const res = await fetchJobExpense(jobExpenseId);
-        console.log('Expense fetch response:', res);
 
         setExpense(res);
       } catch (err: any) {

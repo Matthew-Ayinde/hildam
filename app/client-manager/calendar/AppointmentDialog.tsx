@@ -63,9 +63,7 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
         appointmentData.collection_date = format(formData.collectionDate, "yyyy-MM-dd")
       }
 
-      console.log("Submitting appointment data:", appointmentData)
       const res = await addCalendarDate(appointmentData)
-      console.log("Appointment created successfully:", res)
 
       // Reset form
       setFormData({

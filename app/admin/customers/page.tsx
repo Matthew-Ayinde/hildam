@@ -54,7 +54,6 @@ export default function Table() {
 
 
       const response = await deleteCustomer(payload)
-      console.log('deletion of customer', response)
 
       setData((prevData) => prevData.filter((customer) => customer.id !== selectedCustomerId))
       setPopupMessage("Customer successfully deleted")

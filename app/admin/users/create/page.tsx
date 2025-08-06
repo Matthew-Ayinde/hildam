@@ -69,11 +69,9 @@ const ModernUserForm = () => {
       password_confirmation: formData.password_confirmation,
     }
 
-    console.log("Creating user with payload:", payload)
 
     try {
       const response = await createUser(payload)
-      console.log("User created successfully:", response)
 
       if (response.status === true) {
         setPopupMessage("User created successfully")  
@@ -91,7 +89,6 @@ const ModernUserForm = () => {
       const messages = err.response.data.errors;
       const firstKey = Object.keys(messages)[0];   
       const firstMessage = messages[firstKey][0]
-      console.log("First error message:", firstMessage) 
 
       setPopupMessage(firstMessage)
       setTimeout(() => {

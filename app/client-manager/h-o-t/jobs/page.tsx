@@ -62,7 +62,6 @@ export default function ModernTable() {
 
     try {
       const result = await fetchAllTailorJobs()
-      console.log('resldhf', result)
 
       const formattedData = result.map((item: any) => ({
         id: item.id,

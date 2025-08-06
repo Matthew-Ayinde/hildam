@@ -59,7 +59,6 @@ export default function InventoryPage() {
 
         const data: any = await fetchAllInventories()
 
-        console.log("Fetched Inventory Data:", data)
 
         const items: InventoryItem[] = data.map((item: any) => ({
           ...item,

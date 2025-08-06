@@ -109,7 +109,6 @@ export default function CustomerAnalyticsChart() {
     setError(null)
     try {
       const result: ApiResponse = await fetchCustomerChart(selectedYear)
-      console.log("Fetched customer chart data:", result)
       setChartData(result.data)
       setTotalCustomers(result.total_customers)
       setMonthlyBreakdown(result.monthly_breakdown)
@@ -139,7 +138,6 @@ export default function CustomerAnalyticsChart() {
     try {
       // Fetch the raw CSV string from the API
       const apiResponse = await exportCustomerData()
-      console.log("Export response:", apiResponse)
 
       // Regex to extract all double-quoted fields
       const regex = /"((?:[^"\\]|\\.)*)"/g

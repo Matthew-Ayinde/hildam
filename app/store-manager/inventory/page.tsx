@@ -194,7 +194,6 @@ export default function Table() {
                       onClick={() => {
                         setSelectedUserId(row.id);
                         setIsPopupOpen(true);
-                        console.log("Delete button clicked");
                       }}
                     >
                       <MdOutlineDeleteForever size={20} />

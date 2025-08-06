@@ -213,7 +213,6 @@ export default function Dashboard() {
       const ordersData = await fetchOrderslist()
       return ordersData
     } catch (error) {
-      console.log("Error fetching orders:", error)
       throw error
     }
   }
@@ -259,7 +258,6 @@ export default function Dashboard() {
         // Process orders data - THIS IS THE FIX
         if (ordersResult.status === "fulfilled") {
           const recentOrders = ordersResult.value.orders
-          console.log("my fuf. orders", recentOrders)
 
           // Map the API response to match your Order interface
           const mappedOrders = recentOrders.map((order: any) => ({
@@ -313,7 +311,6 @@ export default function Dashboard() {
         // Update orders stats
         if (ordersResult.status === "fulfilled") {
           const totalOrders = ordersResult.value.orders.length
-          console.log("totalllll orders", totalOrders)
           newStatsData[0] = {
             ...newStatsData[0],
             value: totalOrders.toString(),

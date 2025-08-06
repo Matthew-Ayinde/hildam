@@ -77,7 +77,6 @@ export default function ShowCustomer() {
     setError(null);
     try {
       const result = await fetchPayment(paymentId)
-      console.log('result fo payment id', result)
 
 
       if (result) {

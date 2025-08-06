@@ -145,7 +145,6 @@ export default function InventoryPage() {
     setTimeout(() => {
       setIsLoading(false);
       setSuccessMsg("Inventory request submitted successfully!");
-      console.log("Submitted inventory request:", requests);
     }, 2000);
   };
 

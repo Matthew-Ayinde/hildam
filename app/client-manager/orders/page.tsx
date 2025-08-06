@@ -56,7 +56,6 @@ export default function Table() {
         const response = await fetchOrderslist()
 
         const result = response.orders
-        console.log('order list', result)       
         setData(result)
         setFilteredData(result)
       } catch (error) {

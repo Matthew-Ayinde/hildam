@@ -56,7 +56,6 @@ export default function Invoice() {
     setError(null)
     try {
          const result = await fetchPayment(paymentId)
-         console.log('Fetched invoice data:', result)
       
       if (result) {
         const data: InvoiceData = {

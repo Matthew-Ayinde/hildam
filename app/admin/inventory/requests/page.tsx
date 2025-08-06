@@ -136,7 +136,6 @@ export default function ModernInventoryTable() {
     try {
       const response = await acceptStoreRequest(orderId)
 
-      console.log('ess', response)
 
 
       setData((prevData) =>

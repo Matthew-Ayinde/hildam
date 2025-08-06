@@ -94,7 +94,6 @@ const Form = () => {
   };
 
   {
-    console.log(responseMessage);
   }
 
   return (

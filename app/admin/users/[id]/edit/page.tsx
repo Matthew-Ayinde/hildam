@@ -38,7 +38,6 @@ export default function EditCustomer() {
     setError(null)
     try {
       const result = await fetchUser(userId)
-      console.log("Fetched customer data:", result)
       setCustomer(result)
 
       const initialData = {
@@ -111,17 +110,14 @@ export default function EditCustomer() {
       return
     }
 
-    console.log("Sending only modified fields:", modifiedFields)
 
     try {
       const response = await editUser(userId, modifiedFields)
-      console.log("User updated:", response)
       router.push(`${ApplicationRoutes.AdminUsers}/${userId}`)
     } catch (err: any) {
       const messages = err.response.data.message
       const firstKey = Object.keys(messages)[0]
       const firstMessage = messages[firstKey][0]
-      console.log("Error updating user:", firstMessage)
       setError(firstMessage)
     }
   }

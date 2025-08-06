@@ -56,7 +56,6 @@ export default function Receipt() {
     setError(null)
     try {
       const result = await fetchPayment(paymentId)
-      console.log('Fetched receipt data:', result)
       if (result) {
         const data: ReceiptData = {
           id: result.id,

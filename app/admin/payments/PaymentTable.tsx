@@ -41,7 +41,6 @@ export default function ModernPaymentTable() {
         setLoading(true)
         setError(null)
         const response = await fetchAllPayments()
-        console.log("payment rsss", response)
         setData(response)
       } catch (error) {
         if (error instanceof Error) {

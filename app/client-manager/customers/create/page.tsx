@@ -118,12 +118,9 @@ const Form = () => {
         setResponseMessage(null);
       }, 5000);
     } catch (error: any) {
-      console.log('Full error object:', error);
-    console.log('Error response:', error.response);
       const messages = error.response.data.message;
       const firstKey = Object.keys(messages)[0]; 
       const firstMessage = messages[firstKey][0]
-      console.log('the error message', firstMessage)
       setResponseMessage(`Error: ${firstMessage}`);
       setTimeout(() => {
         setResponseMessage(null);

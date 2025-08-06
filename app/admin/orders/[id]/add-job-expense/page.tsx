@@ -84,7 +84,6 @@ export default function AddExpensePage() {
 
         const result = await fetchOrderById(orderId)
 
-        console.log('fetch invoice expense', result)
 
         const data: any = result
           setOrderInfo({
@@ -93,7 +92,6 @@ export default function AddExpensePage() {
             orderDescription: data.clothing_description || "",
             clothingName: data.clothing_name || "",
           })
-          console.log('orde ID', orderId)
           // setSuccess("Order data loaded successfully!")
         
       } catch (error) {
@@ -134,10 +132,8 @@ export default function AddExpensePage() {
     }
 
     try {
-      console.log("Submitting expense data:", submitData)
 
       const response = await createExpense(submitData)
-      console.log('resulf for create expense', response)
 
 
       setSuccess("Expenses submitted successfully!")

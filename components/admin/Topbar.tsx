@@ -104,7 +104,6 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
     setDropdownOpen(false)
     try {
       const resp = await readNotification(id)
-      console.log("Notification marked as read:", resp)
 
       const updatedNotifications = notifications.map((notif) => (notif.id === id ? { ...notif, is_read: true } : notif))
       setNotifications(updatedNotifications)
@@ -159,7 +158,6 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
     try {
       setDropdownOpen(false)
       const resp = await readAllNotification()
-      console.log("All notifications marked as read", resp)
 
       const updatedNotifications = notifications.map((notif) => ({ ...notif, is_read: true }))
       setNotifications(updatedNotifications)

@@ -103,14 +103,12 @@ const useCalendarData = () => {
     setError(null)
     try {
       const response = await fetchAllDatesHot(payload)
-      console.log("payloadd", payload)
       if (response.success) {
         if (response.type === "year") {
           setYearlyData(response.data)
           setOrders([]) // Clear orders for year view
         } else if (response.type === "month") {
           const parsedOrders = parseMonthlyDataToOrders(response.data)
-          console.log("Parsed Orders:", parsedOrders)
           setOrders(parsedOrders)
           setYearlyData([]) // Clear yearly data for month view
         }
@@ -127,7 +125,6 @@ const useCalendarData = () => {
 
   const addAppointment = async (appointmentData: any) => {
     // Implementation for adding appointment
-    console.log("Adding appointment:", appointmentData)
   }
 
   const clearError = () => setError(null)

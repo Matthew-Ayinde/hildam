@@ -59,7 +59,6 @@ export default function ShowCustomer() {
   const handleConfirmClose = async () => {
     try {
       const response = await closeOrder(orderId);
-      console.log("close order response", response);
 
       router.push(ApplicationRoutes.ClientManagerOrders);
     } catch (err) {
@@ -194,7 +193,6 @@ export default function ShowCustomer() {
     try {
       const result = await fetchOrderById(orderId);
 
-      console.log("Fetched orderssssss data:", result);
 
       if (result) {
         const mappedCustomer: any = {
@@ -271,7 +269,6 @@ export default function ShowCustomer() {
     };
     try {
       const response = await rejectTailorImage(orderId, feedback);
-      console.log("reject response", response);
 
       setIsRejectModalOpen(false);
       setRejectFeedback("");
@@ -298,7 +295,6 @@ export default function ShowCustomer() {
     try {
       const response = await acceptTailorImage(orderId);
 
-      console.log("approve res", response);
       setIsApproveModalOpen(false);
       setApprovePrice("");
       router.push(`/client-manager/orders/${id}/add-job-expense`);

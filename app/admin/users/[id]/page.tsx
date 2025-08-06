@@ -45,7 +45,6 @@ export default function ShowCustomer() {
     setError(null)
     try {
       const result = await fetchUser(userId)
-      console.log("Fetched customer data:", result)
      
       setCustomer(result)
     } catch (err) {

@@ -89,7 +89,6 @@ export default function ShowCustomer() {
     try {
       
       const result = await fetchCustomer(customerId)
-      console.log("Fetched customer data:", result)
 
 
       if (result) {

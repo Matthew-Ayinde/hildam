@@ -202,7 +202,6 @@ export default function OperationalBudgetTracker() {
           description: newExpense.description,
       }
     const resp = await createOperationalExpense(payload)
-    console.log('edd', resp)
 
       setNewExpense({
         expense_date: new Date().toISOString().split("T")[0],
@@ -261,9 +260,7 @@ export default function OperationalBudgetTracker() {
           // carried_over_from_id: newBudget.carried_over_from_id
       }
 
-      console.log("Creating budget with payload:", payload)
       const response = await createBudget(payload)
-      console.log("Budget created:", response)
 
       setNewBudget({
         period_type: "weekly",
@@ -300,7 +297,6 @@ export default function OperationalBudgetTracker() {
   const handleDeleteExpense = async (expenseId: number) => {
     try {
       const resp = await DeleteExpense(expenseId.toString())
-      console.log('delete expense', resp)
 
       // Refresh budget breakdown
       if (selectedBudgetId) {

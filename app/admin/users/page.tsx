@@ -196,7 +196,6 @@ export default function ModernUsersTable() {
 
       const response = await deleteUser(user)
 
-      console.log("User deleted:", response)
 
       setData((prevData) => prevData.filter((user) => user.id !== selectedUser.id))
       setIsPopupOpen(false)

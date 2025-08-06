@@ -58,7 +58,6 @@ export default function EditExpensePage() {
         if (!token) throw new Error("Authentication token missing");
 
         const res = await fetchJobExpense(jobExpenseId);
-        console.log('Expense fetch response:', res);
         // Populate form
         setForm({
           total_amount: res.total_amount,

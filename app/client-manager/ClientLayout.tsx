@@ -37,7 +37,6 @@ export default function ClientLayout({ children }: Props) {
     // This would typically call your API
 
       const resp = await readNotification(id)
-      console.log("Notification marked as read:", resp)
     const updatedNotifications = notifications.map((notif) => (notif.id === id ? { ...notif, is_read: true } : notif))
     setNotifications(updatedNotifications)
     setUnreadCount((prev) => prev - 1)
@@ -54,7 +53,6 @@ export default function ClientLayout({ children }: Props) {
     // This would typically call your API
 
       const resp = await readAllNotification()
-      console.log("All notifications marked as read", resp)
     const updatedNotifications = notifications.map((notif) => ({ ...notif, is_read: true }))
     setNotifications(updatedNotifications)
     setUnreadCount(0)

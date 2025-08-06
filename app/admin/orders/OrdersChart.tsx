@@ -108,7 +108,6 @@ const OrdersAnalyticsChart = () => {
       } else if (timeRange === "monthly") {
         const month = format(selectedMonth, "yyyy-MM")
         url = `https://api.hildamcouture.com/api/v1/orders/chart-information?type=monthly&month=${month}`
-        console.log("Fetching monthly data for:", month)
       }
 
       const response = await fetch(url, {
@@ -122,7 +121,6 @@ const OrdersAnalyticsChart = () => {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      console.log("API Response:", response)
 
       const result: ApiResponse = await response.json()
 

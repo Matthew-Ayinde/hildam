@@ -138,7 +138,6 @@ export default function EditCustomer() {
     setError("")
     try {
       const data = await fetchOrderById(orderId)
-      console.log("Fetched order data:", data)
       setCustomer(data) // Store the original customer data
       const customerFormData = {
         name: data.customer_name,
@@ -175,7 +174,6 @@ export default function EditCustomer() {
     setErrorManagers("")
     try {
       const response = await fetchHeadOfTailoringList()
-      console.log("Fetched project managers:", response)
       setProjectManagers(response.head_of_tailoring)
     } catch (err) {
       setErrorManagers(err instanceof Error ? err.message : "An unknown error occurred")
@@ -313,7 +311,6 @@ export default function EditCustomer() {
       }
 
       const response = await editOrder(orderId, formDataToSend)
-      console.log("Edit order response:", response)
       setSuccessMessage("Order updated successfully!")
       setTimeout(() => router.push("/client-manager/orders"), 2000)
     } catch (err) {

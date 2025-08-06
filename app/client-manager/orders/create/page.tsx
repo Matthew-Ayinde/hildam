@@ -132,7 +132,6 @@ const Form = () => {
     (async () => {
       try {
         const res = await fetchAllCustomers()
-        console.log('customersss', res)
         
         setBasicCustomers(res)
       } catch (err) {
@@ -273,10 +272,8 @@ const Form = () => {
         payload.append("style_reference_images[]", file)
       })
 
-      console.log('payload', formData)
 
       const response = await createOrder(payload)
-      console.log('create order', response)
 
   
 

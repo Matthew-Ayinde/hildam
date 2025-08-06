@@ -166,7 +166,6 @@ export default function ShowCustomer() {
       }
 
       const result = await response.json();
-      console.log(result);
       setUploadMessage("Image approved"); // Set notification message
 
       // Show toast notification for 5 seconds
@@ -213,7 +212,6 @@ export default function ShowCustomer() {
       }
 
       const result = await response.json();
-      console.log(result);
       setUploadMessage("Image rejected with feedback"); // Set notification message
 
       // Remove the image from the page

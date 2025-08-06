@@ -365,7 +365,6 @@ const [selectedTailors, setSelectedTailors] = useState<number[]>([1, 2]);
         }
 
         const result = await response.json();
-        console.log("customer details: ", result);
 
         if (result.data) {
           const mappedCustomer: Customer = {
@@ -461,7 +460,6 @@ const [selectedTailors, setSelectedTailors] = useState<number[]>([1, 2]);
       return <div className="text-center text-gray-500 py-10">No data found</div>;
     }
 
-    console.log("customer approval", customer.project_manager_approval);
 
     return (
       <div className="w-full mx-auto min-h-full p-6 bg-white rounded-2xl shadow-md">

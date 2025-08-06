@@ -80,7 +80,6 @@ export default function PaymentChart() {
       setError(null)
       try {
         const data = await fetchPaymentChartInformation(selectedType, selectedValue)
-        console.log("Fetched chart data:", data)
         setChartData(data)
       } catch (err) {
         if (err instanceof Error) {

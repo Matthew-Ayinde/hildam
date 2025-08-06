@@ -23,7 +23,7 @@ const Form = () => {
     item_name: "",
     item_quantity: "",
     price_purchased: "",
-    unit: "",
+    item_description: "",
     color: "",
   })
 
@@ -44,7 +44,6 @@ const Form = () => {
     try {
 
       const response = await createInventory(formData)
-      console.log('response', response)
 
       setResponseMessage("Inventory item created successfully!")
       setMessageType("success")
@@ -55,7 +54,7 @@ const Form = () => {
           item_name: "",
           item_quantity: "",
           price_purchased: "",
-          unit: "",
+          item_description: "",
           color: "",
         })
       }, 1000)
@@ -278,10 +277,10 @@ const Form = () => {
                 </label>
                 <motion.textarea
                   whileFocus={{ scale: 1.02 }}
-                  id="unit"
-                  name="unit"
+                  id="item_description"
+                  name="item_description"
                   rows={4}
-                  value={formData.unit}
+                  value={formData.item_description}
                   onChange={handleChange}
                   placeholder="Enter item description, specifications, or additional details..."
                   className="w-full rounded-xl border border-gray-300 shadow-sm p-4 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200 bg-white resize-none"

@@ -134,7 +134,6 @@ const Topbar = () => {
 
     //get the id from the end of the link value and save it with linking_id
     const linking_id = link.split("/").pop();
-    console.log(linking_id);
 
     //check if action_type is project_lists, if so redirect to project lists
     if (link.includes("myorders")) {

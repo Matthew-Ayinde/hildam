@@ -28,7 +28,6 @@ async function getUserHeaders() {
 export async function fetchAllCustomers(): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(ApiRoutes.FetchAllCustomers, { headers })
-  console.log(resp.data.data)
   return resp.data.data;
 }
 
@@ -59,7 +58,6 @@ export async function editCustomer(customerId: string, formData: any): Promise<a
 export async function fetchCustomerChart(selectedYear: string): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(`${ApiRoutes.FetchCustomerChart}?year=${selectedYear}`, { headers })
-  console.log("Customer chart data:", resp.data)
   return resp.data;
 }
 
@@ -87,7 +85,6 @@ export async function exportCustomerData(): Promise<any> {
     },
   });
 
-  console.log("Exported customer data:", resp.data);
   return resp.data;
 
 }
@@ -109,7 +106,6 @@ export async function fetchOrderslist(): Promise<any> {
 export async function fetchOrderById(orderId: string): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(`${ApiRoutes.FetchOrderById}/${orderId}`, { headers })
-  console.log("Fetched order data:", resp)
   return resp.data.order;
 }
 
@@ -127,7 +123,6 @@ export async function createOrder(payload: any): Promise<any> {
 
 export async function editOrder(orderId: string, formData: any): Promise<any> {
   const headers = await getUserHeaders();
-  console.log("Form data to send:", formData) // Debugging line
   const resp = await API.post(`${ApiRoutes.EditOrder}/${orderId}`, formData, { headers });
   return resp.data;
 }
@@ -157,7 +152,6 @@ export async function rejectTailorImage(orderId: string, feedback: any): Promise
 export async function closeOrder(orderId: string): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.put(`${ApiRoutes.CloseOrder}/${orderId}`, {}, { headers })
-  console.log("close order data:", resp)
   return resp.data
 }
 
@@ -217,7 +211,6 @@ export async function deleteInventory(inventoryId: string): Promise<any> {
 export async function fetchAllUsers(): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(ApiRoutes.FetchAllUsers, { headers })
-  console.log('all users', resp.data)
   return resp.data;
 }
 
@@ -288,7 +281,6 @@ export async function deletePayment(paymentId: string): Promise<any> {
 export async function fetchPaymentChartInformation(selectedType: string, selectedValue: string): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.get(`${ApiRoutes.FetchPaymentChart}?type=${selectedType}&value=${selectedValue}`, {headers})
-  console.log('payment res', resp.data)
   return resp.data
 }
 
@@ -340,14 +332,12 @@ export async function fetchAllBudgets(): Promise<any> {
 export async function createOperationalExpense(payload: any): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.post(ApiRoutes.CreateOperationalExpense, payload, { headers });
-  console.log('create optional expense', resp)
   return resp.data.data
 }
 
 export async function GetBudgetBreakdown(budgetId: string): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.get(`${ApiRoutes.GetBudgetBreakdown}=${budgetId}`, { headers });
-  console.log('get budget breakdown', resp)
   return resp.data.data;
 }
 
@@ -425,7 +415,6 @@ export async function fetchAllTailorJobs(): Promise<any> {
 export async function fetchTailorJob(tailorJobId: string): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(`${ApiRoutes.FetchTailorJob}/${tailorJobId}`, { headers })
-  console.log(resp)
   return resp.data;
 }
 
@@ -444,7 +433,6 @@ export async function SendJobToClientManager(tailorJobId: string): Promise<any> 
 export async function requestInventory(tailorJobId: string, payload: any): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.post(`${ApiRoutes.RequestInventory}/${tailorJobId}`, payload, { headers })
-  console.log("Response from requestInventory APICLIENT:", resp.data);
   return resp.data;
 }
 
@@ -509,24 +497,19 @@ export async function deleteStoreRequest(storeRequestId: string): Promise<any> {
 
 export async function fetchAllDates(payload: string): Promise<any> {
   const headers = await getUserHeaders()
-  console.log("Fetching all dates with payload:", payload);
   const resp = await API.get(`${ApiRoutes.FetchAllDates}?${payload}`, { headers })
-  console.log("Response from fetchAllDates APICLIENT:", resp.data);
   return resp.data;
 }
 
 export async function fetchAllDatesHot(payload: string): Promise<any> {
   const headers = await getUserHeaders()
-  console.log("Fetching all dates with payload:", payload);
   const resp = await API.get(`${ApiRoutes.FetchAllDatesHot}?${payload}`, { headers })
-  console.log("Response from fetchAllDatesHot  APICLIENT:", resp.data);
   return resp.data;
 }
 
 export async function addCalendarDate(appointmentData: any): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.put(ApiRoutes.AddCalendarDate, appointmentData, { headers });
-  console.log("Response from addCalendarDate APICLIENT:", resp.data);
   return resp.data;
 }
 
@@ -553,7 +536,6 @@ export async function fetchAllNotificationsTopbar(): Promise<any> {
 export async function readNotification(id: string): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.put(`${ApiRoutes.ReadNotification}/${id}`, {}, { headers }); 
-  console.log("Response from readNotification APICLIENT:", resp);
   return resp;
 }
 

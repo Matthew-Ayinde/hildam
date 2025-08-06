@@ -21,7 +21,7 @@ export default function EditCustomer() {
     item_name: "",
     item_quantity: "",
     price_purchased: "",
-    unit: "",
+    item_description: "",
     color: "",
   });
   const [confirmationMessage, setConfirmationMessage] = useState<string | null>(
@@ -35,14 +35,13 @@ export default function EditCustomer() {
     try {
 
       const result = await fetchInventory(inventoryId);
-      console.log('eeedd', result);
 
       setCustomer(result);
       setFormData({
         item_name: result.item_name,
         item_quantity: result.item_quantity,
         price_purchased: result.price_purchased,
-        unit: result.unit,
+        item_description: result.item_description,
         color: result.color,
       });
     } catch (err) {
@@ -72,7 +71,6 @@ export default function EditCustomer() {
 
       const response = await editInventory(inventoryId, formData);
 
-      console.log('response', response);
 
       // Show confirmation message
       setConfirmationMessage("Inventory item updated");
@@ -181,10 +179,10 @@ export default function EditCustomer() {
           </label>
           <input
             type="text"
-            name="unit"
-            value={formData.unit}
+            name="item_description"
+            value={formData.item_description}
             onChange={handleInputChange}
-            placeholder="Enter unit"
+            placeholder="Enter item description"
             className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
           />
         </div>

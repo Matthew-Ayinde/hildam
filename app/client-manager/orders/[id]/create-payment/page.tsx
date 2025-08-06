@@ -86,7 +86,6 @@ const Form = () => {
       }
 
       const result = await createPayment(payload)
-      console.log('create payment result', result)
 
         setResponseMessage("Payment created successfully!")
         setMessageType("success")

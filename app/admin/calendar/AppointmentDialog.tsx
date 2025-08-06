@@ -41,7 +41,6 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
     try {
       const customer = await fetchAllCustomers()
 
-        console.log("Fetched customer data:", customer)
        
     } catch (err: any) {
       console.error("Error fetching customer data:", err)
@@ -81,9 +80,7 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
         appointmentData.collection_date = format(formData.collectionDate, "yyyy-MM-dd")
       }
 
-      console.log("Submitting appointment data:", appointmentData)
       const res = await addCalendarDate(appointmentData)
-      console.log("Appointment created successfully:", res)
 
       // Reset form
       setFormData({

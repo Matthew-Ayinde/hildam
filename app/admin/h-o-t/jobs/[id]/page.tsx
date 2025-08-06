@@ -97,16 +97,13 @@ export default function ShowCustomer() {
 
     const formData = new FormData();
     formData.append("design_image_path", selectedImage);
-    console.log("imagee", formData);
 
     setIsUploading(true);
     setUploadMessage(null);
     setUploadError(null);
 
     try {
-      console.log("the formdata", formData);
       const result = await editTailorJob(tailorId, formData);
-      console.log("Upload result:", result);
       setUploadMessage("Image uploaded successfully");
       setImagePath(result.design_image_path);
     } catch (err) {
@@ -204,7 +201,6 @@ export default function ShowCustomer() {
     try {
       const result = await fetchTailorJob(tailorId);
 
-      console.log("customer details: ", result);
 
       if (result) {
         const mappedCustomer: any = {

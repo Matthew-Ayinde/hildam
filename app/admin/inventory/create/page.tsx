@@ -44,7 +44,6 @@ const Form = () => {
     try {
 
       const response = await createInventory(formData)
-      console.log('response', response)
 
       setResponseMessage("Inventory item created successfully!")
       setMessageType("success")

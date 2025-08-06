@@ -59,7 +59,6 @@ export default function EditCustomer() {
     try {
       const res = await editPayment(paymentId, formData)
       setSuccessMessage("Payment updated successfully!");
-      console.log('payment edit', res)
       setTimeout(() => router.push(ApplicationRoutes.ClientManagerPayments), 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");

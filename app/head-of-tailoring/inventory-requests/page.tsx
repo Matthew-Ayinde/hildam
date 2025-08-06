@@ -41,7 +41,6 @@ export default function StoreRequestsDashboard() {
     try {
       setLoading(true)
       const result = await fetchAllInventoryRequests()
-      console.log("Fetched data:", result)
 
       setData(result)
       setError(null)

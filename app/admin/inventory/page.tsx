@@ -63,7 +63,6 @@ export default function ModernInventoryTable() {
 
 
        const result = await fetchAllInventories()
-       console.log("Fetched inventory data:", result)
        setData(result)
        setFilteredData(result)
 

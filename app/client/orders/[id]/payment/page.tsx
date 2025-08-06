@@ -106,7 +106,6 @@ const Invoice = () => {
       }
 
       const result = await response.json();
-      console.log(result);
       setUploadMessage("Payment successful!"); // Set notification message
 
       // Show toast notification for 5 seconds
@@ -151,7 +150,6 @@ const Invoice = () => {
       }
 
       const result = await response.json();
-      console.log(result);
       setUploadMessage("Order approved"); // Set notification message
 
       // Show toast notification for 5 seconds

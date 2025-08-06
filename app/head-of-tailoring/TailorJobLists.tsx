@@ -143,7 +143,6 @@ export default function TailorDashboard() {
     setLoading(true)
     try {
       const result = await fetchAllTailorJobs()
-      console.log("Fetched Jobs:", result)
 
 
         const validJobs = result

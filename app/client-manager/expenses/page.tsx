@@ -52,7 +52,6 @@ export default function ExpenseTable() {
     try {
 
       const res = await fetchAllJobExpenses()
-      console.log('rress', res)
 
       setData(res)
       

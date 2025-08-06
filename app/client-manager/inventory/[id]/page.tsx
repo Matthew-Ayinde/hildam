@@ -20,7 +20,7 @@ export default function ShowCustomer() {
     item_quantity: number
     created_at: string
     price_purchased: number
-    unit: string
+    item_description: string
     color: string
   }
 
@@ -35,6 +35,7 @@ export default function ShowCustomer() {
      
    
       const result = await fetchInventory(inventoryId)
+      console.log("Fetched customer data:", result)
  
       setCustomer(result)
     } catch (err) {
@@ -147,7 +148,7 @@ export default function ShowCustomer() {
     },
     {
       label: "Description",
-      value: customer.unit,
+      value: customer.item_description || "Not available",
       icon: FileText,
       color: "text-purple-600",
       bgColor: "bg-purple-50",

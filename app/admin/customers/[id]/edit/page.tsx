@@ -84,7 +84,6 @@ export default function EditCustomerPage() {
     try {
     
       const result = await fetchCustomer(customerId)
-      console.log("Fetched customer data:", result);
 
       setCustomer(result);
       setFormData({
@@ -140,7 +139,6 @@ export default function EditCustomerPage() {
     try {
 
       const response = await editCustomer(customerId, formData);
-      console.log("Customer updated successfully:", response);
 
       router.push(`/admin/customers/${id}`);
     } catch (err) {
