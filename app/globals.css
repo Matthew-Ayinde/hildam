@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* === Datepicker component overrides === */
 @layer components {
   /* INPUT FIELD */
@@ -80,7 +79,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem
+    --radius: 0.5rem;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -106,7 +105,7 @@
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%
+    --chart-5: 340 75% 55%;
   }
 }
 
@@ -117,4 +116,149 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Enhanced Visual Aesthetics */
+@layer components {
+  /* Improved shadows */
+  .shadow-soft {
+    box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07),
+      0 10px 20px -2px rgba(0, 0, 0, 0.04);
+  }
+
+  .shadow-elegant {
+    box-shadow: 0 4px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .shadow-floating {
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1),
+      0 2px 9px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-soft {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  }
+
+  .bg-gradient-warm {
+    background: linear-gradient(135deg, #fef7ed 0%, #fed7aa 100%);
+  }
+
+  /* Enhanced buttons */
+  .btn-primary-enhanced {
+    @apply bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium px-6 py-3 rounded-xl shadow-soft hover:shadow-elegant transition-all duration-200 transform hover:scale-[1.02];
+  }
+
+  .btn-secondary-enhanced {
+    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium px-6 py-3 rounded-xl border border-gray-200 shadow-soft hover:shadow-elegant transition-all duration-200 transform hover:scale-[1.02];
+  }
+
+  /* Enhanced cards */
+  .card-enhanced {
+    @apply bg-white rounded-2xl shadow-soft hover:shadow-elegant transition-all duration-300 border border-gray-100/50;
+  }
+
+  .card-floating {
+    @apply bg-white rounded-2xl shadow-floating hover:shadow-elegant transition-all duration-300 border-0;
+  }
+
+  /* Improved form inputs */
+  .input-enhanced {
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-200 bg-white shadow-sm;
+  }
+
+  /* Enhanced navigation */
+  .nav-item-enhanced {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 hover:bg-orange-50 hover:text-orange-600 group;
+  }
+
+  .nav-item-active {
+    @apply bg-gradient-to-r from-orange-500/10 to-orange-600/5 text-orange-600 shadow-sm;
+  }
+
+  /* Backdrop blur effects */
+  .backdrop-enhanced {
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  .backdrop-dark {
+    backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  /* Smooth animations */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  /* Text enhancements */
+  .text-gradient {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

@@ -8,6 +8,7 @@ import { useState } from "react"
 import Topbar from "@/components/head-of-tailoring/Topbar"
 import Sidebar from "@/components/head-of-tailoring/Sidebar"
 import Footer from "@/components/Footer"
+import GlobalBreadcrumb from "@/components/GlobalBreadcrumb"
 
 import { fetchAllNotifications, readAllNotification, readNotification } from "@/app/api/apiClient"
 
@@ -82,7 +83,8 @@ html {
             <div className="pt-16 lg:pt-0 flex flex-col min-h-screen items-stretch justify-between">
               <div>
                 <Topbar onNotificationUpdate={handleNotificationUpdate} />
-              <main className="mt-5">{children}</main>
+                <GlobalBreadcrumb />
+                <main className="mt-5">{children}</main>
               </div>
               <Footer />
             </div>

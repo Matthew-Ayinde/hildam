@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { getSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import { IoNotificationsOutline, IoChevronDownOutline, IoCheckmarkDoneOutline, IoMailOutline } from "react-icons/io5"
+import { IoNotificationsOutline, IoChevronDownOutline, IoCheckmarkDoneOutline, IoMailOutline, IoHelpCircleOutline } from "react-icons/io5"
 import { HiOutlineBell, HiOutlineInboxIn, HiOutlineUserCircle, HiOutlineClock } from "react-icons/hi"
 import { FiMessageSquare } from "react-icons/fi"
 import { fetchAllNotificationsTopbar, readAllNotification, readNotification } from "@/app/api/apiClient"
@@ -205,8 +205,20 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
             </div>
           </div>
 
-          {/* Right Side - Notifications & Profile - Hidden on mobile */}
+          {/* Right Side - Help, Notifications & Profile - Hidden on mobile */}
           <div className="hidden lg:flex items-center gap-4">
+            {/* Help */}
+            <Link href="/head-of-tailoring/help">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative p-3 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition-colors"
+                aria-label="Help"
+              >
+                <IoHelpCircleOutline size={24} />
+              </motion.button>
+            </Link>
+
             {/* Notifications */}
             <div className="relative" ref={dropdownRef}>
               <motion.button
