@@ -173,7 +173,7 @@ const NavigationHelpPage = () => {
             </motion.div>
 
             {/* Navigation Features */}
-            <div className="space-y-6">
+            {/* <div className="space-y-6">
               {navigationFeatures.map((feature, index) => (
                 <motion.div
                   key={feature.title}
@@ -204,7 +204,7 @@ const NavigationHelpPage = () => {
                   </Card>
                 </motion.div>
               ))}
-            </div>
+            </div> */}
 
             {/* Interface Elements */}
             <motion.div
