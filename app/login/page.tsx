@@ -26,6 +26,11 @@ export default function LoginPage() {
   // Redirect upon session change
   useEffect(() => {
     if (status === "authenticated" && session) {
+      const user = session.user as any
+      sessionStorage.setItem("access_token", user.token || "")
+      sessionStorage.setItem("user_role", user.role || "")
+      sessionStorage.setItem("must_change_password", String(Boolean(user.must_change_password)))
+
       const role = (session.user as any).role as string
       redirectToRole(role)
     }

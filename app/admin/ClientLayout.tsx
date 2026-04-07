@@ -9,6 +9,7 @@ import Topbar from "@/components/admin/Topbar"
 import Sidebar from "@/components/admin/Sidebar"
 import Footer from "@/components/Footer"
 import GlobalBreadcrumb from "@/components/GlobalBreadcrumb"
+import FirstLoginPasswordChangePrompt from "@/components/FirstLoginPasswordChangePrompt"
 
 import { fetchAllNotifications, readAllNotification, readNotification } from "@/app/api/apiClient"
 
@@ -90,6 +91,7 @@ html {
             </div>
           </div>
         </div>
+        <FirstLoginPasswordChangePrompt />
       </body>
     </html>
   )

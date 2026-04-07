@@ -20,6 +20,15 @@ async function getUserHeaders() {
   }
 }
 
+export async function firstLoginChangePassword(payload: {
+  password: string
+  password_confirmation: string
+}): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.post(ApiRoutes.FirstLoginChangePassword, payload, { headers })
+  return resp.data
+}
+
 
 
 
@@ -131,6 +140,12 @@ export async function fetchHeadOfTailoringList(): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(ApiRoutes.HeadOfTailoringList, { headers })
   return resp.data;
+}
+
+export async function fetchTailorsList(): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(ApiRoutes.TailorsList, { headers })
+  return resp.data.tailors ?? [];
 }
 
 export async function acceptTailorImage(orderId: string): Promise<any> {
@@ -542,5 +557,88 @@ export async function readNotification(id: string): Promise<any> {
 export async function readAllNotification(): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.put(ApiRoutes.ReadAllNotifications, {}, { headers }); 
+  return resp.data;
+}
+
+
+
+
+    //#region Fabrics endpoint ---------------------------------
+    export async function fetchAllFabrics(): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(`${ApiRoutes.FetchAllFabrics}`, { headers });
+  return resp.data.data;
+}
+
+export async function createFabric(formData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(ApiRoutes.CreateFabric, formData, { headers });
+  return resp.data;
+}
+
+export async function editFabric(fabricId: string, formData: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(`${ApiRoutes.EditFabric}/${fabricId}`, formData, { headers });
+  return resp.data;
+}
+
+export async function fetchFabric(fabricId: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(`${ApiRoutes.FetchFabric}/${fabricId}`, { headers });
+  return resp.data.data;
+}
+
+export async function fetchCustomerFabrics(customerId: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(`${ApiRoutes.FetchCustomerFabrics}/${customerId}`, { headers });
+  return resp.data.data;
+}
+
+export async function deleteFabric(fabricId: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.delete(`${ApiRoutes.DeleteFabric}/${fabricId}`, { headers });
+  return resp;
+}
+
+
+
+    //#region Ready-to-Wear endpoint ---------------------------------
+export async function fetchAllReadyToWearProducts(): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(ApiRoutes.FetchAllReadyToWearProducts, { headers });
+  return resp.data.products ?? resp.data.data ?? resp.data;
+}
+
+export async function fetchReadyToWearProduct(productId: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(`${ApiRoutes.FetchReadyToWearProduct}/${productId}`, { headers });
+  return resp.data.product ?? resp.data.data ?? resp.data;
+}
+
+export async function addReadyToWearProduct(formData: FormData): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(ApiRoutes.AddReadyToWearProduct, formData, {
+    headers: {
+      ...headers,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return resp.data;
+}
+
+export async function editReadyToWearProduct(productId: string, formData: FormData): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(`${ApiRoutes.EditReadyToWearProduct}/${productId}`, formData, {
+    headers: {
+      ...headers,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return resp.data;
+}
+
+export async function deleteReadyToWearProduct(productId: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.delete(`${ApiRoutes.DeleteReadyToWearProduct}/${productId}`, { headers });
   return resp.data;
 }

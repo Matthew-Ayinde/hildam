@@ -374,7 +374,16 @@ export default function ModernInventoryTable() {
                             </div>
                             <div>
                               <div className="font-medium text-slate-900">{row.item_name}</div>
-                              <div className="text-sm text-slate-500">Color: {row.color}</div>
+                              <div className="text-sm text-slate-500 flex items-center gap-2">
+                                <span>Color:</span>
+                                {/^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/.test(row.color) && (
+                                  <span
+                                    className="w-3.5 h-3.5 rounded-full border border-gray-300 inline-block"
+                                    style={{ backgroundColor: row.color }}
+                                  />
+                                )}
+                                <span>{row.color}</span>
+                              </div>
                             </div>
                           </div>
                         </td>

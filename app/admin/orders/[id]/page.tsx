@@ -303,13 +303,39 @@ export default function ShowCustomer() {
     }
   };
 
+  const parseDateTimeValue = (value: string | number | Date) => {
+    if (!value) return null;
+    const normalizedValue = String(value)
+      .replace(/\b(\d{1,2})(st|nd|rd|th)\b/gi, "$1")
+      .replace(/(\d)(am|pm)\b/gi, "$1 $2")
+      .trim();
+
+    const parsedDate = new Date(normalizedValue);
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+  };
+
   const formatDate = (dateString: string | number | Date) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
+    const date = parseDateTimeValue(dateString);
+    if (!date) return "";
     return date.toLocaleDateString("en-US", {
       month: "long",
       day: "numeric",
       year: "numeric",
+    });
+  };
+
+  const formatDateTime = (dateString: string | number | Date) => {
+    if (!dateString) return "";
+    const date = parseDateTimeValue(dateString);
+    if (!date) return String(dateString);
+
+    return date.toLocaleString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -747,7 +773,7 @@ export default function ShowCustomer() {
                         className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-200"
                       />
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
-                        cm
+                        inches
                       </div>
                     </div>
                   </motion.div>
@@ -757,6 +783,7 @@ export default function ShowCustomer() {
           </motion.div>
 
           {/* Tailor Job Image */}
+          
           {customer.tailor_job_image !== null && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -925,7 +952,7 @@ export default function ShowCustomer() {
                   <input
                     type="text"
                     value={
-                      formatDate(customer.first_fitting_date) || "Not scheduled"
+                      formatDateTime(customer.first_fitting_date) || "Not scheduled"
                     }
                     readOnly
                     className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"
@@ -939,7 +966,7 @@ export default function ShowCustomer() {
                   <input
                     type="text"
                     value={
-                      formatDate(customer.second_fitting_date) ||
+                      formatDateTime(customer.second_fitting_date) ||
                       "Not scheduled"
                     }
                     readOnly
@@ -966,7 +993,7 @@ export default function ShowCustomer() {
                   <input
                     type="text"
                     value={
-                      formatDate(customer.collection_date) || "Not scheduled"
+                      formatDateTime(customer.collection_date) || "Not scheduled"
                     }
                     readOnly
                     className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"

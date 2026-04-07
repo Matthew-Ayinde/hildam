@@ -22,11 +22,15 @@ export default function EditCustomer() {
     item_quantity: "",
     price_purchased: "",
     item_description: "",
-    color: "",
+    color: "#000000",
   });
   const [confirmationMessage, setConfirmationMessage] = useState<string | null>(
     null
   );
+
+  const normalizeHexColor = (value: string) => {
+    return /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/.test(value) ? value : "#000000";
+  };
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -42,7 +46,7 @@ export default function EditCustomer() {
         item_quantity: result.item_quantity,
         price_purchased: result.price_purchased,
         item_description: result.item_description,
-        color: result.color,
+        color: normalizeHexColor(result.color || ""),
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -191,14 +195,21 @@ export default function EditCustomer() {
           <label className="block text-gray-800 font-bold mb-2">
             Color
           </label>
-          <input
-            type="text"
-            name="color"
-            value={formData.color}
-            onChange={handleInputChange}
-            placeholder="Enter color"
-            className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
-          />
+          <div className="flex items-center gap-3 w-full">
+            <input
+              type="color"
+              name="color"
+              value={formData.color}
+              onChange={handleInputChange}
+              className="h-[42px] w-16 shrink-0 rounded-lg border border-gray-300 p-1 cursor-pointer"
+            />
+            <input
+              type="text"
+              value={formData.color.toUpperCase()}
+              readOnly
+              className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2 bg-gray-50"
+            />
+          </div>
         </div>
         {/* Form Actions */}
         <div className="col-span-2 flex justify-end space-x-4">

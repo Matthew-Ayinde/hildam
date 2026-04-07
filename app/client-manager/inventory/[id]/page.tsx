@@ -226,7 +226,21 @@ export default function ShowCustomer() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">{field.label}</label>
-                        <div className="text-lg font-medium text-gray-900 break-words">{field.value}</div>
+                        <div className="text-lg font-medium text-gray-900 break-words">
+                          {field.label === "Color" ? (
+                            <div className="flex items-center gap-2">
+                              {typeof field.value === "string" && /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/.test(field.value) && (
+                                <span
+                                  className="w-4 h-4 rounded-full border border-gray-300 inline-block"
+                                  style={{ backgroundColor: field.value }}
+                                />
+                              )}
+                              <span>{field.value}</span>
+                            </div>
+                          ) : (
+                            field.value
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

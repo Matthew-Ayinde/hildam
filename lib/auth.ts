@@ -40,6 +40,7 @@ export const authOptions = {
             email: response.data.email,
             role: response.data.role,
             token: response.data.token,
+            must_change_password: Boolean(response.data.must_change_password),
             exp: expirationTime,
           }
         } catch (error) {
@@ -57,6 +58,7 @@ export const authOptions = {
         token.email = user.email
         token.role = user.role
         token.token = user.token
+        token.must_change_password = user.must_change_password
         token.exp = user.exp
       }
 
@@ -81,6 +83,7 @@ export const authOptions = {
         email: token.email,
         role: token.role,
         token: token.token,
+        must_change_password: token.must_change_password,
       }
 
       return session

@@ -710,7 +710,7 @@ const Form = () => {
                         className="w-full rounded-xl border border-gray-300 shadow-sm p-3 pr-10 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"
                       />
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
-                        cm
+                        inches
                       </div>
                     </div>
                   </motion.div>

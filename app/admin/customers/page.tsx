@@ -29,7 +29,7 @@ declare module "next-auth" {
 export default function Table() {
   interface Customer {
     fullName: string
-    age: number
+    date_of_birth: string
     gender: string
     phone: string
     id: string
@@ -80,7 +80,7 @@ export default function Table() {
         if (result) {
           const filteredData = result.map((item: any) => ({
             fullName: item.name,
-            age: item.age,
+            date_of_birth: item.date_of_birth || "N/A",
             gender: item.gender,
             phone: item.phone_number || "N/A",
             id: item.id,
@@ -212,7 +212,7 @@ export default function Table() {
               <tr className="bg-gray-50 border-b border-gray-200">
                 {[
                   { label: "Customer", icon: IoPersonOutline },
-                  { label: "Age", icon: IoCalendarOutline },
+                  { label: "Date of Birth", icon: IoCalendarOutline },
                   { label: "Gender", icon: IoPersonOutline },
                   { label: "Phone", icon: MdOutlinePhone },
                   { label: "Created", icon: IoCalendarOutline },
@@ -282,7 +282,7 @@ export default function Table() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{row.age} years</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{row.date_of_birth}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
                         {getGenderIcon(row.gender)}

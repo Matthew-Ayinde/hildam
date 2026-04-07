@@ -103,7 +103,8 @@ const ModernUserForm = () => {
   const roleOptions = [
     { value: "admin", label: "Admin", icon: "👑" },
     { value: "client manager", label: "Client Manager", icon: "👥" },
-    { value: "head of tailoring", label: "Head of Tailoring", icon: "✂️" }
+    { value: "head of tailoring", label: "Head of Tailoring", icon: "✂️" },
+    { value: "tailor", label: "Tailor", icon: "🧵" }
   ]
 
   return (

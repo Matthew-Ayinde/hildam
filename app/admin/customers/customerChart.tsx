@@ -39,7 +39,7 @@ const csvSchema = [
   { name: "phone_number", type: "string" },
   { name: "gender", type: "string" },
   { name: "address", type: "string" },
-  { name: "age", type: "number" },
+  { name: "date_of_birth", type: "string" },
   { name: "customer_description", type: "string" },
   { name: "bust", type: "string" },
   { name: "waist", type: "string" },

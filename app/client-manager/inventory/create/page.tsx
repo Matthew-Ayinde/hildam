@@ -24,7 +24,7 @@ const Form = () => {
     item_quantity: "",
     price_purchased: "",
     item_description: "",
-    color: "",
+    color: "#000000",
   })
 
   const [loading, setLoading] = useState(false)
@@ -55,7 +55,7 @@ const Form = () => {
           item_quantity: "",
           price_purchased: "",
           item_description: "",
-          color: "",
+          color: "#000000",
         })
       }, 1000)
 
@@ -250,17 +250,25 @@ const Form = () => {
                     <HiOutlineColorSwatch className="text-purple-500" size={16} />
                     <span>Color</span>
                   </label>
-                  <motion.input
-                    whileFocus={{ scale: 1.02 }}
-                    type="text"
-                    id="color"
-                    name="color"
-                    value={formData.color}
-                    onChange={handleChange}
-                    placeholder="Enter color"
-                    className="w-full rounded-xl border border-gray-300 shadow-sm p-4 focus:ring-2 focus:ring-purple-200 focus:border-purple-400 transition-all duration-200 bg-white"
-                    required
-                  />
+                  <div className="flex items-center gap-3 w-full">
+                    <motion.input
+                      whileFocus={{ scale: 1.02 }}
+                      type="color"
+                      id="color"
+                      name="color"
+                      value={formData.color}
+                      onChange={handleChange}
+                      className="h-[56px] w-16 shrink-0 rounded-xl border border-gray-300 shadow-sm p-1 focus:ring-2 focus:ring-purple-200 focus:border-purple-400 transition-all duration-200 bg-white cursor-pointer"
+                      required
+                    />
+                    <motion.input
+                      whileFocus={{ scale: 1.02 }}
+                      type="text"
+                      value={formData.color.toUpperCase()}
+                      readOnly
+                      className="w-full rounded-xl border border-gray-300 shadow-sm p-4 focus:ring-2 focus:ring-purple-200 focus:border-purple-400 transition-all duration-200 bg-gray-50 text-gray-700"
+                    />
+                  </div>
                 </motion.div>
               </div>
 

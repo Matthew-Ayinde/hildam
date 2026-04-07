@@ -4,11 +4,13 @@
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 
 import { SessionProvider } from "next-auth/react"
+import { Toaster } from "@/components/ui/toaster"
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <SessionProvider>
       {children}
+      <Toaster />
       <ProgressBar
         height="2px"
         color="#f97316"

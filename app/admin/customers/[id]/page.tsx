@@ -27,7 +27,7 @@ export default function ShowCustomer() {
   interface Customer {
     [x: string]: string | number | readonly string[] | undefined
     fullName: string
-    age: number
+    date_of_birth: string
     gender: string
     email: string
     address: string
@@ -94,7 +94,7 @@ export default function ShowCustomer() {
       if (result) {
         const mappedCustomer: Customer = {
           fullName: result.name,
-          age: result.age,
+          date_of_birth: result.date_of_birth || "N/A",
           gender: result.gender,
           phone_number: result.phone_number || "N/A",
           email: result.email || "N/A",
@@ -309,7 +309,7 @@ export default function ShowCustomer() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { label: "Full Name", value: customer.fullName, icon: FiUser },
-                { label: "Age", value: `${customer.age} years`, icon: FiCalendar },
+                { label: "Date of Birth", value: customer.date_of_birth, icon: FiCalendar },
                 {
                   label: "Gender",
                   value: customer.gender,
@@ -407,7 +407,7 @@ export default function ShowCustomer() {
                       value={customer[measurement.key] || 0}
                       className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-200"
                     />
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">cm</div>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">inches</div>
                   </div>
                 </motion.div>
               ))}

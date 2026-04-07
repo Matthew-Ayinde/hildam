@@ -15,7 +15,7 @@ export default function EditCustomerPage() {
 
   interface Customer {
     name: string;
-    age: string;
+    date_of_birth: string;
     phone_number: string;
     email: string;
     gender: string;
@@ -48,7 +48,7 @@ export default function EditCustomerPage() {
   const [error, setError] = useState<string>("");
   const [formData, setFormData] = useState({
     name: "",
-    age: "",
+    date_of_birth: "",
     phone_number: "",
     email: "",
     bust: "",
@@ -88,7 +88,7 @@ export default function EditCustomerPage() {
       setCustomer(result);
       setFormData({
         name: result.name,
-        age: result.age,
+        date_of_birth: result.date_of_birth || "",
         phone_number: result.phone_number,
         gender: result.gender,
         email: result.email,
@@ -218,17 +218,16 @@ export default function EditCustomerPage() {
             className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 focus:border-orange-500 focus:ring focus:ring-orange-200 transition duration-200"
           />
         </div>
-        {/* Age */}
+        {/* Date of Birth */}
         <div>
           <label className="block text-gray-700 font-bold mb-1">
-            Age
+            Date of Birth
           </label>
           <input
-            type="text"
-            name="age"
-            value={formData.age}
+            type="date"
+            name="date_of_birth"
+            value={formData.date_of_birth}
             onChange={handleInputChange}
-            placeholder="Enter age"
             className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg p-3 focus:border-orange-500 focus:ring focus:ring-orange-200 transition duration-200"
           />
         </div>

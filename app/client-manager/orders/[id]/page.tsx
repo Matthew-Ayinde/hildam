@@ -747,7 +747,7 @@ export default function ShowCustomer() {
                         className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-200"
                       />
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
-                        cm
+                        inches
                       </div>
                     </div>
                   </motion.div>

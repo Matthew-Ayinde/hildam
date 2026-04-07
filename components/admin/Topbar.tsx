@@ -226,7 +226,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="sticky top-0 z-30 bg-white shadow-sm border-b border-gray-100 rounded-2xl mt-5"
+      className="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-100 rounded-2xl mt-5"
     >
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
@@ -445,6 +445,15 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                         >
                           <HiOutlineUserCircle size={20} />
                           <span>Your Profile</span>
+                        </button>
+                      </Link>
+                      <Link href="/admin/settings" passHref>
+                        <button
+                          className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        >
+                          {/* <IoHelpCircleOutline size={20} /> */}
+                          <span>Settings</span>
                         </button>
                       </Link>
                     </div>

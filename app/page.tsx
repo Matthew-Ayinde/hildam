@@ -132,7 +132,7 @@ export default function SplashScreen() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.7 }}
               >
-                COUTURES
+                COUTURE
               </motion.h2>
 
               {/* Tagline */}

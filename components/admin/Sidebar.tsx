@@ -74,6 +74,16 @@ const sidebarItems = [
     ],
   },
   {
+    id: 10,
+    text: "Fabrics",
+    icon: <MdOutlineInventory2 />,
+    prefix: "/admin/fabrics",
+    links: [
+      { name: "All Fabrics", href: "/admin/fabrics" },
+      { name: "Ready-to-Wear", href: "/admin/fabrics/ready-to-wear" },
+    ],
+  },
+  {
     id: 9,
     text: "Calendar",
     icon: <Calendar className="w-4 h-4" />,

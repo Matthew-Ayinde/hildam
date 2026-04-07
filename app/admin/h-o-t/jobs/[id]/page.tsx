@@ -620,415 +620,59 @@ export default function ShowCustomer() {
               </div>
             </motion.div>
 
-            {/* Image Upload Section */}
-            {customer.tailor_image === null && (
-              <motion.div
-                className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-3xl border border-blue-200"
-                variants={fadeInUp}
-              >
-                <div className="flex items-center mb-6">
-                  <div className="p-3 bg-blue-100 rounded-full">
-                    <FaUpload className="text-blue-600 text-2xl" />
+              {/* Section to request inventory */}
+              <motion.div variants={fadeInUp} className="mb-12">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                  <div className="p-2 bg-emerald-100 rounded-xl">
+                    <FaUpload className="text-emerald-600" />
                   </div>
-                  <h2 className="ml-4 text-2xl font-bold text-gray-700">
-                    Design Upload
-                  </h2>
-                </div>
+                  Inventory Request
+                </h2>
 
-                {customer.client_manager_approval !== "accepted" && (
-                  <motion.div className="mb-6" variants={fadeInUp}>
-                    <label className="block text-gray-700 font-medium mb-4">
-                      {customer.tailor_image === null ? (
-                        <span className="flex items-center gap-2">
-                          <IoMdCloudOutline className="text-xl" />
-                          Please upload a design image
+                <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-6 md:p-8">
+                    <>
+                      <div className="flex items-start gap-4 mb-6">
+                        
+                        <div>
+                       
+                          <p className="text-gray-600 mt-1">
+                            You can request inventory items for this job
+                            {customer.store_requests && customer.store_requests.length > 0
+                              ? " or submit an additional request."
+                              : "."}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-3 mb-6">
+                        <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 px-3 py-1 text-sm font-semibold">
+                          Approval: Accepted
                         </span>
-                      ) : (
-                        <span className="flex items-center gap-2">
-                          <FaUpload className="text-xl" />
-                          Edit Design Image
+                        <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-700 px-3 py-1 text-sm font-semibold">
+                          Existing Requests: {customer.store_requests?.length || 0}
                         </span>
-                      )}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="w-full p-4 border-2 border-dashed border-blue-300 rounded-xl bg-white hover:bg-blue-50 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-500 file:text-white file:font-medium hover:file:bg-blue-600"
-                      />
-                    </div>
-                  </motion.div>
-                )}
+                      </div>
 
-                {imagePreview && (
-                  <motion.div
-                    className="mb-6 flex flex-col items-center"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="relative group">
-                      <img
-                        src={imagePreview || "/placeholder.svg"}
-                        alt="Selected design"
-                        className="w-64 h-64 object-cover rounded-2xl border-4 border-white shadow-lg"
-                      />
-                      <button
-                        onClick={handleRemoveImage}
-                        className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors"
-                      >
-                        <IoMdCloseCircle className="text-xl" />
-                      </button>
-                    </div>
-                    <p className="mt-3 text-gray-600 font-medium">
-                      Design Preview
-                    </p>
-                  </motion.div>
-                )}
-
-                {selectedImage && !imagePath && (
-                  <motion.button
-                    onClick={handleUploadImage}
-                    disabled={isUploading}
-                    className={`w-full py-4 rounded-2xl text-white font-bold text-lg transition-all flex items-center justify-center gap-3 ${
-                      isUploading
-                        ? "bg-gray-300 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600 shadow-lg hover:shadow-xl"
-                    }`}
-                    whileHover={!isUploading ? { scale: 1.02 } : {}}
-                    whileTap={!isUploading ? { scale: 0.98 } : {}}
-                  >
-                    {isUploading ? (
-                      <>
-                        <Spinner />
-                        Uploading Design...
-                      </>
-                    ) : (
-                      <>
-                        <FaUpload />
-                        Upload Design
-                      </>
-                    )}
-                  </motion.button>
-                )}
-
-                {imagePath && !sentSuccess && (
-                  <motion.button
-                    onClick={handleSendToProjectManager}
-                    disabled={isSending}
-                    className={`w-full py-4 rounded-2xl text-white font-bold text-lg transition-all flex items-center justify-center gap-3 mt-4 ${
-                      isSending
-                        ? "bg-gray-300 cursor-not-allowed"
-                        : "bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl"
-                    }`}
-                    whileHover={!isSending ? { scale: 1.02 } : {}}
-                    whileTap={!isSending ? { scale: 0.98 } : {}}
-                  >
-                    {isSending ? (
-                      <>
-                        <Spinner />
-                        Sending to Client Manager...
-                      </>
-                    ) : (
-                      <>
-                        <FaPaperPlane />
-                        Send to Client Manager
-                      </>
-                    )}
-                  </motion.button>
-                )}
-              </motion.div>
-            )}
-
-            {/* Existing Image Status */}
-            {customer.tailor_image !== null && (
-              <motion.div
-                className="bg-gradient-to-br from-gray-50 to-slate-50 p-8 rounded-3xl border border-gray-200"
-                variants={fadeInUp}
-              >
-                <div className="flex items-center mb-6">
-                  <div className="p-3 bg-gray-100 rounded-full">
-                    <FaImages className="text-gray-600 text-2xl" />
-                  </div>
-                  <h2 className="ml-4 text-2xl font-bold text-gray-700">
-                    Design Status
-                  </h2>
-                </div>
-
-                <div className="flex items-center gap-6 mb-6">
-                  <div className="relative group">
-                    <Image
-                      src={customer.tailor_image}
-                      alt="Submitted design"
-                      width={120}
-                      height={120}
-                      className="rounded-2xl border-4 border-white shadow-lg"
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    {customer.client_manager_approval === null && (
-                      <>
-                        <div className="p-3 bg-yellow-100 rounded-full">
-                          <IoMdCloseCircle className="text-yellow-600 text-2xl" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-yellow-600 text-lg">
-                            Under Review
-                          </h3>
-                          <p className="text-gray-600">
-                            Your design is being reviewed by the client manager
-                          </p>
-                        </div>
-                      </>
-                    )}
-                    {customer.client_manager_approval === "approved" && (
-                      <>
-                        <div className="p-3 bg-green-100 rounded-full">
-                          <IoMdCheckmarkCircle className="text-green-600 text-2xl" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-green-600 text-lg">
-                            Design Approved
-                          </h3>
-                          <p className="text-gray-600">
-                            Great! Your design has been approved
-                          </p>
-                        </div>
-                      </>
-                    )}
-                    {customer.client_manager_approval === "rejected" && (
-                      <>
-                        <div className="p-3 bg-red-100 rounded-full">
-                          <IoMdCloseCircle className="text-red-600 text-2xl" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-red-600 text-lg">
-                            Design Rejected
-                          </h3>
-                          <p className="text-gray-600">
-                            Please review the feedback and submit a new design
-                          </p>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                
-
-                {customer.client_manager_approval === "rejected" &&
-                  customer.client_manager_feedback && (
-                    <motion.div
-                      className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-6"
-                      variants={fadeInUp}
-                    >
-                      <h4 className="font-bold text-red-700 mb-2 flex items-center gap-2">
-                        <IoMdCloseCircle />
-                        Feedback from Client Manager
-                      </h4>
-                      <p className="text-red-600">
-                        {customer.client_manager_feedback}
-                      </p>
-                    </motion.div>
-                  )}
-
-                {customer.client_manager_approval === "accepted" && customer.store_requests && customer.store_requests.length < 1 && (
-                  <motion.div
-                    className="text-center bg-gradient-to-r from-green-500 to-emerald-500 p-8 rounded-2xl text-white"
-                    variants={fadeInUp}
-                  >
-                    <IoMdCheckmarkCircle className="text-6xl mx-auto mb-4" />
-                    <h3 className="text-2xl font-bold mb-2">
-                      Ready for Inventory Request
-                    </h3>
-                    <p className="mb-6 text-green-100">
-                      Your design has been approved! You can now request the
-                      necessary inventory items.
-                    </p>
-                    <Link
-                      href={`/admin/h-o-t/jobs/${id}/request-inventory`}
-                    >
-                      <motion.button
-                        className="bg-white text-green-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-green-50 transition-colors flex items-center gap-3 mx-auto"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <FaUpload />
-                        Request Inventory
-                      </motion.button>
-                    </Link>
-                  </motion.div>
-                )}
-
-                {customer.store_requests && (
-                  <div className="mt-8">
-                    <h4 className="text-2xl font-semibold text-gray-800 mb-4">
-                      Store Requests
-                    </h4>
-                    <div className="space-y-4">
-                      {customer.store_requests.map((req, idx) => (
-                        <div
-                          key={idx}
-                          className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition-shadow duration-200"
+                      <Link href={`/admin/h-o-t/jobs/${tailorId}/request-inventory`}>
+                        <motion.button
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-3 rounded-xl font-bold text-base transition-colors flex items-center gap-3"
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
                         >
-                          {/* Item Details */}
-                          <div className="flex-1 space-y-1">
-                            <h5 className="text-lg font-medium text-gray-900">
-                              {req.items_name}
-                            </h5>
-                            <p className="text-sm text-gray-600">
-                              Quantity:{" "}
-                              <span className="font-semibold">
-                                {req.items_quantities}
-                              </span>
-                            </p>
-                          </div>
-
-                          {/* Color Swatch */}
-                          <div className="flex items-center mt-3 sm:mt-0">
-                            <span className="text-sm text-gray-600 mr-2">
-                              Color:
-                            </span>
-                            <span
-                              className="w-6 h-6 rounded-full border border-gray-300"
-                              style={{ backgroundColor: req.requested_color }}
-                            />
-                          </div>
-
-                          {/* Status Badge */}
-                          <div className="mt-3 sm:mt-0">
-                            <span
-                              className={`
-                inline-block px-3 py-1 text-sm font-medium rounded-full
-                ${
-                  req.status === "approved"
-                    ? "bg-green-100 text-green-800"
-                    : req.status === "pending"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : req.status === "rejected"
-                    ? "bg-red-100 text-red-800"
-                    : "bg-gray-100 text-gray-800"
-                }
-              `}
-                            >
-                              {req.status.charAt(0).toUpperCase() +
-                                req.status.slice(1)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            {/* Rejected Design Re-upload */}
-            {customer.client_manager_approval === "rejected" && (
-              <motion.div
-                className="mt-8 bg-gradient-to-br from-red-50 to-pink-50 p-8 rounded-3xl border border-red-200"
-                variants={fadeInUp}
-              >
-                <div className="flex items-center mb-6">
-                  <div className="p-3 bg-red-100 rounded-full">
-                    <FaUpload className="text-red-600 text-2xl" />
-                  </div>
-                  <div className="ml-4">
-                    <h2 className="text-2xl font-bold text-gray-700">
-                      Submit New Design
-                    </h2>
-                    <p className="text-gray-600">
-                      Please upload a new design that addresses the feedback
-                    </p>
-                  </div>
+                          <FaUpload />
+                          {customer.store_requests && customer.store_requests.length > 0
+                            ? "Request More Inventory"
+                            : "Request Inventory"}
+                        </motion.button>
+                      </Link>
+                    </>
+                  
                 </div>
 
-                <motion.div className="mb-6" variants={fadeInUp}>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="w-full p-4 border-2 border-dashed border-red-300 rounded-xl bg-white hover:bg-red-50 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-500 file:text-white file:font-medium hover:file:bg-red-600"
-                  />
-                </motion.div>
-
-                {imagePreview && (
-                  <motion.div
-                    className="mb-6 flex flex-col items-center"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                  >
-                    <div className="relative">
-                      <img
-                        src={imagePreview || "/placeholder.svg"}
-                        alt="New design"
-                        className="w-64 h-64 object-cover rounded-2xl border-4 border-white shadow-lg"
-                      />
-                      <button
-                        onClick={handleRemoveImage}
-                        className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors"
-                      >
-                        <IoMdCloseCircle className="text-xl" />
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {selectedImage && !imagePath && (
-                  <motion.button
-                    onClick={handleUploadImage}
-                    disabled={isUploading}
-                    className={`w-full py-4 rounded-2xl text-white font-bold text-lg transition-all flex items-center justify-center gap-3 ${
-                      isUploading
-                        ? "bg-gray-300 cursor-not-allowed"
-                        : "bg-red-500 hover:bg-red-600 shadow-lg hover:shadow-xl"
-                    }`}
-                    whileHover={!isUploading ? { scale: 1.02 } : {}}
-                    whileTap={!isUploading ? { scale: 0.98 } : {}}
-                  >
-                    {isUploading ? (
-                      <>
-                        <Spinner />
-                        Uploading New Design...
-                      </>
-                    ) : (
-                      <>
-                        <FaUpload />
-                        Upload New Design
-                      </>
-                    )}
-                  </motion.button>
-                )}
-
-                {imagePath && !sentSuccess && (
-                  <motion.button
-                    onClick={handleSendToProjectManager}
-                    disabled={isSending}
-                    className={`w-full py-4 rounded-2xl text-white font-bold text-lg transition-all flex items-center justify-center gap-3 mt-4 ${
-                      isSending
-                        ? "bg-gray-300 cursor-not-allowed"
-                        : "bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl"
-                    }`}
-                    whileHover={!isSending ? { scale: 1.02 } : {}}
-                    whileTap={!isSending ? { scale: 0.98 } : {}}
-                  >
-                    {isSending ? (
-                      <>
-                        <Spinner />
-                        Sending to Client Manager...
-                      </>
-                    ) : (
-                      <>
-                        <FaPaperPlane />
-                        Send to Client Manager
-                      </>
-                    )}
-                  </motion.button>
-                )}
               </motion.div>
-            )}
+
+          
+
           </div>
         </motion.div>
       </div>

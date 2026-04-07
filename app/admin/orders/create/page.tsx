@@ -16,7 +16,14 @@ import { MdOutlineRule, MdOutlineCloudUpload, MdOutlineCheckCircle } from "react
 import { BsPerson } from "react-icons/bs"
 import { useRouter } from "next/navigation"
 import Spinner from "@/components/Spinner"
-import { createOrder, fetchAllCustomers, fetchCustomer, fetchHeadOfTailoringList } from "@/app/api/apiClient"
+import {
+  createOrder,
+  fetchAllCustomers,
+  fetchCustomer,
+  fetchCustomerFabrics,
+  fetchHeadOfTailoringList,
+  fetchTailorsList,
+} from "@/app/api/apiClient"
 import { ApplicationRoutes } from "@/constants/ApplicationRoutes"
 
 const dummyCustomers = [
@@ -58,6 +65,7 @@ type FormDataType = {
   half_length: string
   hip: string
   manager_id: string
+  tailor_id: string
   neck: string
   order_status: string
   phone_number: string
@@ -72,6 +80,16 @@ type FormDataType = {
   style_reference_images: File[]
   waist: string
   customer_id: string
+}
+
+type CustomerFabric = {
+  id: number
+  customer_name: string
+  description: string
+  staff_name: string
+  dropped_off_at: string
+  status: string
+  fabric_images: string[]
 }
 
 const initialFormData: FormDataType = {
@@ -89,6 +107,7 @@ const initialFormData: FormDataType = {
   half_length: "",
   hip: "",
   manager_id: "",
+  tailor_id: "",
   neck: "",
   order_status: "",
   phone_number: "",
@@ -121,12 +140,47 @@ const Form = () => {
     }[]
   >([])
   const [loadingManagers, setLoadingManagers] = useState(true)
+  const [tailors, setTailors] = useState<
+    {
+      id: string
+      name: string
+    }[]
+  >([])
+  const [loadingTailors, setLoadingTailors] = useState(true)
   const [responseMessage, setResponseMessage] = useState<string | null>(null)
   const [messageType, setMessageType] = useState<"success" | "error">("success")
   const [popupMessage, setPopupMessage] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [customerFabrics, setCustomerFabrics] = useState<CustomerFabric[]>([])
+  const [selectedFabricIds, setSelectedFabricIds] = useState<string[]>([])
+  const [loadingCustomerFabrics, setLoadingCustomerFabrics] = useState(false)
+  const [customerFabricsError, setCustomerFabricsError] = useState<string | null>(null)
   const router = useRouter()
+
+  const loadCustomerFabrics = async (customerId: string) => {
+    if (!customerId) {
+      setCustomerFabrics([])
+      setSelectedFabricIds([])
+      setCustomerFabricsError(null)
+      return
+    }
+
+    try {
+      setLoadingCustomerFabrics(true)
+      setCustomerFabricsError(null)
+      const fabrics = await fetchCustomerFabrics(customerId)
+      setCustomerFabrics(Array.isArray(fabrics) ? fabrics : [])
+      setSelectedFabricIds([])
+    } catch (error) {
+      console.error("Failed to load customer fabrics", error)
+      setCustomerFabrics([])
+      setSelectedFabricIds([])
+      setCustomerFabricsError("Unable to fetch customer fabrics.")
+    } finally {
+      setLoadingCustomerFabrics(false)
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -170,6 +224,22 @@ const Form = () => {
     getHeadOfTailoringList()
   }, [])
 
+  useEffect(() => {
+    const getTailorsList = async () => {
+      try {
+        setLoadingTailors(true)
+        const response = await fetchTailorsList()
+        setTailors(response)
+      } catch (error) {
+        console.error("Failed to load tailors", error)
+      } finally {
+        setLoadingTailors(false)
+      }
+    }
+
+    getTailorsList()
+  }, [])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
 
@@ -191,7 +261,10 @@ const Form = () => {
     setFormData((prev) => ({ ...prev, [name]: value }))
 
     if (name === "customer_name") {
-      setFormData((f) => ({ ...f, customer_name: value }))
+      setFormData((f) => ({ ...f, customer_name: value, customer_id: "" }))
+      setCustomerFabrics([])
+      setSelectedFabricIds([])
+      setCustomerFabricsError(null)
       if (value.trim()) {
         const matches = basicCustomers.filter((c) => c.name.toLowerCase().includes(value.trim().toLowerCase()))
         setFilteredCustomers(matches)
@@ -246,9 +319,30 @@ const Form = () => {
         customer_description: data.customer_description,
         customer_id: data.id
       }))
+      await loadCustomerFabrics(String(data.id || customerId))
     } catch (err) {
       console.error("Failed to load customer details", err)
     }
+  }
+
+  const toggleFabricSelection = (fabricId: string) => {
+    setSelectedFabricIds((previousSelection) => {
+      const nextSelection = previousSelection.includes(fabricId)
+        ? previousSelection.filter((id) => id !== fabricId)
+        : [...previousSelection, fabricId]
+
+      const selectedDescriptions = customerFabrics
+        .filter((fabric) => nextSelection.includes(String(fabric.id)))
+        .map((fabric) => fabric.description)
+        .filter((description) => description && description.trim().length > 0)
+
+      setFormData((previousFormData) => ({
+        ...previousFormData,
+        clothing_name: selectedDescriptions.join(", "),
+      }))
+
+      return nextSelection
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -272,14 +366,30 @@ const Form = () => {
         payload.append("style_reference_images[]", file)
       })
 
+      selectedFabricIds.forEach((fabricId) => {
+        payload.append("fabric_ids[]", fabricId)
+      })
+
 
       const response = await createOrder(payload)
+
+      const createdOrderId =
+        response?.order?.id ??
+        response?.data?.order?.id ??
+        response?.data?.id ??
+        response?.id ??
+        response?.order_id ??
+        response?.data?.order_id
 
   
 
       setResponseMessage("Order created successfully!")
       setMessageType("success")
-      router.push(ApplicationRoutes.AdminOrders)
+      if (createdOrderId) {
+        router.push(`/admin/orders/${createdOrderId}/create-payment`)
+      } else {
+        router.push(ApplicationRoutes.AdminOrders)
+      }
 
       // // Reset form after successful submission
       // setTimeout(() => {
@@ -500,7 +610,128 @@ const Form = () => {
                     </select>
                   )}
                 </div>
+
+                {/* Tailor Selection */}
+                <div>
+                  <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700 mb-2">
+                    <HiOutlineUserGroup className="text-teal-500" size={16} />
+                    <span>Tailor</span>
+                  </label>
+                  {loadingTailors ? (
+                    <div className="flex items-center justify-center p-3 border border-gray-300 rounded-xl bg-gray-50">
+                      <Spinner />
+                      <span className="ml-2 text-sm text-gray-500">Loading tailors...</span>
+                    </div>
+                  ) : (
+                    <select
+                      id="tailor_id"
+                      name="tailor_id"
+                      value={formData.tailor_id}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-gray-300 shadow-sm p-3 bg-white focus:ring-2 focus:ring-teal-200 focus:border-teal-400 transition-all duration-200"
+                    >
+                      <option value="">Select Tailor</option>
+                      {tailors.map((tailor) => (
+                        <option key={tailor.id} value={tailor.id}>
+                          {tailor.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
               </div>
+            </motion.div>
+
+            {/* Customer Fabrics Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.25 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center space-x-3 pb-4 border-b border-gray-200">
+                <div className="p-3 bg-gradient-to-r from-amber-100 to-orange-100 rounded-xl">
+                  <HiOutlinePhotograph className="text-orange-600" size={24} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">Customer Fabrics</h2>
+                  <p className="text-gray-600">Attach one or more available customer fabrics to this order</p>
+                </div>
+              </div>
+
+              {!formData.customer_id && (
+                <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
+                  Select a customer to load available fabrics.
+                </div>
+              )}
+
+              {formData.customer_id && loadingCustomerFabrics && (
+                <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-600">
+                  <Spinner />
+                  <span>Loading customer fabrics...</span>
+                </div>
+              )}
+
+              {formData.customer_id && customerFabricsError && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">{customerFabricsError}</div>
+              )}
+
+              {formData.customer_id && !loadingCustomerFabrics && !customerFabricsError && customerFabrics.length === 0 && (
+                <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
+                  No fabrics available for this customer.
+                </div>
+              )}
+
+              {formData.customer_id && !loadingCustomerFabrics && !customerFabricsError && customerFabrics.length > 0 && (
+                <div className="space-y-4">
+                  {customerFabrics.map((fabric) => {
+                    const fabricId = String(fabric.id)
+                    const isSelected = selectedFabricIds.includes(fabricId)
+
+                    return (
+                      <label
+                        key={fabric.id}
+                        className={`block cursor-pointer rounded-xl border p-4 transition-all ${
+                          isSelected ? "border-orange-400 bg-orange-50" : "border-gray-200 bg-white hover:border-orange-300"
+                        }`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleFabricSelection(fabricId)}
+                            className="mt-1 h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                          />
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-sm font-semibold text-gray-800">Fabric #{fabric.id}</p>
+                              <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                                {fabric.status}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-700">{fabric.description || "No description provided."}</p>
+                            <p className="text-xs text-gray-500">
+                              Staff: {fabric.staff_name || "N/A"} • Dropped off: {new Date(fabric.dropped_off_at).toLocaleDateString()}
+                            </p>
+                            {fabric.fabric_images?.length > 0 && (
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                                {fabric.fabric_images.slice(0, 4).map((imageUrl, imageIndex) => (
+                                  <img
+                                    key={`${fabric.id}-${imageIndex}`}
+                                    src={imageUrl || "/placeholder.svg"}
+                                    alt={`Fabric ${fabric.id} image ${imageIndex + 1}`}
+                                    className="h-16 w-full rounded-lg border border-gray-200 object-cover"
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </label>
+                    )
+                  })}
+                </div>
+              )}
             </motion.div>
 
             {/* Clothing Details Section */}
@@ -710,7 +941,7 @@ const Form = () => {
                         className="w-full rounded-xl border border-gray-300 shadow-sm p-3 pr-10 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"
                       />
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
-                        cm
+                        inches
                       </div>
                     </div>
                   </motion.div>

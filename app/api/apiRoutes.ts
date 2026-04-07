@@ -2,6 +2,7 @@ export class ApiRoutes {
   static BASE_URL_API_TEST: string = 'https://api.hildamcouture.com/api/v1';
 
   static AccessToken: string = 'h';
+  static FirstLoginChangePassword: string = '/auth/first-login-change-password';
 
 
 
@@ -41,6 +42,7 @@ export class ApiRoutes {
     static EditOrder: string = '/orders/edit-order';
     static DeleteOrder: string = '/orders/delete-order';
     static HeadOfTailoringList: string = '/orders/list-of-head-of-tailoring';
+    static TailorsList: string = '/tailoring/list-of-tailors';
     static AcceptTailorImage: string = '/orders/accept-tailor-style';
     static RejectTailorImage: string = '/orders/reject-tailor-style';
     static CloseOrder: string = '/orders/close-order';
@@ -255,7 +257,21 @@ static DeleteExpense: string = '/daily-expenses/delete-expense';
 
 
 
-    //#region Budget endpoint ---------------------------------
-  
+    //#region Fabrics endpoint ---------------------------------
+  static FetchAllFabrics: string = '/fabrics/all-fabrics';
+  static FetchCustomerFabrics: string = '/fabrics/customer';
+  static DeleteFabric: string = '/fabrics/delete-fabric';
+  static CreateFabric: string = '/fabrics/create-fabric';
+  static EditFabric: string = '/fabrics/edit-fabric';
+  static FetchFabric: string = '/fabrics/fabric';
+
+
+
+    //#region Ready-to-Wear endpoint ---------------------------------
+  static FetchAllReadyToWearProducts: string = '/ready-to-wear/all-products';
+  static FetchReadyToWearProduct: string = '/ready-to-wear/product';
+  static AddReadyToWearProduct: string = '/ready-to-wear/add-product';
+  static EditReadyToWearProduct: string = '/ready-to-wear/edit-product';
+  static DeleteReadyToWearProduct: string = '/ready-to-wear/delete-product';
 
 }

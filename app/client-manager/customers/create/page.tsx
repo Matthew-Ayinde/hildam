@@ -28,7 +28,7 @@ const Form = () => {
   const [formData, setFormData] = useState<{
     name: string;
     gender: string;
-    age: string;
+    date_of_birth: string;
     phone_number: string;
     email: string;
     address: string;
@@ -55,7 +55,7 @@ const Form = () => {
   }>({
     name: "",
     gender: "",
-    age: "",
+    date_of_birth: "",
     phone_number: "+234",
     email: "",
     address: "",
@@ -378,26 +378,20 @@ const Form = () => {
                 />
               </motion.div>
 
-              {/* Age */}
+              {/* Date of Birth */}
               <motion.div variants={itemVariants} className="space-y-2">
                 <label
-                  htmlFor="age"
+                  htmlFor="date_of_birth"
                   className="flex items-center gap-2 text-sm font-semibold text-gray-700"
                 >
-                  <MdCalendarToday className="text-[#ff6c2f]" /> Age
+                  <MdCalendarToday className="text-[#ff6c2f]" /> Date of Birth
                 </label>
                 <input
-                  type="number"
-                  id="age"
-                  name="age"
-                  value={formData.age}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (/^\d*$/.test(v) && Number(v) <= 100) handleChange(e);
-                  }}
-                  placeholder="Enter age"
-                  min="0"
-                  max="100"
+                  type="date"
+                  id="date_of_birth"
+                  name="date_of_birth"
+                  value={formData.date_of_birth}
+                  onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition duration-200 bg-gray-50 focus:bg-white"
                   required
                 />
