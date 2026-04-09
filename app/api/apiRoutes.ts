@@ -261,7 +261,7 @@ static DeleteExpense: string = '/daily-expenses/delete-expense';
   static FetchAllFabrics: string = '/fabrics/all-fabrics';
   static FetchCustomerFabrics: string = '/fabrics/customer';
   static DeleteFabric: string = '/fabrics/delete-fabric';
-  static CreateFabric: string = '/fabrics/create-fabric';
+  static CreateFabric: string = '/fabrics/add-fabric';
   static EditFabric: string = '/fabrics/edit-fabric';
   static FetchFabric: string = '/fabrics/fabric';
 

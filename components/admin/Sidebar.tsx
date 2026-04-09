@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { FiMessageSquare } from "react-icons/fi"
 import { HiOutlineInboxIn } from "react-icons/hi"
 import { IoMailOutline } from "react-icons/io5"
+import { GiClothes } from "react-icons/gi"
 
 type Notification = {
   id: string
@@ -75,8 +76,8 @@ const sidebarItems = [
   },
   {
     id: 10,
-    text: "Fabrics",
-    icon: <MdOutlineInventory2 />,
+    text: "Clothing",
+    icon: <GiClothes />,
     prefix: "/admin/fabrics",
     links: [
       { name: "All Fabrics", href: "/admin/fabrics" },

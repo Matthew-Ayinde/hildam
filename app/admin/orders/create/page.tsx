@@ -386,7 +386,7 @@ const Form = () => {
       setResponseMessage("Order created successfully!")
       setMessageType("success")
       if (createdOrderId) {
-        router.push(`/admin/orders/${createdOrderId}/create-payment`)
+        router.push(`/admin/orders/${createdOrderId}/add-job-expense`)
       } else {
         router.push(ApplicationRoutes.AdminOrders)
       }

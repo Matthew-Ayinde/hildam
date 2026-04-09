@@ -275,11 +275,23 @@ const Form = () => {
 
       const response = await createOrder(payload)
 
+      const createdOrderId =
+        response?.order?.id ??
+        response?.data?.order?.id ??
+        response?.data?.id ??
+        response?.id ??
+        response?.order_id ??
+        response?.data?.order_id
+
   
 
       setResponseMessage("Order created successfully!")
       setMessageType("success")
-      router.push(ApplicationRoutes.ClientManagerOrders)
+      if (createdOrderId) {
+        router.push(`/client-manager/orders/${createdOrderId}/add-job-expense`)
+      } else {
+        router.push(ApplicationRoutes.ClientManagerOrders)
+      }
 
       // // Reset form after successful submission
       // setTimeout(() => {

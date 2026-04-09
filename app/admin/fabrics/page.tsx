@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { HiOutlineCollection, HiOutlinePhotograph, HiOutlineTrash } from "react-icons/hi"
+import { HiOutlineCollection, HiOutlinePhotograph, HiOutlineTrash, HiPlus } from "react-icons/hi"
 import { IoEyeOutline, IoCalendarOutline } from "react-icons/io5"
 import Link from "next/link"
 import Spinner from "@/components/Spinner"
@@ -135,6 +135,14 @@ export default function FabricsPage() {
               <p className="text-lg font-bold text-blue-700">{totalImages}</p>
             </div>
           </div>
+
+          <Link
+            href="/admin/fabrics/create"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-700"
+          >
+            <HiPlus size={16} />
+            Add Fabric
+          </Link>
         </div>
       </motion.div>
 
