@@ -256,7 +256,6 @@ static DeleteExpense: string = '/daily-expenses/delete-expense';
 
 
 
-
     //#region Fabrics endpoint ---------------------------------
   static FetchAllFabrics: string = '/fabrics/all-fabrics';
   static FetchCustomerFabrics: string = '/fabrics/customer';
