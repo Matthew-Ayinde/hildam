@@ -29,6 +29,7 @@ import {
   fetchTailorJob,
   SendJobToClientManager,
 } from "@/app/api/apiClient";
+import AssignedTailorsSection from "./AssignedTailorsSection";
 
 export default function ShowCustomer() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -186,7 +187,7 @@ export default function ShowCustomer() {
     round_thigh: number;
     round_knee: number;
     round_feet: number;
-    assigned_tailors?: { id: number; name: string; email: string }[];
+    assigned_tailors?: { id: number; name: string; email: string; role: string }[];
     client_manager_feedback?: string;
   }
 
@@ -203,6 +204,13 @@ export default function ShowCustomer() {
 
 
       if (result) {
+        const tailorFromApi = result?.tailoring?.tailor;
+        const assignedTailors = Array.isArray(tailorFromApi)
+          ? tailorFromApi
+          : tailorFromApi
+          ? [tailorFromApi]
+          : [];
+
         const mappedCustomer: any = {
           fullName: result.customer.name,
           gender: result.customer.gender,
@@ -240,6 +248,12 @@ export default function ShowCustomer() {
           chest: result.customer.chest || 0,
           round_shoulder: result.customer.round_shoulder || 0,
           skirt_length: result.customer.skirt_length || 0,
+          assigned_tailors: assignedTailors.map((tailor: any) => ({
+            id: Number(tailor.id),
+            name: tailor.name || "N/A",
+            email: tailor.email || "N/A",
+            role: tailor.role || "tailor",
+          })),
           // trousers_length: result.data.trousers_length || 0,
           // round_thigh: result.data.round_thigh || 0,
           // round_knee: result.data.round_knee || 0,
@@ -619,6 +633,11 @@ export default function ShowCustomer() {
                 ))}
               </div>
             </motion.div>
+
+            <AssignedTailorsSection
+              jobId={tailorId}
+              tailors={customer.assigned_tailors || []}
+            />
 
               {/* Section to request inventory */}
               <motion.div variants={fadeInUp} className="mb-12">
