@@ -10,76 +10,84 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { format, startOfWeek, endOfWeek, subDays } from "date-fns"
+import { format, subDays } from "date-fns"
 import { cn } from "@/lib/utils"
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
 import type { DateRange } from "react-day-picker"
 import { getSession } from "next-auth/react"
-import { fetchOrderslist } from "@/app/api/apiClient"
+import { ApiRoutes } from "@/app/api/apiRoutes"
 
 // API Response Types
 interface ApiResponse {
   success: boolean
-  data: {
-    prioritySummary: {
-      highPriority: number
-      mediumPriority: number
-      lowPriority: number
+  period: {
+    from: string
+    to: string
+  }
+  order_summary: {
+    total: number
+    pending: number
+    processing: number
+    completed: number
+    closed: number
+  }
+  priority_summary: {
+    high: number
+    medium: number
+    low: number
+  }
+  avg_completion_days: number | null
+  completion_speed: {
+    "1-3 days": {
+      count: number
+      percentage: string
     }
-    orderStatusSummary: {
-      totalOrders: number
-      pendingOrders: number
-      processingOrders: number
-      completedOrders: number
+    "4-7 days": {
+      count: number
+      percentage: string
     }
-    "Completed orders duration": {
-      "1 - 3 days": {
-        count: number
-        percentage: string
-      }
-      "4 - 7 days": {
-        count: number
-        percentage: string
-      }
-      "8 - 14 days": {
-        count: number
-        percentage: string
-      }
-      "15+ days": {
-        count: number
-        percentage: string
-      }
+    "8-14 days": {
+      count: number
+      percentage: string
+    }
+    "15+ days": {
+      count: number
+      percentage: string
     }
   }
 }
 
 interface ChartData {
   prioritySummary: {
-    highPriority: number
-    mediumPriority: number
-    lowPriority: number
+    high: number
+    medium: number
+    low: number
   }
   orderStatusSummary: {
-    totalOrders: number
-    pendingOrders: number
-    processingOrders: number
-    completedOrders: number
+    total: number
+    pending: number
+    processing: number
+    completed: number
+    closed: number
   }
   completionTimes: {
     timeRange: string
     count: number
     percentage: string
   }[]
+  period: {
+    from: string
+    to: string
+  }
+  avgCompletionDays: number | null
 }
 
 const OrdersAnalyticsChart = () => {
-  const [timeRange, setTimeRange] = useState("weekly")
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: startOfWeek(new Date()),
-    to: endOfWeek(new Date()),
+    from: subDays(new Date(), 30),
+    to: new Date(),
   })
-  const [selectedMonth, setSelectedMonth] = useState(new Date())
   const [datePickerOpen, setDatePickerOpen] = useState(false)
   const [apiData, setApiData] = useState<ChartData | null>(null)
   const [loading, setLoading] = useState(false)
@@ -100,15 +108,16 @@ const OrdersAnalyticsChart = () => {
     setError(null)
 
     try {
-      let url = ""
-      if (timeRange === "weekly" && dateRange?.from && dateRange?.to) {
-        const startDate = format(dateRange.from, "yyyy-MM-dd")
-        const endDate = format(dateRange.to, "yyyy-MM-dd")
-        url = `https://api.hildamcouture.com/api/v1/orders/chart-information?type=weekly&start_date=${startDate}&end_date=${endDate}`
-      } else if (timeRange === "monthly") {
-        const month = format(selectedMonth, "yyyy-MM")
-        url = `https://api.hildamcouture.com/api/v1/orders/chart-information?type=monthly&month=${month}`
+      const fromDate = dateRange?.from
+      const toDate = dateRange?.to
+
+      if (!fromDate || !toDate) {
+        throw new Error("Please select a valid date range")
       }
+
+      const startDate = format(fromDate, "yyyy-MM-dd")
+      const endDate = format(toDate, "yyyy-MM-dd")
+      const url = `${ApiRoutes.BASE_URL_API_TEST}${ApiRoutes.FetchOrderAnalytics}?from_date=${startDate}&to_date=${endDate}`
 
       const response = await fetch(url, {
         headers: {
@@ -127,30 +136,32 @@ const OrdersAnalyticsChart = () => {
       if (result.success) {
         // Transform API data to match our component structure
         const transformedData: ChartData = {
-          prioritySummary: result.data.prioritySummary,
-          orderStatusSummary: result.data.orderStatusSummary,
+          prioritySummary: result.priority_summary,
+          orderStatusSummary: result.order_summary,
           completionTimes: [
             {
               timeRange: "1-3 days",
-              count: result.data["Completed orders duration"]["1 - 3 days"].count,
-              percentage: result.data["Completed orders duration"]["1 - 3 days"].percentage,
+              count: result.completion_speed["1-3 days"].count,
+              percentage: result.completion_speed["1-3 days"].percentage,
             },
             {
               timeRange: "4-7 days",
-              count: result.data["Completed orders duration"]["4 - 7 days"].count,
-              percentage: result.data["Completed orders duration"]["4 - 7 days"].percentage,
+              count: result.completion_speed["4-7 days"].count,
+              percentage: result.completion_speed["4-7 days"].percentage,
             },
             {
               timeRange: "8-14 days",
-              count: result.data["Completed orders duration"]["8 - 14 days"].count,
-              percentage: result.data["Completed orders duration"]["8 - 14 days"].percentage,
+              count: result.completion_speed["8-14 days"].count,
+              percentage: result.completion_speed["8-14 days"].percentage,
             },
             {
               timeRange: "15+ days",
-              count: result.data["Completed orders duration"]["15+ days"].count,
-              percentage: result.data["Completed orders duration"]["15+ days"].percentage,
+              count: result.completion_speed["15+ days"].count,
+              percentage: result.completion_speed["15+ days"].percentage,
             },
           ],
+          period: result.period,
+          avgCompletionDays: result.avg_completion_days,
         }
         setApiData(transformedData)
       } else {
@@ -163,79 +174,36 @@ const OrdersAnalyticsChart = () => {
     }
   }
 
-  // Fetch data when timeRange, dateRange, or selectedMonth changes
+  // Fetch data when the custom date range changes
   useEffect(() => {
     fetchData()
-  }, [timeRange, dateRange, selectedMonth])
+  }, [dateRange])
 
-  // Handle time range change
-  const handleTimeRangeChange = (newTimeRange: string) => {
-    setTimeRange(newTimeRange)
-    if (newTimeRange === "weekly") {
-      setDateRange({
-        from: startOfWeek(new Date()),
-        to: endOfWeek(new Date()),
-      })
-    } else if (newTimeRange === "monthly") {
-      setSelectedMonth(new Date())
-    }
-  }
-
-  // Handle date range selection for weekly
+  // Handle custom date range selection
   const handleDateRangeSelect = (range: DateRange | undefined) => {
-    if (timeRange === "weekly") {
-      setDateRange(range)
-    }
-  }
-
-  // Handle month selection for monthly
-  const handleMonthSelect = (date: Date | undefined) => {
-    if (date && timeRange === "monthly") {
-      setSelectedMonth(date)
-    }
-  }
-
-  // Quick date range presets
-  const setThisWeek = () => {
-    const start = startOfWeek(new Date())
-    const end = endOfWeek(new Date())
-    setDateRange({ from: start, to: end })
-    setTimeRange("weekly")
-  }
-
-  const setLastWeek = () => {
-    const thisWeekStart = startOfWeek(new Date())
-    const start = subDays(thisWeekStart, 7)
-    const end = subDays(thisWeekStart, 1)
-    setDateRange({ from: start, to: end })
-    setTimeRange("weekly")
-  }
-
-  const setThisMonth = () => {
-    setSelectedMonth(new Date())
-    setTimeRange("monthly")
+    setDateRange(range)
   }
 
   // Prepare data for charts
   const orderStatusData = apiData
     ? [
-        { name: "Completed", value: apiData.orderStatusSummary.completedOrders, color: "#10b981" },
-        { name: "Processing", value: apiData.orderStatusSummary.processingOrders, color: "#f59e0b" },
-        { name: "Pending", value: apiData.orderStatusSummary.pendingOrders, color: "#ef4444" },
+        { name: "Completed", value: apiData.orderStatusSummary.completed, color: "#10b981" },
+        { name: "Processing", value: apiData.orderStatusSummary.processing, color: "#f59e0b" },
+        { name: "Pending", value: apiData.orderStatusSummary.pending, color: "#ef4444" },
       ]
     : []
 
   const priorityData = apiData
     ? [
-        { name: "High", value: apiData.prioritySummary.highPriority, color: "#ef4444" },
-        { name: "Medium", value: apiData.prioritySummary.mediumPriority, color: "#f59e0b" },
-        { name: "Low", value: apiData.prioritySummary.lowPriority, color: "#10b981" },
+        { name: "High", value: apiData.prioritySummary.high, color: "#ef4444" },
+        { name: "Medium", value: apiData.prioritySummary.medium, color: "#f59e0b" },
+        { name: "Low", value: apiData.prioritySummary.low, color: "#10b981" },
       ]
     : []
 
   const completionRate =
-    apiData && apiData.orderStatusSummary.totalOrders > 0
-      ? (apiData.orderStatusSummary.completedOrders / apiData.orderStatusSummary.totalOrders) * 100
+    apiData && apiData.orderStatusSummary.total > 0
+      ? (apiData.orderStatusSummary.completed / apiData.orderStatusSummary.total) * 100
       : 0
 
   return (
@@ -251,28 +219,18 @@ const OrdersAnalyticsChart = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <Select value={timeRange} onValueChange={handleTimeRangeChange}>
-              <SelectTrigger className="w-full sm:w-40 border-orange-200 focus:border-orange-400">
-                <SelectValue placeholder="Time Range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="weekly">Weekly</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-              </SelectContent>
-            </Select>
-
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full sm:w-[280px] justify-start text-left font-normal border-orange-200 hover:bg-orange-50",
-                    !dateRange && !selectedMonth && "text-muted-foreground",
+                    "w-full sm:w-[320px] justify-start text-left font-normal border-orange-200 hover:bg-orange-50",
+                    !dateRange && "text-muted-foreground",
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
                   <span className="truncate">
-                    {timeRange === "weekly" && dateRange?.from ? (
+                    {dateRange?.from ? (
                       dateRange.to ? (
                         <>
                           {format(dateRange.from, "LLL dd, y")} - {format(dateRange.to, "LLL dd, y")}
@@ -280,54 +238,27 @@ const OrdersAnalyticsChart = () => {
                       ) : (
                         format(dateRange.from, "LLL dd, y")
                       )
-                    ) : timeRange === "monthly" ? (
-                      format(selectedMonth, "MMMM yyyy")
                     ) : (
-                      <span>Pick a date range</span>
+                      <span>Pick a custom date range</span>
                     )}
                   </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
                 <div className="p-4 border-b bg-gradient-to-r from-orange-50 to-amber-50">
-                  <h4 className="font-semibold text-slate-800 mb-2">
-                    Select {timeRange === "weekly" ? "Week Range" : "Month"}
-                  </h4>
+                  <h4 className="font-semibold text-slate-800 mb-2">Select Custom Date Range</h4>
                 </div>
-                {timeRange === "weekly" ? (
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={dateRange?.from}
-                    selected={dateRange}
-                    onSelect={handleDateRangeSelect}
-                    numberOfMonths={1}
-                    className="rounded-md"
-                    required
-                  />
-                ) : (
-                  <Calendar
-                    initialFocus
-                    mode="single"
-                    defaultMonth={selectedMonth}
-                    selected={selectedMonth}
-                    onSelect={handleMonthSelect}
-                    numberOfMonths={1}
-                    className="rounded-md"
-                  />
-                )}
-                <div className="border-t p-3 flex flex-col sm:flex-row gap-2 justify-between">
-                  <div className="flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline" onClick={setThisWeek} className="text-xs bg-transparent">
-                      This Week
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={setLastWeek} className="text-xs bg-transparent">
-                      Last Week
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={setThisMonth} className="text-xs bg-transparent">
-                      This Month
-                    </Button>
-                  </div>
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={dateRange?.from}
+                  selected={dateRange}
+                  onSelect={handleDateRangeSelect}
+                  numberOfMonths={1}
+                  className="rounded-md"
+                  required
+                />
+                <div className="border-t p-3 flex justify-end">
                   <Button
                     size="sm"
                     onClick={() => setDatePickerOpen(false)}
@@ -393,11 +324,11 @@ const OrdersAnalyticsChart = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl sm:text-3xl font-bold">
-                  {apiData.orderStatusSummary.totalOrders.toLocaleString()}
+                  {apiData.orderStatusSummary.total.toLocaleString()}
                 </div>
                 <div className="flex items-center gap-1 text-xs">
                   <TrendingUp className="h-3 w-3 text-orange-200" />
-                  <span className="text-orange-200">Current {timeRange}</span>
+                  <span className="text-orange-200">Custom range</span>
                 </div>
               </CardContent>
             </Card>
@@ -409,7 +340,7 @@ const OrdersAnalyticsChart = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl sm:text-3xl font-bold text-green-600">
-                  {apiData.orderStatusSummary.completedOrders.toLocaleString()}
+                  {apiData.orderStatusSummary.completed.toLocaleString()}
                 </div>
                 <p className="text-xs text-slate-500">{completionRate.toFixed(1)}% completion rate</p>
               </CardContent>
@@ -422,7 +353,7 @@ const OrdersAnalyticsChart = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl sm:text-3xl font-bold text-amber-600">
-                  {apiData.orderStatusSummary.processingOrders.toLocaleString()}
+                  {apiData.orderStatusSummary.processing.toLocaleString()}
                 </div>
                 <p className="text-xs text-slate-500">Currently in progress</p>
               </CardContent>
@@ -435,7 +366,7 @@ const OrdersAnalyticsChart = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl sm:text-3xl font-bold text-red-600">
-                  {apiData.orderStatusSummary.pendingOrders.toLocaleString()}
+                  {apiData.orderStatusSummary.pending.toLocaleString()}
                 </div>
                 <p className="text-xs text-slate-500">Awaiting action</p>
               </CardContent>

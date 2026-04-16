@@ -1,0 +1,7 @@
+
+# robots.txt for Travel Inn Website
+User-agent: *
+Allow: /
+
+# IMPORTANT: Replace <BASE_URL> with your actual domain in production
+Sitemap: <BASE_URL>/sitemap.xml
