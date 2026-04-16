@@ -226,7 +226,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-100 rounded-2xl mt-5"
+      className="sticky top-0 z-[60] bg-white shadow-sm border-b border-gray-100 rounded-2xl mt-5"
     >
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
@@ -281,7 +281,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute top-full right-0 w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 mt-3 z-50 overflow-hidden"
+                    className="absolute top-full right-0 w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 mt-3 z-[80] overflow-hidden"
                   >
                     {/* Header */}
                     <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-5 text-white">
@@ -418,7 +418,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute top-full right-0 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 mt-3 z-50 overflow-hidden"
+                    className="absolute top-full right-0 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 mt-3 z-[70] overflow-hidden"
                   >
                     <div className="p-5 border-b border-gray-100">
                       <div className="flex items-center gap-3">
