@@ -51,14 +51,13 @@ export default function ProductCard({ product, onEdit, onDelete }: ProductCardPr
           >
             <IoEyeOutline size={14} /> View
           </Link>
-          <button
-            type="button"
-            onClick={() => onEdit(product)}
+          <Link
+            href={`/admin/fabrics/ready-to-wear/${product.id}/edit`}
             className="flex items-center justify-center gap-1 rounded-lg border border-orange-200 bg-orange-50 px-2 py-2 text-xs font-medium text-orange-700"
             aria-label={`Edit ${product.name}`}
           >
             <HiOutlinePencil size={14} /> Edit
-          </button>
+          </Link>
           <button
             type="button"
             onClick={() => onDelete(product)}

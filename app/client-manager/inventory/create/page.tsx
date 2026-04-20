@@ -15,11 +15,11 @@ import { FiPackage, FiHash, FiFileText } from "react-icons/fi"
 import { IoArrowBack } from "react-icons/io5"
 import Link from "next/link"
 import { TbCurrencyNaira } from "react-icons/tb";
-import { createInventory } from "@/app/api/apiClient"
+import { createInventory, type CreateInventoryPayload } from "@/app/api/apiClient"
 
 const Form = () => {
   const router = useRouter()
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateInventoryPayload>({
     item_name: "",
     item_quantity: "",
     price_purchased: "",
@@ -43,7 +43,14 @@ const Form = () => {
 
     try {
 
-      const response = await createInventory(formData)
+      const payload: CreateInventoryPayload = {
+        item_name: formData.item_name,
+        item_quantity: formData.item_quantity,
+        price_purchased: formData.price_purchased,
+        color: formData.color,
+        ...(formData.item_description?.trim() ? { item_description: formData.item_description.trim() } : {}),
+      }
+      const response = await createInventory(payload)
 
       setResponseMessage("Inventory item created successfully!")
       setMessageType("success")
@@ -292,7 +299,6 @@ const Form = () => {
                   onChange={handleChange}
                   placeholder="Enter item description, specifications, or additional details..."
                   className="w-full rounded-xl border border-gray-300 shadow-sm p-4 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200 bg-white resize-none"
-                  required
                 />
               </motion.div>
             </motion.div>

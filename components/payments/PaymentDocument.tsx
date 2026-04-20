@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { jsPDF } from "jspdf"
 import html2canvas from "html2canvas"
 
@@ -51,7 +51,9 @@ const normalize = (value: string) => (value && value.trim() ? value : "N/A")
 
 export default function PaymentDocument({ variant, fileName, data }: PaymentDocumentProps) {
   const documentRef = useRef<HTMLDivElement>(null)
+  const successTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [isExporting, setIsExporting] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
 
   const title = variant === "invoice" ? "INVOICE" : "RECEIPT"
 
@@ -93,10 +95,25 @@ export default function PaymentDocument({ variant, fileName, data }: PaymentDocu
       }
 
       pdf.save(fileName)
+      setSuccessMessage(`${title} downloaded successfully.`)
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current)
+      }
+      successTimeoutRef.current = setTimeout(() => {
+        setSuccessMessage("")
+      }, 5000)
     } finally {
       setIsExporting(false)
     }
   }
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current)
+      }
+    }
+  }, [])
 
   return (
     <div className="print-page min-h-screen bg-gray-100 py-6 px-4 sm:px-6">
@@ -147,7 +164,6 @@ export default function PaymentDocument({ variant, fileName, data }: PaymentDocu
                 <thead>
                   <tr className="bg-yellow-400 text-white text-xs sm:text-sm">
                     <th className="w-[42%] text-left p-3 font-semibold">Description</th>
-                    <th className="w-[19%] text-right p-3 font-semibold">Rate</th>
                     <th className="w-[19%] text-right p-3 font-semibold">VAT/Discount</th>
                     <th className="w-[20%] text-right p-3 font-semibold">Amount</th>
                   </tr>
@@ -158,7 +174,6 @@ export default function PaymentDocument({ variant, fileName, data }: PaymentDocu
                       <p className="font-semibold">{normalize(data.clothingName)}</p>
                       <p className="text-xs text-gray-500 mt-1 break-words">{normalize(data.clothingDescription)}</p>
                     </td>
-                    <td className="p-3 text-right whitespace-nowrap">{formatCurrency(data.goingRate)}</td>
                     <td className="p-3 text-right whitespace-nowrap">
                       {variant === "invoice" ? `${normalize(data.discount)}%` : `VAT ${normalize(data.vat)}% / Disc ${normalize(data.discount)}%`}
                     </td>
@@ -191,6 +206,12 @@ export default function PaymentDocument({ variant, fileName, data }: PaymentDocu
             </div>
           </section>
         </div>
+
+        {successMessage ? (
+          <div className="no-print mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            {successMessage}
+          </div>
+        ) : null}
 
         <div className="no-print mt-6 flex flex-wrap gap-3 justify-center">
           <button

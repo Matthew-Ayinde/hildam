@@ -3,6 +3,8 @@ export class ApiRoutes {
 
   static AccessToken: string = 'h';
   static FirstLoginChangePassword: string = '/auth/first-login-change-password';
+  static UserProfile: string = '/auth/profile';
+  static UpdateProfile: string = '/auth/update-profile';
 
 
 
@@ -273,5 +275,12 @@ static DeleteExpense: string = '/daily-expenses/delete-expense';
   static AddReadyToWearProduct: string = '/ready-to-wear/add-product';
   static EditReadyToWearProduct: string = '/ready-to-wear/edit-product';
   static DeleteReadyToWearProduct: string = '/ready-to-wear/delete-product';
+
+  //#region Sales endpoint ---------------------------------
+  static FetchAllSales: string = '/sales/all-sales';
+  static FetchSale: string = '/sales/sale';
+  static AddSale: string = '/sales/add-sale';
+  static EditSale: string = '/sales/edit-sale';
+  static DeleteSale: string = '/sales/delete-sale';
 
 }

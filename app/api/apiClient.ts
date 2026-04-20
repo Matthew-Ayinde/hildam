@@ -29,6 +29,21 @@ export async function firstLoginChangePassword(payload: {
   return resp.data
 }
 
+export async function fetchUserProfile(): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(ApiRoutes.UserProfile, { headers })
+  return resp.data.data
+}
+
+export async function updateUserProfile(payload: {
+  name?: string
+  new_password?: string
+}): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.put(ApiRoutes.UpdateProfile, payload, { headers })
+  return resp.data
+}
+
 
 
 
@@ -197,7 +212,15 @@ export async function fetchInventory(inventoryId: string): Promise<any> {
   return resp.data.data;
 }
 
-export async function createInventory(formData: any): Promise<any> {
+export interface CreateInventoryPayload {
+  item_name: string
+  item_quantity: string
+  price_purchased: string
+  color: string
+  item_description?: string
+}
+
+export async function createInventory(formData: CreateInventoryPayload): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.post(ApiRoutes.CreateInventory, formData, { headers });
   return resp.data;
@@ -641,4 +664,41 @@ export async function deleteReadyToWearProduct(productId: string): Promise<any> 
   const headers = await getUserHeaders();
   const resp = await API.delete(`${ApiRoutes.DeleteReadyToWearProduct}/${productId}`, { headers });
   return resp.data;
+}
+
+export async function fetchAllSales(filters?: Record<string, string | undefined>): Promise<any> {
+  const headers = await getUserHeaders();
+  const query = filters
+    ? new URLSearchParams(
+        Object.entries(filters).filter(([_key, value]) => value !== undefined) as [string, string][]
+      ).toString()
+    : ""
+
+  const url = query ? `${ApiRoutes.FetchAllSales}?${query}` : ApiRoutes.FetchAllSales
+  const resp = await API.get(url, { headers })
+  return resp.data
+}
+
+export async function fetchSale(saleId: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(`${ApiRoutes.FetchSale}/${saleId}`, { headers });
+  return resp.data
+}
+
+export async function addSale(payload: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.post(ApiRoutes.AddSale, payload, { headers });
+  return resp.data
+}
+
+export async function editSale(saleId: string, payload: any): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.put(`${ApiRoutes.EditSale}/${saleId}`, payload, { headers });
+  return resp.data
+}
+
+export async function deleteSale(saleId: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.delete(`${ApiRoutes.DeleteSale}/${saleId}`, { headers });
+  return resp.data
 }

@@ -1,10 +1,10 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import Link from "next/link"
 import { HiOutlineCollection, HiOutlinePlus } from "react-icons/hi"
 import { IoSearchOutline } from "react-icons/io5"
 import ProductCard from "@/components/admin/ready-to-wear/ProductCard"
-import ProductFormModal from "@/components/admin/ready-to-wear/ProductFormModal"
 import DeleteProductModal from "@/components/admin/ready-to-wear/DeleteProductModal"
 import ProductListSkeleton from "@/components/admin/ready-to-wear/ProductListSkeleton"
 import { Input } from "@/components/ui/input"
@@ -15,11 +15,9 @@ import { ReadyToWearProduct } from "@/features/ready-to-wear/types"
 
 export default function ReadyToWearPage() {
   const { products, isLoading, error, refetch } = useReadyToWearProducts()
-  const { isMutating, createProduct, editProduct, deleteProduct } = useReadyToWearMutations()
+  const { isMutating, deleteProduct } = useReadyToWearMutations()
 
   const [searchValue, setSearchValue] = useState("")
-  const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [editingProduct, setEditingProduct] = useState<ReadyToWearProduct | null>(null)
   const [deletingProduct, setDeletingProduct] = useState<ReadyToWearProduct | null>(null)
 
   const filteredProducts = useMemo(() => {
@@ -34,36 +32,6 @@ export default function ReadyToWearPage() {
       )
     })
   }, [products, searchValue])
-
-  const onCreate = async (payload: FormData) => {
-    try {
-      await createProduct(payload)
-      toast({ title: "Product added", description: "Ready-to-Wear product created successfully." })
-      setIsCreateOpen(false)
-      await refetch()
-    } catch (createError) {
-      toast({
-        title: "Unable to add product",
-        description: createError instanceof Error ? createError.message : "Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const onEdit = async (id: string, payload: FormData) => {
-    try {
-      await editProduct(id, payload)
-      toast({ title: "Product updated", description: "Product details have been updated." })
-      setEditingProduct(null)
-      await refetch()
-    } catch (editError) {
-      toast({
-        title: "Unable to update product",
-        description: editError instanceof Error ? editError.message : "Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
 
   const onDelete = async () => {
     if (!deletingProduct?.id) return
@@ -96,9 +64,12 @@ export default function ReadyToWearPage() {
             </div>
           </div>
 
-          <Button onClick={() => setIsCreateOpen(true)} className="bg-orange-600 text-white hover:bg-orange-700">
+          <Link
+            href="/admin/fabrics/ready-to-wear/create"
+            className="inline-flex bg-orange-600 text-white hover:bg-orange-700 h-10 px-4 py-2 rounded-md font-medium text-sm"
+          >
             <HiOutlinePlus size={16} /> Add Product
-          </Button>
+          </Link>
         </div>
 
         <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3">
@@ -138,31 +109,12 @@ export default function ReadyToWearPage() {
             <ProductCard
               key={product.id}
               product={product}
-              onEdit={(value) => setEditingProduct(value)}
+              onEdit={() => {}}
               onDelete={(value) => setDeletingProduct(value)}
             />
           ))}
         </div>
       )}
-
-      <ProductFormModal
-        open={isCreateOpen}
-        mode="create"
-        isSubmitting={isMutating}
-        onClose={() => setIsCreateOpen(false)}
-        onSubmitCreate={onCreate}
-        onSubmitEdit={onEdit}
-      />
-
-      <ProductFormModal
-        open={Boolean(editingProduct)}
-        mode="edit"
-        product={editingProduct}
-        isSubmitting={isMutating}
-        onClose={() => setEditingProduct(null)}
-        onSubmitCreate={onCreate}
-        onSubmitEdit={onEdit}
-      />
 
       <DeleteProductModal
         open={Boolean(deletingProduct)}

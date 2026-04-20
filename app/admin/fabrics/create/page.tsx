@@ -170,20 +170,6 @@ export default function AdminCreateFabricPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50 p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-orange-700">Payload Preview</h2>
-        <p className="mt-2 text-sm text-gray-700">This form submits these keys in the request body:</p>
-        <pre className="mt-3 overflow-auto rounded-lg border border-orange-100 bg-white p-3 text-xs text-gray-700">
-{`{
-  "customer_id": "1",
-  "description": "bla bla",
-  "received_by_staff_id": "21",
-  "fabric_images[]": "files uploaded using file format",
-  "dropped_off_at": "2026-03-07"
-}`}
-        </pre>
-      </div>
-
       <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
         {isLoadingLookups ? (
           <div className="flex min-h-[240px] items-center justify-center">

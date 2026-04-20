@@ -82,6 +82,7 @@ const sidebarItems = [
     links: [
       { name: "All Fabrics", href: "/admin/fabrics" },
       { name: "Ready-to-Wear", href: "/admin/fabrics/ready-to-wear" },
+      { name: "Ready-to-Wear Sales", href: "/admin/fabrics/ready-to-wear-sales" },
     ],
   },
   {

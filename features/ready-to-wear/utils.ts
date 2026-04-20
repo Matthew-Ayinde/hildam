@@ -77,12 +77,8 @@ export const normalizeReadyToWearProduct = (raw: any): ReadyToWearProduct => {
 export const buildFormValuesFromProduct = (product: ReadyToWearProduct): ReadyToWearFormValues => ({
   name: product.name,
   category: product.category,
-  fabricType: product.fabricType || "",
-  status: product.status || "active",
-  description: product.description,
   costPrice: product.costPrice,
   sellingPrice: product.sellingPrice,
-  reorderLevel: product.reorderLevel ?? 0,
   variants:
     product.variants.length > 0
       ? product.variants.map((variant) => ({
@@ -106,19 +102,10 @@ export const validateReadyToWearForm = (
 
   if (!values.name.trim()) errors.name = "Product name is required"
   if (!values.category.trim()) errors.category = "Category is required"
-  if (!values.fabricType.trim()) errors.fabricType = "Fabric type is required"
-
-  if (values.status && !["active", "inactive"].includes(values.status)) {
-    errors.status = "Status must be active or inactive"
-  }
 
   if (values.costPrice < 0) errors.costPrice = "Cost price cannot be negative"
   if (values.sellingPrice <= values.costPrice) {
     errors.sellingPrice = "Selling price must be greater than cost price"
-  }
-
-  if (values.reorderLevel < 0) {
-    errors.reorderLevel = "Reorder level cannot be negative"
   }
 
   if (!values.variants.length) {
@@ -150,34 +137,26 @@ export const validateReadyToWearForm = (
 }
 
 const appendBaseProductFields = (formData: FormData, values: ReadyToWearFormValues) => {
-  formData.append("name", values.name.trim())
   formData.append("product_name", values.name.trim())
   formData.append("category", values.category.trim())
-  formData.append("fabric_type", values.fabricType.trim())
-  formData.append("status", values.status || "active")
-  formData.append("description", values.description.trim())
   formData.append("cost_price", String(values.costPrice))
   formData.append("selling_price", String(values.sellingPrice))
-  formData.append("reorder_level", String(values.reorderLevel))
 }
-
-const mapVariantForPayload = (variant: ReadyToWearVariantInput) => ({
-  ...(variant.id ? { id: variant.id } : {}),
-  color: variant.color.trim(),
-  size: variant.size.trim(),
-  quantity: Number(variant.quantity),
-})
 
 export const buildCreateProductFormData = (values: ReadyToWearFormValues): FormData => {
   const formData = new FormData()
   appendBaseProductFields(formData, values)
 
-  const variants = values.variants.map(mapVariantForPayload)
-  formData.append("variants", JSON.stringify(variants))
-
+  // Add product images
   values.newImages.forEach((image) => {
-    formData.append("images[]", image)
     formData.append("product_images[]", image)
+  })
+
+  // Add variants with bracket notation for form-data
+  values.variants.forEach((variant, index) => {
+    formData.append(`variants[${index}][color]`, variant.color.trim())
+    formData.append(`variants[${index}][size]`, variant.size.trim())
+    formData.append(`variants[${index}][quantity_in_stock]`, String(variant.quantity))
   })
 
   return formData
@@ -187,30 +166,26 @@ export const buildEditProductFormData = ({ originalProduct, values }: ReadyToWea
   const formData = new FormData()
   appendBaseProductFields(formData, values)
 
-  const existingVariantIds = new Set(originalProduct.variants.filter((variant) => variant.id).map((variant) => String(variant.id)))
-  const submittedVariants = values.variants.map(mapVariantForPayload)
-  const submittedExistingVariantIds = new Set(
-    submittedVariants.filter((variant) => variant.id != null).map((variant) => String(variant.id))
-  )
-
-  const updatedVariants = submittedVariants.filter((variant) => variant.id != null)
-  const newVariants = submittedVariants.filter((variant) => variant.id == null)
-  const deletedVariantIds = Array.from(existingVariantIds).filter((id) => !submittedExistingVariantIds.has(id))
-
-  formData.append("variants", JSON.stringify(submittedVariants))
-  formData.append("updated_variants", JSON.stringify(updatedVariants))
-  formData.append("new_variants", JSON.stringify(newVariants))
-  formData.append("deleted_variant_ids", JSON.stringify(deletedVariantIds))
-
+  // Add new product images if provided
   if (values.newImages.length > 0) {
-    formData.append("replace_images", "true")
     values.newImages.forEach((image) => {
-      formData.append("images[]", image)
       formData.append("product_images[]", image)
     })
+    formData.append("replace_images", "true")
   } else {
     formData.append("replace_images", "false")
   }
+
+  // Add variants with bracket notation for form-data
+  values.variants.forEach((variant, index) => {
+    // If variant has an ID, mark it as existing
+    if (variant.id) {
+      formData.append(`variants[${index}][id]`, variant.id)
+    }
+    formData.append(`variants[${index}][color]`, variant.color.trim())
+    formData.append(`variants[${index}][size]`, variant.size.trim())
+    formData.append(`variants[${index}][quantity_in_stock]`, String(variant.quantity))
+  })
 
   return formData
 }
