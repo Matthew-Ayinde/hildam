@@ -205,7 +205,10 @@ export default function RevenueAnalytics() {
                   },
                   tooltip: {
                     callbacks: {
-                      label: (ctx) => `₦${ctx.parsed.y.toLocaleString()}`,
+                      label: (ctx) => {
+                        const parsedY = typeof ctx.parsed?.y === "number" ? ctx.parsed.y : 0
+                        return `₦${parsedY.toLocaleString()}`
+                      },
                     },
                   },
                 },

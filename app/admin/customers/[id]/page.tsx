@@ -177,6 +177,10 @@ export default function ShowCustomer() {
     { label: "Chest", key: "chest" },
     { label: "Round Shoulder", key: "round_shoulder" },
     { label: "Skirt Length", key: "skirt_length" },
+    { label: "Trousers Length", key: "trousers_length" },
+    { label: "Round Thigh", key: "round_thigh" },
+    { label: "Round Knee", key: "round_knee" },
+    { label: "Round Feet", key: "round_feet" },
       ]
 
   const getGenderIcon = (gender: string) => {

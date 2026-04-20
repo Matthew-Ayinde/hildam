@@ -1,21 +1,16 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import ProductFormComponent from "@/components/admin/ready-to-wear/ProductFormComponent"
 import { toast } from "@/hooks/use-toast"
 import { useReadyToWearMutations, useReadyToWearProducts } from "@/features/ready-to-wear/hooks"
 import { ReadyToWearProduct } from "@/features/ready-to-wear/types"
 
-interface EditProductPageProps {
-  params: {
-    id: string
-  }
-}
-
-export default function EditProductPage({ params }: EditProductPageProps) {
+export default function EditProductPage() {
   const router = useRouter()
-  const { id } = params
+  const params = useParams()
+  const id = params?.id as string
   const { isMutating, editProduct } = useReadyToWearMutations()
   const { products, isLoading, error, refetch } = useReadyToWearProducts()
 

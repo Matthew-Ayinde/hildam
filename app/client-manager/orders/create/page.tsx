@@ -455,7 +455,6 @@ const Form = () => {
                     value={formData.customer_email}
                     onChange={handleChange}
                     placeholder="Enter customer email"
-                    required
                     className="w-full rounded-xl border border-gray-300 shadow-sm p-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-200"
                   />
                 </div>

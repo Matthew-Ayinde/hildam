@@ -754,6 +754,10 @@ export default function ShowCustomer() {
                   { label: "Chest", value: customer.chest },
                   { label: "Round Shoulder", value: customer.round_shoulder },
                   { label: "Skirt Length", value: customer.skirt_length },
+                  { label: "Trousers Length", value: customer.trousers_length },
+                  { label: "Round Thigh", value: customer.round_thigh },
+                  { label: "Round Knee", value: customer.round_knee },
+                  { label: "Round Feet", value: customer.round_feet },
                 ].map((measurement, index) => (
                   <motion.div
                     key={index}

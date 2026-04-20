@@ -30,8 +30,12 @@ interface ProductFormComponentProps {
 const emptyFormValues: ReadyToWearFormValues = {
   name: "",
   category: "",
+  fabricType: "",
+  status: "active",
+  description: "",
   costPrice: 0,
   sellingPrice: 0,
+  reorderLevel: 0,
   variants: [createEmptyVariant()],
   newImages: [],
 }

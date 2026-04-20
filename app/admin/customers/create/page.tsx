@@ -257,6 +257,38 @@ const Form = () => {
       delay: 1.3,
       value: formData.skirt_length,
     },
+    {
+      label: "Trousers Length",
+      id: "trousersLength",
+      name: "trousers_length",
+      placeholder: "Trousers Length",
+      delay: 1.6,
+      value: formData.trousers_length,
+    },
+    {
+      label: "Round Thigh",
+      id: "roundThigh",
+      name: "round_thigh",
+      placeholder: "Round Thigh",
+      delay: 1.7,
+      value: formData.round_thigh,
+    },
+    {
+      label: "Round Knee",
+      id: "roundKnee",
+      name: "round_knee",
+      placeholder: "Round Knee",
+      delay: 1.8,
+      value: formData.round_knee,
+    },
+    {
+      label: "Round Feet",
+      id: "roundFeet",
+      name: "round_feet",
+      placeholder: "Round Feet",
+      delay: 1.9,
+      value: formData.round_feet,
+    },
   ];
 
   useEffect(() => {
@@ -446,7 +478,6 @@ const Form = () => {
                   rows={3}
                   placeholder="Enter full address"
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition duration-200 bg-gray-50 focus:bg-white resize-none"
-                  required
                 />
               </motion.div>
 
@@ -470,7 +501,6 @@ const Form = () => {
                 rows={4}
                 placeholder="Enter customer description and preferences"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#ff6c2f] focus:ring-2 focus:ring-orange-100 transition duration-200 bg-gray-50 focus:bg-white resize-none"
-                required
               />
             </motion.div>
           </motion.div>
@@ -559,7 +589,7 @@ const Form = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -50, scale: 0.9 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="fixed top-8 left-1/2 -translate-x-1/2 z-50"
+              className="fixed top-8 left-1/2 -translate-x-1/2 z-[9999]"
             >
               <div
                 className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border ${

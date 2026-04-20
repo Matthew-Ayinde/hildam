@@ -56,6 +56,7 @@ export default function ModernInventoryTable() {
   const [popupMessage, setPopupMessage] = useState<string | null>(null)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("")
+  const [rejectionFeedback, setRejectionFeedback] = useState("")
   const [statusFilter, setStatusFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending")
   const [searchTerm, setSearchTerm] = useState("")
 
@@ -109,6 +110,13 @@ export default function ModernInventoryTable() {
     const orderId = id
     if (!selectedCustomerId) return
 
+    const feedback = rejectionFeedback.trim()
+    if (!feedback) {
+      setPopupMessage("Please add a rejection feedback message.")
+      setTimeout(() => setPopupMessage(null), 5000)
+      return
+    }
+
     try {
       const session = await getSession()
       const accessToken = session?.user?.token
@@ -116,9 +124,10 @@ export default function ModernInventoryTable() {
         throw new Error("Authentication token not found")
       }
 
-      const response = await rejectStoreRequest(orderId)
+      const response = await rejectStoreRequest(orderId, feedback)
 
       setData((prevData) => prevData.filter((customer) => customer.id !== selectedCustomerId))
+      setRejectionFeedback("")
 
       setPopupMessage("Request successfully rejected")
       setTimeout(() => setPopupMessage(null), 5000)
@@ -442,6 +451,7 @@ export default function ModernInventoryTable() {
                             <motion.button
                               onClick={() => {
                                 setSelectedCustomerId(row.id)
+                                setRejectionFeedback("")
                                 setIsPopupOpen(true)
                               }}
                               className="p-2 bg-red-100 text-red-500 rounded-lg hover:bg-red-200 transition-colors duration-200"
@@ -556,6 +566,17 @@ export default function ModernInventoryTable() {
                 <p className="text-gray-700 mb-6">
                   Are you sure you want to reject this inventory request? 
                 </p>
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Feedback message
+                  </label>
+                  <textarea
+                    value={rejectionFeedback}
+                    onChange={(event) => setRejectionFeedback(event.target.value)}
+                    placeholder="Explain why this request was rejected"
+                    className="w-full min-h-[120px] rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 focus:border-[#ff6c2f] focus:ring-2 focus:ring-[#ff6c2f]/20 outline-none transition-colors"
+                  />
+                </div>
                 <div className="flex gap-3">
                   <motion.button
                     className="flex-1 px-4 py-3 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors duration-200"

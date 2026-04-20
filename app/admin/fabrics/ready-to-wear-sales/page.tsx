@@ -14,8 +14,8 @@ import { useReadyToWearProducts } from "@/features/ready-to-wear/hooks"
 import { useSaleMutations, useSales } from "@/features/ready-to-wear-sales/hooks"
 import { SalePaymentMethod } from "@/features/ready-to-wear-sales/types"
 
-const paymentMethodOptions: Array<{ value: SalePaymentMethod | ""; label: string }> = [
-  { value: "", label: "All payment methods" },
+const paymentMethodOptions: Array<{ value: SalePaymentMethod | "all"; label: string }> = [
+  { value: "all", label: "All payment methods" },
   { value: "cash", label: "Cash" },
   { value: "card", label: "Card" },
   { value: "mobile_money", label: "Mobile Money" },
@@ -23,13 +23,27 @@ const paymentMethodOptions: Array<{ value: SalePaymentMethod | ""; label: string
   { value: "other", label: "Other" },
 ]
 
+const formatSaleDateTime = (value: string) => {
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return date.toLocaleDateString("en-NG", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  })
+}
+
 export default function ReadyToWearSalesPage() {
   const { sales, isLoading, error, refetch } = useSales()
   const { products } = useReadyToWearProducts()
   const { deleteSale, isMutating } = useSaleMutations()
 
   const [searchText, setSearchText] = useState("")
-  const [paymentMethod, setPaymentMethod] = useState<"" | SalePaymentMethod>("")
+  const [paymentMethod, setPaymentMethod] = useState<"all" | SalePaymentMethod>("all")
   const [fromDate, setFromDate] = useState("")
   const [toDate, setToDate] = useState("")
 
@@ -39,7 +53,7 @@ export default function ReadyToWearSalesPage() {
     return sales.filter((sale) => {
       const customerMatches = sale.customer_name.toLowerCase().includes(query)
       const productMatches = sale.product?.product_name.toLowerCase().includes(query) ?? false
-      const paymentMatches = !paymentMethod || sale.payment_method === paymentMethod
+      const paymentMatches = paymentMethod === "all" || sale.payment_method === paymentMethod
       const fromMatches = !fromDate || sale.sale_date >= fromDate
       const toMatches = !toDate || sale.sale_date <= toDate
       return (customerMatches || productMatches) && paymentMatches && fromMatches && toMatches
@@ -67,14 +81,14 @@ export default function ReadyToWearSalesPage() {
     await refetch({
       from_date: fromDate || undefined,
       to_date: toDate || undefined,
-      payment_method: paymentMethod || undefined,
+      payment_method: paymentMethod === "all" ? undefined : paymentMethod,
       customer_name: searchText.trim() || undefined,
     })
   }
 
   const handleClearFilters = async () => {
     setSearchText("")
-    setPaymentMethod("")
+    setPaymentMethod("all")
     setFromDate("")
     setToDate("")
     await refetch()
@@ -119,7 +133,7 @@ export default function ReadyToWearSalesPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Payment Method</label>
-            <Select value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "" | SalePaymentMethod)}>
+            <Select value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as "all" | SalePaymentMethod)}>
               <SelectTrigger className="mt-1" aria-label="Select payment method">
                 <SelectValue placeholder="Filter by method" />
               </SelectTrigger>
@@ -188,7 +202,7 @@ export default function ReadyToWearSalesPage() {
             <TableBody>
               {displaySales.map((sale) => (
                 <TableRow key={sale.id}>
-                  <TableCell>{sale.sale_date}</TableCell>
+                  <TableCell>{formatSaleDateTime(sale.sale_date)}</TableCell>
                   <TableCell>{sale.product?.product_name ?? "Unknown product"}</TableCell>
                   <TableCell>{sale.customer_name}</TableCell>
                   <TableCell>{sale.quantity_sold}</TableCell>

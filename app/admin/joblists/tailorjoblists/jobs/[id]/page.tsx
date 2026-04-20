@@ -646,6 +646,10 @@ const [selectedTailors, setSelectedTailors] = useState<number[]>([1, 2]);
   { label: "Shoulder To Underbust", value: customer.shoulder_to_underbust, id: "shoulder_to_underbust" },
   { label: "Skirt Length(Long, 3/4, Short)", value: customer.skirt_length, id: "skirt_length" },
   { label: "Sleeve Length(Long, Quarter, Short)", value: customer.sleeve_length, id: "sleeve_length" },
+  { label: "Trousers Length", value: customer.trousers_length, id: "trousers_length" },
+  { label: "Round Thigh", value: customer.round_thigh, id: "round_thigh" },
+  { label: "Round Knee", value: customer.round_knee, id: "round_knee" },
+  { label: "Round Feet", value: customer.round_feet, id: "round_feet" },
   { label: "Waist", value: customer.waist, id: "waist" }
 ]
 .map((measurement, index) => (

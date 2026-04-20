@@ -92,8 +92,12 @@ export interface ReadyToWearVariantInput {
 export interface ReadyToWearFormValues {
   name: string
   category: string
+  fabricType: string
+  status: string
+  description: string
   costPrice: number
   sellingPrice: number
+  reorderLevel: number
   variants: ReadyToWearVariantInput[]
   newImages: File[]
 }
@@ -101,8 +105,12 @@ export interface ReadyToWearFormValues {
 export interface ReadyToWearValidationErrors {
   name?: string
   category?: string
+  fabricType?: string
+  status?: string
+  description?: string
   costPrice?: string
   sellingPrice?: string
+  reorderLevel?: string
   variants?: string
   images?: string
   variantFieldErrors: Record<string, { color?: string; size?: string; quantity?: string }>

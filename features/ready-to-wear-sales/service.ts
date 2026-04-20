@@ -9,7 +9,7 @@ import { CreateSalePayload, Sale, SaleQueryFilters, UpdateSalePayload } from "./
 import { normalizeSale } from "./utils"
 
 export const getSales = async (filters?: SaleQueryFilters): Promise<Sale[]> => {
-  const response = await fetchAllSales(filters)
+  const response = await fetchAllSales(filters as Record<string, string | undefined> | undefined)
   const rows = Array.isArray(response?.sales)
     ? response.sales
     : Array.isArray(response)

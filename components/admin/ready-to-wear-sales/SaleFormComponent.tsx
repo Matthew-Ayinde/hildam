@@ -17,14 +17,25 @@ const paymentMethods: SalePaymentMethod[] = [
   "other",
 ]
 
-interface SaleFormComponentProps {
-  mode: "create" | "edit"
+interface SaleFormBaseProps {
   products: ReadyToWearProduct[]
-  sale?: Sale | null
   isLoading?: boolean
-  onSubmit: (payload: CreateSalePayload | UpdateSalePayload) => Promise<void>
   onCancel: () => void
 }
+
+interface CreateSaleFormProps extends SaleFormBaseProps {
+  mode: "create"
+  sale?: Sale | null
+  onSubmit: (payload: CreateSalePayload) => Promise<void>
+}
+
+interface EditSaleFormProps extends SaleFormBaseProps {
+  mode: "edit"
+  sale: Sale
+  onSubmit: (payload: UpdateSalePayload) => Promise<void>
+}
+
+type SaleFormComponentProps = CreateSaleFormProps | EditSaleFormProps
 
 export default function SaleFormComponent({
   mode,

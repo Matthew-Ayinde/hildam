@@ -27,6 +27,7 @@ import { TbRulerMeasure2 } from "react-icons/tb";
 import {
   editTailorJob,
   fetchTailorJob,
+  fetchGroupedStoreRequests,
   SendJobToClientManager,
 } from "@/app/api/apiClient";
 import AssignedTailorsSection from "./AssignedTailorsSection";
@@ -140,10 +141,16 @@ export default function ShowCustomer() {
   };
 
   interface StoreRequest {
+    id: number;
     items_name: string;
-    items_quantities: number;
+    items_quantities: number | string;
     requested_color: string;
     status: string;
+    requested_by_name?: string;
+    created_at?: string;
+    accepted_at?: string | null;
+    rejected_at?: string | null;
+    order_id?: string;
   }
 
   interface Customer {
@@ -194,6 +201,9 @@ export default function ShowCustomer() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [orderStoreRequests, setOrderStoreRequests] = useState<StoreRequest[]>([]);
+  const [storeRequestsLoading, setStoreRequestsLoading] = useState(false);
+  const [storeRequestsError, setStoreRequestsError] = useState<string | null>(null);
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -248,16 +258,16 @@ export default function ShowCustomer() {
           chest: result.customer.chest || 0,
           round_shoulder: result.customer.round_shoulder || 0,
           skirt_length: result.customer.skirt_length || 0,
+          trousers_length: result.customer.trousers_length || 0,
+          round_thigh: result.customer.round_thigh || 0,
+          round_knee: result.customer.round_knee || 0,
+          round_feet: result.customer.round_feet || 0,
           assigned_tailors: assignedTailors.map((tailor: any) => ({
             id: Number(tailor.id),
             name: tailor.name || "N/A",
             email: tailor.email || "N/A",
             role: tailor.role || "tailor",
           })),
-          // trousers_length: result.data.trousers_length || 0,
-          // round_thigh: result.data.round_thigh || 0,
-          // round_knee: result.data.round_knee || 0,
-          // round_feet: result.data.round_feet || 0,
           // assigned_tailors: result.data.assigned_tailors || [],
         };
         setCustomer(mappedCustomer);
@@ -278,6 +288,56 @@ export default function ShowCustomer() {
   useEffect(() => {
     fetchCustomer();
   }, [id]);
+
+  useEffect(() => {
+    const fetchOrderStoreRequests = async () => {
+      if (!customer?.order_id) return;
+
+      setStoreRequestsLoading(true);
+      setStoreRequestsError(null);
+
+      try {
+        const groupedRequests = await fetchGroupedStoreRequests();
+        const requestsForOrder = groupedRequests?.[customer.order_id];
+        setOrderStoreRequests(Array.isArray(requestsForOrder) ? requestsForOrder : []);
+      } catch (err) {
+        setStoreRequestsError(
+          err instanceof Error ? err.message : "Unable to fetch store requests"
+        );
+      } finally {
+        setStoreRequestsLoading(false);
+      }
+    };
+
+    fetchOrderStoreRequests();
+  }, [customer?.order_id]);
+
+  const approvedCount = orderStoreRequests.filter(
+    (request) => (request.status || "").toLowerCase() === "approved"
+  ).length;
+  const pendingCount = orderStoreRequests.filter(
+    (request) => (request.status || "").toLowerCase() === "pending"
+  ).length;
+
+  const formatStoreRequestDate = (dateString?: string | null) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getRequestStatusClass = (status: string) => {
+    const normalizedStatus = status.toLowerCase();
+    if (normalizedStatus === "approved") return "bg-emerald-100 text-emerald-700";
+    if (normalizedStatus === "rejected") return "bg-red-100 text-red-700";
+    return "bg-amber-100 text-amber-700";
+  };
 
   if (loading) {
     return (
@@ -610,6 +670,26 @@ export default function ShowCustomer() {
                     value: customer.skirt_length,
                     unit: "inches",
                   },
+                  {
+                    label: "Trousers Length",
+                    value: customer.trousers_length,
+                    unit: "inches",
+                  },
+                  {
+                    label: "Round Thigh",
+                    value: customer.round_thigh,
+                    unit: "inches",
+                  },
+                  {
+                    label: "Round Knee",
+                    value: customer.round_knee,
+                    unit: "inches",
+                  },
+                  {
+                    label: "Round Feet",
+                    value: customer.round_feet,
+                    unit: "inches",
+                  },
                 ].map((measurement, index) => (
                   <motion.div
                     key={index}
@@ -648,44 +728,102 @@ export default function ShowCustomer() {
                   Inventory Request
                 </h2>
 
-                <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-6 md:p-8">
-                    <>
-                      <div className="flex items-start gap-4 mb-6">
-                        
-                        <div>
-                       
-                          <p className="text-gray-600 mt-1">
-                            You can request inventory items for this job
-                            {customer.store_requests && customer.store_requests.length > 0
-                              ? " or submit an additional request."
-                              : "."}
-                          </p>
-                        </div>
-                      </div>
+                <div className="rounded-2xl border border-gray-200 bg-white p-6 md:p-8">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div>
+                      <p className="text-gray-600 mt-1">
+                        View current store requests for this order and submit additional items when needed.
+                      </p>
+                    </div>
+                  </div>
 
-                      <div className="flex flex-wrap items-center gap-3 mb-6">
-                        <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 px-3 py-1 text-sm font-semibold">
-                          Approval: Accepted
-                        </span>
-                        <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-700 px-3 py-1 text-sm font-semibold">
-                          Existing Requests: {customer.store_requests?.length || 0}
-                        </span>
-                      </div>
+                  <div className="flex flex-wrap items-center gap-3 mb-6">
+                    <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-700 px-3 py-1 text-sm font-semibold">
+                      Existing Requests: {orderStoreRequests.length}
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 px-3 py-1 text-sm font-semibold">
+                      Approved: {approvedCount}
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-700 px-3 py-1 text-sm font-semibold">
+                      Pending: {pendingCount}
+                    </span>
+                  </div>
 
-                      <Link href={`/admin/h-o-t/jobs/${tailorId}/request-inventory`}>
-                        <motion.button
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-3 rounded-xl font-bold text-base transition-colors flex items-center gap-3"
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.97 }}
+                  {storeRequestsLoading && (
+                    <p className="text-sm text-gray-500 mb-4">Loading store requests...</p>
+                  )}
+
+                  {storeRequestsError && (
+                    <p className="text-sm text-red-600 mb-4">{storeRequestsError}</p>
+                  )}
+
+                  {!storeRequestsLoading && !storeRequestsError && orderStoreRequests.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      {orderStoreRequests.map((request) => (
+                        <div
+                          key={request.id}
+                          className="rounded-xl border border-gray-200 bg-gray-50 p-4"
                         >
-                          <FaUpload />
-                          {customer.store_requests && customer.store_requests.length > 0
-                            ? "Request More Inventory"
-                            : "Request Inventory"}
-                        </motion.button>
-                      </Link>
-                    </>
-                  
+                          <div className="flex items-start justify-between gap-3 mb-3">
+                            <p className="text-base font-semibold text-gray-900">{request.items_name}</p>
+                            <span
+                              className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${getRequestStatusClass(
+                                request.status || "pending"
+                              )}`}
+                            >
+                              {(request.status || "pending").charAt(0).toUpperCase() +
+                                (request.status || "pending").slice(1)}
+                            </span>
+                          </div>
+                          <div className="space-y-2 text-sm text-gray-600">
+                            <div className="flex items-center justify-between">
+                              <span>Order ID</span>
+                              <span className="font-medium text-gray-800">{request.order_id || customer.order_id}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>Quantity</span>
+                              <span className="font-medium text-gray-800">{request.items_quantities}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>Requested By</span>
+                              <span className="font-medium text-gray-800">{request.requested_by_name || "-"}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>Color</span>
+                              <span className="flex items-center gap-2 font-medium text-gray-800">
+                                <span
+                                  className="h-4 w-4 rounded-full border border-gray-300"
+                                  style={{ backgroundColor: request.requested_color || "transparent" }}
+                                />
+                                {request.requested_color || "-"}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>Requested At</span>
+                              <span className="font-medium text-gray-800">
+                                {formatStoreRequestDate(request.created_at)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {!storeRequestsLoading && !storeRequestsError && orderStoreRequests.length === 0 && (
+                    <p className="text-sm text-gray-500 mb-6">No store requests yet for this order.</p>
+                  )}
+
+                  <Link href={`/admin/h-o-t/jobs/${tailorId}/request-inventory`}>
+                    <motion.button
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-3 rounded-xl font-bold text-base transition-colors flex items-center gap-3"
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      <FaUpload />
+                      {orderStoreRequests.length > 0 ? "Request More Inventory" : "Request Inventory"}
+                    </motion.button>
+                  </Link>
                 </div>
 
               </motion.div>

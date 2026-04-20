@@ -23,7 +23,6 @@ const Form = () => {
     item_name: "",
     item_quantity: "",
     price_purchased: "",
-    item_description: "",
     color: "#000000",
   })
 
@@ -61,7 +60,6 @@ const Form = () => {
           item_name: "",
           item_quantity: "",
           price_purchased: "",
-          item_description: "",
           color: "#000000",
         })
       }, 1000)
@@ -295,7 +293,7 @@ const Form = () => {
                   id="item_description"
                   name="item_description"
                   rows={4}
-                  value={formData.item_description}
+                  value={formData.item_description ?? ""}
                   onChange={handleChange}
                   placeholder="Enter item description, specifications, or additional details..."
                   className="w-full rounded-xl border border-gray-300 shadow-sm p-4 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200 bg-white resize-none"

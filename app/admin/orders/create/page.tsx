@@ -77,6 +77,10 @@ type FormDataType = {
   shoulder_to_underbust: string
   skirt_length: string
   sleeve_length: string
+  trousers_length: string
+  round_thigh: string
+  round_knee: string
+  round_feet: string
   style_reference_images: File[]
   waist: string
   customer_id: string
@@ -119,6 +123,10 @@ const initialFormData: FormDataType = {
   shoulder_to_underbust: "",
   skirt_length: "",
   sleeve_length: "",
+  trousers_length: "",
+  round_thigh: "",
+  round_knee: "",
+  round_feet: "",
   style_reference_images: [],
   waist: "",
   customer_id: "",
@@ -315,6 +323,10 @@ const Form = () => {
         shoulder_to_underbust: data.shoulder_to_underbust,
         sleeve_length: data.sleeve_length,
         skirt_length: data.skirt_length,
+        trousers_length: data.trousers_length,
+        round_thigh: data.round_thigh,
+        round_knee: data.round_knee,
+        round_feet: data.round_feet,
         waist: data.waist,
         customer_description: data.customer_description,
         customer_id: data.id
@@ -553,7 +565,6 @@ const Form = () => {
                     value={formData.customer_email}
                     onChange={handleChange}
                     placeholder="Enter customer email"
-                    required
                     className="w-full rounded-xl border border-gray-300 shadow-sm p-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-200"
                   />
                 </div>
@@ -781,6 +792,7 @@ const Form = () => {
                     onChange={handleChange}
                     placeholder="Describe the clothing details, style, and requirements"
                     className="w-full rounded-xl border border-gray-300 shadow-sm p-3 focus:ring-2 focus:ring-purple-200 focus:border-purple-400 transition-all duration-200 resize-none"
+                    required
                   />
                 </div>
               </div>
@@ -797,7 +809,6 @@ const Form = () => {
                   value={formData.customer_description}
                   onChange={handleChange}
                   placeholder="Enter any specific customer requirements or notes"
-                  required
                   className="w-full rounded-xl border border-gray-300 shadow-sm p-3 focus:ring-2 focus:ring-purple-200 focus:border-purple-400 transition-all duration-200 resize-none"
                 />
               </div>
@@ -920,6 +931,10 @@ const Form = () => {
                   { id: "chest", label: "Chest" },
                   { id: "round_shoulder", label: "Round Shoulder" },
                   { id: "skirt_length", label: "Skirt Length" },
+                  { id: "trousers_length", label: "Trousers Length" },
+                  { id: "round_thigh", label: "Round Thigh" },
+                  { id: "round_knee", label: "Round Knee" },
+                  { id: "round_feet", label: "Round Feet" },
                 ].map(({ id, label }, index) => (
                   <motion.div
                     key={id}

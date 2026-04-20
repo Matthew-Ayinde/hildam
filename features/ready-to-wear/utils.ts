@@ -77,8 +77,12 @@ export const normalizeReadyToWearProduct = (raw: any): ReadyToWearProduct => {
 export const buildFormValuesFromProduct = (product: ReadyToWearProduct): ReadyToWearFormValues => ({
   name: product.name,
   category: product.category,
+  fabricType: product.fabricType ?? "",
+  status: product.status ?? "active",
+  description: product.description ?? "",
   costPrice: product.costPrice,
   sellingPrice: product.sellingPrice,
+  reorderLevel: product.reorderLevel ?? 0,
   variants:
     product.variants.length > 0
       ? product.variants.map((variant) => ({
@@ -139,8 +143,12 @@ export const validateReadyToWearForm = (
 const appendBaseProductFields = (formData: FormData, values: ReadyToWearFormValues) => {
   formData.append("product_name", values.name.trim())
   formData.append("category", values.category.trim())
+  formData.append("fabric_type", values.fabricType.trim())
+  formData.append("status", values.status)
+  formData.append("description", values.description.trim())
   formData.append("cost_price", String(values.costPrice))
   formData.append("selling_price", String(values.sellingPrice))
+  formData.append("reorder_level", String(values.reorderLevel))
 }
 
 export const buildCreateProductFormData = (values: ReadyToWearFormValues): FormData => {

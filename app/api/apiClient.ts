@@ -480,6 +480,12 @@ export async function fetchAllInventoryRequests(): Promise<any> {
   return resp.data.data;
 }
 
+export async function fetchGroupedStoreRequests(): Promise<Record<string, any[]>> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(ApiRoutes.FetchAllInventoryRequests, { headers })
+  return resp.data.data ?? {}
+}
+
 
 
 
@@ -506,14 +512,13 @@ export async function fetchStoreRequest(storeRequestId: string): Promise<any> {
 
 export async function acceptStoreRequest(orderId: string): Promise<any> {
   const headers = await getUserHeaders()
-  const resp = await API.post(`${ApiRoutes.AcceptStoreRequest}/${orderId}`, {}, { headers })
+  const resp = await API.post(`${ApiRoutes.AcceptStoreRequest}/${orderId}`, { headers })
   return resp.data;
 }
 
-export async function rejectStoreRequest(orderId: string): Promise<any> {
+export async function rejectStoreRequest(orderId: string, feedback: string): Promise<any> {
   const headers = await getUserHeaders()
-  const payload = { feedback: 'rejected' }
-  const resp = await API.post(`${ApiRoutes.RejectStoreRequest}/${orderId}`, {payload}, { headers })
+  const resp = await API.post(`${ApiRoutes.RejectStoreRequest}/${orderId}`, { feedback }, { headers })
   return resp.data;
 }
 
