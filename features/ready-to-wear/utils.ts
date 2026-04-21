@@ -8,6 +8,24 @@ import {
   StockStatus,
 } from "./types"
 
+type ApiErrorResponse = {
+  message?: unknown
+  error?: unknown
+  errors?: unknown
+  data?: {
+    message?: unknown
+    error?: unknown
+    errors?: unknown
+  }
+  response?: {
+    data?: {
+      message?: unknown
+      error?: unknown
+      errors?: unknown
+    }
+  }
+}
+
 export const createEmptyVariant = (): ReadyToWearVariantInput => ({
   clientId: `variant-${Date.now()}-${Math.random().toString(16).slice(2)}`,
   color: "",
@@ -106,11 +124,15 @@ export const validateReadyToWearForm = (
 
   if (!values.name.trim()) errors.name = "Product name is required"
   if (!values.category.trim()) errors.category = "Category is required"
+  if (!values.fabricType.trim()) errors.fabricType = "Fabric type is required"
+  if (!values.description.trim()) errors.description = "Description is required"
+  if (!values.status.trim()) errors.status = "Status is required"
 
   if (values.costPrice < 0) errors.costPrice = "Cost price cannot be negative"
   if (values.sellingPrice <= values.costPrice) {
     errors.sellingPrice = "Selling price must be greater than cost price"
   }
+  if (values.reorderLevel < 1) errors.reorderLevel = "Reorder level must be at least 1"
 
   if (!values.variants.length) {
     errors.variants = "At least one variant is required"
@@ -138,6 +160,62 @@ export const validateReadyToWearForm = (
   }
 
   return errors
+}
+
+const humanizeFieldName = (fieldName: string) =>
+  fieldName
+    .replace(/[_-]+/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .trim()
+    .replace(/\b\w/g, (character) => character.toUpperCase())
+
+const flattenValidationMessages = (payload: unknown): string[] => {
+  if (typeof payload === "string") {
+    return payload.trim() ? [payload.trim()] : []
+  }
+
+  if (Array.isArray(payload)) {
+    return payload.flatMap((entry) => flattenValidationMessages(entry))
+  }
+
+  if (payload && typeof payload === "object") {
+    return Object.entries(payload).flatMap(([fieldName, value]) => {
+      const messages = flattenValidationMessages(value)
+      if (messages.length === 0) return []
+
+      const label = humanizeFieldName(fieldName)
+      return messages.map((message) => `${label}: ${message}`)
+    })
+  }
+
+  return []
+}
+
+export const formatReadyToWearApiError = (error: unknown): string => {
+  if (typeof error === "string" && error.trim()) {
+    return error.trim()
+  }
+
+  const apiError = error as ApiErrorResponse | undefined
+  const responseData = apiError?.response?.data ?? apiError?.data ?? apiError
+  const candidateMessages = flattenValidationMessages(
+    responseData?.message ?? responseData?.error ?? responseData?.errors
+  )
+
+  if (candidateMessages.length > 0) {
+    return `Please review the highlighted fields: ${candidateMessages.join("; ")}`
+  }
+
+  const fallbackMessage =
+    typeof responseData?.message === "string"
+      ? responseData.message
+      : typeof responseData?.error === "string"
+        ? responseData.error
+        : typeof (error as { message?: unknown })?.message === "string"
+          ? (error as { message: string }).message
+          : "Please try again."
+
+  return fallbackMessage.trim() || "Please try again."
 }
 
 const appendBaseProductFields = (formData: FormData, values: ReadyToWearFormValues) => {

@@ -57,6 +57,7 @@ export default function ModernInventoryTable() {
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("")
   const [rejectionFeedback, setRejectionFeedback] = useState("")
+  const [approvingRequestId, setApprovingRequestId] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending")
   const [searchTerm, setSearchTerm] = useState("")
 
@@ -140,24 +141,26 @@ export default function ModernInventoryTable() {
     }
   }
 
-  const handleApprove = async (id: string) => {
-    const orderId = id
+  const handleApprove = async (requestId: string) => {
+    if (approvingRequestId === requestId) return
+
+    setApprovingRequestId(requestId)
     try {
-      const response = await acceptStoreRequest(orderId)
-
-
+      await acceptStoreRequest(requestId)
 
       setData((prevData) =>
-        prevData.map((customer) => (customer.id === id ? { ...customer, status: "approved" } : customer)),
+        prevData.map((customer) => (customer.id === requestId ? { ...customer, status: "approved" } : customer)),
       )
 
+      setPopupMessage("Request successfully approved")
       setTimeout(() => setPopupMessage(null), 5000)
     } catch (error) {
       console.error("Error approving request:", error)
-      // setPopupMessage("Error approving request")
+      setPopupMessage("Error approving request")
+      setTimeout(() => setPopupMessage(null), 5000)
+    } finally {
+      setApprovingRequestId(null)
     }
-          setPopupMessage("Request successfully approved")
-    setTimeout(() => setPopupMessage(null), 5000)
   }
 
   // Filter data based on selected status and search term
@@ -436,16 +439,26 @@ export default function ModernInventoryTable() {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">{row.date}</td>
                         <td className="px-6 py-4 text-sm">
+                          {(() => {
+                            const isApproving = approvingRequestId === row.id
+
+                            return (
                           <div className="flex items-center gap-2">
                             {row.status === "pending" && (
                               <motion.button
                                 onClick={() => handleApprove(row.id)}
-                                className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors duration-200"
+                                className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60"
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
-                                title="Approve request"
+                                title={isApproving ? "Approving request" : "Approve request"}
+                                disabled={isApproving}
+                                aria-busy={isApproving}
                               >
-                                <FaCheck className="w-4 h-4" />
+                                {isApproving ? (
+                                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-green-500 border-r-transparent" />
+                                ) : (
+                                  <FaCheck className="w-4 h-4" />
+                                )}
                               </motion.button>
                             )}
                             <motion.button
@@ -458,10 +471,13 @@ export default function ModernInventoryTable() {
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                               title="Reject request"
+                              disabled={isApproving}
                             >
                               <TiDelete className="w-4 h-4" />
                             </motion.button>
                           </div>
+                            )
+                          })()}
                         </td>
                       </motion.tr>
                     ))}

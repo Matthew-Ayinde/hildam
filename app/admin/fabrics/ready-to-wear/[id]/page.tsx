@@ -10,6 +10,7 @@ import ProductDetailsSkeleton from "@/components/admin/ready-to-wear/ProductDeta
 import { Button } from "@/components/ui/button"
 import { toast } from "@/hooks/use-toast"
 import { useReadyToWearMutations, useReadyToWearProduct } from "@/features/ready-to-wear/hooks"
+import { formatReadyToWearApiError } from "@/features/ready-to-wear/utils"
 import { useMemo, useState } from "react"
 
 const statusStyles = {
@@ -42,7 +43,7 @@ export default function ReadyToWearDetailPage() {
     } catch (editError) {
       toast({
         title: "Unable to update",
-        description: editError instanceof Error ? editError.message : "Please try again.",
+        description: formatReadyToWearApiError(editError),
         variant: "destructive",
       })
     }

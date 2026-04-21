@@ -6,6 +6,7 @@ import ProductFormComponent from "@/components/admin/ready-to-wear/ProductFormCo
 import { toast } from "@/hooks/use-toast"
 import { useReadyToWearMutations, useReadyToWearProducts } from "@/features/ready-to-wear/hooks"
 import { ReadyToWearProduct } from "@/features/ready-to-wear/types"
+import { formatReadyToWearApiError } from "@/features/ready-to-wear/utils"
 
 export default function EditProductPage() {
   const router = useRouter()
@@ -40,7 +41,7 @@ export default function EditProductPage() {
     } catch (editError) {
       toast({
         title: "Unable to update product",
-        description: editError instanceof Error ? editError.message : "Please try again.",
+        description: formatReadyToWearApiError(editError),
         variant: "destructive",
       })
     }

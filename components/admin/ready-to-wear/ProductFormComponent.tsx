@@ -76,8 +76,12 @@ export default function ProductFormComponent({
     const hasErrors =
       Boolean(validation.name) ||
       Boolean(validation.category) ||
+      Boolean(validation.fabricType) ||
+      Boolean(validation.description) ||
+      Boolean(validation.status) ||
       Boolean(validation.costPrice) ||
       Boolean(validation.sellingPrice) ||
+      Boolean(validation.reorderLevel) ||
       Boolean(validation.variants) ||
       Boolean(validation.images) ||
       Object.keys(validation.variantFieldErrors).length > 0
@@ -126,6 +130,44 @@ export default function ProductFormComponent({
           </div>
 
           <div>
+            <label className="mb-1 block text-sm font-semibold text-gray-700">Fabric Type</label>
+            <Input
+              value={values.fabricType}
+              onChange={(event) => setValues((prev) => ({ ...prev, fabricType: event.target.value }))}
+              placeholder="e.g., Ankara"
+              aria-invalid={Boolean(errors.fabricType)}
+            />
+            {errors.fabricType ? <p className="mt-1 text-xs text-red-500">{errors.fabricType}</p> : null}
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-gray-700">Status</label>
+            <select
+              value={values.status}
+              onChange={(event) => setValues((prev) => ({ ...prev, status: event.target.value }))}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-invalid={Boolean(errors.status)}
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+            {errors.status ? <p className="mt-1 text-xs text-red-500">{errors.status}</p> : null}
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-gray-700">Reorder Level</label>
+            <Input
+              type="number"
+              min={1}
+              value={String(values.reorderLevel)}
+              onChange={(event) => setValues((prev) => ({ ...prev, reorderLevel: Number(event.target.value) || 0 }))}
+              placeholder="e.g., 5"
+              aria-invalid={Boolean(errors.reorderLevel)}
+            />
+            {errors.reorderLevel ? <p className="mt-1 text-xs text-red-500">{errors.reorderLevel}</p> : null}
+          </div>
+
+          <div>
             <label className="mb-1 block text-sm font-semibold text-gray-700">Cost Price</label>
             <Input
               type="number"
@@ -150,6 +192,18 @@ export default function ProductFormComponent({
             />
             {errors.sellingPrice ? <p className="mt-1 text-xs text-red-500">{errors.sellingPrice}</p> : null}
           </div>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-semibold text-gray-700">Description</label>
+          <textarea
+            className="min-h-[90px] w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+            value={values.description}
+            onChange={(event) => setValues((prev) => ({ ...prev, description: event.target.value }))}
+            placeholder="Describe the product"
+            aria-invalid={Boolean(errors.description)}
+          />
+          {errors.description ? <p className="mt-1 text-xs text-red-500">{errors.description}</p> : null}
         </div>
 
         <VariantForm

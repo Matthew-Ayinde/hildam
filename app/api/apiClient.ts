@@ -512,7 +512,7 @@ export async function fetchStoreRequest(storeRequestId: string): Promise<any> {
 
 export async function acceptStoreRequest(orderId: string): Promise<any> {
   const headers = await getUserHeaders()
-  const resp = await API.post(`${ApiRoutes.AcceptStoreRequest}/${orderId}`, { headers })
+  const resp = await API.post(`${ApiRoutes.AcceptStoreRequest}/${orderId}`, {}, { headers })
   return resp.data;
 }
 

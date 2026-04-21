@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import ProductFormComponent from "@/components/admin/ready-to-wear/ProductFormComponent"
 import { toast } from "@/hooks/use-toast"
 import { useReadyToWearMutations, useReadyToWearProducts } from "@/features/ready-to-wear/hooks"
+import { formatReadyToWearApiError } from "@/features/ready-to-wear/utils"
 
 export default function CreateProductPage() {
   const router = useRouter()
@@ -22,7 +23,7 @@ export default function CreateProductPage() {
     } catch (createError) {
       toast({
         title: "Unable to add product",
-        description: createError instanceof Error ? createError.message : "Please try again.",
+        description: formatReadyToWearApiError(createError),
         variant: "destructive",
       })
     }
