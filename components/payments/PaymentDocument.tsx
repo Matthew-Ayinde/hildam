@@ -17,6 +17,7 @@ export interface PaymentDocumentData {
   clothingDescription: string
   goingRate: string
   vat: string
+  vatAmount?: string
   discount: string
   totalAmountDue: string
   amountPaid: string
@@ -175,7 +176,9 @@ export default function PaymentDocument({ variant, fileName, data }: PaymentDocu
                       <p className="text-xs text-gray-500 mt-1 break-words">{normalize(data.clothingDescription)}</p>
                     </td>
                     <td className="p-3 text-right whitespace-nowrap">
-                      {variant === "invoice" ? `${normalize(data.discount)}%` : `VAT ${normalize(data.vat)}% / Disc ${normalize(data.discount)}%`}
+                      {variant === "invoice"
+                        ? `VAT ${formatCurrency(data.vatAmount || "N/A")}`
+                        : `VAT ${formatCurrency(data.vatAmount || "N/A")} / Disc ${normalize(data.discount)}%`}
                     </td>
                     <td className="p-3 text-right whitespace-nowrap font-semibold">
                       {variant === "invoice" ? formatCurrency(data.totalAmountDue) : formatCurrency(data.amountPaid)}
@@ -188,7 +191,8 @@ export default function PaymentDocument({ variant, fileName, data }: PaymentDocu
 
           <section className="print-avoid-break pt-6 flex justify-end">
             <div className="w-full sm:w-[380px] space-y-2 rounded-xl border border-gray-200 p-4 bg-gray-50">
-              <p className="flex justify-between gap-3"><span className="font-medium">VAT (%)</span><span className="text-right">{normalize(data.vat)}</span></p>
+              <p className="flex justify-between gap-3"><span className="font-medium">VAT Amount</span><span className="text-right">{formatCurrency(data.vatAmount || "N/A")}</span></p>
+              <p className="flex justify-between gap-3"><span className="font-medium">VAT Rate (%)</span><span className="text-right">{normalize(data.vat)}</span></p>
               <p className="flex justify-between gap-3"><span className="font-medium">Discount (%)</span><span className="text-right">{normalize(data.discount)}</span></p>
               <p className="flex justify-between gap-3"><span className="font-medium">Total Due</span><span className="text-right">{formatCurrency(data.totalAmountDue)}</span></p>
               {variant === "receipt" && (

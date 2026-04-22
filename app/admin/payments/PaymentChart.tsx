@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { motion } from "framer-motion"
-import { FaBriefcase, FaChartBar, FaChartLine, FaMoneyBillWave, FaPercent } from "react-icons/fa"
+import { FaChartBar, FaChartLine, FaMoneyBillWave, FaPercent, FaScaleBalanced, FaWallet } from "react-icons/fa6"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
@@ -12,10 +12,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts"
 import { fetchPaymentChartInformation } from "@/app/api/apiClient"
 
-type ChartType = "year" | "month"
+type ChartType = "year" | "month" | "week"
 
 interface PaymentSummary {
   tailoring_revenue: number
@@ -49,7 +49,7 @@ interface PaymentChartData {
   status: string
   type: ChartType
   period: string
-  summary: PaymentSummary
+  summary?: Partial<PaymentSummary>
   breakdown: BreakdownItem[]
 }
 
@@ -62,6 +62,109 @@ const formatCurrency = (value: number) => {
   }).format(value)
 }
 
+const numberValue = (value: unknown) => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+const currentIsoWeek = () => {
+  const date = new Date()
+  const target = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  const dayNum = target.getUTCDay() || 7
+  target.setUTCDate(target.getUTCDate() + 4 - dayNum)
+  const yearStart = new Date(Date.UTC(target.getUTCFullYear(), 0, 1))
+  const weekNo = Math.ceil((((target.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+  return `${target.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`
+}
+
+const buildRecentWeeks = (count: number) => {
+  const weeks: { value: string; label: string }[] = []
+  const baseDate = new Date()
+
+  for (let i = 0; i < count; i++) {
+    const date = new Date(baseDate)
+    date.setDate(baseDate.getDate() - i * 7)
+
+    const target = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+    const dayNum = target.getUTCDay() || 7
+    target.setUTCDate(target.getUTCDate() + 4 - dayNum)
+
+    const year = target.getUTCFullYear()
+    const yearStart = new Date(Date.UTC(year, 0, 1))
+    const weekNo = Math.ceil((((target.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+
+    const value = `${year}-W${String(weekNo).padStart(2, "0")}`
+    weeks.push({ value, label: `Week ${String(weekNo).padStart(2, "0")}, ${year}` })
+  }
+
+  return Array.from(new Map(weeks.map((week) => [week.value, week])).values())
+}
+
+const computeSummaryFromBreakdown = (breakdown: BreakdownItem[]): PaymentSummary => {
+  const totals = breakdown.reduce(
+    (acc, item) => {
+      acc.tailoring_revenue += numberValue(item.tailoring_revenue)
+      acc.sales_revenue += numberValue(item.sales_revenue)
+      acc.total_revenue += numberValue(item.total_revenue)
+      acc.job_expenses += numberValue(item.job_expenses)
+      acc.sales_cogs += numberValue(item.sales_cogs)
+      acc.operational_expenses += numberValue(item.operational_expenses)
+      acc.total_expenses += numberValue(item.total_expenses)
+      acc.net_profit += numberValue(item.net_profit)
+      return acc
+    },
+    {
+      tailoring_revenue: 0,
+      sales_revenue: 0,
+      total_revenue: 0,
+      job_expenses: 0,
+      sales_cogs: 0,
+      operational_expenses: 0,
+      total_expenses: 0,
+      net_profit: 0,
+    }
+  )
+
+  const profitMargin = totals.total_revenue > 0 ? (totals.net_profit / totals.total_revenue) * 100 : 0
+
+  return {
+    ...totals,
+    profit_margin: profitMargin,
+    is_profitable: totals.net_profit >= 0,
+    financial_status: totals.net_profit >= 0 ? "profit" : "loss",
+  }
+}
+
+const normalizeSummary = (chartData: PaymentChartData | null): PaymentSummary => {
+  const fallback = computeSummaryFromBreakdown(chartData?.breakdown || [])
+  const source = chartData?.summary || {}
+
+  const totalRevenue = numberValue(source.total_revenue) || fallback.total_revenue
+  const totalExpenses = numberValue(source.total_expenses) || fallback.total_expenses
+  const netProfit = numberValue(source.net_profit) || fallback.net_profit
+
+  const profitMargin =
+    source.profit_margin !== undefined && source.profit_margin !== null
+      ? numberValue(source.profit_margin)
+      : totalRevenue > 0
+      ? (netProfit / totalRevenue) * 100
+      : 0
+
+  return {
+    tailoring_revenue: numberValue(source.tailoring_revenue) || fallback.tailoring_revenue,
+    sales_revenue: numberValue(source.sales_revenue) || fallback.sales_revenue,
+    total_revenue: totalRevenue,
+    job_expenses: numberValue(source.job_expenses) || fallback.job_expenses,
+    sales_cogs: numberValue(source.sales_cogs) || fallback.sales_cogs,
+    operational_expenses: numberValue(source.operational_expenses) || fallback.operational_expenses,
+    total_expenses: totalExpenses,
+    net_profit: netProfit,
+    profit_margin: profitMargin,
+    is_profitable: source.is_profitable !== undefined ? Boolean(source.is_profitable) : netProfit >= 0,
+    financial_status: source.financial_status || (netProfit >= 0 ? "profit" : "loss"),
+  }
+}
+
 const LoadingSpinner = () => (
   <motion.div
     animate={{ rotate: 360 }}
@@ -71,11 +174,28 @@ const LoadingSpinner = () => (
 )
 
 const formatXAxisPeriod = (value: string, type: ChartType) => {
-  if (type === "month") {
+  if (type === "month" || type === "week") {
     const date = new Date(value)
     if (Number.isNaN(date.getTime())) return value
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
   }
+
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ]
+
+  if (monthNames.includes(value)) return value
 
   const [, month] = value.split("-")
   if (!month) return value
@@ -83,7 +203,7 @@ const formatXAxisPeriod = (value: string, type: ChartType) => {
   const monthIndex = Number(month) - 1
   if (monthIndex < 0 || monthIndex > 11) return value
 
-  return new Date(2026, monthIndex, 1).toLocaleString("en-US", { month: "short" })
+  return monthNames[monthIndex]
 }
 
 export default function PaymentChart() {
@@ -98,6 +218,7 @@ export default function PaymentChart() {
   const [selectedType, setSelectedType] = useState<ChartType>("month")
   const [selectedYear, setSelectedYear] = useState<string>(String(currentYear))
   const [selectedMonth, setSelectedMonth] = useState<string>(currentMonth)
+  const [selectedWeek, setSelectedWeek] = useState<string>(currentIsoWeek())
 
   const years = Array.from({ length: 10 }, (_, i) => String(currentYear - i))
   const months = Array.from({ length: 12 }, (_, i) => {
@@ -107,14 +228,19 @@ export default function PaymentChart() {
       label: new Date(2026, i, 1).toLocaleString("en-US", { month: "long" }),
     }
   })
+  const weeks = useMemo(() => buildRecentWeeks(26), [])
 
   const selectedValue = useMemo(() => {
     if (selectedType === "month") {
       return `${selectedYear}-${selectedMonth}`
     }
 
+    if (selectedType === "week") {
+      return selectedWeek
+    }
+
     return selectedYear
-  }, [selectedType, selectedYear, selectedMonth])
+  }, [selectedType, selectedYear, selectedMonth, selectedWeek])
 
   useEffect(() => {
     const fetchChartData = async () => {
@@ -138,51 +264,78 @@ export default function PaymentChart() {
     fetchChartData()
   }, [selectedType, selectedValue])
 
+  const summary = useMemo(() => normalizeSummary(chartData), [chartData])
+
   const chartConfig = {
-    revenue: {
-      label: "Revenue",
+    tailoring_revenue: {
+      label: "Tailoring Revenue",
       color: "hsl(var(--chart-1))",
     },
-    expenses: {
-      label: "Expenses",
+    sales_revenue: {
+      label: "RTW Sales Revenue",
       color: "hsl(var(--chart-2))",
     },
-    profit: {
+    job_expenses: {
+      label: "Job Expenses",
+      color: "hsl(var(--chart-3))",
+    },
+    sales_cogs: {
+      label: "Sales COGS",
+      color: "hsl(var(--chart-4))",
+    },
+    operational_expenses: {
+      label: "Operational Expenses",
+      color: "hsl(var(--chart-5))",
+    },
+    net_profit: {
       label: "Net Profit",
+      color: "hsl(var(--chart-1))",
+    },
+    total_revenue: {
+      label: "Total Revenue",
+      color: "hsl(var(--chart-2))",
+    },
+    total_expenses: {
+      label: "Total Expenses",
       color: "hsl(var(--chart-3))",
     },
   }
 
   return (
     <main className="flex flex-col items-center justify-center p-4 md:p-6 lg:p-8">
-      <Card className="mb-8 w-full max-w-6xl rounded-2xl border border-orange-100 shadow-xl">
+      <Card className="mb-8 w-full max-w-7xl rounded-2xl border border-orange-100 shadow-xl">
         <CardHeader className="flex flex-col items-start gap-2 space-y-0 border-b border-gray-100 bg-gradient-to-r from-orange-50 to-white px-6 py-4">
           <CardTitle className="text-2xl font-bold text-gray-800">Financial Overview</CardTitle>
-          <CardDescription className="text-gray-600">Visualize revenue, expenses, and net profit.</CardDescription>
+          <CardDescription className="text-gray-600">
+            Tailoring and ready-to-wear revenue, full expense mix, and profitability trend.
+          </CardDescription>
 
-          <div className="mt-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+          <div className="mt-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:flex-wrap">
             <Select value={selectedType} onValueChange={(value: ChartType) => setSelectedType(value)}>
-              <SelectTrigger className="w-[130px]">
+              <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="year">Yearly</SelectItem>
                 <SelectItem value="month">Monthly</SelectItem>
+                <SelectItem value="week">Weekly</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="Year" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((year) => (
-                  <SelectItem key={year} value={year}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {(selectedType === "year" || selectedType === "month") && (
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
 
             {selectedType === "month" && (
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
@@ -193,6 +346,21 @@ export default function PaymentChart() {
                   {months.map((month) => (
                     <SelectItem key={month.value} value={month.value}>
                       {month.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {selectedType === "week" && (
+              <Select value={selectedWeek} onValueChange={setSelectedWeek}>
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue placeholder="Week" />
+                </SelectTrigger>
+                <SelectContent>
+                  {weeks.map((week) => (
+                    <SelectItem key={week.value} value={week.value}>
+                      {week.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -219,45 +387,61 @@ export default function PaymentChart() {
             </motion.div>
           ) : (
             <>
-              <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                <Card className="flex items-center justify-between rounded-lg border-blue-200 bg-blue-50 p-4">
+              <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+                <Card className="flex items-center justify-between rounded-lg border-blue-200 bg-blue-50 p-4 xl:col-span-2">
                   <div>
                     <p className="text-sm font-medium text-blue-700">Total Revenue</p>
-                    <h4 className="text-2xl font-bold text-blue-800">{formatCurrency(chartData.summary.total_revenue)}</h4>
+                    <h4 className="text-xl font-bold text-blue-800">{formatCurrency(summary.total_revenue)}</h4>
                   </div>
-                  <FaMoneyBillWave className="text-3xl text-blue-500" />
+                  <FaWallet className="text-3xl text-blue-500" />
                 </Card>
 
-                <Card className="flex items-center justify-between rounded-lg border-red-200 bg-red-50 p-4">
+                <Card className="flex items-center justify-between rounded-lg border-red-200 bg-red-50 p-4 xl:col-span-2">
                   <div>
                     <p className="text-sm font-medium text-red-700">Total Expenses</p>
-                    <h4 className="text-2xl font-bold text-red-800">{formatCurrency(chartData.summary.total_expenses)}</h4>
+                    <h4 className="text-xl font-bold text-red-800">{formatCurrency(summary.total_expenses)}</h4>
                   </div>
                   <FaMoneyBillWave className="text-3xl text-red-500" />
                 </Card>
 
-                <Card className="flex items-center justify-between rounded-lg border-orange-200 bg-orange-50 p-4">
-                  <div>
-                    <p className="text-sm font-medium text-orange-700">Job Expenses</p>
-                    <h4 className="text-2xl font-bold text-orange-800">{formatCurrency(chartData.summary.job_expenses)}</h4>
-                  </div>
-                  <FaBriefcase className="text-3xl text-orange-500" />
-                </Card>
-
-                <Card className="flex items-center justify-between rounded-lg border-green-200 bg-green-50 p-4">
+                <Card className="flex items-center justify-between rounded-lg border-green-200 bg-green-50 p-4 xl:col-span-2">
                   <div>
                     <p className="text-sm font-medium text-green-700">Net Profit</p>
-                    <h4 className="text-2xl font-bold text-green-800">{formatCurrency(chartData.summary.net_profit)}</h4>
+                    <h4 className="text-xl font-bold text-green-800">{formatCurrency(summary.net_profit)}</h4>
                   </div>
                   <FaChartLine className="text-3xl text-green-500" />
                 </Card>
 
-                <Card className="flex items-center justify-between rounded-lg border-purple-200 bg-purple-50 p-4">
+                <Card className="flex items-center justify-between rounded-lg border-purple-200 bg-purple-50 p-4 xl:col-span-2">
                   <div>
                     <p className="text-sm font-medium text-purple-700">Profit Margin</p>
-                    <h4 className="text-2xl font-bold text-purple-800">{chartData.summary.profit_margin.toFixed(2)}%</h4>
+                    <h4 className="text-xl font-bold text-purple-800">{summary.profit_margin.toFixed(2)}%</h4>
+                    <p className="text-xs text-purple-600 capitalize">{summary.financial_status}</p>
                   </div>
                   <FaPercent className="text-3xl text-purple-500" />
+                </Card>
+              </div>
+
+              <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <Card className="rounded-lg border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm font-medium text-slate-700">Tailoring Revenue</p>
+                  <p className="text-2xl font-bold text-slate-900">{formatCurrency(summary.tailoring_revenue)}</p>
+                </Card>
+                <Card className="rounded-lg border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm font-medium text-slate-700">RTW Sales Revenue</p>
+                  <p className="text-2xl font-bold text-slate-900">{formatCurrency(summary.sales_revenue)}</p>
+                </Card>
+                <Card className="rounded-lg border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm font-medium text-slate-700">Job Expenses</p>
+                  <p className="text-2xl font-bold text-slate-900">{formatCurrency(summary.job_expenses)}</p>
+                </Card>
+                <Card className="rounded-lg border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm font-medium text-slate-700">Sales COGS</p>
+                  <p className="text-2xl font-bold text-slate-900">{formatCurrency(summary.sales_cogs)}</p>
+                </Card>
+                <Card className="rounded-lg border-slate-200 bg-slate-50 p-4 md:col-span-2 lg:col-span-1">
+                  <p className="text-sm font-medium text-slate-700">Operational Expenses</p>
+                  <p className="text-2xl font-bold text-slate-900">{formatCurrency(summary.operational_expenses)}</p>
                 </Card>
               </div>
 
@@ -266,32 +450,102 @@ export default function PaymentChart() {
                   No breakdown data available for this period.
                 </div>
               ) : (
-                <ChartContainer config={chartConfig} className="min-h-[320px] w-full">
-                  <BarChart accessibilityLayer data={chartData.breakdown}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="period"
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                      tickFormatter={(value) => formatXAxisPeriod(value, selectedType)}
-                    />
-                    <YAxis
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                      tickFormatter={(value) => formatCurrency(Number(value))}
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent indicator="dashed" formatter={(value) => formatCurrency(Number(value))} />}
-                    />
-                    <ChartLegend content={<ChartLegendContent />} />
-                    <Bar dataKey="total_revenue" name="Revenue" fill="var(--color-revenue)" radius={4} />
-                    <Bar dataKey="total_expenses" name="Expenses" fill="var(--color-expenses)" radius={4} />
-                    <Bar dataKey="net_profit" name="Net Profit" fill="var(--color-profit)" radius={4} />
-                  </BarChart>
-                </ChartContainer>
+                <div className="space-y-8">
+                  <Card className="rounded-xl border border-blue-100 bg-white p-4">
+                    <div className="mb-3 flex items-center gap-2 text-blue-700">
+                      <FaScaleBalanced />
+                      <h4 className="font-semibold">Revenue Streams by Period</h4>
+                    </div>
+                    <ChartContainer config={chartConfig} className="min-h-[320px] w-full">
+                      <BarChart accessibilityLayer data={chartData.breakdown}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="period"
+                          tickLine={false}
+                          tickMargin={10}
+                          axisLine={false}
+                          tickFormatter={(value) => formatXAxisPeriod(value, selectedType)}
+                        />
+                        <YAxis tickLine={false} tickMargin={10} axisLine={false} tickFormatter={(value) => formatCurrency(Number(value))} />
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent indicator="dashed" formatter={(value) => formatCurrency(Number(value))} />}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                        <Bar dataKey="tailoring_revenue" name="Tailoring Revenue" fill="var(--color-tailoring_revenue)" radius={4} />
+                        <Bar dataKey="sales_revenue" name="RTW Sales Revenue" fill="var(--color-sales_revenue)" radius={4} />
+                      </BarChart>
+                    </ChartContainer>
+                  </Card>
+
+                  <Card className="rounded-xl border border-red-100 bg-white p-4">
+                    <div className="mb-3 flex items-center gap-2 text-red-700">
+                      <FaScaleBalanced />
+                      <h4 className="font-semibold">Expense Streams by Period</h4>
+                    </div>
+                    <ChartContainer config={chartConfig} className="min-h-[320px] w-full">
+                      <BarChart accessibilityLayer data={chartData.breakdown}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="period"
+                          tickLine={false}
+                          tickMargin={10}
+                          axisLine={false}
+                          tickFormatter={(value) => formatXAxisPeriod(value, selectedType)}
+                        />
+                        <YAxis tickLine={false} tickMargin={10} axisLine={false} tickFormatter={(value) => formatCurrency(Number(value))} />
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent indicator="dashed" formatter={(value) => formatCurrency(Number(value))} />}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                        <Bar dataKey="job_expenses" name="Job Expenses" fill="var(--color-job_expenses)" radius={4} />
+                        <Bar dataKey="sales_cogs" name="Sales COGS" fill="var(--color-sales_cogs)" radius={4} />
+                        <Bar
+                          dataKey="operational_expenses"
+                          name="Operational Expenses"
+                          fill="var(--color-operational_expenses)"
+                          radius={4}
+                        />
+                      </BarChart>
+                    </ChartContainer>
+                  </Card>
+
+                  <Card className="rounded-xl border border-green-100 bg-white p-4">
+                    <div className="mb-3 flex items-center gap-2 text-green-700">
+                      <FaChartLine />
+                      <h4 className="font-semibold">Profitability Trend</h4>
+                    </div>
+                    <ChartContainer config={chartConfig} className="min-h-[320px] w-full">
+                      <ComposedChart accessibilityLayer data={chartData.breakdown}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="period"
+                          tickLine={false}
+                          tickMargin={10}
+                          axisLine={false}
+                          tickFormatter={(value) => formatXAxisPeriod(value, selectedType)}
+                        />
+                        <YAxis tickLine={false} tickMargin={10} axisLine={false} tickFormatter={(value) => formatCurrency(Number(value))} />
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent indicator="dashed" formatter={(value) => formatCurrency(Number(value))} />}
+                        />
+                        <ChartLegend content={<ChartLegendContent />} />
+                        <Bar dataKey="total_revenue" name="Total Revenue" fill="var(--color-total_revenue)" radius={4} />
+                        <Bar dataKey="total_expenses" name="Total Expenses" fill="var(--color-total_expenses)" radius={4} />
+                        <Line
+                          type="monotone"
+                          dataKey="net_profit"
+                          name="Net Profit"
+                          stroke="var(--color-net_profit)"
+                          strokeWidth={3}
+                          dot={{ r: 3 }}
+                        />
+                      </ComposedChart>
+                    </ChartContainer>
+                  </Card>
+                </div>
               )}
             </>
           )}

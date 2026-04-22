@@ -54,6 +54,24 @@ export default function ShowCustomer() {
   const [clothUploadError, setClothUploadError] = useState<string | null>(null);
   const [finishedClothImages, setFinishedClothImages] = useState<string[]>([]);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
+  const [pendingOverwriteFiles, setPendingOverwriteFiles] = useState<File[]>([]);
+
+  const parseFinishedClothImages = (imageData: string | string[] | null): string[] => {
+    if (!imageData) return [];
+    
+    try {
+      if (typeof imageData === 'string') {
+        // Try to parse as JSON
+        const parsed = JSON.parse(imageData);
+        return Array.isArray(parsed) ? parsed : [parsed];
+      }
+      return Array.isArray(imageData) ? imageData : [];
+    } catch {
+      // If not valid JSON, return as array
+      return Array.isArray(imageData) ? imageData : imageData ? [imageData] : [];
+    }
+  };
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -192,11 +210,35 @@ export default function ShowCustomer() {
   };
 
   const addClothFiles = (files: File[]) => {
+    // If there are already uploaded images, ask for confirmation to overwrite
+    if (finishedClothImages.length > 0 && finishedClothPreviews.length === 0) {
+      setPendingOverwriteFiles(files);
+      setShowOverwriteConfirm(true);
+      return;
+    }
+
     const newFiles = [...finishedClothFiles, ...files];
     setFinishedClothFiles(newFiles);
 
     const newPreviews = files.map((file) => URL.createObjectURL(file));
     setFinishedClothPreviews([...finishedClothPreviews, ...newPreviews]);
+  };
+
+  const handleConfirmOverwrite = () => {
+    // Clear existing images and add new ones
+    setFinishedClothImages([]);
+    setFinishedClothFiles(pendingOverwriteFiles);
+    const newPreviews = pendingOverwriteFiles.map((file) =>
+      URL.createObjectURL(file)
+    );
+    setFinishedClothPreviews(newPreviews);
+    setPendingOverwriteFiles([]);
+    setShowOverwriteConfirm(false);
+  };
+
+  const handleCancelOverwrite = () => {
+    setPendingOverwriteFiles([]);
+    setShowOverwriteConfirm(false);
   };
 
   const removeClothFile = (index: number) => {
@@ -214,7 +256,7 @@ export default function ShowCustomer() {
 
     const formData = new FormData();
     finishedClothFiles.forEach((file) => {
-      formData.append("finished_cloth_images[]", file);
+      formData.append("finished_cloth_image[]", file);
     });
 
     setIsUploadingCloth(true);
@@ -224,7 +266,12 @@ export default function ShowCustomer() {
     try {
       const result = await editTailorJob(tailorId, formData);
       setClothUploadMessage("Finished cloth images uploaded successfully");
-      setFinishedClothImages(result.finished_cloth_images || []);
+      
+      // Parse the response images properly
+      const uploadedImages = parseFinishedClothImages(
+        result.finished_cloth_image || result.tailoring?.finished_cloth_image
+      );
+      setFinishedClothImages(uploadedImages);
       setFinishedClothFiles([]);
       setFinishedClothPreviews([]);
     } catch (err) {
@@ -234,6 +281,11 @@ export default function ShowCustomer() {
     } finally {
       setIsUploadingCloth(false);
     }
+  };
+
+  const removeExistingClothImage = (index: number) => {
+    const newImages = finishedClothImages.filter((_, i) => i !== index);
+    setFinishedClothImages(newImages);
   };
 
   const handleSendFinishedClothToClientManager = async () => {
@@ -390,6 +442,12 @@ export default function ShowCustomer() {
           // assigned_tailors: result.data.assigned_tailors || [],
         };
         setCustomer(mappedCustomer);
+
+        // Parse and set finished cloth images from API response
+        const finishedImages = parseFinishedClothImages(
+          result.tailoring.finished_cloth_image || result.order.finished_cloth_images
+        );
+        setFinishedClothImages(finishedImages);
       } else {
         setCustomer(null);
       }
@@ -1043,10 +1101,24 @@ export default function ShowCustomer() {
                             className="w-full h-24 object-cover"
                             onError={(e) => {
                               e.currentTarget.src = "/placeholder.svg";
+                              e.currentTarget.className = "w-full h-24 object-contain bg-gray-100";
                             }}
                           />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <FaCheckCircle className="text-emerald-400 text-2xl" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleCustomerImageClick(imageUrl)}
+                              className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition-colors"
+                              title="View image"
+                            >
+                              <FaSearch className="text-xl" />
+                            </button>
+                            <button
+                              onClick={() => removeExistingClothImage(index)}
+                              className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors"
+                              title="Remove image"
+                            >
+                              <IoMdCloseCircle className="text-xl" />
+                            </button>
                           </div>
                           <span className="absolute top-1 right-1 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                             ✓
@@ -1081,7 +1153,7 @@ export default function ShowCustomer() {
                     </motion.button>
                   )}
 
-                  {finishedClothImages.length > 0 && (
+                  {finishedClothImages.length > 0 && customer?.client_manager_approval !== "pending" && (
                     <motion.button
                       onClick={() => setSendClothConfirmOpen(true)}
                       disabled={isSendingCloth}
@@ -1154,15 +1226,15 @@ export default function ShowCustomer() {
         )}
       </AnimatePresence>
 
-      {/* Send to Client Manager Confirmation Modal */}
+      {/* Overwrite Confirmation Modal */}
       <AnimatePresence>
-        {sendClothConfirmOpen && (
+        {showOverwriteConfirm && (
           <motion.div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setSendClothConfirmOpen(false)}
+            onClick={handleCancelOverwrite}
           >
             <motion.div
               className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8"
@@ -1172,50 +1244,40 @@ export default function ShowCustomer() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FaPaperPlane className="text-blue-600 text-2xl" />
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <IoMdCloseCircle className="text-amber-600 text-2xl" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                  Send to Client Manager?
+                  Overwrite Existing Images?
                 </h2>
                 <p className="text-gray-600">
-                  {finishedClothImages.length} image{finishedClothImages.length > 1 ? "s" : ""} will be sent for approval
+                  You already have {finishedClothImages.length} uploaded image{finishedClothImages.length > 1 ? "s" : ""}. Uploading new images will replace the existing ones.
                 </p>
               </div>
 
-              <div className="bg-blue-50 rounded-xl p-4 mb-6 border border-blue-200">
-                <p className="text-sm text-blue-800">
-                  <span className="font-semibold">Note:</span> The client manager will be notified and can approve or request changes.
+              <div className="bg-amber-50 rounded-xl p-4 mb-6 border border-amber-200">
+                <p className="text-sm text-amber-800">
+                  <span className="font-semibold">Action:</span> {pendingOverwriteFiles.length} new image{pendingOverwriteFiles.length > 1 ? "s" : ""} will be uploaded.
                 </p>
               </div>
 
               <div className="flex gap-3">
                 <motion.button
-                  onClick={() => setSendClothConfirmOpen(false)}
+                  onClick={handleCancelOverwrite}
                   className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-xl font-bold transition-colors"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  Cancel
+                  Keep Existing
                 </motion.button>
                 <motion.button
-                  onClick={handleSendFinishedClothToClientManager}
-                  disabled={isSendingCloth}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white px-4 py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
+                  onClick={handleConfirmOverwrite}
+                  className="flex-1 bg-amber-600 hover:bg-amber-700 text-white px-4 py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  {isSendingCloth ? (
-                    <>
-                      <Spinner />
-                      <span>Sending...</span>
-                    </>
-                  ) : (
-                    <>
-                      <FaPaperPlane />
-                      <span>Send Now</span>
-                    </>
-                  )}
+                  <FaUpload />
+                  <span>Overwrite</span>
                 </motion.button>
               </div>
             </motion.div>

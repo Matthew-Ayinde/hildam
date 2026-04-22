@@ -50,6 +50,7 @@ export default function ClientInvoicePage() {
           clothingDescription: order.clothing_description || "N/A",
           goingRate: order.amount || "N/A",
           vat: "0",
+          vatAmount: order.vat_amount || "0",
           discount: "0",
           totalAmountDue: order.amount || "N/A",
           amountPaid: order.amount || "N/A",

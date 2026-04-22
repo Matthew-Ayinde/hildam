@@ -49,6 +49,8 @@ export class ApiRoutes {
     static RejectTailorImage: string = '/orders/reject-tailor-style';
     static CloseOrder: string = '/orders/close-order';
     static FetchOrderAnalytics: string = '/orders/analytics';
+    static FetchTailorAnalytics: string = '/orders/tailor-analytics';
+    static FetchCustomerAnalytics: string = '/orders/customer-analytics';
 
 
 
