@@ -280,7 +280,7 @@ export default function PaymentChart() {
       color: "hsl(var(--chart-3))",
     },
     sales_cogs: {
-      label: "Sales COGS",
+      label: "Ready to Wear Expenses",
       color: "hsl(var(--chart-4))",
     },
     operational_expenses: {

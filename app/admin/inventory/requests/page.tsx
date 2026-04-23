@@ -39,6 +39,8 @@ const Spinner = () => (
 )
 
 export default function ModernInventoryTable() {
+  type RequestAction = "approve" | "reject"
+
   interface Customer {
     id: string
     itemName: string
@@ -54,8 +56,7 @@ export default function ModernInventoryTable() {
   const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [popupMessage, setPopupMessage] = useState<string | null>(null)
-  const [isPopupOpen, setIsPopupOpen] = useState(false)
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string>("")
+  const [activeAction, setActiveAction] = useState<{ type: RequestAction; requestId: string } | null>(null)
   const [rejectionFeedback, setRejectionFeedback] = useState("")
   const [approvingRequestId, setApprovingRequestId] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending")
@@ -107,10 +108,51 @@ export default function ModernInventoryTable() {
     fetchData()
   }, [])
 
-  const handleReject = async (id: string) => {
-    const orderId = id
-    if (!selectedCustomerId) return
+  const openActionModal = (type: RequestAction, requestId: string) => {
+    setActiveAction({ type, requestId })
+    if (type === "approve") {
+      setRejectionFeedback("")
+    }
+  }
 
+  const closeActionModal = () => {
+    setActiveAction(null)
+    setRejectionFeedback("")
+  }
+
+  const handleApprove = (requestId: string) => {
+    if (approvingRequestId === requestId) return
+    openActionModal("approve", requestId)
+  }
+
+  const confirmApprove = async (requestId: string) => {
+    if (approvingRequestId === requestId) return
+
+    setApprovingRequestId(requestId)
+    try {
+      await acceptStoreRequest(requestId)
+
+      setData((prevData) =>
+        prevData.map((customer) => (customer.id === requestId ? { ...customer, status: "approved" } : customer)),
+      )
+
+      setPopupMessage("Request approved successfully.")
+      setTimeout(() => setPopupMessage(null), 5000)
+    } catch (error) {
+      console.error("Error approving request:", error)
+      setPopupMessage("Error approving request")
+      setTimeout(() => setPopupMessage(null), 5000)
+    } finally {
+      setApprovingRequestId(null)
+      closeActionModal()
+    }
+  }
+
+  const handleReject = (requestId: string) => {
+    openActionModal("reject", requestId)
+  }
+
+  const confirmReject = async (requestId: string) => {
     const feedback = rejectionFeedback.trim()
     if (!feedback) {
       setPopupMessage("Please add a rejection feedback message.")
@@ -125,41 +167,19 @@ export default function ModernInventoryTable() {
         throw new Error("Authentication token not found")
       }
 
-      const response = await rejectStoreRequest(orderId, feedback)
+      await rejectStoreRequest(requestId, feedback)
 
-      setData((prevData) => prevData.filter((customer) => customer.id !== selectedCustomerId))
+      setData((prevData) => prevData.filter((customer) => customer.id !== requestId))
       setRejectionFeedback("")
 
-      setPopupMessage("Request successfully rejected")
+      setPopupMessage("Request rejected successfully.")
       setTimeout(() => setPopupMessage(null), 5000)
     } catch (error) {
       console.error("Error rejecting request:", error)
       setPopupMessage("Error rejecting request")
       setTimeout(() => setPopupMessage(null), 5000)
     } finally {
-      setIsPopupOpen(false)
-    }
-  }
-
-  const handleApprove = async (requestId: string) => {
-    if (approvingRequestId === requestId) return
-
-    setApprovingRequestId(requestId)
-    try {
-      await acceptStoreRequest(requestId)
-
-      setData((prevData) =>
-        prevData.map((customer) => (customer.id === requestId ? { ...customer, status: "approved" } : customer)),
-      )
-
-      setPopupMessage("Request successfully approved")
-      setTimeout(() => setPopupMessage(null), 5000)
-    } catch (error) {
-      console.error("Error approving request:", error)
-      setPopupMessage("Error approving request")
-      setTimeout(() => setPopupMessage(null), 5000)
-    } finally {
-      setApprovingRequestId(null)
+      closeActionModal()
     }
   }
 
@@ -461,20 +481,18 @@ export default function ModernInventoryTable() {
                                 )}
                               </motion.button>
                             )}
-                            <motion.button
-                              onClick={() => {
-                                setSelectedCustomerId(row.id)
-                                setRejectionFeedback("")
-                                setIsPopupOpen(true)
-                              }}
-                              className="p-2 bg-red-100 text-red-500 rounded-lg hover:bg-red-200 transition-colors duration-200"
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              title="Reject request"
-                              disabled={isApproving}
-                            >
-                              <TiDelete className="w-4 h-4" />
-                            </motion.button>
+                            {row.status === "pending" && (
+                              <motion.button
+                                onClick={() => handleReject(row.id)}
+                                className="p-2 bg-red-100 text-red-500 rounded-lg hover:bg-red-200 transition-colors duration-200"
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                title="Reject request"
+                                disabled={isApproving}
+                              >
+                                <TiDelete className="w-4 h-4" />
+                              </motion.button>
+                            )}
                           </div>
                             )
                           })()}
@@ -552,10 +570,10 @@ export default function ModernInventoryTable() {
 
       {/* Confirmation Popup */}
       <AnimatePresence>
-        {isPopupOpen && (
+        {activeAction && (
           <motion.div
             className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50"
-            onClick={() => setIsPopupOpen(false)}
+          onClick={closeActionModal}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -571,40 +589,59 @@ export default function ModernInventoryTable() {
             >
               <div className="p-6">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                    <HiOutlineExclamationTriangle className="w-6 h-6 text-red-600" />
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                      activeAction.type === "approve" ? "bg-green-100" : "bg-red-100"
+                    }`}
+                  >
+                    <HiOutlineExclamationTriangle
+                      className={`w-6 h-6 ${activeAction.type === "approve" ? "text-green-600" : "text-red-600"}`}
+                    />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">Reject Request</h3>
+                    <h3 className="text-lg font-bold text-gray-900">
+                      {activeAction.type === "approve" ? "Approve Request" : "Reject Request"}
+                    </h3>
                     <p className="text-sm text-gray-600">This action cannot be undone</p>
                   </div>
                 </div>
                 <p className="text-gray-700 mb-6">
-                  Are you sure you want to reject this inventory request? 
+                  {activeAction.type === "approve"
+                    ? "Are you sure you want to approve this inventory request?"
+                    : "Are you sure you want to reject this inventory request?"}
                 </p>
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Feedback message
-                  </label>
-                  <textarea
-                    value={rejectionFeedback}
-                    onChange={(event) => setRejectionFeedback(event.target.value)}
-                    placeholder="Explain why this request was rejected"
-                    className="w-full min-h-[120px] rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 focus:border-[#ff6c2f] focus:ring-2 focus:ring-[#ff6c2f]/20 outline-none transition-colors"
-                  />
-                </div>
+                {activeAction.type === "reject" && (
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Feedback message</label>
+                    <textarea
+                      value={rejectionFeedback}
+                      onChange={(event) => setRejectionFeedback(event.target.value)}
+                      placeholder="Explain why this request was rejected"
+                      className="w-full min-h-[120px] rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 focus:border-[#ff6c2f] focus:ring-2 focus:ring-[#ff6c2f]/20 outline-none transition-colors"
+                    />
+                  </div>
+                )}
                 <div className="flex gap-3">
                   <motion.button
-                    className="flex-1 px-4 py-3 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors duration-200"
-                    onClick={() => handleReject(selectedCustomerId)}
+                    className={`flex-1 px-4 py-3 text-sm font-semibold text-white rounded-xl transition-colors duration-200 ${
+                      activeAction.type === "approve"
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-red-600 hover:bg-red-700"
+                    }`}
+                    onClick={() =>
+                      activeAction.type === "approve"
+                        ? confirmApprove(activeAction.requestId)
+                        : confirmReject(activeAction.requestId)
+                    }
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    disabled={activeAction.type === "approve" && approvingRequestId === activeAction.requestId}
                   >
-                    Reject Request
+                    {activeAction.type === "approve" ? "Approve Request" : "Reject Request"}
                   </motion.button>
                   <motion.button
                     className="flex-1 px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors duration-200"
-                    onClick={() => setIsPopupOpen(false)}
+                    onClick={closeActionModal}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >

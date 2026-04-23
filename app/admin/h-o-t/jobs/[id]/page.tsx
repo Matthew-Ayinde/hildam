@@ -331,6 +331,7 @@ export default function ShowCustomer() {
     date: string;
     address: string;
     order_id: string;
+    order_status?: string;
     bust: number;
     waist: number;
     hips: number;
@@ -397,6 +398,7 @@ export default function ShowCustomer() {
           gender: result.customer.gender,
           date: new Date().toLocaleDateString(),
           order_id: result.tailoring.order_id,
+          order_status: result.tailoring.order?.order_status || "N/A",
           bust: result.customer.bust || 0,
           waist: result.customer.waist || 0,
           hip: result.customer.hip || 0,
@@ -665,6 +667,7 @@ export default function ShowCustomer() {
                     icon: "👤",
                   },
                   { label: "Gender", value: customer.gender, icon: "⚧" },
+                  { label: "Order Status", value: customer.order_status, icon: "✅" },
                 ].map((field, index) => (
                   <motion.div
                     key={index}

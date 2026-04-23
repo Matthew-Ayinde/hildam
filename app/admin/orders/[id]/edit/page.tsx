@@ -373,7 +373,7 @@ export default function EditCustomer() {
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
-              className="fixed left-0 right-0 top-5 z-50 flex justify-center"
+              className="fixed left-0 right-0 top-5 z-[9999] flex justify-center"
             >
               <div className="rounded-xl bg-gradient-to-r from-green-500 to-green-600 px-6 py-3 text-white shadow-lg">
                 {successMessage}
