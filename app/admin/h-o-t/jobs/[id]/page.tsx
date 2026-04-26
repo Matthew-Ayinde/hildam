@@ -103,10 +103,14 @@ export default function ShowCustomer() {
   const tailorId = id as string;
 
   useEffect(() => {
-    if (uploadMessage) {
-      setTimeout(() => setUploadMessage(null), 5000);
+    if (uploadMessage || uploadError) {
+      const t = setTimeout(() => {
+        setUploadMessage(null);
+        setUploadError(null);
+      }, 5000);
+      return () => clearTimeout(t);
     }
-  }, [uploadMessage]);
+  }, [uploadMessage, uploadError]);
 
   useEffect(() => {
     if (clothUploadMessage || clothUploadError) {
@@ -165,6 +169,10 @@ export default function ShowCustomer() {
 
       setUploadMessage("Image sent to project manager successfully");
       setSentSuccess(true);
+      // Delay navigation so the toast message is visible for 5 seconds
+      setTimeout(() => {
+        router.push("/admin/h-o-t/jobs");
+      }, 5000);
     } catch (err) {
       setUploadError(
         err instanceof Error ? err.message : "An unknown error occurred"
@@ -172,8 +180,6 @@ export default function ShowCustomer() {
     } finally {
       setIsSending(false);
     }
-
-    router.push("/admin/h-o-t/jobs");
   };
 
   const handleDragEnter = (e: React.DragEvent) => {
@@ -302,6 +308,10 @@ export default function ShowCustomer() {
       await SendJobToClientManager(tailorId);
       setClothUploadMessage("Finished cloth sent to client manager for approval");
       setSendClothConfirmOpen(false);
+      // Delay navigation so the toast message is visible for 5 seconds
+      setTimeout(() => {
+        router.push("/admin/h-o-t/jobs");
+      }, 5000);
     } catch (err) {
       setClothUploadError(
         err instanceof Error ? err.message : "Failed to send to client manager"

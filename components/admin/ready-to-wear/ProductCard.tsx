@@ -33,9 +33,9 @@ export default function ProductCard({ product, onEdit, onDelete }: ProductCardPr
             <p className="line-clamp-1 text-base font-semibold text-gray-800">{product.name}</p>
             <p className="text-sm text-gray-500">{product.category || "Uncategorized"}</p>
           </div>
-          <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyles[product.stockStatus]}`}>
+          {/* <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyles[product.stockStatus]}`}>
             {product.stockStatus.replace("_", " ")}
-          </span>
+          </span> */}
         </div>
 
         <div className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
