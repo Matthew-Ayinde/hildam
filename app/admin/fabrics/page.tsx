@@ -6,7 +6,7 @@ import { HiOutlineCollection, HiOutlinePhotograph, HiOutlineTrash, HiPlus } from
 import { IoEyeOutline, IoCalendarOutline } from "react-icons/io5"
 import Link from "next/link"
 import Spinner from "@/components/Spinner"
-import { deleteFabric, fetchAllFabrics } from "../../api/apiClient"
+import { deleteFabric, fetchAllFabricsOriginal } from "../../api/apiClient"
 
 interface Fabric {
   id: number
@@ -29,7 +29,7 @@ export default function FabricsPage() {
     const getFabrics = async () => {
       setIsLoading(true)
       try {
-        const response = await fetchAllFabrics()
+        const response = await fetchAllFabricsOriginal()
         setFabrics(response || [])
       } catch (error) {
         console.error("Error fetching fabrics:", error)

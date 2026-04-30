@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
-  getCachedProduct,
   getCachedProductList,
   invalidateReadyToWearCache,
   setCachedProduct,
@@ -82,13 +81,6 @@ export function useReadyToWearProduct(id: string) {
 
   useEffect(() => {
     if (!id) return
-
-    const cached = getCachedProduct(id)
-    if (cached) {
-      setProduct(cached)
-      setIsLoading(false)
-      return
-    }
 
     void refetch()
   }, [id, refetch])

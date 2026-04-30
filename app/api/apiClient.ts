@@ -592,6 +592,11 @@ export async function readAllNotification(): Promise<any> {
 
 
     //#region Fabrics endpoint ---------------------------------
+    export async function fetchAllFabricsOriginal(): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(`${ApiRoutes.FetchAllFabricsOriginal}`, { headers });
+  return resp.data.data;
+}
     export async function fetchAllFabrics(): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.get(`${ApiRoutes.FetchAllFabrics}`, { headers });
