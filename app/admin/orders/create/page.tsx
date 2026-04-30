@@ -378,9 +378,10 @@ const Form = () => {
         payload.append("style_reference_images[]", file)
       })
 
-      selectedFabricIds.forEach((fabricId) => {
-        payload.append("fabric_ids[]", fabricId)
-      })
+      const selectedFabricId = selectedFabricIds[0]
+      if (selectedFabricId) {
+        payload.append("fabric_id", selectedFabricId)
+      }
 
 
       const response = await createOrder(payload)

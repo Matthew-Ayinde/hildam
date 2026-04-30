@@ -202,6 +202,10 @@ export default function ShowCustomer() {
   const handleClothFilesDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isFinishedClothUploadLocked) {
+      setClothUploadError("Images can no longer be uploaded after sending to the client manager.");
+      return;
+    }
     setIsDragActive(false);
     
     const files = Array.from(e.dataTransfer.files).filter((file) =>
@@ -211,11 +215,21 @@ export default function ShowCustomer() {
   };
 
   const handleClothFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isFinishedClothUploadLocked) {
+      setClothUploadError("Images can no longer be uploaded after sending to the client manager.");
+      e.target.value = "";
+      return;
+    }
     const files = e.target.files ? Array.from(e.target.files) : [];
     addClothFiles(files);
   };
 
   const addClothFiles = (files: File[]) => {
+    if (isFinishedClothUploadLocked) {
+      setClothUploadError("Images can no longer be uploaded after sending to the client manager.");
+      return;
+    }
+
     // If there are already uploaded images, ask for confirmation to overwrite
     if (finishedClothImages.length > 0 && finishedClothPreviews.length === 0) {
       setPendingOverwriteFiles(files);
@@ -258,6 +272,11 @@ export default function ShowCustomer() {
   };
 
   const handleUploadFinishedCloth = async () => {
+    if (isFinishedClothUploadLocked) {
+      setClothUploadError("Images can no longer be uploaded after sending to the client manager.");
+      return;
+    }
+
     if (finishedClothFiles.length === 0) return;
 
     const formData = new FormData();
@@ -307,6 +326,7 @@ export default function ShowCustomer() {
     try {
       await SendJobToClientManager(tailorId);
       setClothUploadMessage("Finished cloth sent to client manager for approval");
+      setSentSuccess(true);
       setSendClothConfirmOpen(false);
       // Delay navigation so the toast message is visible for 5 seconds
       setTimeout(() => {
@@ -386,6 +406,7 @@ export default function ShowCustomer() {
   const [orderStoreRequests, setOrderStoreRequests] = useState<StoreRequest[]>([]);
   const [storeRequestsLoading, setStoreRequestsLoading] = useState(false);
   const [storeRequestsError, setStoreRequestsError] = useState<string | null>(null);
+  const isFinishedClothUploadLocked = sentSuccess || customer?.client_manager_approval === "pending";
 
   const fetchCustomer = async () => {
     setLoading(true);
@@ -1030,8 +1051,10 @@ export default function ShowCustomer() {
               <div className="rounded-2xl border-2 border-gray-200 bg-white p-6 md:p-8">
                 {/* Drag-Drop Upload Area */}
                 <motion.div
-                  className={`rounded-2xl border-2 border-dashed transition-all p-8 text-center cursor-pointer ${
-                    isDragActive
+                  className={`rounded-2xl border-2 border-dashed transition-all p-8 text-center ${
+                      isFinishedClothUploadLocked
+                        ? "cursor-not-allowed border-gray-200 bg-gray-100 opacity-70"
+                        : isDragActive
                       ? "border-emerald-500 bg-emerald-50"
                       : "border-gray-300 bg-gray-50 hover:border-emerald-400 hover:bg-emerald-50/50"
                   }`}
@@ -1045,6 +1068,7 @@ export default function ShowCustomer() {
                     type="file"
                     multiple
                     accept="image/*"
+                    disabled={isFinishedClothUploadLocked}
                     onChange={handleClothFilesChange}
                     className="hidden"
                     id="cloth-files-input"
@@ -1144,7 +1168,7 @@ export default function ShowCustomer() {
 
                 {/* Action Buttons */}
                 <div className="mt-8 flex flex-wrap gap-4">
-                  {finishedClothPreviews.length > 0 && (
+                  {finishedClothPreviews.length > 0 && !isFinishedClothUploadLocked && (
                     <motion.button
                       onClick={handleUploadFinishedCloth}
                       disabled={isUploadingCloth}
@@ -1194,6 +1218,14 @@ export default function ShowCustomer() {
                     No images uploaded yet. Upload finished cloth images to proceed.
                   </p>
                 )}
+
+                {isFinishedClothUploadLocked && (
+                    <div>
+                  // <p className="mt-6 text-sm font-medium text-amber-700 text-center">
+                  //   Uploading is locked after sending these images to the client manager.
+                  // </p>
+                  </div>
+                )}
               </div>
             </motion.div>
 
@@ -1234,6 +1266,70 @@ export default function ShowCustomer() {
                   e.currentTarget.src = "/placeholder.svg?height=600&width=800";
                 }}
               />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Send Confirmation Modal */}
+      <AnimatePresence>
+        {sendClothConfirmOpen && (
+          <motion.div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSendClothConfirmOpen(false)}
+          >
+            <motion.div
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FaPaperPlane className="text-blue-600 text-2xl" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Send Finished Cloth?
+                </h2>
+                <p className="text-gray-600">
+                  This will send the finished cloth images to the client manager for approval.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <motion.button
+                  onClick={() => setSendClothConfirmOpen(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-3 rounded-xl font-bold transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={isSendingCloth}
+                >
+                  Cancel
+                </motion.button>
+                <motion.button
+                  onClick={handleSendFinishedClothToClientManager}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white px-4 py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={isSendingCloth}
+                >
+                  {isSendingCloth ? (
+                    <>
+                      <Spinner />
+                      <span>Sending...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaPaperPlane />
+                      <span>Send</span>
+                    </>
+                  )}
+                </motion.button>
+              </div>
             </motion.div>
           </motion.div>
         )}

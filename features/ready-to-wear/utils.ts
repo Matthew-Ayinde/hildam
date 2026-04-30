@@ -125,7 +125,7 @@ export const validateReadyToWearForm = (
   if (!values.name.trim()) errors.name = "Product name is required"
   if (!values.category.trim()) errors.category = "Category is required"
   if (!values.fabricType.trim()) errors.fabricType = "Fabric type is required"
-  if (!values.description.trim()) errors.description = "Description is required"
+  // Description is optional; do not treat empty description as an error
   if (!values.status.trim()) errors.status = "Status is required"
 
   if (values.costPrice < 0) errors.costPrice = "Cost price cannot be negative"
@@ -223,7 +223,10 @@ const appendBaseProductFields = (formData: FormData, values: ReadyToWearFormValu
   formData.append("category", values.category.trim())
   formData.append("fabric_type", values.fabricType.trim())
   formData.append("status", values.status)
-  formData.append("description", values.description.trim())
+  // Only include description in the payload if provided
+  if (values.description && values.description.trim() !== "") {
+    formData.append("description", values.description.trim())
+  }
   formData.append("cost_price", String(values.costPrice))
   formData.append("selling_price", String(values.sellingPrice))
   formData.append("reorder_level", String(values.reorderLevel))
