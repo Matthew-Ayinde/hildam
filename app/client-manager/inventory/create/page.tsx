@@ -41,7 +41,6 @@ const Form = () => {
     setResponseMessage(null)
 
     try {
-
       const payload: CreateInventoryPayload = {
         item_name: formData.item_name,
         item_quantity: formData.item_quantity,
@@ -49,6 +48,7 @@ const Form = () => {
         color: formData.color,
         ...(formData.item_description?.trim() ? { item_description: formData.item_description.trim() } : {}),
       }
+
       const response = await createInventory(payload)
 
       setResponseMessage("Inventory item created successfully!")

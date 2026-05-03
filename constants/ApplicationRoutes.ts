@@ -74,6 +74,8 @@ export class ApplicationRoutes {
     static readonly ClientManagerJobExpenses = "/client-manager/expenses";
     static readonly ClientManagerDailyExpenses = "/client-manager/daily-expenses";
     static readonly ClientManagerPayments = '/client-manager/payments'
+    static readonly ClientManagerUsers = "/client-manager/users";
+    static readonly ClientManagerUsersCreate = "/client-manager/users/create";
 
     
 

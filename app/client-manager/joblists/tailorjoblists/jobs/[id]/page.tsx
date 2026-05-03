@@ -293,7 +293,7 @@ const [selectedTailors, setSelectedTailors] = useState<number[]>([1, 2]);
         setIsSending(false);
       }
 
-      router.push("/admin/joblists/tailorjoblists/jobs");
+      router.push("/client-manager/joblists/tailorjoblists/jobs");
     };
 
     interface Customer {
@@ -489,7 +489,7 @@ const [selectedTailors, setSelectedTailors] = useState<number[]>([1, 2]);
           transition={{ duration: 0.5 }}
         >
           <Link
-            href="/admin/joblists/tailorjoblists/jobs"
+            href="/client-manager/joblists/tailorjoblists/jobs"
             className="hover:text-orange-700 text-orange-500 flex flex-row items-center mb-2"
           >
             <IoIosArrowBack size={30} />
@@ -646,6 +646,10 @@ const [selectedTailors, setSelectedTailors] = useState<number[]>([1, 2]);
   { label: "Shoulder To Underbust", value: customer.shoulder_to_underbust, id: "shoulder_to_underbust" },
   { label: "Skirt Length(Long, 3/4, Short)", value: customer.skirt_length, id: "skirt_length" },
   { label: "Sleeve Length(Long, Quarter, Short)", value: customer.sleeve_length, id: "sleeve_length" },
+  { label: "Trousers Length", value: customer.trousers_length, id: "trousers_length" },
+  { label: "Round Thigh", value: customer.round_thigh, id: "round_thigh" },
+  { label: "Round Knee", value: customer.round_knee, id: "round_knee" },
+  { label: "Round Feet", value: customer.round_feet, id: "round_feet" },
   { label: "Waist", value: customer.waist, id: "waist" }
 ]
 .map((measurement, index) => (
@@ -1006,7 +1010,7 @@ const [selectedTailors, setSelectedTailors] = useState<number[]>([1, 2]);
                   items necessary to complete your job
                 </h1>
                 <Link
-                  href={`/admin/joblists/tailorjoblists/jobs/${id}/request-inventory`}
+                  href={`/client-manager/joblists/tailorjoblists/jobs/${id}/request-inventory`}
                   className=""
                 >
                   <button className="bg-orange-500 text-white px-4 py-2 rounded">

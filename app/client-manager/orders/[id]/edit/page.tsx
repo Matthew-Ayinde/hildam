@@ -41,6 +41,29 @@ interface Customer {
 }
 
 export default function EditCustomer() {
+  const parseDateTimeValue = (value: string | null | undefined): Date | null => {
+    if (!value) return null
+
+    const sanitizedValue = value
+      .replace(/\b(\d{1,2})(st|nd|rd|th)\b/gi, "$1")
+      .replace(/(\d)(am|pm)\b/gi, "$1 $2")
+      .trim()
+
+    const parsedDate = new Date(sanitizedValue)
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate
+  }
+
+  const formatDateTimeForPayload = (date: Date): string => {
+    return date.toISOString().replace(".000Z", "Z")
+  }
+
+  const normalizeStoredDateTime = (value: string | null | undefined): string => {
+    if (!value) return ""
+    const parsed = parseDateTimeValue(value)
+    if (!parsed) return value.trim()
+    return formatDateTimeForPayload(parsed)
+  }
+
   const [projectManagers, setProjectManagers] = useState<ProjectManager[]>([])
   const [loadingManagers, setLoadingManagers] = useState(true)
   const [errorManagers, setErrorManagers] = useState("")
@@ -158,9 +181,9 @@ export default function EditCustomer() {
       }
       setFormData(customerFormData)
       setPreviewUrls(data.style_reference_images || []) // Set initial preview URLs from existing images
-      setFirstFittingDate(data.first_fitting_date ? new Date(data.first_fitting_date) : null)
-      setSecondFittingDate(data.second_fitting_date ? new Date(data.second_fitting_date) : null)
-      setCollectionDate(data.collection_date ? new Date(data.collection_date) : null)
+      setFirstFittingDate(parseDateTimeValue(data.first_fitting_date))
+      setSecondFittingDate(parseDateTimeValue(data.second_fitting_date))
+      setCollectionDate(parseDateTimeValue(data.collection_date))
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred")
@@ -249,20 +272,16 @@ export default function EditCustomer() {
       }
 
       // 2. Handle fitting dates
-      const originalFirstFittingDateStr = customer.first_fitting_date
-        ? new Date(customer.first_fitting_date).toISOString().split("T")[0]
-        : ""
-      const currentFirstFittingDateStr = firstFittingDate ? firstFittingDate.toISOString().split("T")[0] : ""
+      const originalFirstFittingDateStr = normalizeStoredDateTime(customer.first_fitting_date)
+      const currentFirstFittingDateStr = firstFittingDate ? formatDateTimeForPayload(firstFittingDate) : ""
 
       if (currentFirstFittingDateStr !== originalFirstFittingDateStr) {
         formDataToSend.append("first_fitting_date", currentFirstFittingDateStr)
         hasChanges = true
       }
 
-      const originalSecondFittingDateStr = customer.second_fitting_date
-        ? new Date(customer.second_fitting_date).toISOString().split("T")[0]
-        : ""
-      const currentSecondFittingDateStr = secondFittingDate ? secondFittingDate.toISOString().split("T")[0] : ""
+      const originalSecondFittingDateStr = normalizeStoredDateTime(customer.second_fitting_date)
+      const currentSecondFittingDateStr = secondFittingDate ? formatDateTimeForPayload(secondFittingDate) : ""
 
       if (currentSecondFittingDateStr !== originalSecondFittingDateStr) {
         formDataToSend.append("second_fitting_date", currentSecondFittingDateStr)
@@ -270,10 +289,8 @@ export default function EditCustomer() {
       }
 
       // Handle collection date
-      const originalCollectionDateStr = customer.collection_date
-        ? new Date(customer.collection_date).toISOString().split("T")[0]
-        : ""
-      const currentCollectionDateStr = collectionDate ? collectionDate.toISOString().split("T")[0] : ""
+      const originalCollectionDateStr = normalizeStoredDateTime(customer.collection_date)
+      const currentCollectionDateStr = collectionDate ? formatDateTimeForPayload(collectionDate) : ""
 
       if (currentCollectionDateStr !== originalCollectionDateStr) {
         formDataToSend.append("collection_date", currentCollectionDateStr)
@@ -356,7 +373,7 @@ export default function EditCustomer() {
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
-              className="fixed left-0 right-0 top-5 z-50 flex justify-center"
+              className="fixed left-0 right-0 top-5 z-[9999] flex justify-center"
             >
               <div className="rounded-xl bg-gradient-to-r from-green-500 to-green-600 px-6 py-3 text-white shadow-lg">
                 {successMessage}
@@ -582,8 +599,10 @@ export default function EditCustomer() {
                         setSecondFittingDate(null)
                       }
                     }}
-                    dateFormat="yyyy-MM-dd"
-                    placeholderText="Select date"
+                    showTimeSelect
+                    timeIntervals={5}
+                    dateFormat="do, MMMM, yyyy, h:mm aa"
+                    placeholderText="Select date and time"
                     className="w-full rounded-xl border border-gray-200 p-3 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                     minDate={new Date()}
                   />
@@ -593,8 +612,10 @@ export default function EditCustomer() {
                   <DatePicker
                     selected={secondFittingDate}
                     onChange={(date) => setSecondFittingDate(date)}
-                    dateFormat="yyyy-MM-dd"
-                    placeholderText="Select date"
+                    showTimeSelect
+                    timeIntervals={5}
+                    dateFormat="do, MMMM, yyyy, h:mm aa"
+                    placeholderText="Select date and time"
                     className="w-full rounded-xl border border-gray-200 p-3 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                     minDate={firstFittingDate || new Date()}
                   />
@@ -615,8 +636,10 @@ export default function EditCustomer() {
                   <DatePicker
                     selected={collectionDate}
                     onChange={(date) => setCollectionDate(date)}
-                    dateFormat="yyyy-MM-dd"
-                    placeholderText="Select date"
+                    showTimeSelect
+                    timeIntervals={5}
+                    dateFormat="do, MMMM, yyyy, h:mm aa"
+                    placeholderText="Select date and time"
                     className="w-full rounded-xl border border-gray-200 p-3 transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
                     minDate={secondFittingDate || firstFittingDate || new Date()}
                   />

@@ -93,7 +93,7 @@ function escapeCsvField(field: string | number | null | undefined): string {
 }
 
 export default function CustomerAnalyticsChart() {
-  const [selectedYear, setSelectedYear] = useState("2025")
+  const [selectedYear, setSelectedYear] = useState("2026")
   const [chartData, setChartData] = useState<MonthlyCustomerData[]>([]) // For total customer base chart
   const [totalCustomers, setTotalCustomers] = useState(0)
   const [monthlyBreakdown, setMonthlyBreakdown] = useState<MonthlyCustomerData[]>([]) // For new customers calculation
@@ -102,7 +102,7 @@ export default function CustomerAnalyticsChart() {
   const [error, setError] = useState<string | null>(null)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false) // State for modal visibility
 
-  const years = ["2023", "2024", "2025"] // Example years for the dropdown
+  const years = ["2022", "2023", "2024", "2025", "2026"] // Example years for the dropdown
 
   const fetchCustomerData = useCallback(async () => {
     setLoading(true)

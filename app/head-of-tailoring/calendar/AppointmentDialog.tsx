@@ -69,15 +69,15 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
         order_id: formData.orderId,
       }
 
-      // Use format(date, "yyyy-MM-dd") to get the local date string
+      // Send full ISO datetime strings in UTC (e.g. 2026-05-02T13:00:00Z)
       if (formData.firstFittingDate) {
-        appointmentData.first_fitting_date = format(formData.firstFittingDate, "yyyy-MM-dd")
+        appointmentData.first_fitting_date = formData.firstFittingDate.toISOString().replace(".000Z", "Z")
       }
       if (formData.secondFittingDate) {
-        appointmentData.second_fitting_date = format(formData.secondFittingDate, "yyyy-MM-dd")
+        appointmentData.second_fitting_date = formData.secondFittingDate.toISOString().replace(".000Z", "Z")
       }
       if (formData.collectionDate) {
-        appointmentData.collection_date = format(formData.collectionDate, "yyyy-MM-dd")
+        appointmentData.collection_date = formData.collectionDate.toISOString().replace(".000Z", "Z")
       }
 
       const res = await addCalendarDate(appointmentData)

@@ -777,6 +777,7 @@ const Form = () => {
                     onChange={handleChange}
                     placeholder="Enter the name of the clothing item"
                     className="w-full rounded-xl border border-gray-300 shadow-sm p-3 focus:ring-2 focus:ring-purple-200 focus:border-purple-400 transition-all duration-200 resize-none"
+                    required
                   />
                 </div>
 

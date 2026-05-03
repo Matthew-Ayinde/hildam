@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { FiMessageSquare } from "react-icons/fi"
 import { HiOutlineInboxIn } from "react-icons/hi"
 import { IoMailOutline } from "react-icons/io5"
+import { GiClothes } from "react-icons/gi"
 
 type Notification = {
   id: string
@@ -74,6 +75,17 @@ const sidebarItems = [
     ],
   },
   {
+    id: 10,
+    text: "Clothing",
+    icon: <GiClothes />,
+    prefix: "/client-manager/fabrics",
+    links: [
+      { name: "All Fabrics", href: "/client-manager/fabrics" },
+      { name: "Ready-to-Wear", href: "/client-manager/fabrics/ready-to-wear" },
+      { name: "Ready-to-Wear Sales", href: "/client-manager/fabrics/ready-to-wear-sales" },
+    ],
+  },
+  {
     id: 9,
     text: "Calendar",
     icon: <Calendar className="w-4 h-4" />,
@@ -92,6 +104,16 @@ const sidebarItems = [
       { name: "Daily Expenses", href: "/client-manager/expenses/daily-expenses" },
     ],
   },
+  // {
+  //   id: 8,
+  //   text: "Users",
+  //   icon: <FaUser />,
+  //   prefix: "/client-manager/users",
+  //   links: [
+  //     { name: "All Users", href: "/client-manager/users" },
+  //     { name: "Add User", href: "/client-manager/users/create" },
+  //   ],
+  // },
 ]
 
 const Sidebar = ({ notifications = [], unreadCount = 0, onMarkAsRead, onMarkAllAsRead }: SidebarProps) => {
@@ -193,7 +215,7 @@ const Sidebar = ({ notifications = [], unreadCount = 0, onMarkAsRead, onMarkAllA
           </div>
           <div className="ml-3">
             <div className="text-white font-bold text-lg">HildaM Couture</div>
-            <div className="text-orange-300 text-xs font-medium">Client Manager Panel</div>
+            <div className="text-orange-300 text-xs font-medium">Admin Panel</div>
           </div>
         </motion.div>
 
@@ -363,7 +385,7 @@ const Sidebar = ({ notifications = [], unreadCount = 0, onMarkAsRead, onMarkAllA
             </div>
             <div className="ml-3">
               <div className="text-white font-bold text-xl">HildaM Couture</div>
-              <div className="text-orange-300 text-sm font-medium">Client Manager Panel</div>
+              <div className="text-orange-300 text-sm font-medium">Admin Panel</div>
             </div>
           </div>
         </motion.div>
@@ -493,7 +515,7 @@ const Sidebar = ({ notifications = [], unreadCount = 0, onMarkAsRead, onMarkAllA
           >
             <div
               className={`absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-orange-500 to-orange-600 rounded-r-full transition-opacity duration-300 ${
-                pathname === "/client-manager/h-o-t" ? "opacity-100" : "opacity-0"
+                pathname === "/client-manager" ? "opacity-100" : "opacity-0"
               }`}
             ></div>
             <Link

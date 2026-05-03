@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 
 import {
   IoIosArrowBack,
@@ -42,7 +41,6 @@ export default function ShowCustomer() {
   const [toast, setToast] = useState(false);
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
 
-  const contentRef = useRef<HTMLDivElement | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const handleOpenStyleModal = (src: string) => {
@@ -98,6 +96,8 @@ export default function ShowCustomer() {
     clothing_name: string;
     style_reference_images: string[];
     tailor_job_image: string;
+    finished_cloth_image: string;
+    finished_cloth_images: string[];
     order_id: string;
     priority: string;
     order_status: string;
@@ -121,47 +121,384 @@ export default function ShowCustomer() {
   const [rejectFeedback, setRejectFeedback] = useState("");
   const [approvePrice, setApprovePrice] = useState("");
 
+  const normalizeImageList = (value: string | string[] | null | undefined): string[] => {
+    if (!value) return [];
+
+    if (Array.isArray(value)) {
+      return value.filter(Boolean);
+    }
+
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [String(parsed)].filter(Boolean);
+    } catch {
+      return [value].filter(Boolean);
+    }
+  };
+
   const handleScroll = () => {
     targetRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleDownload = async () => {
-    if (!contentRef.current || !customer) return;
+    if (!customer) return;
     setIsGeneratingPDF(true);
 
     try {
-      const canvas = await html2canvas(contentRef.current, { useCORS: true });
-      const imgData = canvas.toDataURL("image/png");
-
       const pdf = new jsPDF("p", "pt", "a4");
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const marginX = 40; // Increased from 0 to add horizontal margins
-      const marginY = 40;
+      const margin = 52;
+      const contentWidth = pageWidth - margin * 2;
+      let cursorY = margin;
 
-      const availableWidth = pageWidth - marginX * 2;
-      const availableHeight = pageHeight - marginY * 2;
-      const imgWidth = availableWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const ensurePageSpace = (requiredHeight: number) => {
+        if (cursorY + requiredHeight > pageHeight - margin) {
+          pdf.addPage();
+          cursorY = margin;
+        }
+      };
 
-      const finalImgHeight =
-        imgHeight > availableHeight ? availableHeight : imgHeight;
-      const finalImgWidth =
-        imgHeight > availableHeight
-          ? (canvas.width * availableHeight) / canvas.height
-          : imgWidth;
+      const drawDivider = () => {
+        pdf.setDrawColor(220, 220, 220);
+        pdf.line(margin, cursorY, pageWidth - margin, cursorY);
+        cursorY += 20;
+      };
 
-      const xOffset = marginX + (availableWidth - finalImgWidth) / 2;
-      const yOffset = marginY + (availableHeight - finalImgHeight) / 2;
+      const addSectionTitle = (title: string) => {
+        ensurePageSpace(34);
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(13);
+        pdf.setTextColor(34, 34, 34);
+        pdf.text(title, margin, cursorY);
+        cursorY += 16;
+        drawDivider();
+      };
 
-      pdf.addImage(
-        imgData,
-        "PNG",
-        xOffset,
-        yOffset,
-        finalImgWidth,
-        finalImgHeight
+      const addFieldRows = (
+        fields: Array<{ label: string; value: string }>,
+        cols = 2
+      ) => {
+        const colGap = 14;
+        const colWidth = (contentWidth - colGap * (cols - 1)) / cols;
+        const rows = Math.ceil(fields.length / cols);
+
+        for (let row = 0; row < rows; row++) {
+          const rowFields: Array<{ label: string; wrapped: string[] }> = [];
+          let maxWrappedLines = 1;
+
+          for (let col = 0; col < cols; col++) {
+            const index = row * cols + col;
+            if (!fields[index]) continue;
+
+            const safeValue = fields[index].value || "-";
+            const wrapped = pdf.splitTextToSize(safeValue, colWidth - 20) as string[];
+            maxWrappedLines = Math.max(maxWrappedLines, wrapped.length);
+            rowFields.push({ label: fields[index].label, wrapped });
+          }
+
+          const rowHeight = 34 + maxWrappedLines * 12;
+          ensurePageSpace(rowHeight + 14);
+
+          for (let col = 0; col < cols; col++) {
+            const field = rowFields[col];
+            if (!field) continue;
+
+            const x = margin + col * (colWidth + colGap);
+
+            pdf.setFillColor(249, 250, 251);
+            pdf.setDrawColor(229, 231, 235);
+            pdf.roundedRect(x, cursorY, colWidth, rowHeight, 6, 6, "FD");
+
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(9);
+            pdf.setTextColor(90, 90, 90);
+            pdf.text(field.label, x + 10, cursorY + 14);
+
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(10);
+            pdf.setTextColor(25, 25, 25);
+            pdf.text(field.wrapped, x + 10, cursorY + 30);
+          }
+
+          cursorY += rowHeight + 14;
+        }
+      };
+
+      const addParagraph = (label: string, value: string) => {
+        const lines = pdf.splitTextToSize(value || "-", contentWidth - 24) as string[];
+        const blockHeight = 40 + lines.length * 12;
+        ensurePageSpace(blockHeight + 16);
+
+        pdf.setFillColor(249, 250, 251);
+        pdf.setDrawColor(229, 231, 235);
+        pdf.roundedRect(margin, cursorY, contentWidth, blockHeight, 8, 8, "FD");
+
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(10);
+        pdf.setTextColor(90, 90, 90);
+        pdf.text(label, margin + 12, cursorY + 16);
+
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(30, 30, 30);
+        pdf.text(lines, margin + 12, cursorY + 34);
+        cursorY += blockHeight + 16;
+      };
+
+      const addMeasurementTable = (
+        measurements: Array<{ label: string; value: string }>
+      ) => {
+        const colCount = 2;
+        const colGap = 14;
+        const colWidth = (contentWidth - colGap) / colCount;
+        const rowHeight = 42;
+
+        for (let i = 0; i < measurements.length; i += colCount) {
+          ensurePageSpace(rowHeight + 12);
+          const row = measurements.slice(i, i + colCount);
+
+          row.forEach((item, index) => {
+            const x = margin + index * (colWidth + colGap);
+            pdf.setFillColor(249, 250, 251);
+            pdf.setDrawColor(229, 231, 235);
+            pdf.roundedRect(x, cursorY, colWidth, rowHeight, 6, 6, "FD");
+
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(9);
+            pdf.setTextColor(100, 100, 100);
+            pdf.text(item.label, x + 10, cursorY + 15);
+
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(10);
+            pdf.setTextColor(30, 30, 30);
+            pdf.text(item.value || "-", x + 10, cursorY + 31);
+          });
+
+          cursorY += rowHeight + 12;
+        }
+      };
+
+      const formatValue = (value: string | number | null | undefined) => {
+        if (value === null || value === undefined || value === "") return "-";
+        return String(value);
+      };
+
+      const addImageFromUrl = async (
+        imageUrl: string,
+        title: string,
+        imageHeight = 210
+      ) => {
+        if (!imageUrl) return;
+
+        try {
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(String(reader.result));
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+
+          const imageElement = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const img = new window.Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = dataUrl;
+          });
+
+          addSectionTitle(title);
+          ensurePageSpace(imageHeight + 16);
+
+          pdf.setDrawColor(220, 220, 220);
+          pdf.setFillColor(255, 255, 255);
+          pdf.roundedRect(margin, cursorY, contentWidth, imageHeight, 8, 8, "FD");
+
+          const boxX = margin + 10;
+          const boxY = cursorY + 10;
+          const boxWidth = contentWidth - 20;
+          const boxHeight = imageHeight - 20;
+          const scale = Math.min(
+            boxWidth / imageElement.naturalWidth,
+            boxHeight / imageElement.naturalHeight
+          );
+          const drawWidth = imageElement.naturalWidth * scale;
+          const drawHeight = imageElement.naturalHeight * scale;
+          const drawX = boxX + (boxWidth - drawWidth) / 2;
+          const drawY = boxY + (boxHeight - drawHeight) / 2;
+
+          pdf.addImage(
+            dataUrl,
+            dataUrl.startsWith("data:image/png") ? "PNG" : "JPEG",
+            drawX,
+            drawY,
+            drawWidth,
+            drawHeight,
+            undefined,
+            "MEDIUM"
+          );
+          cursorY += imageHeight + 16;
+        } catch (error) {
+          console.error("Failed to include image in PDF:", error);
+        }
+      };
+
+      pdf.setFillColor(239, 246, 255);
+      pdf.rect(0, 0, pageWidth, 118, "F");
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(15, 23, 42);
+      pdf.setFontSize(22);
+      pdf.text(`Order #${customer.order_id}`, margin, 58);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(11);
+      pdf.setTextColor(71, 85, 105);
+      pdf.text(
+        `Generated: ${new Date().toLocaleString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })}`,
+        margin,
+        82
       );
+
+      pdf.setFontSize(10);
+      pdf.text("Tailoring Order Profile", margin, 102);
+
+      cursorY = 146;
+
+      addSectionTitle("Order Summary");
+      addFieldRows(
+        [
+          { label: "Order ID", value: formatValue(customer.order_id) },
+          { label: "Status", value: formatValue(customer.order_status) },
+          { label: "Priority", value: formatValue(customer.priority) },
+          { label: "Customer", value: formatValue(customer.customer_name) },
+          { label: "Email", value: formatValue(customer.customer_email) },
+          { label: "Phone", value: formatValue(customer.phone_number) },
+          { label: "Gender", value: formatValue(customer.gender) },
+          { label: "Manager", value: formatValue(customer.manager_name) },
+          {
+            label: "Created Date",
+            value: formatValue(formatDate(customer.created_at)),
+          },
+          {
+            label: "Collection Date",
+            value: formatValue(formatDateTime(customer.collection_date)),
+          },
+        ],
+        2
+      );
+
+      addParagraph(
+        "Customer Description",
+        formatValue(customer.customer_description)
+      );
+      addParagraph(
+        "Clothing Description",
+        formatValue(customer.clothing_description)
+      );
+
+      addSectionTitle("Measurements (inches)");
+      addMeasurementTable([
+        { label: "Shoulder", value: `${formatValue(customer.shoulder)} in` },
+        { label: "Bust", value: `${formatValue(customer.bust)} in` },
+        { label: "Bust Point", value: `${formatValue(customer.bustpoint)} in` },
+        {
+          label: "Shoulder to Underbust",
+          value: `${formatValue(customer.shoulder_to_underbust)} in`,
+        },
+        {
+          label: "Round Under Bust",
+          value: `${formatValue(customer.round_under_bust)} in`,
+        },
+        { label: "Waist", value: `${formatValue(customer.waist)} in` },
+        { label: "Half Length", value: `${formatValue(customer.half_length)} in` },
+        {
+          label: "Blouse Length",
+          value: `${formatValue(customer.blouse_length)} in`,
+        },
+        {
+          label: "Sleeve Length",
+          value: `${formatValue(customer.sleeve_length)} in`,
+        },
+        {
+          label: "Round Sleeve",
+          value: `${formatValue(customer.round_sleeve)} in`,
+        },
+        {
+          label: "Dress Length",
+          value: `${formatValue(customer.dress_length)} in`,
+        },
+        { label: "Hip", value: `${formatValue(customer.hip)} in` },
+        { label: "Chest", value: `${formatValue(customer.chest)} in` },
+        {
+          label: "Round Shoulder",
+          value: `${formatValue(customer.round_shoulder)} in`,
+        },
+        {
+          label: "Skirt Length",
+          value: `${formatValue(customer.skirt_length)} in`,
+        },
+        {
+          label: "Trousers Length",
+          value: `${formatValue(customer.trousers_length)} in`,
+        },
+        {
+          label: "Round Thigh",
+          value: `${formatValue(customer.round_thigh)} in`,
+        },
+        { label: "Round Knee", value: `${formatValue(customer.round_knee)} in` },
+        { label: "Round Feet", value: `${formatValue(customer.round_feet)} in` },
+      ]);
+
+      addSectionTitle("Project Timeline");
+      addFieldRows(
+        [
+          {
+            label: "First Fitting",
+            value: formatValue(formatDateTime(customer.first_fitting_date)),
+          },
+          {
+            label: "Second Fitting",
+            value: formatValue(formatDateTime(customer.second_fitting_date)),
+          },
+          { label: "Duration", value: `${formatValue(customer.duration)} days` },
+          {
+            label: "Collection Date",
+            value: formatValue(formatDateTime(customer.collection_date)),
+          },
+        ],
+        2
+      );
+
+      const firstStyleRef = customer.style_reference_images?.[0];
+      if (firstStyleRef) {
+        await addImageFromUrl(firstStyleRef, "Style Reference", 210);
+      }
+
+      if (customer.tailor_job_image) {
+        await addImageFromUrl(customer.tailor_job_image, "Tailor Proposed Style", 240);
+      }
+
+      const totalPages = pdf.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(9);
+        pdf.setTextColor(120, 120, 120);
+        pdf.text(
+          `Page ${i} of ${totalPages}`,
+          pageWidth - margin,
+          pageHeight - 20,
+          { align: "right" }
+        );
+      }
+
       pdf.save(`order-${customer.order_id}.pdf`);
     } catch (err) {
       console.error("PDF generation failed:", err);
@@ -195,7 +532,7 @@ export default function ShowCustomer() {
 
 
       if (result) {
-        const mappedCustomer: any = {
+      const mappedCustomer: any = {
           hip: result.customer.hip,
           waist: result.customer.waist,
           bust: result.customer.bust,
@@ -217,8 +554,15 @@ export default function ShowCustomer() {
           round_feet: result.round_feet,
           clothing_description: result.clothing_description,
           clothing_name: result.clothing_name,
-          style_reference_images: result.style_reference_images,
-          tailor_job_image: result.tailoring.design_image_path,
+          style_reference_images: result.style_reference_images || [],
+          fabric_images: result.fabric?.fabric_images || [],
+          fabric_description: result.fabric?.description || "",
+          fabric_dropped_off_at: result.fabric?.dropped_off_at || null,
+          fabric_status: result.fabric?.status || "",
+          fabric_received_by_staff_id: result.fabric?.received_by_staff_id || "",
+          finished_cloth_images: normalizeImageList(result.tailoring?.finished_cloth_image),
+          tailor_job_image: normalizeImageList(result.tailoring?.finished_cloth_image)[0] || "",
+          finished_cloth_image: normalizeImageList(result.tailoring?.finished_cloth_image)[0] || "",
           order_id: result.order_id,
           priority: result.priority,
           order_status: result.order_status,
@@ -232,7 +576,7 @@ export default function ShowCustomer() {
           gender: result.customer.gender,
           phone_number: result.customer.phone_number,
           address: result.address,
-          manager_name: result.tailoring.manager.name || "Not Assigned",
+          manager_name: result.tailoring?.manager?.name || "Not Assigned",
           duration: result.duration,
           style_approval: result.tailoring.client_manager_approval,
           style_approval_feedback: result.tailoring.client_manager_feedback,
@@ -303,13 +647,39 @@ export default function ShowCustomer() {
     }
   };
 
+  const parseDateTimeValue = (value: string | number | Date) => {
+    if (!value) return null;
+    const normalizedValue = String(value)
+      .replace(/\b(\d{1,2})(st|nd|rd|th)\b/gi, "$1")
+      .replace(/(\d)(am|pm)\b/gi, "$1 $2")
+      .trim();
+
+    const parsedDate = new Date(normalizedValue);
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+  };
+
   const formatDate = (dateString: string | number | Date) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
+    const date = parseDateTimeValue(dateString);
+    if (!date) return "";
     return date.toLocaleDateString("en-US", {
       month: "long",
       day: "numeric",
       year: "numeric",
+    });
+  };
+
+  const formatDateTime = (dateString: string | number | Date) => {
+    if (!dateString) return "";
+    const date = parseDateTimeValue(dateString);
+    if (!date) return String(dateString);
+
+    return date.toLocaleString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -466,7 +836,7 @@ export default function ShowCustomer() {
         </AnimatePresence>
 
         {/* Main Content */}
-        <div ref={contentRef} className="space-y-8">
+        <div className="space-y-8">
           {/* Order Information Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -614,6 +984,73 @@ export default function ShowCustomer() {
             </div>
           </motion.div>
 
+          {/* Fabric Information */}
+          {(customer.fabric_images && Array.isArray(customer.fabric_images) && customer.fabric_images.length > 0) || customer.fabric_description ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.35 }}
+              className="bg-white rounded-2xl shadow-lg border border-orange-100 overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-gray-700 to-gray-900 p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                    <FiPackage className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">Fabric</h3>
+                    <p className="text-gray-200">Details about the fabric attached to this order</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    {customer.fabric_images && Array.isArray(customer.fabric_images) && customer.fabric_images.length > 0 ? (
+                      <div className="overflow-hidden rounded-xl border-2 border-gray-200 w-full max-w-sm">
+                        <img
+                          src={customer.fabric_images[0] || "/placeholder.svg"}
+                          alt="Fabric Image"
+                          className="w-full h-48 object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <HiOutlinePhotograph className="mx-auto text-gray-400 mb-2" size={36} />
+                        <p className="text-gray-500">No fabric image available</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{customer.fabric_description || "-"}</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">Dropped off</label>
+                          <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{(() => {
+                            const d = Array.isArray(customer.fabric_dropped_off_at)
+                              ? customer.fabric_dropped_off_at[0]
+                              : customer.fabric_dropped_off_at;
+                            return d ? formatDate(String(d)) : "-";
+                          })()}</p>
+                        </div>
+                     
+                      </div>
+
+                   
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ) : null}
+
           {/* Style Reference Images */}
           {customer.style_reference_images && (
             <motion.div
@@ -728,6 +1165,10 @@ export default function ShowCustomer() {
                   { label: "Chest", value: customer.chest },
                   { label: "Round Shoulder", value: customer.round_shoulder },
                   { label: "Skirt Length", value: customer.skirt_length },
+                  { label: "Trousers Length", value: customer.trousers_length },
+                  { label: "Round Thigh", value: customer.round_thigh },
+                  { label: "Round Knee", value: customer.round_knee },
+                  { label: "Round Feet", value: customer.round_feet },
                 ].map((measurement, index) => (
                   <motion.div
                     key={index}
@@ -757,7 +1198,8 @@ export default function ShowCustomer() {
           </motion.div>
 
           {/* Tailor Job Image */}
-          {customer.tailor_job_image !== null && (
+          
+          {customer.finished_cloth_images?.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -774,7 +1216,7 @@ export default function ShowCustomer() {
                       Tailor Style
                     </h3>
                     <p className="text-emerald-100">
-                      Proposed design from our tailoring team
+                      Finished cloth image from the tailoring team
                     </p>
                   </div>
                 </div>
@@ -816,76 +1258,8 @@ export default function ShowCustomer() {
                     </div>
 
                     {/* Approval Status and Buttons */}
-                    <div className="mt-4 space-y-3">
-                      {/* Current Status Display */}
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium text-gray-700">
-                          Status:
-                        </span>
-                        {customer.style_approval === "accepted" && (
-                          <div className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                            <IoIosCheckmark size={16} />
-                            <span>Approved</span>
-                          </div>
-                        )}
-                        {customer.style_approval === "rejected" && (
-                          <div>
-                            <div className="flex items-center space-x-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
-                              <IoIosClose size={16} />
-                              <span>Rejected</span>
-                              <span className="ml-5">
-                                ({customer.style_approval_feedback})
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                        {customer.style_approval === null && (
-                          <div className="flex items-center space-x-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
-                            <IoIosWarning size={16} />
-                            <span>Pending Review</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Action Buttons */}
-                      {customer.style_approval === null &&
-                        customer.order_status !== "closed" && (
-                          <div className="flex space-x-2">
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={handleOpenApproveModal}
-                              className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 text-sm font-medium"
-                            >
-                              <IoIosCheckmark size={16} />
-                              <span>Approve</span>
-                            </motion.button>
-
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={handleOpenRejectModal}
-                              className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-lg hover:from-red-600 hover:to-rose-700 transition-all duration-200 text-sm font-medium"
-                            >
-                              <IoIosClose size={16} />
-                              <span>Reject</span>
-                            </motion.button>
-                          </div>
-                        )}
-
-                      {/* Show action for approved status */}
-                      {customer.style_approval === "accepted" && customer.has_payment === "0" && customer.order_status !== "closed" && (
-                        <Link href={`/client-manager/orders/${id}/add-job-expense`}>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                              className="flex items-center space-x-1 px-4 mt-5 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:from-orange-600 hover:to-amber-600 transition-all duration-200 text-sm font-medium"
-                            >
-                              <span>Add Payment</span>
-                            </motion.button>
-                          </Link>
-                        )}
-                    </div>
+                    
+                   
                   </div>
                 )}
               </div>
@@ -925,7 +1299,7 @@ export default function ShowCustomer() {
                   <input
                     type="text"
                     value={
-                      formatDate(customer.first_fitting_date) || "Not scheduled"
+                      formatDateTime(customer.first_fitting_date) || "Not scheduled"
                     }
                     readOnly
                     className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"
@@ -939,7 +1313,7 @@ export default function ShowCustomer() {
                   <input
                     type="text"
                     value={
-                      formatDate(customer.second_fitting_date) ||
+                      formatDateTime(customer.second_fitting_date) ||
                       "Not scheduled"
                     }
                     readOnly
@@ -966,7 +1340,7 @@ export default function ShowCustomer() {
                   <input
                     type="text"
                     value={
-                      formatDate(customer.collection_date) || "Not scheduled"
+                      formatDateTime(customer.collection_date) || "Not scheduled"
                     }
                     readOnly
                     className="w-full rounded-xl border border-gray-200 shadow-sm p-3 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all duration-200"
@@ -1048,7 +1422,7 @@ export default function ShowCustomer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+             transition={{ duration: 0.3 }}
             onClick={() => setIsTailorJobModalOpen(false)}
           >
             <motion.div
@@ -1068,10 +1442,10 @@ export default function ShowCustomer() {
 
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                  Tailor Style Review
+                  Tailor Job Image
                 </h3>
                 <p className="text-gray-600">
-                  Review and approve or reject the proposed design
+                  This image shows the finished cloth from the tailoring team
                 </p>
               </div>
 
@@ -1085,51 +1459,8 @@ export default function ShowCustomer() {
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-4">
-                {customer.style_approval === "pending" && (
-                  <>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleOpenApproveModal}
-                      className="flex-1 min-w-[200px] px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-semibold"
-                    >
-                      ✓ Approve Style
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleOpenRejectModal}
-                      className="flex-1 min-w-[200px] px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:from-red-600 hover:to-rose-700 transition-all duration-200 font-semibold"
-                    >
-                      ✗ Reject Style
-                    </motion.button>
-                  </>
-                )}
+             
 
-                {customer.style_approval === "accepted" && customer.has_payment === "0" && customer.order_status !== "closed" && (
-                  <div className="text-center">
-                    <div className="flex items-center justify-center space-x-2 text-green-600 font-semibold text-lg mb-4">
-                      <IoIosCheckmark size={24} />
-                      <span>Style Approved</span>
-                    </div>
-                    <Link href={`/client-manager/orders/${id}/add-job-expense`}>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 transition-all duration-200 font-semibold"
-                      >
-                        Add Payment
-                      </motion.button>
-                    </Link>
-                  </div>
-                )}
-
-                {customer.style_approval === "rejected" && (
-                  <div className="flex items-center justify-center space-x-2 text-red-600 font-semibold text-lg">
-                    <IoIosClose size={24} />
-                    <span>Style Rejected</span>
-                  </div>
-                )}
               </div>
             </motion.div>
           </motion.div>

@@ -2,24 +2,27 @@
 
 import { motion } from "framer-motion"
 import Link from "next/link"
+import HelpBreadcrumb from "@/components/client-manager/help/HelpBreadcrumb"
 import { 
-  Users,
-  MessageSquare,
-  Calendar,
-  FileText,
-  BookOpen,
-  Phone,
-  Mail,
-  Settings
-} from "lucide-react"
+  FaUsers, 
+  FaShoppingCart, 
+  FaMoneyBillWave,
+  FaQuestionCircle 
+} from "react-icons/fa"
+import { 
+  MdDashboard, 
+  MdOutlinePayment, 
+  MdOutlineInventory2,
+  MdOutlineHelp 
+} from "react-icons/md"
+import { Calendar, BookOpen, Navigation, Settings } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import GlobalBreadcrumb from "@/components/GlobalBreadcrumb"
 
-const ClientManagerHelpPage = () => {
+const HelpPage = () => {
   const helpSections = [
     {
       title: "Getting Started",
-      description: "Learn the basics of managing client relationships and communications",
+      description: "Learn the basics of navigating and using the Hildam Couture management system",
       icon: <BookOpen className="w-8 h-8" />,
       href: "/client-manager/help/getting-started",
       color: "from-blue-500 to-blue-600",
@@ -27,49 +30,93 @@ const ClientManagerHelpPage = () => {
       textColor: "text-blue-600"
     },
     {
-      title: "Client Management",
-      description: "Manage client profiles, preferences, and relationship history",
-      icon: <Users className="w-8 h-8" />,
-      href: "/client-manager/help/clients",
-      color: "from-green-500 to-green-600",
-      bgColor: "bg-green-50",
-      textColor: "text-green-600"
-    },
-    {
-      title: "Communication Tools",
-      description: "Use messaging, email, and phone systems to stay connected with clients",
-      icon: <MessageSquare className="w-8 h-8" />,
-      href: "/client-manager/help/communication",
+      title: "Dashboard Overview",
+      description: "Understand your dashboard metrics, analytics, and key performance indicators",
+      icon: <MdDashboard className="w-8 h-8" />,
+      href: "/client-manager/help/dashboard",
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-50",
       textColor: "text-purple-600"
     },
     {
-      title: "Appointment Scheduling",
-      description: "Schedule consultations, fittings, and follow-up appointments",
-      icon: <Calendar className="w-8 h-8" />,
-      href: "/client-manager/help/appointments",
+      title: "Customer Management",
+      description: "Complete guide to managing customers, profiles, and customer relationships",
+      icon: <FaUsers className="w-8 h-8" />,
+      href: "/client-manager/help/customers",
+      color: "from-green-500 to-green-600",
+      bgColor: "bg-green-50",
+      textColor: "text-green-600"
+    },
+    {
+      title: "Order Processing",
+      description: "Step-by-step guide to creating, managing, and tracking customer orders",
+      icon: <FaShoppingCart className="w-8 h-8" />,
+      href: "/client-manager/help/orders",
       color: "from-orange-500 to-orange-600",
       bgColor: "bg-orange-50",
       textColor: "text-orange-600"
     },
     {
-      title: "Reports & Analytics",
-      description: "Generate client reports and analyze relationship metrics",
-      icon: <FileText className="w-8 h-8" />,
-      href: "/client-manager/help/reports",
+      title: "Payment Management",
+      description: "Handle payments, invoicing, and financial transactions efficiently",
+      icon: <MdOutlinePayment className="w-8 h-8" />,
+      href: "/client-manager/help/payments",
       color: "from-emerald-500 to-emerald-600",
       bgColor: "bg-emerald-50",
       textColor: "text-emerald-600"
+    },
+    {
+      title: "Inventory Control",
+      description: "Manage stock levels, inventory requests, and supply chain operations",
+      icon: <MdOutlineInventory2 className="w-8 h-8" />,
+      href: "/client-manager/help/inventory",
+      color: "from-indigo-500 to-indigo-600",
+      bgColor: "bg-indigo-50",
+      textColor: "text-indigo-600"
+    },
+    {
+      title: "Calendar & Scheduling",
+      description: "Schedule appointments, manage timelines, and coordinate team activities",
+      icon: <Calendar className="w-8 h-8" />,
+      href: "/client-manager/help/calendar",
+      color: "from-pink-500 to-pink-600",
+      bgColor: "bg-pink-50",
+      textColor: "text-pink-600"
+    },
+    {
+      title: "Expense Tracking",
+      description: "Monitor job expenses, daily costs, and financial reporting",
+      icon: <FaMoneyBillWave className="w-8 h-8" />,
+      href: "/client-manager/help/expenses",
+      color: "from-yellow-500 to-yellow-600",
+      bgColor: "bg-yellow-50",
+      textColor: "text-yellow-600"
+    },
+    {
+      title: "User Management",
+      description: "Manage team members, roles, permissions, and user accounts",
+      icon: <Settings className="w-8 h-8" />,
+      href: "/client-manager/help/users",
+      color: "from-red-500 to-red-600",
+      bgColor: "bg-red-50",
+      textColor: "text-red-600"
+    },
+    {
+      title: "Navigation Guide",
+      description: "Master the interface navigation, shortcuts, and workflow optimization",
+      icon: <Navigation className="w-8 h-8" />,
+      href: "/client-manager/help/navigation",
+      color: "from-teal-500 to-teal-600",
+      bgColor: "bg-teal-50",
+      textColor: "text-teal-600"
     }
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-soft">
-      <GlobalBreadcrumb />
-      
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <HelpBreadcrumb />
       {/* Header Section */}
-      <div className="bg-white shadow-soft border-b border-gray-200/60">
+      <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -78,16 +125,16 @@ const ClientManagerHelpPage = () => {
             className="text-center"
           >
             <div className="flex justify-center mb-4">
-              <div className="bg-gradient-to-r from-green-500 to-green-600 p-4 rounded-2xl shadow-elegant">
-                <Users className="w-12 h-12 text-white" />
+              <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4 rounded-2xl">
+                <MdOutlineHelp className="w-12 h-12 text-white" />
               </div>
             </div>
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Client Manager Help Center
+              Help & Documentation
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Master client relationship management with comprehensive guides for building lasting 
-              relationships, managing communications, and ensuring exceptional client experiences.
+              Welcome to the comprehensive help center for Hildam Couture Management System. 
+              Find detailed guides, tutorials, and documentation to help you master every aspect of the platform.
             </p>
           </motion.div>
         </div>
@@ -102,41 +149,22 @@ const ClientManagerHelpPage = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mb-12"
         >
-          <Card className="card-floating bg-gradient-to-r from-green-500 to-green-600 text-white border-0">
+          <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0">
             <CardHeader>
               <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                <MessageSquare className="w-8 h-8" />
-                Client Relationship Excellence
+                <FaQuestionCircle className="w-8 h-8" />
+                Quick Start Guide
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-green-100 mb-6 text-lg">
-                As a Client Manager, you are the primary point of contact for our valued clients. 
-                Your role focuses on building relationships, managing communications, and ensuring 
-                exceptional service delivery.
+              <p className="text-orange-100 mb-6 text-lg">
+                New to the system? Start here for a quick overview of the essential features and workflows.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-                  <Phone className="w-8 h-8 mb-2" />
-                  <h4 className="font-semibold mb-1">Client Communication</h4>
-                  <p className="text-sm text-green-100">Maintain regular contact and updates</p>
-                </div>
-                <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-                  <Calendar className="w-8 h-8 mb-2" />
-                  <h4 className="font-semibold mb-1">Appointment Coordination</h4>
-                  <p className="text-sm text-green-100">Schedule and manage client meetings</p>
-                </div>
-                <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-                  <FileText className="w-8 h-8 mb-2" />
-                  <h4 className="font-semibold mb-1">Relationship Tracking</h4>
-                  <p className="text-sm text-green-100">Monitor client satisfaction and feedback</p>
-                </div>
-              </div>
               <Link href="/client-manager/help/getting-started">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="btn-secondary-enhanced mt-6"
+                  className="bg-white text-orange-600 px-6 py-3 rounded-xl font-semibold hover:bg-orange-50 transition-colors"
                 >
                   Get Started →
                 </motion.button>
@@ -164,9 +192,9 @@ const ClientManagerHelpPage = () => {
                 whileHover={{ y: -5 }}
               >
                 <Link href={section.href}>
-                  <Card className="card-enhanced h-full hover:shadow-floating transition-all duration-300 cursor-pointer">
+                  <Card className="h-full hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-md">
                     <CardHeader className="pb-4">
-                      <div className={`w-16 h-16 ${section.bgColor} rounded-2xl flex items-center justify-center mb-4 shadow-soft`}>
+                      <div className={`w-16 h-16 ${section.bgColor} rounded-2xl flex items-center justify-center mb-4`}>
                         <div className={section.textColor}>
                           {section.icon}
                         </div>
@@ -199,38 +227,38 @@ const ClientManagerHelpPage = () => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mt-16"
         >
-          <div className="card-floating p-8">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-              Quick Access
+              Need Additional Support?
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Link href="/client-manager/clients" className="text-center group">
-                <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-100 transition-colors shadow-soft">
-                  <Users className="w-8 h-8 text-blue-600" />
+              <div className="text-center">
+                <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <BookOpen className="w-8 h-8 text-blue-600" />
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Manage Clients</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">Documentation</h4>
                 <p className="text-gray-600 text-sm">
-                  View and manage all client relationships
+                  Comprehensive guides and API documentation for advanced users
                 </p>
-              </Link>
-              <Link href="/client-manager/communications" className="text-center group">
-                <div className="bg-green-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-100 transition-colors shadow-soft">
-                  <MessageSquare className="w-8 h-8 text-green-600" />
+              </div>
+              <div className="text-center">
+                <div className="bg-green-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FaQuestionCircle className="w-8 h-8 text-green-600" />
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Communications</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">FAQ</h4>
                 <p className="text-gray-600 text-sm">
-                  Send messages and track communications
+                  Frequently asked questions and common troubleshooting solutions
                 </p>
-              </Link>
-              <Link href="/client-manager/appointments" className="text-center group">
-                <div className="bg-purple-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-100 transition-colors shadow-soft">
-                  <Calendar className="w-8 h-8 text-purple-600" />
+              </div>
+              <div className="text-center">
+                <div className="bg-purple-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MdOutlineHelp className="w-8 h-8 text-purple-600" />
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Appointments</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">Contact Support</h4>
                 <p className="text-gray-600 text-sm">
-                  Schedule and manage client appointments
+                  Get in touch with our support team for personalized assistance
                 </p>
-              </Link>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -239,4 +267,4 @@ const ClientManagerHelpPage = () => {
   )
 }
 
-export default ClientManagerHelpPage
+export default HelpPage

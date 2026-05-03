@@ -262,9 +262,8 @@ static DeleteExpense: string = '/daily-expenses/delete-expense';
 
 
     //#region Fabrics endpoint ---------------------------------
-  static FetchAllFabricsOriginal: string = '/fabrics/all-fabrics';
-  static FetchAllFabrics: string = '/fabrics/fabrics-in-stock';
-  static FetchCustomerFabrics: string = '/fabrics/customer';
+  static FetchAllFabrics: string = '/fabrics/all-fabrics';
+  static FetchCustomerFabrics: string = '/fabrics/fabrics-in-stock';
   static DeleteFabric: string = '/fabrics/delete-fabric';
   static CreateFabric: string = '/fabrics/add-fabric';
   static EditFabric: string = '/fabrics/edit-fabric';

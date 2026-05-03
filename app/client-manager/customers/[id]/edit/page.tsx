@@ -188,6 +188,10 @@ export default function EditCustomerPage() {
     { label: "Shoulder to Underbust", key: "shoulder_to_underbust" },
     { label: "Skirt Length(Long, 3/4, Short)", key: "skirt_length" },
     { label: "Sleeve Length(Long, Quarter, Short)", key: "sleeve_length" },
+    { label: "Trousers Length", key: "trousers_length" },
+    { label: "Round Thigh", key: "round_thigh" },
+    { label: "Round Knee", key: "round_knee" },
+    { label: "Round Feet", key: "round_feet" },
     { label: "Waist", key: "waist" },
   ];
   

@@ -33,6 +33,7 @@ interface JobItem {
   gender: "male" | "female"
   age: string
   customer_description: string
+  order_status?: string
 }
 
 export default function TailorDashboard() {
@@ -134,6 +135,19 @@ export default function TailorDashboard() {
         return "bg-orange-100 text-orange-700 border-orange-200"
       case "low":
         return "bg-green-100 text-green-700 border-green-200"
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200"
+    }
+  }
+
+  const getOrderStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "closed":
+        return "bg-emerald-100 text-emerald-700 border-emerald-200"
+      case "processing":
+        return "bg-blue-100 text-blue-700 border-blue-200"
+      case "pending":
+        return "bg-amber-100 text-amber-700 border-amber-200"
       default:
         return "bg-gray-100 text-gray-700 border-gray-200"
     }
@@ -343,7 +357,14 @@ export default function TailorDashboard() {
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg font-semibold text-gray-800">{job.order_id}</CardTitle>
-                      <Badge className={`${getPriorityColor(job.priority)} border`}>{job.priority}</Badge>
+                      <div className="flex gap-2">
+                        <Badge className={`${getPriorityColor(job.priority)} border`}>{job.priority}</Badge>
+                        {job.order_status && (
+                          <Badge className={`${getOrderStatusColor(job.order_status)} border`}>
+                            {job.order_status}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -352,7 +373,7 @@ export default function TailorDashboard() {
                         <FiUser className="w-4 h-4" />
                         <span className="font-medium">{job.customer_name}</span>
                         <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">
-                          {job.gender}, {job.age}
+                          {job.gender}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">

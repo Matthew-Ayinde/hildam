@@ -317,10 +317,10 @@ export default function CalendarPage() {
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold text-gray-900">
             {currentDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </h2>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-gray-500 mt-2">
             {dayOrders.length} appointment{dayOrders.length !== 1 ? "s" : ""} scheduled
           </p>
           {!isCurrentDatePast && (
@@ -329,13 +329,13 @@ export default function CalendarPage() {
                 setSelectedDate(currentDate)
                 setShowAppointmentDialog(true)
               }}
-              className="mt-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+              className="mt-4 bg-orange-500 hover:bg-orange-600 text-white shadow-md"
             >
               <Calendar className="h-4 w-4 mr-2" /> Add Appointment
             </Button>
           )}
           {isCurrentDatePast && (
-            <p className="text-sm text-muted-foreground mt-4 italic">Cannot create appointments for past dates</p>
+            <p className="text-sm text-gray-500 mt-4 italic">Cannot create appointments for past dates</p>
           )}
         </div>
         {dayOrders.length > 0 ? (
@@ -353,10 +353,10 @@ export default function CalendarPage() {
           </div>
         ) : (
           <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center">
+            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center">
               <Calendar className="w-12 h-12 text-orange-400" />
             </div>
-            <p className="text-muted-foreground text-lg">No appointments scheduled for this day</p>
+            <p className="text-gray-500 text-lg">No appointments scheduled for this day</p>
           </div>
         )}
       </div>
@@ -378,15 +378,15 @@ export default function CalendarPage() {
         <div className="grid grid-cols-7 gap-4">
           {weekDays.map((date, index) => (
             <div key={index} className="text-center">
-              <div className="text-sm font-semibold text-muted-foreground mb-2">
+              <div className="text-sm font-semibold text-gray-600 mb-2">
                 {date.toLocaleDateString("en-US", { weekday: "short" })}
               </div>
               <div
                 className={cn(
                   "rounded-full w-12 h-12 mx-auto flex items-center justify-center text-lg font-semibold transition-all duration-200",
                   date.toDateString() === new Date().toDateString()
-                    ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg"
-                    : "hover:bg-orange-50 text-gray-700",
+                    ? "bg-orange-500 text-white shadow-md"
+                    : "hover:bg-orange-100 text-gray-700",
                 )}
               >
                 {date.getDate()}
@@ -398,7 +398,7 @@ export default function CalendarPage() {
           {weekDays.map((date, index) => {
             const dateOrders = getOrdersForDate(date)
             return (
-              <Card key={index} className="min-h-[120px] hover:shadow-md transition-shadow duration-200">
+              <Card key={index} className="min-h-[120px] hover:shadow-md transition-shadow duration-200 border-gray-200">
                 <CardContent className="p-3">
                   <div className="space-y-2">
                     {dateOrders.map((order) => (
@@ -406,12 +406,12 @@ export default function CalendarPage() {
                         key={order.id}
                         whileHover={{ scale: 1.02 }}
                         className={cn(
-                          "text-xs p-2 rounded-lg cursor-pointer transition-all duration-200",
+                          "text-xs p-2 rounded-lg cursor-pointer transition-all duration-200 border-l-2",
                           getAppointmentType(date, order) === "First"
-                            ? "bg-gradient-to-r from-orange-100 to-orange-50 border-l-4 border-orange-500 hover:shadow-sm"
+                            ? "bg-orange-50 border-l-orange-500 hover:shadow-sm"
                             : getAppointmentType(date, order) === "Second"
-                              ? "bg-gradient-to-r from-orange-50 to-orange-25 border-l-4 border-orange-300 hover:shadow-sm"
-                              : "bg-gradient-to-r from-green-100 to-green-50 border-l-4 border-green-500 hover:shadow-sm",
+                              ? "bg-orange-25 border-l-orange-400 hover:shadow-sm"
+                              : "bg-green-50 border-l-green-500 hover:shadow-sm",
                         )}
                         onClick={() => setSelectedDate(date)}
                       >
@@ -433,11 +433,11 @@ export default function CalendarPage() {
         </div>
         {selectedDate && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
-            <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-orange-50/30">
-              <CardHeader className="pb-4">
+            <Card className="shadow-lg border-gray-200 bg-white">
+              <CardHeader className="pb-4 bg-orange-50 rounded-t-lg">
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-xl bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
+                    <CardTitle className="text-xl text-orange-700">
                       {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })} Appointments
                     </CardTitle>
                     <CardDescription className="text-base">
@@ -449,7 +449,7 @@ export default function CalendarPage() {
                     <Button
                       onClick={() => setShowAppointmentDialog(true)}
                       size="sm"
-                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                      className="bg-orange-500 hover:bg-orange-600 text-white"
                     >
                       <Calendar className="h-4 w-4 mr-2" /> Add
                     </Button>
@@ -511,7 +511,7 @@ export default function CalendarPage() {
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
             <div
               key={day}
-              className="py-4 text-sm font-bold text-gray-600 bg-gradient-to-br from-orange-50 to-orange-25 rounded-lg"
+              className="py-4 text-sm font-bold text-gray-600 bg-orange-50 rounded-lg"
             >
               {day}
             </div>
@@ -531,7 +531,7 @@ export default function CalendarPage() {
                 className={cn(
                   "h-28 rounded-xl p-2 overflow-hidden cursor-pointer transition-all duration-200 border-2",
                   isToday
-                    ? "border-orange-500 bg-gradient-to-br from-orange-50 to-white shadow-lg"
+                    ? "border-orange-500 bg-orange-50 shadow-md"
                     : "border-gray-100 bg-white hover:border-orange-200 hover:shadow-md",
                   day.date.toDateString() === selectedDate?.toDateString()
                     ? "ring-2 ring-orange-400 ring-offset-2"
@@ -547,7 +547,7 @@ export default function CalendarPage() {
                     className={cn(
                       "text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full transition-all duration-200",
                       isToday
-                        ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md"
+                        ? "bg-orange-500 text-white shadow-md"
                         : "text-gray-700 hover:bg-orange-100",
                       isDatePast ? "text-gray-400" : "",
                     )}
@@ -557,7 +557,7 @@ export default function CalendarPage() {
                   {day.orders.length > 0 && (
                     <Badge
                       variant="outline"
-                      className="bg-gradient-to-r from-orange-100 to-orange-50 text-orange-700 border-orange-200 text-xs font-semibold"
+                      className="bg-orange-100 text-orange-700 border-orange-300 text-xs font-semibold"
                     >
                       {day.orders.length}
                     </Badge>
@@ -570,10 +570,10 @@ export default function CalendarPage() {
                       className={cn(
                         "text-xs p-1.5 truncate rounded-md font-medium transition-all duration-200",
                         getAppointmentType(day.date, order) === "First"
-                          ? "bg-gradient-to-r from-orange-200 to-orange-100 text-orange-800"
+                          ? "bg-orange-200 text-orange-800"
                           : getAppointmentType(day.date, order) === "Second"
-                            ? "bg-gradient-to-r from-orange-100 to-orange-50 text-orange-700"
-                            : "bg-gradient-to-r from-green-200 to-green-100 text-green-800",
+                            ? "bg-orange-100 text-orange-700"
+                            : "bg-green-200 text-green-800",
                       )}
                     >
                       {order.customer.split(" ")[0]}
@@ -589,14 +589,14 @@ export default function CalendarPage() {
         </div>
         {selectedDate && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
-            <Card className="shadow-xl border-0 bg-gradient-to-br from-white via-orange-50/20 to-white">
-              <CardHeader className="pb-4 bg-gradient-to-r from-orange-500/5 to-orange-400/5 rounded-t-lg">
+            <Card className="shadow-lg border-gray-200 bg-white">
+              <CardHeader className="pb-4 bg-orange-50 rounded-t-lg">
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-2xl bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
+                    <CardTitle className="text-2xl text-orange-700">
                       {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                       {isPastDate(selectedDate) && (
-                        <span className="text-sm text-muted-foreground ml-2 font-normal">(Past Date)</span>
+                        <span className="text-sm text-gray-500 ml-2 font-normal">(Past Date)</span>
                       )}
                     </CardTitle>
                     <CardDescription className="text-base">
@@ -607,7 +607,7 @@ export default function CalendarPage() {
                   {!isPastDate(selectedDate) && (
                     <Button
                       onClick={() => setShowAppointmentDialog(true)}
-                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+                      className="bg-orange-500 hover:bg-orange-600 text-white shadow-md"
                     >
                       <Calendar className="h-4 w-4 mr-2" /> Add Appointment
                     </Button>
@@ -672,7 +672,7 @@ export default function CalendarPage() {
               className={cn(
                 "cursor-pointer transition-all duration-300 hover:shadow-xl border-2",
                 currentMonth === month.month && selectedYear === new Date().getFullYear()
-                  ? "border-orange-500 bg-gradient-to-br from-orange-50 to-white shadow-lg"
+                  ? "border-orange-500 bg-orange-50 shadow-md"
                   : "border-gray-100 hover:border-orange-300 bg-white",
               )}
               onClick={() => {
@@ -681,7 +681,7 @@ export default function CalendarPage() {
               }}
             >
               <CardHeader className="pb-3">
-                <CardTitle className="text-xl bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
+                <CardTitle className="text-xl text-orange-700">
                   {month.name}
                 </CardTitle>
                 <CardDescription className="text-base font-medium">
@@ -690,17 +690,17 @@ export default function CalendarPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-orange-50 to-orange-25 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
                     <span className="text-sm font-medium text-orange-800">First Fittings</span>
                     <Badge className="bg-orange-500 text-white">{month.firstFittingCount}</Badge>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-orange-25 to-orange-50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-orange-100 rounded-lg">
                     <span className="text-sm font-medium text-orange-700">Second Fittings</span>
                     <Badge variant="outline" className="border-orange-300 text-orange-600">
                       {month.secondFittingCount}
                     </Badge>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-green-25 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
                     <span className="text-sm font-medium text-green-700">Collections</span>
                     <Badge variant="outline" className="border-green-300 text-green-600">
                       {month.collectionCount}
@@ -716,20 +716,20 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
+    <div className="min-h-screen bg-white">
       <div className="container mx-auto py-8 max-w-7xl">
         <div className="flex flex-col space-y-8">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-white rounded-2xl shadow-lg border border-gray-100">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
+              <div className="p-3 bg-orange-500 rounded-xl shadow-md">
                 <Calendar className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold text-gray-900">
                   Fitting Calendar
                 </h1>
-                <p className="text-muted-foreground">Manage your appointments with style</p>
+                <p className="text-gray-500">Manage your appointments with style</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -796,7 +796,7 @@ export default function CalendarPage() {
           {/* Main Content */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as any)} className="w-full">
-              <div className="flex flex-col md:flex-row md:items-center justify-between p-6 bg-gradient-to-r from-orange-50/50 to-orange-25/50 border-b">
+              <div className="flex flex-col md:flex-row md:items-center justify-between p-6 bg-orange-50 border-b">
                 <TabsList className="bg-white shadow-md border">
                   <TabsTrigger value="day" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
                     Day
@@ -820,7 +820,7 @@ export default function CalendarPage() {
                     Year
                   </TabsTrigger>
                 </TabsList>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent mt-4 md:mt-0">
+                <h2 className="text-2xl font-bold text-orange-700 mt-4 md:mt-0">
                   {viewMode === "year"
                     ? selectedYear
                     : viewMode === "month"
@@ -866,18 +866,35 @@ function OrderCard({ order, appointmentType }: { order: Order; appointmentType: 
   }
 
   const getAppointmentColor = () => {
-    if (appointmentType === "First") return "border-l-orange-500 hover:border-orange-300"
-    if (appointmentType === "Second") return "border-l-orange-300 hover:border-orange-200"
-    return "border-l-green-500 hover:border-green-300"
+    if (appointmentType === "First") return "border-l-orange-500 hover:border-orange-400"
+    if (appointmentType === "Second") return "border-l-orange-400 hover:border-orange-300"
+    return "border-l-green-500 hover:border-green-400"
   }
 
   const getBadgeStyle = () => {
-    if (appointmentType === "First") return "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md"
-    if (appointmentType === "Second") return "text-orange-600 border-orange-300 bg-orange-50"
-    return "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md"
+    if (appointmentType === "First") return "bg-orange-500 text-white"
+    if (appointmentType === "Second") return "bg-orange-400 text-white"
+    return "bg-green-500 text-white"
+  }
+
+  const getTimeColor = () => {
+    if (appointmentType === "First") return "text-orange-600"
+    if (appointmentType === "Second") return "text-orange-500"
+    return "text-green-600"
   }
 
   const appointmentDate = getAppointmentDate()
+
+  const formatDateTime = (date: Date | null) => {
+    if (!date) return { date: "N/A", time: "N/A" }
+    
+    const dateStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    const timeStr = date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })
+    
+    return { date: dateStr, time: timeStr }
+  }
+
+  const { date: dateStr, time: timeStr } = formatDateTime(appointmentDate)
 
   return (
     <motion.div
@@ -892,33 +909,33 @@ function OrderCard({ order, appointmentType }: { order: Order; appointmentType: 
       <div className="p-5">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="font-bold text-lg text-gray-800">{order.customer}</h3>
-            <p className="text-sm text-muted-foreground font-medium">{order.id}</p>
+            <h3 className="font-bold text-lg text-gray-900">{order.customer}</h3>
+            <p className="text-sm text-gray-500 font-medium">{order.id}</p>
           </div>
           <Badge
-            variant={appointmentType === "First" || appointmentType === "Collection" ? "default" : "outline"}
-            className={cn("font-semibold px-3 py-1", getBadgeStyle())}
+            variant="default"
+            className={cn("font-semibold px-3 py-1 rounded-full", getBadgeStyle())}
           >
             {appointmentType === "Collection" ? "Collection" : `${appointmentType} Fitting`}
           </Badge>
         </div>
-        <Separator className="my-4" />
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-            <Clock className="h-4 w-4 text-orange-500" />
-            <span className="font-medium">
-              {appointmentDate
-                ? appointmentDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                : "N/A"}
-            </span>
+        <Separator className="my-4 bg-gray-200" />
+        <div className="space-y-3">
+          <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <Clock className={cn("h-5 w-5 mt-0.5 flex-shrink-0", getTimeColor())} />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">Date & Time</p>
+              <p className={cn("font-semibold text-sm mt-1", getTimeColor())}>
+                {dateStr}
+              </p>
+              <p className={cn("font-bold text-base mt-0.5", getTimeColor())}>
+                {timeStr}
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-            <User className="h-4 w-4 text-orange-500" />
-            <span className="font-medium truncate">{order.customer}</span>
-          </div>
-          <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg col-span-2">
-            <Package className="h-4 w-4 text-orange-500 flex-shrink-0" />
-            <span className="font-medium">{order.items.join(", ")}</span>
+          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <Package className="h-5 w-5 text-slate-400 flex-shrink-0" />
+            <span className="font-medium text-sm text-gray-700 truncate">{order.items.join(", ")}</span>
           </div>
         </div>
       </div>

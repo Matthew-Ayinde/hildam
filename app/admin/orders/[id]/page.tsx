@@ -97,6 +97,7 @@ export default function ShowCustomer() {
     style_reference_images: string[];
     tailor_job_image: string;
     finished_cloth_image: string;
+    finished_cloth_images: string[];
     order_id: string;
     priority: string;
     order_status: string;
@@ -119,6 +120,21 @@ export default function ShowCustomer() {
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [rejectFeedback, setRejectFeedback] = useState("");
   const [approvePrice, setApprovePrice] = useState("");
+
+  const normalizeImageList = (value: string | string[] | null | undefined): string[] => {
+    if (!value) return [];
+
+    if (Array.isArray(value)) {
+      return value.filter(Boolean);
+    }
+
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [String(parsed)].filter(Boolean);
+    } catch {
+      return [value].filter(Boolean);
+    }
+  };
 
   const handleScroll = () => {
     targetRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -516,7 +532,7 @@ export default function ShowCustomer() {
 
 
       if (result) {
-        const mappedCustomer: any = {
+      const mappedCustomer: any = {
           hip: result.customer.hip,
           waist: result.customer.waist,
           bust: result.customer.bust,
@@ -538,9 +554,15 @@ export default function ShowCustomer() {
           round_feet: result.round_feet,
           clothing_description: result.clothing_description,
           clothing_name: result.clothing_name,
-          style_reference_images: result.style_reference_images,
-          tailor_job_image: result.tailoring.finished_cloth_image || "",
-          finished_cloth_image: result.tailoring.finished_cloth_image || "",
+          style_reference_images: result.style_reference_images || [],
+          fabric_images: result.fabric?.fabric_images || [],
+          fabric_description: result.fabric?.description || "",
+          fabric_dropped_off_at: result.fabric?.dropped_off_at || null,
+          fabric_status: result.fabric?.status || "",
+          fabric_received_by_staff_id: result.fabric?.received_by_staff_id || "",
+          finished_cloth_images: normalizeImageList(result.tailoring?.finished_cloth_image),
+          tailor_job_image: normalizeImageList(result.tailoring?.finished_cloth_image)[0] || "",
+          finished_cloth_image: normalizeImageList(result.tailoring?.finished_cloth_image)[0] || "",
           order_id: result.order_id,
           priority: result.priority,
           order_status: result.order_status,
@@ -554,7 +576,7 @@ export default function ShowCustomer() {
           gender: result.customer.gender,
           phone_number: result.customer.phone_number,
           address: result.address,
-          manager_name: result.tailoring.manager.name || "Not Assigned",
+          manager_name: result.tailoring?.manager?.name || "Not Assigned",
           duration: result.duration,
           style_approval: result.tailoring.client_manager_approval,
           style_approval_feedback: result.tailoring.client_manager_feedback,
@@ -962,6 +984,73 @@ export default function ShowCustomer() {
             </div>
           </motion.div>
 
+          {/* Fabric Information */}
+          {(customer.fabric_images && Array.isArray(customer.fabric_images) && customer.fabric_images.length > 0) || customer.fabric_description ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.35 }}
+              className="bg-white rounded-2xl shadow-lg border border-orange-100 overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-gray-700 to-gray-900 p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                    <FiPackage className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">Fabric</h3>
+                    <p className="text-gray-200">Details about the fabric attached to this order</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    {customer.fabric_images && Array.isArray(customer.fabric_images) && customer.fabric_images.length > 0 ? (
+                      <div className="overflow-hidden rounded-xl border-2 border-gray-200 w-full max-w-sm">
+                        <img
+                          src={customer.fabric_images[0] || "/placeholder.svg"}
+                          alt="Fabric Image"
+                          className="w-full h-48 object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <HiOutlinePhotograph className="mx-auto text-gray-400 mb-2" size={36} />
+                        <p className="text-gray-500">No fabric image available</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{customer.fabric_description || "-"}</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">Dropped off</label>
+                          <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{(() => {
+                            const d = Array.isArray(customer.fabric_dropped_off_at)
+                              ? customer.fabric_dropped_off_at[0]
+                              : customer.fabric_dropped_off_at;
+                            return d ? formatDate(String(d)) : "-";
+                          })()}</p>
+                        </div>
+                     
+                      </div>
+
+                   
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ) : null}
+
           {/* Style Reference Images */}
           {customer.style_reference_images && (
             <motion.div
@@ -1110,7 +1199,7 @@ export default function ShowCustomer() {
 
           {/* Tailor Job Image */}
           
-          {customer.finished_cloth_image && (
+          {customer.finished_cloth_images?.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1333,7 +1422,7 @@ export default function ShowCustomer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+             transition={{ duration: 0.3 }}
             onClick={() => setIsTailorJobModalOpen(false)}
           >
             <motion.div
@@ -1353,10 +1442,10 @@ export default function ShowCustomer() {
 
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                  Tailor Style Review
+                  Tailor Job Image
                 </h3>
                 <p className="text-gray-600">
-                  Review and approve or reject the proposed design
+                  This image shows the finished cloth from the tailoring team
                 </p>
               </div>
 
@@ -1370,51 +1459,8 @@ export default function ShowCustomer() {
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-4">
-                {customer.style_approval === "pending" && (
-                  <>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleOpenApproveModal}
-                      className="flex-1 min-w-[200px] px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-semibold"
-                    >
-                      ✓ Approve Style
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleOpenRejectModal}
-                      className="flex-1 min-w-[200px] px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:from-red-600 hover:to-rose-700 transition-all duration-200 font-semibold"
-                    >
-                      ✗ Reject Style
-                    </motion.button>
-                  </>
-                )}
+             
 
-                {customer.style_approval === "accepted" && customer.has_payment === "0" && customer.order_status !== "closed" && (
-                  <div className="text-center">
-                    <div className="flex items-center justify-center space-x-2 text-green-600 font-semibold text-lg mb-4">
-                      <IoIosCheckmark size={24} />
-                      <span>Style Approved</span>
-                    </div>
-                    <Link href={`/admin/orders/${id}/add-job-expense`}>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 transition-all duration-200 font-semibold"
-                      >
-                        Add Payment
-                      </motion.button>
-                    </Link>
-                  </div>
-                )}
-
-                {customer.style_approval === "rejected" && (
-                  <div className="flex items-center justify-center space-x-2 text-red-600 font-semibold text-lg">
-                    <IoIosClose size={24} />
-                    <span>Style Rejected</span>
-                  </div>
-                )}
               </div>
             </motion.div>
           </motion.div>

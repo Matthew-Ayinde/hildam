@@ -272,7 +272,7 @@ export default function PaymentChart() {
       color: "hsl(var(--chart-1))",
     },
     sales_revenue: {
-      label: "RTW Sales Revenue",
+      label: "Ready to Wear Sales Revenue",
       color: "hsl(var(--chart-2))",
     },
     job_expenses: {
@@ -280,7 +280,7 @@ export default function PaymentChart() {
       color: "hsl(var(--chart-3))",
     },
     sales_cogs: {
-      label: "Sales COGS",
+      label: "Ready to Wear Expenses",
       color: "hsl(var(--chart-4))",
     },
     operational_expenses: {
@@ -428,7 +428,7 @@ export default function PaymentChart() {
                   <p className="text-2xl font-bold text-slate-900">{formatCurrency(summary.tailoring_revenue)}</p>
                 </Card>
                 <Card className="rounded-lg border-slate-200 bg-slate-50 p-4">
-                  <p className="text-sm font-medium text-slate-700">RTW Sales Revenue</p>
+                  <p className="text-sm font-medium text-slate-700">Ready to Wear Sales Revenue</p>
                   <p className="text-2xl font-bold text-slate-900">{formatCurrency(summary.sales_revenue)}</p>
                 </Card>
                 <Card className="rounded-lg border-slate-200 bg-slate-50 p-4">
@@ -436,7 +436,7 @@ export default function PaymentChart() {
                   <p className="text-2xl font-bold text-slate-900">{formatCurrency(summary.job_expenses)}</p>
                 </Card>
                 <Card className="rounded-lg border-slate-200 bg-slate-50 p-4">
-                  <p className="text-sm font-medium text-slate-700">Sales COGS</p>
+                  <p className="text-sm font-medium text-slate-700">Ready to Wear Expenses</p>
                   <p className="text-2xl font-bold text-slate-900">{formatCurrency(summary.sales_cogs)}</p>
                 </Card>
                 <Card className="rounded-lg border-slate-200 bg-slate-50 p-4 md:col-span-2 lg:col-span-1">
@@ -473,7 +473,7 @@ export default function PaymentChart() {
                         />
                         <ChartLegend content={<ChartLegendContent />} />
                         <Bar dataKey="tailoring_revenue" name="Tailoring Revenue" fill="var(--color-tailoring_revenue)" radius={4} />
-                        <Bar dataKey="sales_revenue" name="RTW Sales Revenue" fill="var(--color-sales_revenue)" radius={4} />
+                        <Bar dataKey="sales_revenue" name="Ready to Wear Sales Revenue" fill="var(--color-sales_revenue)" radius={4} />
                       </BarChart>
                     </ChartContainer>
                   </Card>
@@ -500,7 +500,7 @@ export default function PaymentChart() {
                         />
                         <ChartLegend content={<ChartLegendContent />} />
                         <Bar dataKey="job_expenses" name="Job Expenses" fill="var(--color-job_expenses)" radius={4} />
-                        <Bar dataKey="sales_cogs" name="Sales COGS" fill="var(--color-sales_cogs)" radius={4} />
+                        <Bar dataKey="sales_cogs" name="Ready to Wear Expenses" fill="var(--color-sales_cogs)" radius={4} />
                         <Bar
                           dataKey="operational_expenses"
                           name="Operational Expenses"

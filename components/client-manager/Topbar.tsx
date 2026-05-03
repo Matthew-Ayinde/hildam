@@ -10,7 +10,7 @@ import Link from "next/link"
 import { IoNotificationsOutline, IoChevronDownOutline, IoCheckmarkDoneOutline, IoMailOutline, IoHelpCircleOutline } from "react-icons/io5"
 import { HiOutlineBell, HiOutlineInboxIn, HiOutlineUserCircle, HiOutlineClock } from "react-icons/hi"
 import { FiMessageSquare } from "react-icons/fi"
-import { fetchAllNotificationsTopbar, readAllNotification, readNotification } from "@/app/api/apiClient"
+import { fetchAllNotifications, fetchAllNotificationsTopbar, readAllNotification, readNotification } from "@/app/api/apiClient"
 
 type Notification = {
   id: string
@@ -81,7 +81,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
     fetchNotifications()
     const intervalId = setInterval(() => {
       fetchNotifications()
-    }, 2000)
+    }, 5000)
     return () => clearInterval(intervalId)
   }, [])
 
@@ -226,7 +226,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="sticky top-0 z-30 bg-white shadow-sm border-b border-gray-100 rounded-2xl mt-5"
+      className="sticky top-0 z-[60] bg-white shadow-sm border-b border-gray-100 rounded-2xl mt-5"
     >
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
@@ -281,7 +281,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute top-full right-0 w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 mt-3 z-50 overflow-hidden"
+                    className="absolute top-full right-0 w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 mt-3 z-[80] overflow-hidden"
                   >
                     {/* Header */}
                     <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-5 text-white">
@@ -418,7 +418,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute top-full right-0 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 mt-3 z-50 overflow-hidden"
+                    className="absolute top-full right-0 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 mt-3 z-[70] overflow-hidden"
                   >
                     <div className="p-5 border-b border-gray-100">
                       <div className="flex items-center gap-3">
@@ -433,11 +433,30 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                         </div>
                         <div>
                           <p className="font-semibold text-gray-900">{userName}</p>
-                          <p className="text-sm text-orange-600">Client Manager</p>
+                          <p className="text-sm text-orange-600">Administrator</p>
                         </div>
                       </div>
                     </div>
-                   
+                    <div className="py-2">
+                      <Link href="/client-manager/users" passHref>
+                        <button
+                          className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        >
+                          <HiOutlineUserCircle size={20} />
+                          <span>Your Profile</span>
+                        </button>
+                      </Link>
+                      <Link href="/client-manager/settings" passHref>
+                        <button
+                          className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        >
+                          {/* <IoHelpCircleOutline size={20} /> */}
+                          <span>Settings</span>
+                        </button>
+                      </Link>
+                    </div>
                     <div className="py-2 border-t border-gray-100">
                       <div className="px-5 py-3">
                         <LogoutButton />

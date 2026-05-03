@@ -99,7 +99,7 @@ const GlobalBreadcrumb = () => {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="backdrop-enhanced border-b border-gray-200/60 px-6 py-4 sticky top-0 z-40 shadow-soft"
+      className="backdrop-enhanced border-b border-gray-200/60 px-6 py-4 mt-6 sticky top-0 z-40 shadow-soft"
     >
       <div className="max-w-7xl mx-auto">
         <ol className="flex items-center space-x-2 text-sm">

@@ -176,7 +176,7 @@ export default function EditCustomer() {
             className="w-full border border-gray-300 text-gray-700 text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
           />
         </div>
-        {/* Item Description */}
+        {/* Unit */}
         <div>
           <label className="block text-gray-800 font-bold mb-2">
             Description
