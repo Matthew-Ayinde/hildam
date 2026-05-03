@@ -19,7 +19,7 @@ export default async function EditAssignedTailorsPage({
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex items-center justify-between">
           <Link
-            href={`/admin/h-o-t/jobs/${id}`}
+            href={`/head-of-tailoring/h-o-t/jobs/${id}`}
             className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
           >
             <IoIosArrowBack className="text-lg" />

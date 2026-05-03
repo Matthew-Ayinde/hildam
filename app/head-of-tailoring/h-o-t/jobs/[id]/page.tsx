@@ -171,7 +171,7 @@ export default function ShowCustomer() {
       setSentSuccess(true);
       // Delay navigation so the toast message is visible for 5 seconds
       setTimeout(() => {
-        router.push("/admin/h-o-t/jobs");
+        router.push("/head-of-tailoring/h-o-t/jobs");
       }, 5000);
     } catch (err) {
       setUploadError(
@@ -330,7 +330,7 @@ export default function ShowCustomer() {
       setSendClothConfirmOpen(false);
       // Delay navigation so the toast message is visible for 5 seconds
       setTimeout(() => {
-        router.push("/admin/h-o-t/jobs");
+        router.push("/head-of-tailoring/h-o-t/jobs");
       }, 5000);
     } catch (err) {
       setClothUploadError(
@@ -578,8 +578,7 @@ export default function ShowCustomer() {
           <h2 className="text-2xl font-bold text-gray-800 mb-8">
             This Job could not be found
           </h2>
-          <Link href={`/admin/h-o-t`}
-            className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          <Link href={`/head-of-tailoring/h-o-t`}      className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
           >
             Go to Dashboard
           </Link>
@@ -646,7 +645,7 @@ export default function ShowCustomer() {
           transition={{ duration: 0.6 }}
         >
           <Link
-            href="/admin/h-o-t/jobs"
+            href="/head-of-tailoring/h-o-t/jobs"
             className="flex items-center gap-3 text-orange-600 hover:text-orange-700 transition-colors group"
           >
             <div className="p-2 rounded-full bg-orange-100 group-hover:bg-orange-200 transition-colors">
@@ -1025,7 +1024,7 @@ export default function ShowCustomer() {
                     <p className="text-sm text-gray-500 mb-6">No store requests yet for this order.</p>
                   )}
 
-                  <Link href={`/admin/h-o-t/jobs/${tailorId}/request-inventory`}>
+                  <Link href={`/head-of-tailoring/h-o-t/jobs/${tailorId}/request-inventory`}>
                     <motion.button
                       className="bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-3 rounded-xl font-bold text-base transition-colors flex items-center gap-3"
                       whileHover={{ scale: 1.03 }}

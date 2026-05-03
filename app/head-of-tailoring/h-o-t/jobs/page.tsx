@@ -294,7 +294,7 @@ export default function ModernTable() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm">
-                    <Link href={`/admin/h-o-t/jobs/${row.id}`}>
+                    <Link href={`/head-of-tailoring/h-o-t/jobs/${row.id}`}>
                       <motion.div
                         className="inline-flex items-center space-x-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-xl hover:bg-orange-200 transition-colors"
                         whileHover={{ scale: 1.05 }}

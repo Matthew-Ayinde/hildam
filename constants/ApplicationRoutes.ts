@@ -87,7 +87,11 @@ export class ApplicationRoutes {
 
     static readonly HeadOfTailoringHomepage = "/head-of-tailoring";
     static readonly HeadOfTailoringJobs = "/head-of-tailoring/jobs";
-    
-    
+    static readonly HeadOfTailoringInventoryRequests = "/head-of-tailoring/inventory-requests";
+    static readonly HeadOfTailoringCalendar = "/head-of-tailoring/calendar";
+    static readonly HeadOfTailoringHelp = "/head-of-tailoring/help";
+    static readonly HeadOfTailoringNotifications = "/head-of-tailoring/notifications";
+    static readonly HeadOfTailoringSettings = "/head-of-tailoring/settings";
+    static readonly HeadOfTailoringHOT = "/head-of-tailoring/h-o-t";
 
 }

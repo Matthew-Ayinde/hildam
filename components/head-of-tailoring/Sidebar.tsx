@@ -33,21 +33,21 @@ interface SidebarProps {
 }
 
 const sidebarItems = [
-  
   {
     id: 1,
     text: "Jobs",
     icon: <FaShoppingCart />,
-    prefix: "/head-of-tailoring/jobsss",
+    prefix: "/head-of-tailoring/jobs",
     links: [
       { name: "All Jobs", href: "/head-of-tailoring/jobs" },
+      { name: "Job Details", href: "/head-of-tailoring/h-o-t/jobs" },
     ],
   },
   {
     id: 2,
     text: "Inventory Requests",
     icon: <MdOutlineInventory2 />,
-    prefix: "/head-of-tailoring/inventoryyy",
+    prefix: "/head-of-tailoring/inventory-requests",
     links: [
       { name: "All Requests", href: "/head-of-tailoring/inventory-requests" }
     ],

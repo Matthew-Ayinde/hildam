@@ -82,7 +82,7 @@ export default function AssignedTailorsEditor({ jobId }: AssignedTailorsEditorPr
       await editTailorJob(jobId, { tailor_id: selectedTailorId });
       setSaveMessage("Assigned tailor updated successfully.");
       setTimeout(() => {
-        router.push(`/head-of-tailoring/h-o-t/jobs/${jobId}`);
+        router.push(`/admin/h-o-t/jobs/${jobId}`);
       }, 3000);
     } catch (error) {
       setErrorMessage(

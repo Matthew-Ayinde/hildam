@@ -43,10 +43,10 @@ export default function ClientLayout({ children }: Props) {
     setNotifications(updatedNotifications)
     setUnreadCount((prev) => prev - 1)
 
-    // Handle navigation logic here
+    // Handle navigation logic here - route to HOT appropriate paths
     const linking_id = link.split("/").pop()
     if (link.includes("orders")) {
-      window.location.href = "/admin/orders/" + linking_id
+      window.location.href = "/head-of-tailoring/jobs/" + linking_id
     }
     // Add other navigation logic as needed
   }

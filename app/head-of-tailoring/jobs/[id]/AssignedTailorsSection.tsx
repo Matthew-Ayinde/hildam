@@ -37,7 +37,7 @@ export default function AssignedTailorsSection({
         </div>
 
         <Link
-          href={`/head-of-tailoring/h-o-t/jobs/${jobId}/edit`}
+          href={`/admin/h-o-t/jobs/${jobId}/edit`}
           className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
         >
           Edit Assigned Tailors

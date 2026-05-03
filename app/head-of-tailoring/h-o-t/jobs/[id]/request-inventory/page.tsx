@@ -160,7 +160,7 @@ export default function InventoryPage() {
 
       setSuccessMsg("Inventory request submitted successfully!")
       setTimeout(() => {
-        router.push(`/admin/h-o-t/jobs/${tailorJobId}`)
+        router.push(`/head-of-tailoring/h-o-t/jobs/${tailorJobId}`)
       }, 2000)
       setRequests(Object.keys(requests).reduce((acc, key) => ({ ...acc, [key]: 0 }), {} as Requests))
       setErrors({})

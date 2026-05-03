@@ -1149,13 +1149,13 @@ export default function ShowCustomer() {
                             >
                               <FaSearch className="text-xl" />
                             </button>
-                            <button
+                            {/* <button
                               onClick={() => removeExistingClothImage(index)}
                               className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors"
                               title="Remove image"
                             >
                               <IoMdCloseCircle className="text-xl" />
-                            </button>
+                            </button> */}
                           </div>
                           <span className="absolute top-1 right-1 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                             ✓
@@ -1228,6 +1228,7 @@ export default function ShowCustomer() {
                 )}
               </div>
             </motion.div>
+
 
           </div>
         </motion.div>

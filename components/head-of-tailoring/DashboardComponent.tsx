@@ -96,9 +96,9 @@ export default function Table() {
       <div className="overflow-x-auto bg-white py-3 rounded-2xl">
         <div className="mx-2 font-bold text-gray-500 text-xl my-3 flex flex-row justify-between items-center">
           <div>Recent Orders</div>
-          <Link href="/admin/orders/create">
+          <Link href="/head-of-tailoring/jobs">
             <div className="w-fit bg-red-100 px-4 py-2 text-base text-orange-500 rounded-lg">
-              + Create Order
+              + View Jobs
             </div>
           </Link>
         </div>
@@ -164,7 +164,7 @@ export default function Table() {
                     <div className="flex flex-row">
                       <div
                         className="me-4 px-3 bg-red-100 text-orange-600 p-2 rounded-lg"
-                        onClick={() => router.push(`/admin/orders/${row.id}`)}
+                        onClick={() => router.push(`/head-of-tailoring/jobs/${row.id}`)}
                       >
                         <IoEyeOutline size={20} />
                       </div>

@@ -389,7 +389,7 @@ export default function TailorDashboard() {
                     </div>
 
                     <div className="flex gap-2 pt-2">
-                      <Link href={`/admin/h-o-t/jobs/${job.id}`}>
+                      <Link href={`/head-of-tailoring/h-o-t/jobs/${job.id}`}>
                         <Button size="sm" className="flex-1 bg-orange-500 hover:bg-orange-600 text-white">
                           <FiEye className="w-4 h-4 mr-2" />
                           View
