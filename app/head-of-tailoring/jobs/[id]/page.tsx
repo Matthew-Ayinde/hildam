@@ -1025,7 +1025,7 @@ export default function ShowCustomer() {
                     <p className="text-sm text-gray-500 mb-6">No store requests yet for this order.</p>
                   )}
 
-                  <Link href={`/admin/h-o-t/jobs/${tailorId}/request-inventory`}>
+                  <Link href={`/head-of-tailoring/jobs/${tailorId}/request-inventory`}>
                     <motion.button
                       className="bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-3 rounded-xl font-bold text-base transition-colors flex items-center gap-3"
                       whileHover={{ scale: 1.03 }}

@@ -4,6 +4,7 @@ import { Calendar, Plus, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { formatDateGMTPlus1 } from "@/lib/dateFormatter"
 
 interface QuickAppointmentCardProps {
   selectedDate: Date
@@ -28,11 +29,7 @@ export function QuickAppointmentCard({
             </div>
             <div>
               <h3 className="font-semibold text-gray-800">
-                {selectedDate.toLocaleDateString("en-US", {
-                  weekday: "long",
-                  month: "long",
-                  day: "numeric",
-                })}
+                {formatDateGMTPlus1(selectedDate, "weekday")}
               </h3>
               <div className="flex items-center gap-2 mt-1">
                 <Clock className="h-4 w-4 text-muted-foreground" />

@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaChartBar, FaCalendarAlt } from "react-icons/fa";
+import { formatDateGMTPlus1 } from "@/lib/dateFormatter";
 
 // Register Chart.js components
 ChartJS.register(
@@ -38,16 +39,8 @@ export default function Last7Days() {
   const [endDate, setEndDate] = useState<Date>(today);
 
   // Format dates for display
-  const formattedStart = startDate.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-  const formattedEnd = endDate.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const formattedStart = formatDateGMTPlus1(startDate, "full");
+  const formattedEnd = formatDateGMTPlus1(endDate, "full");
 
   const fetchChartData = () => {
     // Generate array of dates in range
@@ -60,7 +53,7 @@ export default function Last7Days() {
 
     // Mock fetch: random orders and completions for each day
     const data = dates.map((d) => ({
-      label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      label: formatDateGMTPlus1(d, "short"),
       orders: Math.floor(Math.random() * 200) + 50,
       completed: Math.floor(Math.random() * 150) + 30,
     }));

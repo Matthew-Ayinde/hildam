@@ -19,6 +19,7 @@ import { CalendarIcon, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { addCalendarDate, fetchAllCustomers } from "@/app/api/apiClient" // Assuming this path is correct
+import { formatDateGMTPlus1 } from "@/lib/dateFormatter"
 
 interface AppointmentDialogProps {
   open: boolean
@@ -145,13 +146,7 @@ export function AppointmentDialog({ open, onOpenChange, selectedDate, onSaveAppo
             Schedule New Appointment
           </DialogTitle>
           <DialogDescription>
-            Create a new appointment for{" "}
-            {selectedDate?.toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })}
+            Create a new appointment for {selectedDate && formatDateGMTPlus1(selectedDate, "weekday")}
           </DialogDescription>
         </DialogHeader>
         {error && <div className="bg-red-50 border border-red-200 rounded-md p-3 text-red-700 text-sm">{error}</div>}

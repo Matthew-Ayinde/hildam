@@ -5,10 +5,12 @@ import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { IoIosArrowBack } from "react-icons/io";
 
 export default function ShowCustomer() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const modalRoot = typeof document !== "undefined" ? document.body : null;
 
   const handleCustomerImageClick = () => {
     setIsCustomerModalOpen(true);
@@ -560,43 +562,48 @@ export default function ShowCustomer() {
           <div className="text-sm my-5">Please click to open</div>
         </div>
       )}
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={handleCloseModal}
-        >
-          <div
-            className="bg-white rounded-lg p-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Image
-              src={customer.tailor_job_image || ""}
-              alt="Proposed Tailor Job"
-              width={400}
-              height={400}
-            />
-            {customer.approval === "2" && (
-              <div className="mt-4 flex justify-between">
-                <button
-                  onClick={
-                    //use the router to push to the make payment page
-                    () => router.push(`/client/orders/${id}/invoice`)
-                  }
-                  className={`px-4 py-2 bg-green-500 text-white rounded`}
+      {modalRoot
+        ? createPortal(
+            isModalOpen ? (
+              <div
+                className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-md"
+                onClick={handleCloseModal}
+              >
+                <div
+                  className="bg-white rounded-lg p-4 z-[201]"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  Approve Style
-                </button>
-                <button
-                  onClick={handleRejectStyle}
-                  className={`px-4 py-2 bg-red-500 text-white rounded`}
-                >
-                  Reject Style
-                </button>
+                  <Image
+                    src={customer.tailor_job_image || ""}
+                    alt="Proposed Tailor Job"
+                    width={400}
+                    height={400}
+                  />
+                  {customer.approval === "2" && (
+                    <div className="mt-4 flex justify-between">
+                      <button
+                        onClick={
+                          //use the router to push to the make payment page
+                          () => router.push(`/client/orders/${id}/invoice`)
+                        }
+                        className={`px-4 py-2 bg-green-500 text-white rounded`}
+                      >
+                        Approve Style
+                      </button>
+                      <button
+                        onClick={handleRejectStyle}
+                        className={`px-4 py-2 bg-red-500 text-white rounded`}
+                      >
+                        Reject Style
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-      )}
+            ) : null,
+            modalRoot,
+          )
+        : null}
       {isFeedbackModalOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"

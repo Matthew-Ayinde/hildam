@@ -15,6 +15,7 @@ import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion"; // Import Framer Motion
 import { getSession } from "next-auth/react"; // Import getSession from NextAuth
+import { formatDateGMTPlus1 } from "@/lib/dateFormatter";
 
 export default function TailorJobLists() {
 
@@ -92,11 +93,7 @@ export default function TailorJobLists() {
         itemQuantity: item.item_quantity,
         customer_name: item.customer_name,
         order_status: item.order_status,
-        date: new Date(item.assigned_at).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        }),
+        date: formatDateGMTPlus1(item.assigned_at, "full"),
       }));
       setData(formattedData);
     } catch (err) {

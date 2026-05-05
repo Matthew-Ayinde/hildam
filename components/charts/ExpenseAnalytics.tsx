@@ -11,6 +11,7 @@ import {
   FaHardHat,
   FaBuilding,
 } from "react-icons/fa";
+import { formatDateGMTPlus1 } from "@/lib/dateFormatter";
 
 // Mocked API data
 const apiData = [
@@ -390,11 +391,7 @@ const ExpensePieChart: React.FC = () => {
                 className="flex flex-col items-center bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300"
               >
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  {new Date(date).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  {formatDateGMTPlus1(date, "full")}
                 </h3>
 
                 {hasData ? (

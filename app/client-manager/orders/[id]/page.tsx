@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getSession } from "next-auth/react";
 import SkeletonLoader from "@/components/SkeletonLoader";
 import Image from "next/image";
+import { createPortal } from "react-dom";
 import { AiOutlineDownload } from "react-icons/ai";
 import { FiUser, FiCalendar, FiPackage, FiEdit3 } from "react-icons/fi";
 import { HiOutlineSparkles, HiOutlinePhotograph } from "react-icons/hi";
@@ -42,6 +43,7 @@ export default function ShowCustomer() {
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
 
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const modalRoot = typeof document !== "undefined" ? document.body : null;
 
   const handleOpenStyleModal = (src: string) => {
     setActiveStyleImage(src);
@@ -1213,7 +1215,7 @@ export default function ShowCustomer() {
                   </div>
                   <div>
                     <h3 className="text-2xl font-bold text-white">
-                      Tailor Style
+                      Finished Cloth Image
                     </h3>
                     <p className="text-emerald-100">
                       Finished cloth image from the tailoring team
@@ -1415,57 +1417,59 @@ export default function ShowCustomer() {
       </AnimatePresence>
 
       {/* Tailor Job Modal */}
-      <AnimatePresence>
-        {isTailorJobModalOpen && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-             transition={{ duration: 0.3 }}
-            onClick={() => setIsTailorJobModalOpen(false)}
-          >
-            <motion.div
-              className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={() => setIsTailorJobModalOpen(false)}
-                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
-              >
-                <IoIosClose size={24} />
-              </button>
+      {modalRoot
+        ? createPortal(
+            <AnimatePresence>
+              {isTailorJobModalOpen && (
+                <motion.div
+                  className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-md p-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  onClick={() => setIsTailorJobModalOpen(false)}
+                >
+                  <motion.div
+                    className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 z-[201]"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      onClick={() => setIsTailorJobModalOpen(false)}
+                      className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+                    >
+                      <IoIosClose size={24} />
+                    </button>
 
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                  Tailor Job Image
-                </h3>
-                <p className="text-gray-600">
-                  This image shows the finished cloth from the tailoring team
-                </p>
-              </div>
+                    <div className="mb-6">
+                      <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                        Tailor Job Image
+                      </h3>
+                      <p className="text-gray-600">
+                        This image shows the finished cloth from the tailoring team
+                      </p>
+                    </div>
 
-              <div className="relative w-full h-[60vh] mb-6 rounded-xl bg-gray-100 overflow-hidden">
-                <Image
-                  src={customer.tailor_job_image || "/fallback.jpg"}
-                  alt="Tailor Job Style"
-                  fill
-                  className="object-contain"
-                />
-              </div>
+                    <div className="relative w-full h-[60vh] mb-6 rounded-xl bg-gray-100 overflow-hidden">
+                      <Image
+                        src={customer.tailor_job_image || "/fallback.jpg"}
+                        alt="Tailor Job Style"
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
 
-              <div className="flex flex-wrap items-center justify-center gap-4">
-             
-
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                    <div className="flex flex-wrap items-center justify-center gap-4"></div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>,
+            modalRoot,
+          )
+        : null}
 
       {/* Reject Modal */}
       <AnimatePresence>

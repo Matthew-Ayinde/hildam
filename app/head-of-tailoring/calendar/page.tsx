@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AppointmentDialog } from "./AppointmentDialog"
 import { QuickAppointmentCard } from "./QuickAppointmentCard"
 import { fetchAllDatesHot } from "@/app/api/apiClient"
+import { formatDateTimeGMTPlus1, formatDateGMTPlus1, formatTimeGMTPlus1, isPastDateGMTPlus1, convertToGMTPlus1 } from "@/lib/dateFormatter"
 
 // Types
 interface Order {
@@ -58,13 +59,9 @@ const getMonthName = (month: number) => {
   return new Date(0, month).toLocaleString("default", { month: "long" })
 }
 
-// Check if a date is in the past (before today)
+// Check if a date is in the past (before today) - using GMT+1
 const isPastDate = (date: Date) => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0) // Reset time to start of day
-  const checkDate = new Date(date)
-  checkDate.setHours(0, 0, 0, 0) // Reset time to start of day
-  return checkDate < today
+  return isPastDateGMTPlus1(date)
 }
 
 // Generate available years (current year and next 2 years)
@@ -877,21 +874,25 @@ function OrderCard({ order, appointmentType }: { order: Order; appointmentType: 
         </div>
         <Separator className="my-4" />
         <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+          <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg col-span-2">
             <Clock className="h-4 w-4 text-orange-500" />
-            <span className="font-medium">
-              {appointmentDate
-                ? appointmentDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                : "N/A"}
-            </span>
+            <div className="flex flex-col flex-1">
+              <span className="text-xs text-muted-foreground font-semibold">Schedule</span>
+              <span className="font-medium text-gray-800">
+                {appointmentDate ? formatDateGMTPlus1(appointmentDate, "full") : "N/A"}
+              </span>
+              <span className="text-sm font-semibold text-orange-600">
+                {appointmentDate ? formatTimeGMTPlus1(appointmentDate, true) : "N/A"}
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
             <User className="h-4 w-4 text-orange-500" />
             <span className="font-medium truncate">{order.customer}</span>
           </div>
-          <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg col-span-2">
+          <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
             <Package className="h-4 w-4 text-orange-500 flex-shrink-0" />
-            <span className="font-medium">{order.items.join(", ")}</span>
+            <span className="font-medium truncate">{order.id}</span>
           </div>
         </div>
       </div>

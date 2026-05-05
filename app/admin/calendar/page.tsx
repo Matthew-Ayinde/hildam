@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AppointmentDialog } from "./AppointmentDialog"
 import { QuickAppointmentCard } from "./QuickAppointmentCard"
 import { fetchAllDates } from "@/app/api/apiClient"
+import { formatDateTimeGMTPlus1, formatDateGMTPlus1, formatTimeGMTPlus1, isPastDateGMTPlus1, convertToGMTPlus1 } from "@/lib/dateFormatter"
 
 // Types
 interface Order {
@@ -58,13 +59,9 @@ const getMonthName = (month: number) => {
   return new Date(0, month).toLocaleString("default", { month: "long" })
 }
 
-// Check if a date is in the past (before today)
+// Check if a date is in the past (before today) - using GMT+1
 const isPastDate = (date: Date) => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0) // Reset time to start of day
-  const checkDate = new Date(date)
-  checkDate.setHours(0, 0, 0, 0) // Reset time to start of day
-  return checkDate < today
+  return isPastDateGMTPlus1(date)
 }
 
 // Generate available years (current year and next 2 years)
@@ -888,8 +885,8 @@ function OrderCard({ order, appointmentType }: { order: Order; appointmentType: 
   const formatDateTime = (date: Date | null) => {
     if (!date) return { date: "N/A", time: "N/A" }
     
-    const dateStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-    const timeStr = date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })
+    const dateStr = formatDateGMTPlus1(date, "full")
+    const timeStr = formatTimeGMTPlus1(date, true)
     
     return { date: dateStr, time: timeStr }
   }

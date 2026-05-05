@@ -11,6 +11,7 @@ import { IoNotificationsOutline, IoChevronDownOutline, IoCheckmarkDoneOutline, I
 import { HiOutlineBell, HiOutlineInboxIn, HiOutlineUserCircle, HiOutlineClock } from "react-icons/hi"
 import { FiMessageSquare } from "react-icons/fi"
 import { fetchAllNotifications, fetchAllNotificationsTopbar, readAllNotification, readNotification } from "@/app/api/apiClient"
+import { formatDateGMTPlus1 } from "@/lib/dateFormatter"
 
 type Notification = {
   id: string
@@ -195,7 +196,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
     } else if (date.toDateString() === yesterday.toDateString()) {
       return "Yesterday"
     } else {
-      return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+      return formatDateGMTPlus1(date, "short")
     }
   }
 

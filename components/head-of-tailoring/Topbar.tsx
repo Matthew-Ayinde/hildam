@@ -193,7 +193,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="sticky top-0 z-30 bg-white shadow-sm border-b border-gray-100 rounded-2xl mt-5"
+      className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100 rounded-2xl mt-5"
     >
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">

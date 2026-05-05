@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import type React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -22,11 +22,15 @@ interface StaffOption {
 
 export default function AdminCreateFabricPage() {
   const router = useRouter()
+  const customerInputRef = useRef<HTMLDivElement>(null)
 
   const [customers, setCustomers] = useState<CustomerOption[]>([])
   const [staffMembers, setStaffMembers] = useState<StaffOption[]>([])
   const [isLoadingLookups, setIsLoadingLookups] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCustomerSuggestions, setShowCustomerSuggestions] = useState(false)
+  const [filteredCustomers, setFilteredCustomers] = useState<CustomerOption[]>([])
+  const [customerQuery, setCustomerQuery] = useState("")
 
   const [formData, setFormData] = useState({
     customer_id: "",
@@ -71,6 +75,17 @@ export default function AdminCreateFabricPage() {
     loadLookups()
   }, [])
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (customerInputRef.current && !customerInputRef.current.contains(event.target as Node)) {
+        setShowCustomerSuggestions(false)
+      }
+    }
+
+    document.addEventListener("click", handleClickOutside)
+    return () => document.removeEventListener("click", handleClickOutside)
+  }, [])
+
   const selectedFilesText = useMemo(() => {
     if (formData.fabric_images.length === 0) return "No files selected"
     if (formData.fabric_images.length === 1) return formData.fabric_images[0].name
@@ -85,6 +100,34 @@ export default function AdminCreateFabricPage() {
     }))
   }
 
+  const handleCustomerSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value
+    setCustomerQuery(value)
+    setFormData((prev) => ({
+      ...prev,
+      customer_id: "",
+    }))
+
+    if (!value.trim()) {
+      setFilteredCustomers([])
+      setShowCustomerSuggestions(false)
+      return
+    }
+
+    const matches = customers.filter((customer) => customer.name.toLowerCase().includes(value.toLowerCase()))
+    setFilteredCustomers(matches)
+    setShowCustomerSuggestions(matches.length > 0)
+  }
+
+  const handleCustomerSelect = (customer: CustomerOption) => {
+    setCustomerQuery(customer.name)
+    setFormData((prev) => ({
+      ...prev,
+      customer_id: customer.id,
+    }))
+    setShowCustomerSuggestions(false)
+  }
+
   const handleFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
     setFormData((prev) => ({
@@ -95,6 +138,13 @@ export default function AdminCreateFabricPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
+    if (!formData.customer_id) {
+      setStatusMessage("Please select a customer from the list.")
+      setStatusType("error")
+      return
+    }
+
     setIsSubmitting(true)
     setStatusMessage(null)
 
@@ -178,28 +228,51 @@ export default function AdminCreateFabricPage() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div>
-                <label htmlFor="customer_id" className="mb-2 block text-sm font-semibold text-gray-700">
+              <div className="relative" ref={customerInputRef}>
+                <label htmlFor="customer-search" className="mb-2 block text-sm font-semibold text-gray-700">
                   <span className="inline-flex items-center gap-2">
                     <IoPeopleOutline size={16} className="text-orange-500" />
                     Customer
                   </span>
                 </label>
-                <select
-                  id="customer_id"
-                  name="customer_id"
-                  value={formData.customer_id}
-                  onChange={handleInputChange}
+                <motion.input
+                  whileFocus={{ scale: 1.01 }}
+                  id="customer-search"
+                  type="text"
+                  value={customerQuery}
+                  onChange={handleCustomerSearchChange}
+                  onFocus={() => {
+                    if (customerQuery.trim()) {
+                      setShowCustomerSuggestions(filteredCustomers.length > 0)
+                    }
+                  }}
+                  placeholder="Start typing customer name..."
+                  autoComplete="off"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-orange-400 focus:outline-none"
-                  required
                 >
-                  <option value="">Select customer</option>
-                  {customers.map((customer) => (
-                    <option key={customer.id} value={customer.id}>
-                      {customer.name}
-                    </option>
-                  ))}
-                </select>
+                </motion.input>
+                <AnimatePresence>
+                  {showCustomerSuggestions && (
+                    <motion.ul
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute z-20 mt-2 max-h-48 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg"
+                    >
+                      {filteredCustomers.map((customer) => (
+                        <motion.li
+                          key={customer.id}
+                          whileHover={{ backgroundColor: "#f9fafb" }}
+                          onClick={() => handleCustomerSelect(customer)}
+                          className="cursor-pointer border-b border-gray-100 px-4 py-3 last:border-b-0"
+                        >
+                          <div className="font-medium text-gray-800">{customer.name}</div>
+                        </motion.li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+                <input type="hidden" name="customer_id" value={formData.customer_id} />
               </div>
 
               <div>

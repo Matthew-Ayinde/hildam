@@ -11,6 +11,7 @@ import { getSession } from "next-auth/react"; // Import getSession from NextAuth
 import Last7Days from "../charts/Last7Days";
 import { FaClipboardList, FaClock, FaCheckCircle } from "react-icons/fa";
 import { FaUser } from "react-icons/fa6";
+import { formatDateGMTPlus1 } from "@/lib/dateFormatter";
 
 // Extend the NextAuth session type
 declare module "next-auth" {
@@ -94,12 +95,7 @@ export default function Table() {
   };
 
   const formatDate = (dateString: string | number | Date) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    return formatDateGMTPlus1(dateString, "full");
   };
 
   const paginatedData = data.slice(

@@ -15,6 +15,7 @@ interface Fabric {
   description: string
   staff_name: string
   dropped_off_at: string
+  status: string | null
   fabric_images: string[]
   created_at: string
   updated_at: string
@@ -191,6 +192,7 @@ export default function AdminFabricViewPage() {
           <div className="rounded-2xl bg-gradient-to-r from-orange-100 to-amber-100 p-4">
             <HiOutlineCollection className="text-orange-600" size={28} />
           </div>
+          
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Fabric Details</h1>
             <p className="text-sm text-gray-600">View full details of this fabric entry</p>
@@ -332,6 +334,12 @@ export default function AdminFabricViewPage() {
                 {formatDate(fabric.dropped_off_at)}
               </p>
             </div>
+            {fabric.status && (
+              <div className="rounded-xl bg-gray-50 p-4">
+                <p className="text-xs text-gray-500">Status</p>
+                <p className="mt-1 font-semibold text-gray-800">{fabric.status}</p>
+              </div>
+            )}
           </div>
 
           <div className="mt-5 rounded-xl bg-gray-50 p-4">

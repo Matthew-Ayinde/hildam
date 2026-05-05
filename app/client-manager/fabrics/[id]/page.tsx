@@ -15,6 +15,7 @@ interface Fabric {
   description: string
   staff_name: string
   dropped_off_at: string
+  status: string | null
   fabric_images: string[]
   created_at: string
   updated_at: string
@@ -332,6 +333,12 @@ export default function AdminFabricViewPage() {
                 {formatDate(fabric.dropped_off_at)}
               </p>
             </div>
+            {fabric.status && (
+              <div className="rounded-xl bg-gray-50 p-4">
+                <p className="text-xs text-gray-500">Status</p>
+                <p className="mt-1 font-semibold text-gray-800">{fabric.status}</p>
+              </div>
+            )}
           </div>
 
           <div className="mt-5 rounded-xl bg-gray-50 p-4">
@@ -364,6 +371,7 @@ export default function AdminFabricViewPage() {
               exit={{ opacity: 0 }}
               className="flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 text-center"
             >
+              
               <HiOutlinePhotograph className="mb-3 text-gray-400" size={34} />
               <p className="text-base font-medium text-gray-700">No fabric images</p>
               <p className="text-sm text-gray-500">This fabric entry does not have uploaded images yet.</p>

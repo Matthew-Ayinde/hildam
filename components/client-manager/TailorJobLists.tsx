@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { getSession } from "next-auth/react"
+import { formatDateGMTPlus1 } from "@/lib/dateFormatter"
 
 interface JobItem {
   id: string
@@ -118,11 +119,7 @@ export default function TailorDashboard() {
   const paginatedData = filteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
+    return formatDateGMTPlus1(dateString, "short")
   }
 
   const getPriorityColor = (priority: string) => {

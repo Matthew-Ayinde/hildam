@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { formatDateGMTPlus1 } from "@/lib/dateFormatter";
 
 export default function Table() {
   interface Order {
@@ -124,12 +125,7 @@ export default function Table() {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    return formatDateGMTPlus1(dateString, "full");
   };
 
   const paginatedData = data.slice(

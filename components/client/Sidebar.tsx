@@ -15,6 +15,7 @@ import LogoutButton from "@/components/LogoutMobile";
 import { useRouter } from "next/navigation";
 import { AiOutlineCheck } from "react-icons/ai";
 import { FiBell } from "react-icons/fi";
+import { formatDateTimeGMTPlus1 } from "@/lib/dateFormatter";
 
 type Notification = {
   id: string;
@@ -251,7 +252,7 @@ const Sidebar = () => {
                           {notification.message}
                         </span>
                         <span className="text-xs text-gray-500">
-                          {new Date(notification.created_at).toLocaleString()}
+                          {formatDateTimeGMTPlus1(notification.created_at)}
                         </span>
                       </div>
                     ))}

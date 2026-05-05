@@ -5,6 +5,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { IoNotifications } from "react-icons/io5";
 import LogoutButton from "@/components/Logout";
 import { useRouter } from "next/navigation";
+import { formatDateTimeGMTPlus1 } from "@/lib/dateFormatter";
 
 const Topbar = () => {
   const [userName, setUserName] = useState("Client");
@@ -208,7 +209,7 @@ const Topbar = () => {
                       >
                         <span>{notification.message}</span>
                         <span className="text-xs text-gray-500">
-                          {new Date(notification.created_at).toLocaleString()}
+                          {formatDateTimeGMTPlus1(notification.created_at)}
                         </span>
                       </div>
                     ))}
