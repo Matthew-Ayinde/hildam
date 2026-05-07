@@ -42,6 +42,18 @@ export default function AdminCreateFabricPage() {
 
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [statusType, setStatusType] = useState<"success" | "error">("success")
+  const getCustomerSuggestions = (value: string) => {
+    const query = value.trim().toLowerCase()
+
+    if (!query) {
+      return customers.slice(0, 8)
+    }
+
+    return customers.filter((customer) => {
+      const normalizedName = customer.name.toLowerCase()
+      return normalizedName.includes(query) || customer.id.toLowerCase().includes(query)
+    })
+  }
 
   useEffect(() => {
     const loadLookups = async () => {
@@ -108,13 +120,7 @@ export default function AdminCreateFabricPage() {
       customer_id: "",
     }))
 
-    if (!value.trim()) {
-      setFilteredCustomers([])
-      setShowCustomerSuggestions(false)
-      return
-    }
-
-    const matches = customers.filter((customer) => customer.name.toLowerCase().includes(value.toLowerCase()))
+    const matches = getCustomerSuggestions(value)
     setFilteredCustomers(matches)
     setShowCustomerSuggestions(matches.length > 0)
   }
@@ -201,6 +207,7 @@ export default function AdminCreateFabricPage() {
         )}
       </AnimatePresence>
 
+
       <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -242,15 +249,14 @@ export default function AdminCreateFabricPage() {
                   value={customerQuery}
                   onChange={handleCustomerSearchChange}
                   onFocus={() => {
-                    if (customerQuery.trim()) {
-                      setShowCustomerSuggestions(filteredCustomers.length > 0)
-                    }
+                    const matches = getCustomerSuggestions(customerQuery)
+                    setFilteredCustomers(matches)
+                    setShowCustomerSuggestions(matches.length > 0)
                   }}
-                  placeholder="Start typing customer name..."
+                  placeholder="Search customer name or ID..."
                   autoComplete="off"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-orange-400 focus:outline-none"
-                >
-                </motion.input>
+                />
                 <AnimatePresence>
                   {showCustomerSuggestions && (
                     <motion.ul

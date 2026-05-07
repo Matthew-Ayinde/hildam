@@ -73,6 +73,10 @@ export default function SaleFormComponent({
         return
       }
 
+      if (variantOptions.length > 0 && !variantId) {
+        setValidationError("Please choose a variant.")
+        return
+      }
       if (!saleDate) {
         setValidationError("Sale date is required.")
         return
@@ -153,6 +157,7 @@ export default function SaleFormComponent({
             : "Update customer information and payment details."}
         </p>
       </div>
+      
 
       <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
         <div className="grid gap-6">
@@ -179,7 +184,7 @@ export default function SaleFormComponent({
 
                 <div>
                   <Label htmlFor="variant" className="text-base font-semibold">
-                    Variant (optional)
+                    Variant
                   </Label>
                   <Select value={variantId} onValueChange={(value) => setVariantId(value)}>
                     <SelectTrigger

@@ -434,7 +434,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                         </div>
                         <div>
                           <p className="font-semibold text-gray-900">{userName}</p>
-                          <p className="text-sm text-orange-600">Administrator</p>
+                          <p className="text-sm text-orange-600">Client Manager</p>
                         </div>
                       </div>
                     </div>

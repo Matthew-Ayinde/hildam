@@ -122,6 +122,10 @@ export default function ShowCustomer() {
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const [rejectFeedback, setRejectFeedback] = useState("");
   const [approvePrice, setApprovePrice] = useState("");
+  const [isFabricModalOpen, setIsFabricModalOpen] = useState(false);
+  const [activeFabricIndex, setActiveFabricIndex] = useState<number>(0);
+  const [isFinishedModalOpen, setIsFinishedModalOpen] = useState(false);
+  const [activeFinishedIndex, setActiveFinishedIndex] = useState<number>(0);
 
   const normalizeImageList = (value: string | string[] | null | undefined): string[] => {
     if (!value) return [];
@@ -1010,12 +1014,22 @@ export default function ShowCustomer() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     {customer.fabric_images && Array.isArray(customer.fabric_images) && customer.fabric_images.length > 0 ? (
-                      <div className="overflow-hidden rounded-xl border-2 border-gray-200 w-full max-w-sm">
-                        <img
-                          src={customer.fabric_images[0] || "/placeholder.svg"}
-                          alt="Fabric Image"
-                          className="w-full h-48 object-cover"
-                        />
+                      <div className="overflow-hidden rounded-xl border-2 border-gray-200 w-full max-w-full">
+                        <div className="flex gap-3 overflow-x-auto py-2">
+                          {customer.fabric_images.map((src, i) => (
+                            <button
+                              key={i}
+                              onClick={() => { setActiveFabricIndex(i); setIsFabricModalOpen(true); }}
+                              className="flex-shrink-0 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-orange-300 transition-all duration-200"
+                            >
+                              <img
+                                src={src || "/placeholder.svg"}
+                                alt={`Fabric ${i + 1}`}
+                                className="w-48 h-36 object-cover block"
+                              />
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     ) : (
                       <div className="text-center py-8">
@@ -1225,43 +1239,30 @@ export default function ShowCustomer() {
               </div>
 
               <div className="p-6">
-                {customer.tailor_job_image === "" ? (
+                {customer.finished_cloth_images && Array.isArray(customer.finished_cloth_images) && customer.finished_cloth_images.length > 0 ? (
+                  <div>
+                    <div className="flex gap-3 flex-wrap">
+                      {customer.finished_cloth_images.map((src, i) => (
+                        <button
+                          key={i}
+                          onClick={() => { setActiveFinishedIndex(i); setIsFinishedModalOpen(true); }}
+                          className="rounded-lg overflow-hidden border-2 border-gray-200 hover:border-emerald-300 transition-all duration-200"
+                        >
+                          <img
+                            src={src || "/placeholder.svg"}
+                            alt={`Finished ${i + 1}`}
+                            className="w-40 h-40 object-cover block"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
                   <div className="text-center py-12">
                     <BsStars className="mx-auto text-gray-400 mb-4" size={48} />
                     <p className="text-gray-500">
-                      No tailor style image available yet
+                      No finished cloth images available yet
                     </p>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex">
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="cursor-pointer group"
-                        onClick={handleTailorJobImageClick}
-                      >
-                        <div className="relative overflow-hidden rounded-xl border-2 border-gray-200 group-hover:border-emerald-300 transition-all duration-200">
-                          <img
-                            src={
-                              customer.tailor_job_image || "/placeholder.svg"
-                            }
-                            alt="Tailor Job Style"
-                            className="w-32 h-32 object-cover group-hover:scale-110 transition-transform duration-300"
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
-                            <BsStars
-                              className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                              size={24}
-                            />
-                          </div>
-                        </div>
-                      </motion.div>
-                    </div>
-
-                    {/* Approval Status and Buttons */}
-                    
-                   
                   </div>
                 )}
               </div>
@@ -1411,6 +1412,122 @@ export default function ShowCustomer() {
                 alt="Style Reference Full"
                 className="w-full h-[70vh] object-contain rounded-xl"
               />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Fabric Modal */}
+      <AnimatePresence>
+        {isFabricModalOpen && customer?.fabric_images && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center bg-black/75 backdrop-blur-sm z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setIsFabricModalOpen(false)}
+          >
+            <motion.div
+              className="relative bg-white rounded-2xl p-4 max-w-4xl w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <button
+                onClick={() => setIsFabricModalOpen(false)}
+                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+              >
+                <IoIosClose size={22} />
+              </button>
+
+              <div className="flex items-center justify-center">
+                <button
+                  onClick={() => setActiveFabricIndex((i) => Math.max(0, i - 1))}
+                  className="p-2 mr-4 bg-gray-100 rounded-full hover:bg-gray-200"
+                >
+                  ‹
+                </button>
+
+                <div className="w-full max-h-[70vh] overflow-hidden flex items-center justify-center">
+                  <img
+                    src={customer.fabric_images[activeFabricIndex] || "/placeholder.svg"}
+                    alt={`Fabric ${activeFabricIndex + 1}`}
+                    className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                  />
+                </div>
+
+                <button
+                  onClick={() => setActiveFabricIndex((i) => Math.min(customer.fabric_images!.length - 1, i + 1))}
+                  className="p-2 ml-4 bg-gray-100 rounded-full hover:bg-gray-200"
+                >
+                  ›
+                </button>
+              </div>
+
+              <div className="mt-4 text-center text-sm text-gray-600">
+                {activeFabricIndex + 1} / {customer.fabric_images.length}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Finished Cloth Modal */}
+      <AnimatePresence>
+        {isFinishedModalOpen && customer?.finished_cloth_images && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center bg-black/75 backdrop-blur-sm z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setIsFinishedModalOpen(false)}
+          >
+            <motion.div
+              className="relative bg-white rounded-2xl p-4 max-w-4xl w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <button
+                onClick={() => setIsFinishedModalOpen(false)}
+                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+              >
+                <IoIosClose size={22} />
+              </button>
+
+              <div className="flex items-center justify-center">
+                <button
+                  onClick={() => setActiveFinishedIndex((i) => Math.max(0, i - 1))}
+                  className="p-2 mr-4 bg-gray-100 rounded-full hover:bg-gray-200"
+                >
+                  ‹
+                </button>
+
+                <div className="w-full max-h-[70vh] overflow-hidden flex items-center justify-center">
+                  <img
+                    src={customer.finished_cloth_images[activeFinishedIndex] || "/placeholder.svg"}
+                    alt={`Finished ${activeFinishedIndex + 1}`}
+                    className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                  />
+                </div>
+
+                <button
+                  onClick={() => setActiveFinishedIndex((i) => Math.min(customer.finished_cloth_images!.length - 1, i + 1))}
+                  className="p-2 ml-4 bg-gray-100 rounded-full hover:bg-gray-200"
+                >
+                  ›
+                </button>
+              </div>
+
+              <div className="mt-4 text-center text-sm text-gray-600">
+                {activeFinishedIndex + 1} / {customer.finished_cloth_images.length}
+              </div>
             </motion.div>
           </motion.div>
         )}
