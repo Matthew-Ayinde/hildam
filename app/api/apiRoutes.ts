@@ -96,6 +96,7 @@ export class ApiRoutes {
     
     //#region Users endpoint ---------------------------------
     static FetchAllUsers: string = '/users/all-users';
+    static FetchUsersForClient: string = '/fabrics/list-of-available-staff';
     static DeleteUser: string = '/users/delete-user';
     static EditUser: string = '/users/edit-user';
     static CreateUser: string = '/users/create-user';
@@ -277,6 +278,7 @@ static DeleteExpense: string = '/daily-expenses/delete-expense';
   static AddReadyToWearProduct: string = '/ready-to-wear/add-product';
   static EditReadyToWearProduct: string = '/ready-to-wear/edit-product';
   static DeleteReadyToWearProduct: string = '/ready-to-wear/delete-product';
+    static GetProductWithVariant: string = '/sales/get-product-with-variant';
 
   //#region Sales endpoint ---------------------------------
   static FetchAllSales: string = '/sales/all-sales';

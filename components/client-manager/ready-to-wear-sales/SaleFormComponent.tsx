@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { ReadyToWearProduct } from "@/features/ready-to-wear/types"
 import { CreateSalePayload, Sale, SalePaymentMethod, UpdateSalePayload } from "@/features/ready-to-wear-sales/types"
+import { fetchProductWithVariants } from "@/app/api/apiClient"
 
 const paymentMethods: SalePaymentMethod[] = [
   "cash",
@@ -47,6 +48,8 @@ export default function SaleFormComponent({
 }: SaleFormComponentProps) {
   const [productId, setProductId] = useState(sale?.product_id || "")
   const [variantId, setVariantId] = useState(sale?.product_variant_id || "")
+  const [fetchedVariants, setFetchedVariants] = useState<any[]>([])
+  const [isLoadingVariants, setIsLoadingVariants] = useState(false)
   const [quantitySold, setQuantitySold] = useState(sale?.quantity_sold || 1)
   const [saleDate, setSaleDate] = useState(sale?.sale_date || "")
   const [customerName, setCustomerName] = useState(sale?.customer_name || "")
@@ -64,7 +67,40 @@ export default function SaleFormComponent({
     [products, productId]
   )
 
-  const variantOptions = selectedProduct?.variants ?? []
+  const variantOptions = fetchedVariants.length > 0 ? fetchedVariants : selectedProduct?.variants ?? []
+
+  useEffect(() => {
+    // reset selection when product changes
+    setVariantId("")
+
+    if (!productId) {
+      setFetchedVariants([])
+      setIsLoadingVariants(false)
+      return
+    }
+
+    let mounted = true
+    setIsLoadingVariants(true)
+    setFetchedVariants([])
+
+    fetchProductWithVariants(productId)
+      .then((product) => {
+        if (!mounted) return
+        const variants = product?.variants ?? []
+        setFetchedVariants(Array.isArray(variants) ? variants : [])
+      })
+      .catch((err) => {
+        console.error("Failed to fetch product variants:", err)
+        setFetchedVariants([])
+      })
+      .finally(() => {
+        if (mounted) setIsLoadingVariants(false)
+      })
+
+    return () => {
+      mounted = false
+    }
+  }, [productId])
 
   const handleSubmit = async () => {
     if (mode === "create") {
@@ -191,11 +227,15 @@ export default function SaleFormComponent({
                       id="variant"
                       aria-label="Select variant"
                       className="mt-2"
-                      disabled={variantOptions.length === 0}
+                      disabled={isLoadingVariants || variantOptions.length === 0}
                     >
                       <SelectValue
                         placeholder={
-                          variantOptions.length > 0 ? "Choose a variant" : "Select a product first"
+                          isLoadingVariants
+                            ? "Loading variants..."
+                            : variantOptions.length > 0
+                            ? "Choose a variant"
+                            : "Select a product first"
                         }
                       />
                     </SelectTrigger>

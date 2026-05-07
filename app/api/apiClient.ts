@@ -252,6 +252,12 @@ export async function fetchAllUsers(): Promise<any> {
   return resp.data;
 }
 
+export async function fetchAllUsersForClient(): Promise<any> {
+  const headers = await getUserHeaders()
+  const resp = await API.get(ApiRoutes.FetchUsersForClient, { headers })
+  return resp.data;
+}
+
 export async function fetchUser(userId: string): Promise<any> {
   const headers = await getUserHeaders()
   const resp = await API.get(`${ApiRoutes.FetchUser}/${userId}`, { headers })
@@ -646,6 +652,13 @@ export async function fetchReadyToWearProduct(productId: string): Promise<any> {
   const headers = await getUserHeaders();
   const resp = await API.get(`${ApiRoutes.FetchReadyToWearProduct}/${productId}`, { headers });
   return resp.data.product ?? resp.data.data ?? resp.data;
+}
+
+export async function fetchProductWithVariants(productId: string): Promise<any> {
+  const headers = await getUserHeaders();
+  const resp = await API.get(`${ApiRoutes.GetProductWithVariant}/${productId}`, { headers });
+  // expected response shape: { success: true, data: { ...product..., variants: [...] } }
+  return resp.data?.data ?? resp.data?.product ?? resp.data;
 }
 
 export async function addReadyToWearProduct(formData: FormData): Promise<any> {
