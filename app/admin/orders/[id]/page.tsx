@@ -97,6 +97,7 @@ export default function ShowCustomer() {
     clothing_description: string;
     clothing_name: string;
     style_reference_images: string[];
+    fabric_images: string[];
     tailor_job_image: string;
     finished_cloth_image: string;
     finished_cloth_images: string[];
