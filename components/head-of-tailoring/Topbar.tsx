@@ -11,6 +11,8 @@ import { IoNotificationsOutline, IoChevronDownOutline, IoCheckmarkDoneOutline, I
 import { HiOutlineBell, HiOutlineInboxIn, HiOutlineUserCircle, HiOutlineClock } from "react-icons/hi"
 import { FiMessageSquare } from "react-icons/fi"
 import { fetchAllNotificationsTopbar, readAllNotification, readNotification } from "@/app/api/apiClient"
+// import settings icon from react icons
+import { IoSettingsOutline } from "react-icons/io5"
 
 type Notification = {
   id: string
@@ -250,6 +252,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                     transition={{ duration: 0.2 }}
                     className="absolute top-full right-0 w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 mt-3 z-50 overflow-hidden"
                   >
+
                     {/* Header */}
                     <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-5 text-white">
                       <div className="flex justify-between items-center">
@@ -399,6 +402,18 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                           <p className="text-sm text-orange-600">Head of Tailoring</p>
                         </div>
                       </div>
+                    </div>
+                      <div className="py-2">
+                      
+                      <Link href="/head-of-tailoring/settings" passHref>
+                        <button
+                          className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        >
+                          <IoSettingsOutline size={20} />
+                          <span>Settings</span>
+                        </button>
+                      </Link>
                     </div>
                     <div className="py-2 border-t border-gray-100">
                       <div className="px-5 py-3">

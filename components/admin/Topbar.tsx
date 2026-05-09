@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { getSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import { IoNotificationsOutline, IoChevronDownOutline, IoCheckmarkDoneOutline, IoMailOutline, IoHelpCircleOutline } from "react-icons/io5"
+import { IoNotificationsOutline, IoChevronDownOutline, IoCheckmarkDoneOutline, IoMailOutline, IoHelpCircleOutline, IoSettingsOutline } from "react-icons/io5"
 import { HiOutlineBell, HiOutlineInboxIn, HiOutlineUserCircle, HiOutlineClock } from "react-icons/hi"
 import { FiMessageSquare } from "react-icons/fi"
 import { fetchAllNotifications, fetchAllNotificationsTopbar, readAllNotification, readNotification } from "@/app/api/apiClient"
@@ -447,12 +447,12 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                           <span>Your Profile</span>
                         </button>
                       </Link>
-                      <Link href="/admin/settings" passHref>
+                     <Link href="/admin/settings" passHref>
                         <button
                           className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
                           onClick={() => setProfileDropdownOpen(false)}
                         >
-                          {/* <IoHelpCircleOutline size={20} /> */}
+                          <IoSettingsOutline size={20} />
                           <span>Settings</span>
                         </button>
                       </Link>
