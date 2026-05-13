@@ -18,7 +18,7 @@ import { getSession } from "next-auth/react";
 import SkeletonLoader from "@/components/SkeletonLoader";
 import Image from "next/image";
 import { createPortal } from "react-dom";
-import { AiOutlineDownload } from "react-icons/ai";
+import { AiOutlineDownload, AiOutlinePlus } from "react-icons/ai";
 import { FiUser, FiCalendar, FiPackage, FiEdit3 } from "react-icons/fi";
 import { HiOutlineSparkles, HiOutlinePhotograph } from "react-icons/hi";
 import { MdOutlineRule, MdOutlineClose } from "react-icons/md";
@@ -69,7 +69,7 @@ export default function ShowCustomer() {
   };
 
   interface Customer {
-    [x: string]: string | number | readonly string[] | undefined;
+    [x: string]: string | number | readonly string[] | boolean | undefined;
     gender: string;
     phone_number: string;
     created_at: string;
@@ -112,7 +112,9 @@ export default function ShowCustomer() {
     duration: number;
     style_approval: string;
     collection_date: string;
-    has_payment: string
+    has_payment: string;
+    has_created_job_expenses: boolean;
+    has_created_payment: boolean;
   }
 
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -588,6 +590,8 @@ export default function ShowCustomer() {
           style_approval: result.tailoring.client_manager_approval,
           style_approval_feedback: result.tailoring.client_manager_feedback,
           has_payment: result.has_payment,
+          has_created_job_expenses: result.has_created_job_expenses,
+          has_created_payment: result.has_created_payment,
         };
         setCustomer(mappedCustomer);
       } else {
@@ -1354,6 +1358,47 @@ export default function ShowCustomer() {
             </div>
           </motion.div>
         </div>
+
+        {/* Link to add job expense or payment */}
+        {!customer.has_created_job_expenses && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex items-center justify-end space-x-4 mt-8"
+          >
+            <Link href={`/client-manager/orders/${id}/add-job-expense`}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white rounded-xl font-semibold shadow-lg transition-all duration-200"
+              >
+                <AiOutlinePlus size={18} />
+                <span>Add Job Expense</span>
+              </motion.button>
+            </Link>
+          </motion.div>
+        )}
+
+        {customer.has_created_job_expenses && !customer.has_created_payment && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex items-center justify-end space-x-4 mt-8"
+          >
+            <Link href={`/client-manager/orders/${id}/create-payment`}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-xl font-semibold shadow-lg transition-all duration-200"
+              >
+                <AiOutlinePlus size={18} />
+                <span>Create Payment</span>
+              </motion.button>
+            </Link>
+          </motion.div>
+        )}
 
         {/* Edit Button */}
         {customer.order_status !== "closed" && (

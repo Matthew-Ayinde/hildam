@@ -130,13 +130,15 @@ export default function AdminCreateFabricPage() {
 
         // Process staff
         const users: Staff[] = (userResult?.data || [])
-        const staffOptions: StaffOption[] = users.map((item: Staff) => ({
-          id: String(item.id),
-          name: item.name || `Staff #${item.id}`,
-          email: item.email || "",
-          role: item.role || "",
-          displayText: `${item.name} (${item.role})`,
-        }))
+        const staffOptions: StaffOption[] = users
+          .filter((item: Staff) => item.role === "admin" || item.role === "client manager")
+          .map((item: Staff) => ({
+            id: String(item.id),
+            name: item.name || `Staff #${item.id}`,
+            email: item.email || "",
+            role: item.role || "",
+            displayText: `${item.name} (${item.role})`,
+          }))
 
         setCustomers(customerOptions)
         setStaffMembers(staffOptions)
@@ -512,6 +514,7 @@ export default function AdminCreateFabricPage() {
                   </motion.div>
                 )}
               </div>
+
 
               {/* Staff Member Dropdown */}
               <div>

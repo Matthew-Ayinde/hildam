@@ -439,7 +439,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                       </div>
                     </div>
                     <div className="py-2">
-                      <Link href="/client-manager/users" passHref>
+                      {/* <Link href="/client-manager/users" passHref>
                         <button
                           className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
                           onClick={() => setProfileDropdownOpen(false)}
@@ -447,7 +447,7 @@ const Topbar = ({ onNotificationUpdate }: TopbarProps) => {
                           <HiOutlineUserCircle size={20} />
                           <span>Your Profile</span>
                         </button>
-                      </Link>
+                      </Link> */}
                       <Link href="/client-manager/settings" passHref>
                         <button
                           className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"

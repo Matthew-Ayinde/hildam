@@ -67,11 +67,13 @@ export default function AdminCreateFabricPage() {
         }))
 
         const users: any[] = userResult?.data || []
-        const staffOptions: StaffOption[] = users.map((item: any) => ({
-          id: String(item.id),
-          name: item.name || item.full_name || `Staff #${item.id}`,
-          role: item.role,
-        }))
+        const staffOptions: StaffOption[] = users
+          .filter((item: any) => item.role === "admin" || item.role === "client manager")
+          .map((item: any) => ({
+            id: String(item.id),
+            name: item.name || item.full_name || `Staff #${item.id}`,
+            role: item.role,
+          }))
 
         setCustomers(customerOptions)
         setStaffMembers(staffOptions)
