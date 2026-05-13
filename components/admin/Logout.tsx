@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { MdLogout } from "react-icons/md";
 import { signOut } from "next-auth/react";
+import { getLoginRedirectUrl } from "@/utils/authRedirect";
 
 const LogoutButton = () => {
   const [loading, setLoading] = useState(false);
@@ -8,7 +9,7 @@ const LogoutButton = () => {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      await signOut({ callbackUrl: "/login" });
+      await signOut({ callbackUrl: getLoginRedirectUrl() });
       // no need to setLoading(false) because next-auth will redirect
     } catch (error) {
       console.error("Logout failed", error);

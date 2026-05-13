@@ -186,7 +186,7 @@ export default function SettingsPage() {
         {/* Header */}
         <div className="mb-8">
           <Link href="/head-of-tailoring" passHref>
-            <motion.button
+            <motion.button  
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium mb-6 transition-colors"

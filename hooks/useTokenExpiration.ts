@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import jwt from "jsonwebtoken"
+import { getLoginRedirectUrl } from "@/utils/authRedirect"
 
 export function useTokenExpiration() {
   const { data: session, status } = useSession()
@@ -23,13 +24,13 @@ export function useTokenExpiration() {
 
           if (timeUntilExpiration <= 0) {
             // Token is already expired
-            signOut({ callbackUrl: "/login" })
+            signOut({ callbackUrl: getLoginRedirectUrl() })
             return
           }
 
           // Set a timeout to automatically sign out when token expires
           const timeoutId = setTimeout(() => {
-            signOut({ callbackUrl: "/login" })
+            signOut({ callbackUrl: getLoginRedirectUrl() })
           }, timeUntilExpiration)
 
           return () => clearTimeout(timeoutId)

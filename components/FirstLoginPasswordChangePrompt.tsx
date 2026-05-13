@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { HiEye, HiEyeOff } from "react-icons/hi"
 import { MdLockOutline, MdOutlineCheckCircle, MdOutlineErrorOutline } from "react-icons/md"
 import { firstLoginChangePassword } from "@/app/api/apiClient"
+import { getLoginRedirectUrl } from "@/utils/authRedirect"
 
 export default function FirstLoginPasswordChangePrompt() {
   const { data: session, status } = useSession()
@@ -204,7 +205,7 @@ export default function FirstLoginPasswordChangePrompt() {
               <div className="flex items-center justify-between gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  onClick={() => signOut({ callbackUrl: getLoginRedirectUrl() })}
                   className="px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
                 >
                   Sign out
